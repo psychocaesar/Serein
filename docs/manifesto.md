@@ -1,3 +1,3 @@
 # Manifeste Serein
 
-À rédiger.
+À rédiger
