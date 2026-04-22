@@ -1,164 +1,464 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="author" content="César Broche">
-  <meta name="description" content="Serein : méditation en français gratuite, open source et respectueuse de la vie privée">
-  <meta name="theme-color" content="#01696f" />
-  <title>Serein — Méditation libre en français</title>
-  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&f[]=boska@400,500,700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#1a3d32">
+  <title>Serein — Méditation en français</title>
   <style>
-    :root,[data-theme="light"]{--text-xs:clamp(.75rem,.7rem + .25vw,.875rem);--text-sm:clamp(.875rem,.8rem + .35vw,1rem);--text-base:clamp(1rem,.95rem + .25vw,1.125rem);--text-lg:clamp(1.125rem,1rem + .75vw,1.5rem);--text-xl:clamp(1.5rem,1.2rem + 1.25vw,2.25rem);--text-2xl:clamp(2rem,1.2rem + 2.5vw,3.5rem);--space-2:.5rem;--space-3:.75rem;--space-4:1rem;--space-5:1.25rem;--space-6:1.5rem;--space-8:2rem;--space-10:2.5rem;--space-12:3rem;--space-16:4rem;--space-20:5rem;--color-bg:#f7f6f2;--color-surface:#f9f8f5;--color-surface-2:#fbfbf9;--color-surface-offset:#edeae5;--color-text:#28251d;--color-text-muted:#6f6d67;--color-border:#d4d1ca;--color-divider:#dcd9d5;--color-primary:#01696f;--color-primary-hover:#0c4e54;--color-primary-highlight:#cedcd8;--color-text-inverse:#f9f8f4;--radius-md:.5rem;--radius-lg:.75rem;--radius-xl:1rem;--radius-full:9999px;--font-display:'Boska', Georgia, serif;--font-body:'Satoshi', Inter, sans-serif;--shadow-sm:0 1px 2px rgba(0,0,0,.05);--shadow-md:0 12px 32px rgba(0,0,0,.08)}
-    [data-theme="dark"]{--color-bg:#171614;--color-surface:#1c1b19;--color-surface-2:#201f1d;--color-surface-offset:#22211f;--color-text:#cdccca;--color-text-muted:#979590;--color-border:#393836;--color-divider:#262523;--color-primary:#4f98a3;--color-primary-hover:#227f8b;--color-primary-highlight:#313b3b;--color-text-inverse:#171614;--shadow-sm:0 1px 2px rgba(0,0,0,.2);--shadow-md:0 12px 32px rgba(0,0,0,.35)}
-    *,:before,:after{box-sizing:border-box}html,body{margin:0;padding:0}body{font-family:var(--font-body);background:var(--color-bg);color:var(--color-text);font-size:var(--text-base);line-height:1.6}a{text-decoration:none;color:inherit}button,input{font:inherit}button{cursor:pointer;border:none}img,svg{display:block;max-width:100%}h1,h2,h3,p{margin:0}p{max-width:70ch;color:var(--color-text-muted)}
-    .container{max-width:1120px;margin:0 auto;padding:0 var(--space-4)}.topbar{position:sticky;top:0;z-index:30;background:color-mix(in srgb,var(--color-bg) 82%,transparent);backdrop-filter:blur(12px);border-bottom:1px solid color-mix(in srgb,var(--color-border) 70%, transparent)}.topbar-inner{display:flex;justify-content:space-between;align-items:center;gap:var(--space-4);min-height:76px}
-    .brand{display:flex;align-items:center;gap:var(--space-3)}.logo{width:38px;height:38px;color:var(--color-primary)}.brand-copy strong{display:block}.brand-copy span{display:block;font-size:var(--text-xs);color:var(--color-text-muted)}
-    .nav-actions{display:flex;gap:var(--space-3);align-items:center;flex-wrap:wrap}.btn{min-height:44px;padding:.9rem 1rem;border-radius:var(--radius-full);border:1px solid var(--color-border);background:var(--color-surface);color:var(--color-text)}.btn.primary{background:var(--color-primary);border-color:transparent;color:var(--color-text-inverse)}.btn.primary:hover{background:var(--color-primary-hover)}
-    .hero{padding:clamp(var(--space-12),10vw,var(--space-20)) 0 var(--space-12);display:grid;grid-template-columns:1.15fr .85fr;gap:var(--space-6);align-items:center}.eyebrow{font-size:var(--text-xs);letter-spacing:.12em;text-transform:uppercase;color:var(--color-text-muted);margin-bottom:var(--space-4)}.hero h1{font-family:var(--font-display);font-size:var(--text-2xl);line-height:.96;max-width:10ch;margin-bottom:var(--space-5)}.hero p{font-size:var(--text-lg);max-width:34ch}
-    .hero-card,.card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);box-shadow:var(--shadow-sm)}.hero-card{padding:var(--space-6)}.hero-grid{display:grid;gap:var(--space-4)}.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-4);margin-top:var(--space-6)}.stat{padding:var(--space-4);border-radius:var(--radius-lg);background:var(--color-surface-2);border:1px solid var(--color-border)}.label{font-size:var(--text-xs);text-transform:uppercase;letter-spacing:.08em;color:var(--color-text-muted);margin-bottom:.35rem}.value{font-size:var(--text-lg);font-weight:700}
-    section{padding:var(--space-10) 0}.section-head{display:grid;gap:var(--space-3);margin-bottom:var(--space-6)}.section-head h2{font-size:var(--text-xl);font-family:var(--font-display)}
-    .bento{display:grid;grid-template-columns:1.15fr .85fr;gap:var(--space-4)}.stack{display:grid;gap:var(--space-4)}.card{padding:var(--space-5)}.chip{display:inline-flex;padding:.35rem .7rem;border-radius:var(--radius-full);background:var(--color-primary-highlight);font-size:var(--text-xs);margin-bottom:var(--space-4)}
-    .checklist,.faq{display:grid;gap:var(--space-3)}.row{display:flex;gap:var(--space-3);align-items:flex-start;padding:var(--space-4);background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-lg)}.dot{width:11px;height:11px;border-radius:999px;background:var(--color-primary);margin-top:.45rem;flex:0 0 auto}
-    .email-wrap{display:grid;gap:var(--space-3);margin-top:var(--space-5)}.email-form{display:flex;gap:var(--space-3);flex-wrap:wrap}.input{flex:1 1 280px;min-height:48px;padding:.95rem 1rem;border-radius:var(--radius-full);border:1px solid var(--color-border);background:var(--color-surface-2);color:var(--color-text)}
-    .foot{padding:var(--space-10) 0 var(--space-12);border-top:1px solid var(--color-divider)}.foot-grid{display:grid;grid-template-columns:1fr auto;gap:var(--space-4);align-items:end}.mini{font-size:var(--text-sm);color:var(--color-text-muted)}
-    @media (max-width: 920px){.hero,.bento,.stat-grid,.foot-grid{grid-template-columns:1fr}.topbar-inner{align-items:flex-start;flex-direction:column;padding:var(--space-4) 0}.hero h1{max-width:12ch}.email-form{flex-direction:column}}
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --color-bg: #f0f5f3;
+      --color-surface: #ffffff;
+      --color-primary: #2f6f5e;
+      --color-primary-light: #e0eeea;
+      --color-text: #15332b;
+      --color-muted: #5a7a72;
+      --color-border: rgba(0,0,0,.08);
+      --radius: 1.25rem;
+      --radius-sm: .75rem;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--color-bg);
+      color: var(--color-text);
+      min-height: 100vh;
+      padding-bottom: 80px;
+    }
+
+    /* ---- Navigation ---- */
+    .nav {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: var(--color-surface);
+      border-top: 1px solid var(--color-border);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: .75rem 0 1rem;
+      z-index: 100;
+    }
+
+    .nav-btn {
+      background: none;
+      border: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .25rem;
+      font-size: .75rem;
+      color: var(--color-muted);
+      cursor: pointer;
+      padding: .25rem .75rem;
+      border-radius: var(--radius-sm);
+      transition: color .2s;
+    }
+
+    .nav-btn.active { color: var(--color-primary); font-weight: 600; }
+    .nav-btn svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+    /* ---- Écrans ---- */
+    .screen { display: none; padding: 2rem 1.25rem 1.5rem; max-width: 760px; margin: 0 auto; }
+    .screen.active { display: block; }
+
+    /* ---- Commun ---- */
+    .eyebrow { text-transform: uppercase; letter-spacing: .1em; font-size: .75rem; color: var(--color-muted); margin-bottom: .5rem; }
+    h1 { font-size: 2rem; line-height: 1.2; margin-bottom: .75rem; }
+    h2 { font-size: 1.4rem; margin-bottom: .5rem; }
+    h3 { font-size: 1rem; margin-bottom: .35rem; }
+    .lead { font-size: 1.05rem; color: var(--color-muted); line-height: 1.6; max-width: 55ch; margin-bottom: 1.5rem; }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: .85rem 1.4rem; border-radius: 999px;
+      border: none; font-size: 1rem; cursor: pointer; transition: opacity .2s;
+      text-decoration: none;
+    }
+    .btn:hover { opacity: .85; }
+    .btn-primary { background: var(--color-primary); color: #fff; }
+    .btn-secondary { background: var(--color-primary-light); color: var(--color-primary); }
+    .btn-ghost { background: transparent; color: var(--color-muted); border: 1px solid var(--color-border); }
+
+    .actions { display: flex; gap: .75rem; flex-wrap: wrap; margin-top: 1.25rem; }
+
+    .card {
+      background: var(--color-surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--color-border);
+      padding: 1.25rem;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-top: 1.25rem;
+    }
+
+    /* ---- Trust bar ---- */
+    .trust {
+      display: flex; flex-wrap: wrap; gap: .75rem;
+      margin: 1.5rem 0;
+      font-size: .85rem; color: var(--color-muted);
+    }
+    .trust-item {
+      background: var(--color-primary-light);
+      color: var(--color-primary);
+      border-radius: 999px;
+      padding: .35rem .85rem;
+    }
+
+    /* ---- Parcours cartes ---- */
+    .path-card { cursor: pointer; transition: box-shadow .2s; }
+    .path-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.08); }
+    .path-card .meta { font-size: .8rem; color: var(--color-muted); margin-top: .5rem; }
+    .path-icon { font-size: 1.75rem; margin-bottom: .5rem; }
+
+    /* ---- Séances cartes ---- */
+    .session-card { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+    .session-info p { font-size: .85rem; color: var(--color-muted); margin-top: .2rem; }
+    .session-list { display: flex; flex-direction: column; gap: .75rem; margin-top: 1.25rem; }
+
+    /* ---- Filtres ---- */
+    .filter-tabs { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; }
+    .tab {
+      border: 1px solid var(--color-border); background: var(--color-surface);
+      border-radius: 999px; padding: .4rem .9rem; font-size: .85rem; cursor: pointer;
+      transition: background .2s, color .2s;
+    }
+    .tab.active { background: var(--color-primary); color: #fff; border-color: transparent; }
+
+    /* ---- Player ---- */
+    .player-card { text-align: center; max-width: 480px; margin: 0 auto; }
+    .player-card .session-meta { font-size: .85rem; color: var(--color-muted); margin-bottom: 1rem; }
+    .player-card h2 { font-size: 1.6rem; margin-bottom: 1.5rem; }
+    .player-controls { display: flex; justify-content: center; gap: 1rem; margin: 1.5rem 0; flex-wrap: wrap; }
+    .btn-play {
+      width: 72px; height: 72px; border-radius: 50%; font-size: 1.75rem;
+      background: var(--color-primary); color: #fff; border: none; cursor: pointer;
+    }
+    .progress-wrap { margin: 1.25rem 0; }
+    .progress-bar { width: 100%; height: 6px; background: var(--color-primary-light); border-radius: 999px; overflow: hidden; }
+    .progress-fill { height: 100%; width: 35%; background: var(--color-primary); border-radius: 999px; }
+    .progress-text { font-size: .8rem; color: var(--color-muted); margin-top: .5rem; }
+    .player-note { font-style: italic; color: var(--color-muted); margin-top: 1.25rem; font-size: .95rem; }
+
+    /* ---- Réglages ---- */
+    .settings-list { display: flex; flex-direction: column; gap: .75rem; margin-top: 1.25rem; }
+    .setting-item { display: flex; justify-content: space-between; align-items: center; }
+    .setting-item p { font-size: .85rem; color: var(--color-muted); margin-top: .2rem; }
+    .setting-item .info { flex: 1; }
+    .setting-tag { font-size: .8rem; color: var(--color-primary); background: var(--color-primary-light); border-radius: 999px; padding: .25rem .75rem; }
+
+    /* ---- Section fin ---- */
+    .complete-icon { font-size: 3rem; margin-bottom: 1rem; }
+
+    /* ---- Footer note ---- */
+    .footer-note { text-align: center; font-size: .8rem; color: var(--color-muted); padding: 2rem 1rem; }
+
+    @media (max-width: 480px) {
+      h1 { font-size: 1.5rem; }
+      .card-grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
-  <header class="topbar">
-    <div class="container topbar-inner">
-      <a class="brand" href="#top" aria-label="Accueil Serein">
-        <svg class="logo" viewBox="0 0 64 64" fill="none" aria-labelledby="serein-logo-title" role="img">
-  <title id="serein-logo-title">Serein</title>
-  <path d="M32 8C21 8 12 17 12 28c0 13 13 22 20 28 7-6 20-15 20-28C52 17 43 8 32 8Z" 
-        stroke="currentColor" stroke-width="4" stroke-linejoin="round"/>
-  <text x="32" y="35.5" text-anchor="middle" dominant-baseline="middle"
-        fill="currentColor" font-family="Inter, Arial, sans-serif"
-        font-size="22" font-weight="700">S</text>
-</svg>
-        <div class="brand-copy"><strong>Serein</strong><span>Méditation libre en français</span></div>
-      </a>
-      <div class="nav-actions">
-        <button class="btn" id="themeBtn">Mode sombre</button>
-        <a class="btn" href="#manifeste">Manifeste</a>
-        <a class="btn primary" href="#rejoindre">Rejoindre la bêta</a>
-      </div>
+
+<!-- ================================
+     ÉCRAN 1 — ACCUEIL
+================================ -->
+<section id="home" class="screen active">
+
+  <header>
+    <p class="eyebrow">Serein</p>
+    <h1>Respirer, dormir, se recentrer.</h1>
+    <p class="lead">
+      Des séances guidées en français pour t'aider à retrouver un peu d'espace,
+      sans publicité, sans paywall agressif et sans tracking tiers.
+    </p>
+    <div class="actions">
+      <button class="btn btn-primary" onclick="showScreen('explore')">Commencer</button>
+      <button class="btn btn-ghost" onclick="showScreen('settings')">À propos</button>
     </div>
   </header>
 
-  <main id="top">
-    <section class="hero container">
-      <div>
-        <div class="eyebrow">Open source · éthique · sans tracking tiers</div>
-        <h1>La méditation en français comme un bien commun numérique.</h1>
-        <p>Serein est une future application de méditation gratuite et open source, pensée pour aider à respirer, dormir et se recentrer sans publicité, sans paywall agressif et sans exploitation de données personnelles.</p>
-        <div class="email-wrap" id="rejoindre">
-          <div class="email-form">
-            <input class="input" type="email" placeholder="Votre mail" aria-label="Votre email" />
-            <button class="btn primary" type="button">Être prévenu du lancement</button>
-          </div>
-          <p class="mini">Pas de pixel marketing, pas de campagne de retargeting, pas de spam. Juste des nouvelles utiles sur l’avancement du projet.</p>
-        </div>
-      </div>
-      <aside class="hero-grid">
-        <div class="hero-card">
-          <span class="chip">Promesse produit</span>
-          <div class="checklist">
-            <div class="row"><span class="dot"></span><div><strong>Gratuit</strong><p>Accès simple à des audios utiles sans friction commerciale.</p></div></div>
-            <div class="row"><span class="dot"></span><div><strong>Confidentiel</strong><p>Minimisation des données et absence de tracking tiers.</p></div></div>
-            <div class="row"><span class="dot"></span><div><strong>Réutilisable</strong><p>Code public et gouvernance ouverte à construire dans le temps.</p></div></div>
-          </div>
-        </div>
-        <div class="stat-grid">
-          <div class="stat"><div class="label">Compte requis</div><div class="value">Non</div></div>
-          <div class="stat"><div class="label">SDK marketing</div><div class="value">0</div></div>
-          <div class="stat"><div class="label">MVP cible</div><div class="value">30 audios</div></div>
-        </div>
-      </aside>
-    </section>
+  <div class="trust">
+    <span class="trust-item">✓ Aucun compte requis</span>
+    <span class="trust-item">✓ Lecture hors ligne</span>
+    <span class="trust-item">✓ Sans publicité</span>
+    <span class="trust-item">✓ Open source</span>
+  </div>
 
-    <section class="container">
-      <div class="section-head">
-        <div class="eyebrow">Pourquoi maintenant</div>
-        <h2>Une alternative plus sobre est possible.</h2>
-        <p>Les applications de santé mentale et de bien-être sont particulièrement sensibles du point de vue de la confidentialité, et de nombreux observateurs ont pointé des pratiques encore insuffisantes dans ce secteur.[web:40][web:87] En parallèle, la CNIL insiste sur la transparence, la minimisation des données et une information compréhensible au bon moment dans les applications mobiles.[web:36][web:103]</p>
-      </div>
-      <div class="bento">
-        <article class="card">
-          <span class="chip">Besoin utilisateur</span>
-          <h3 style="font-size:var(--text-lg);margin-bottom:12px">Ce qui manque aujourd’hui</h3>
-          <div class="checklist">
-            <div class="row"><span class="dot"></span><div><strong>Une vraie gratuité</strong><p>Sans tunnel d’abonnement agressif ni frustration artificielle.</p></div></div>
-            <div class="row"><span class="dot"></span><div><strong>Une expérience francophone native</strong><p>Avec des voix, scripts et usages pensés d’abord pour le public français.</p></div></div>
-            <div class="row"><span class="dot"></span><div><strong>Une confiance claire</strong><p>Pas seulement une politique de confidentialité longue, mais une promesse produit cohérente.</p></div></div>
-          </div>
-        </article>
-        <article class="card">
-          <span class="chip">Lancement MVP</span>
-          <h3 style="font-size:var(--text-lg);margin-bottom:12px">Ce que Serein veut lancer</h3>
-          <div class="checklist">
-            <div class="row"><span class="dot"></span><div><strong>5 parcours</strong><p>Débuter, stress, sommeil, respiration, urgence anxiété.</p></div></div>
-            <div class="row"><span class="dot"></span><div><strong>Mode hors ligne</strong><p>Pour pratiquer sans dépendre du réseau.</p></div></div>
-            <div class="row"><span class="dot"></span><div><strong>Compte optionnel</strong><p>Seulement si la synchronisation devient vraiment utile.</p></div></div>
-          </div>
-        </article>
-      </div>
-    </section>
-
-    <section class="container" id="manifeste">
-      <div class="section-head">
-        <div class="eyebrow">Manifeste</div>
-        <h2>Un produit de calme ne devrait pas être construit comme une machine d’acquisition.</h2>
-      </div>
-      <div class="bento">
-        <article class="card stack">
-          <p>Nous pensons qu’une application de méditation ne devrait pas capter l’attention comme un réseau social.</p>
-          <p>Nous pensons qu’un produit destiné au calme, au sommeil ou à l’anxiété ne devrait pas dépendre d’une logique publicitaire.</p>
-          <p>Nous pensons qu’un service numérique peut être conçu comme un bien commun : transparent, réutilisable, améliorable et gouvernable avec sa communauté.</p>
-        </article>
-        <article class="card stack">
-          <div class="row"><span class="dot"></span><div><strong>Zéro publicité</strong><p>Pas de business model fondé sur la captation d’attention.</p></div></div>
-          <div class="row"><span class="dot"></span><div><strong>Zéro vente de données</strong><p>Pas de revente ou de croisement marketing.</p></div></div>
-          <div class="row"><span class="dot"></span><div><strong>Transparence</strong><p>Des explications courtes, simples et publiées au bon endroit.</p></div></div>
-        </article>
-      </div>
-    </section>
-
-    <section class="container">
-      <div class="section-head">
-        <div class="eyebrow">Questions fréquentes</div>
-        <h2>Ce que tu peux attendre du projet.</h2>
-      </div>
-      <div class="faq">
-        <article class="card"><strong>Serein sera-t-il gratuit ?</strong><p style="margin-top:10px">Oui, c’est l’intention produit. Le financement visé à terme est plutôt communautaire ou philanthropique que publicitaire.</p></article>
-        <article class="card"><strong>Sera-t-il open source ?</strong><p style="margin-top:10px">Oui pour le code applicatif. Les contenus audio auront une politique de licence séparée afin de respecter les droits des auteurs et des voix.</p></article>
-        <article class="card"><strong>Allez-vous suivre les utilisateurs ?</strong><p style="margin-top:10px">L’objectif est d’éviter les trackers tiers et de limiter au strict nécessaire toute collecte technique éventuelle, conformément à une logique de minimisation.[web:36][web:103]</p></article>
-      </div>
-    </section>
-  </main>
-
- <footer class="foot">
-    <div class="container foot-grid">
-      <div>
-        <div class="brand" style="margin-bottom:12px">
-          <div class="brand-copy"><strong>Serein</strong><span>Prototype de lancement</span></div>
-        </div>
-        <p class="mini">Un projet de méditation libre en français, pensé pour la confiance avant la croissance.</p>
-      </div>
-      <div class="mini">
-        <a href="mailto:serein@cesarbroche.fr">serein@cesarbroche.fr</a> · 
-        <a href="https://github.com/cesarbroche/serein-app">GitHub</a> · 
-        <a href="#manifeste">Manifeste</a>
-      </div>
+  <section>
+    <h2>Parcours</h2>
+    <div class="card-grid">
+      <article class="card path-card" onclick="showScreen('explore')">
+        <div class="path-icon">🌱</div>
+        <h3>Débuter</h3>
+        <p>Pour entrer doucement dans la pratique.</p>
+        <p class="meta">5 séances</p>
+      </article>
+      <article class="card path-card" onclick="showScreen('explore')">
+        <div class="path-icon">🌬️</div>
+        <h3>Stress</h3>
+        <p>Pour relâcher la pression.</p>
+        <p class="meta">6 séances</p>
+      </article>
+      <article class="card path-card" onclick="showScreen('explore')">
+        <div class="path-icon">🌙</div>
+        <h3>Sommeil</h3>
+        <p>Pour préparer le coucher.</p>
+        <p class="meta">8 séances</p>
+      </article>
+      <article class="card path-card" onclick="showScreen('explore')">
+        <div class="path-icon">💨</div>
+        <h3>Respiration</h3>
+        <p>Pour revenir au souffle.</p>
+        <p class="meta">5 séances</p>
+      </article>
+      <article class="card path-card" onclick="showScreen('explore')">
+        <div class="path-icon">🤍</div>
+        <h3>Anxiété</h3>
+        <p>Pour apaiser l'agitation mentale.</p>
+        <p class="meta">6 séances</p>
+      </article>
     </div>
-  </footer>
+  </section>
 
-  <script>
-    const root = document.documentElement;
-    let dark = matchMedia('(prefers-color-scheme: dark)').matches;
-    root.setAttribute('data-theme', dark ? 'dark' : 'light');
-    document.getElementById('themeBtn').addEventListener('click',()=>{dark=!dark;root.setAttribute('data-theme', dark ? 'dark':'light');});
-  </script>
+</section>
+
+<!-- ================================
+     ÉCRAN 2 — EXPLORER
+================================ -->
+<section id="explore" class="screen">
+
+  <header>
+    <p class="eyebrow">Explorer</p>
+    <h1>Choisis une séance selon ton besoin du moment.</h1>
+    <p class="lead">Parcours toutes les séances disponibles par thème ou durée.</p>
+  </header>
+
+  <nav class="filter-tabs" aria-label="Filtres">
+    <button class="tab active" onclick="filterTab(this)">Toutes</button>
+    <button class="tab" onclick="filterTab(this)">Débuter</button>
+    <button class="tab" onclick="filterTab(this)">Stress</button>
+    <button class="tab" onclick="filterTab(this)">Sommeil</button>
+    <button class="tab" onclick="filterTab(this)">Respiration</button>
+    <button class="tab" onclick="filterTab(this)">Anxiété</button>
+  </nav>
+
+  <div class="session-list">
+    <article class="card session-card">
+      <div class="session-info">
+        <h3>Revenir au souffle</h3>
+        <p>Respiration · 5 min</p>
+      </div>
+      <button class="btn btn-primary" onclick="launchPlayer('Revenir au souffle', 'Respiration', '5 min')">Lancer</button>
+    </article>
+    <article class="card session-card">
+      <div class="session-info">
+        <h3>Apaiser la journée</h3>
+        <p>Stress · 8 min</p>
+      </div>
+      <button class="btn btn-primary" onclick="launchPlayer('Apaiser la journée', 'Stress', '8 min')">Lancer</button>
+    </article>
+    <article class="card session-card">
+      <div class="session-info">
+        <h3>Préparer le sommeil</h3>
+        <p>Sommeil · 10 min</p>
+      </div>
+      <button class="btn btn-primary" onclick="launchPlayer('Préparer le sommeil', 'Sommeil', '10 min')">Lancer</button>
+    </article>
+    <article class="card session-card">
+      <div class="session-info">
+        <h3>Retrouver un rythme calme</h3>
+        <p>Débuter · 6 min</p>
+      </div>
+      <button class="btn btn-primary" onclick="launchPlayer('Retrouver un rythme calme', 'Débuter', '6 min')">Lancer</button>
+    </article>
+    <article class="card session-card">
+      <div class="session-info">
+        <h3>Traverser un moment d'anxiété</h3>
+        <p>Anxiété · 9 min</p>
+      </div>
+      <button class="btn btn-primary" onclick="launchPlayer('Traverser un moment d'anxiété', 'Anxiété', '9 min')">Lancer</button>
+    </article>
+    <article class="card session-card">
+      <div class="session-info">
+        <h3>Première respiration consciente</h3>
+        <p>Débuter · 5 min</p>
+      </div>
+      <button class="btn btn-primary" onclick="launchPlayer('Première respiration consciente', 'Débuter', '5 min')">Lancer</button>
+    </article>
+  </div>
+
+  <p style="text-align:center; color:var(--color-muted); font-size:.85rem; margin-top:2rem;">
+    De nouvelles séances arriveront au fil du projet.
+  </p>
+
+</section>
+
+<!-- ================================
+     ÉCRAN 3 — LECTEUR
+================================ -->
+<section id="player" class="screen">
+
+  <header>
+    <p class="eyebrow">Lecteur</p>
+    <p class="lead">Installe-toi comme tu veux. Tu peux mettre en pause à tout moment.</p>
+  </header>
+
+  <div class="card player-card">
+    <p class="session-meta" id="player-meta">Respiration · 5 min</p>
+    <h2 id="player-title">Revenir au souffle</h2>
+
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+      <p class="progress-text" id="progress-text">0:00 / 5:00</p>
+    </div>
+
+    <div class="player-controls">
+      <button class="btn btn-ghost" onclick="alert('Séance précédente')">⏮</button>
+      <button class="btn-play" id="play-btn" onclick="togglePlay()">▶</button>
+      <button class="btn btn-ghost" onclick="alert('Séance suivante')">⏭</button>
+    </div>
+
+    <p class="player-note">Prends ton temps. Tu n'as rien à réussir.</p>
+
+    <div class="actions" style="justify-content:center; margin-top:1.5rem;">
+      <button class="btn btn-ghost" onclick="showScreen('explore')">← Retour aux séances</button>
+    </div>
+  </div>
+
+</section>
+
+<!-- ================================
+     ÉCRAN 4 — RÉGLAGES
+================================ -->
+<section id="settings" class="screen">
+
+  <header>
+    <p class="eyebrow">Réglages</p>
+    <h1>Personnalise l'expérience.</h1>
+    <p class="lead">Serein ne demande pas de compte, n'affiche pas de publicité et évite les trackers tiers.</p>
+  </header>
+
+  <div class="settings-list">
+    <article class="card setting-item">
+      <div class="info">
+        <h3>Langue</h3>
+        <p>Interface et séances en français</p>
+      </div>
+      <span class="setting-tag">Français</span>
+    </article>
+    <article class="card setting-item">
+      <div class="info">
+        <h3>Audio</h3>
+        <p>Voix, volume, sons d'ambiance</p>
+      </div>
+      <span class="setting-tag">À venir</span>
+    </article>
+    <article class="card setting-item">
+      <div class="info">
+        <h3>Hors ligne</h3>
+        <p>Télécharger des séances pour les écouter sans connexion</p>
+      </div>
+      <span class="setting-tag">MVP</span>
+    </article>
+    <article class="card setting-item">
+      <div class="info">
+        <h3>Accessibilité</h3>
+        <p>Taille du texte, contraste, lisibilité</p>
+      </div>
+      <span class="setting-tag">À venir</span>
+    </article>
+    <article class="card setting-item">
+      <div class="info">
+        <h3>Confidentialité</h3>
+        <p>Aucune publicité · Aucun tracker · Aucun compte requis</p>
+      </div>
+      <span class="setting-tag">✓</span>
+    </article>
+    <article class="card">
+      <h3>À propos de Serein</h3>
+      <p style="color:var(--color-muted);font-size:.9rem;margin-top:.5rem;line-height:1.6;">
+        Serein est un projet de méditation en français, open source, pensé pour rester simple,
+        compréhensible et respectueux de la vie privée. Pas de publicité, pas de vente de données,
+        pas de compte obligatoire au lancement.
+      </p>
+      <div class="trust" style="margin-top:1rem;">
+        <span class="trust-item">Open source</span>
+        <span class="trust-item">MIT / CC BY</span>
+        <span class="trust-item">Alpha v0.1</span>
+      </div>
+    </article>
+  </div>
+
+  <p class="footer-note">
+    Serein — méditation en français, sans publicité, sans tracking tiers.
+  </p>
+
+</section>
+
+<!-- ================================
+     NAVIGATION BAS DE PAGE
+================================ -->
+<nav class="nav" aria-label="Navigation principale">
+  <button class="nav-btn active" id="nav-home" onclick="showScreen('home')">
+    <svg viewBox="0 0 24 24"><path d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-4h4v4h4a1 1 0 001-1v-9"/></svg>
+    Accueil
+  </button>
+  <button class="nav-btn" id="nav-explore" onclick="showScreen('explore')">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    Explorer
+  </button>
+  <button class="nav-btn" id="nav-player" onclick="showScreen('player')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+    Lecteur
+  </button>
+  <button class="nav-btn" id="nav-settings" onclick="showScreen('settings')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+    Réglages
+  </button>
+</nav>
+
+<!-- ================================
+     JAVASCRIPT
+================================ -->
+<script>
+  const screens = ['home', 'explore', 'player', 'settings'];
+
+  function showScreen(id) {
+    screens.forEach(s => {
+      document.getElementById(s).classList.toggle('active', s === id);
+      const btn = document.getElementById('nav-' + s);
+      if (btn) btn.classList.toggle('active', s === id);
+    });
+    window.scrollTo(0, 0);
+  }
+
+  function filterTab(el) {
+    document.querySelectorAll('.filter-tabs .tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  function launchPlayer(title, parcours, duree) {
+    document.getElementById('player-title').textContent = title;
+    document.getElementById('player-meta').textContent = parcours + ' · ' + duree + ' · Hors ligne';
+    document.getElementById('progress-text').textContent = '0:00 / ' + duree;
+    document.getElementById('progress-fill').style.width = '0%';
+    document.getElementById('play-btn').textContent = '▶';
+    showScreen('player');
+  }
+
+  let playing = false;
+  function togglePlay() {
+    playing = !playing;
+    document.getElementById('play-btn').textContent = playing ? '⏸' : '▶';
+  }
+</script>
+
 </body>
 </html>
