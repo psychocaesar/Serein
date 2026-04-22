@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#1a3d32">
-  <title>Serein — Application de méditation en français</title>
+  <title>Serein — Méditation en français</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -172,6 +172,48 @@
       --color-muted: #7aada0;
       --color-border: rgba(255,255,255,.08);
     }
+
+    /* ---- Widget stats accueil ---- */
+    .stats-widget {
+      display: flex;
+      gap: .75rem;
+      margin-top: 2rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .stat-chip {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      padding: .6rem 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      min-width: 80px;
+    }
+    .stat-chip .stat-value { font-size: 1.3rem; font-weight: 700; color: var(--color-primary); line-height: 1.1; }
+    .stat-chip .stat-label { font-size: .7rem; color: var(--color-muted); margin-top: .2rem; text-align: center; }
+
+    /* ---- Instagram link ---- */
+    .insta-link {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      text-decoration: none;
+      color: var(--color-text);
+      width: 100%;
+    }
+    .insta-link:hover { opacity: .8; }
+    .insta-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .insta-icon svg { width: 20px; height: 20px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .insta-text .insta-title { font-size: .95rem; font-weight: 600; }
+    .insta-text .insta-handle { font-size: .8rem; color: var(--color-muted); }
   </style>
 </head>
 <body>
@@ -183,7 +225,7 @@
 
   <header>
     <p class="eyebrow">Serein</p>
-    <h1>Respirer, s'apaiser, se recentrer.</h1>
+    <h1>Respirer, dormir, se recentrer.</h1>
     <p class="lead">
       Des séances guidées en français pour t'aider à retrouver un peu d'espace,
       sans publicité, sans paywall agressif et sans tracking tiers.
@@ -193,6 +235,22 @@
       <button class="btn btn-ghost" onclick="showScreen('settings')">À propos</button>
     </div>
   </header>
+
+  <!-- Widget statistiques -->
+  <div class="stats-widget" id="stats-widget">
+    <div class="stat-chip">
+      <span class="stat-value" id="stat-streak">0</span>
+      <span class="stat-label">🔥 Jours<br>d'affilée</span>
+    </div>
+    <div class="stat-chip">
+      <span class="stat-value" id="stat-sessions">0</span>
+      <span class="stat-label">▶ Séances<br>terminées</span>
+    </div>
+    <div class="stat-chip">
+      <span class="stat-value" id="stat-time">0 min</span>
+      <span class="stat-label">⏱ Temps<br>total</span>
+    </div>
+  </div>
 
   <div class="trust">
     <span class="trust-item">✓ Aucun compte requis</span>
@@ -406,6 +464,21 @@
     </article>
   </div>
 
+    <article class="card setting-item">
+      <div class="info" style="flex:1;">
+        <a href="https://www.instagram.com/serein_project/" target="_blank" rel="noopener" class="insta-link">
+          <div class="insta-icon">
+            <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+          </div>
+          <div class="insta-text">
+            <div class="insta-title">Suivez-nous sur Instagram</div>
+            <div class="insta-handle">@serein_project</div>
+          </div>
+        </a>
+      </div>
+      <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--color-muted);fill:none;stroke-width:2;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
+    </article>
+
   <p class="footer-note">
     Serein — méditation en français, sans publicité, sans tracking tiers.
   </p>
@@ -490,6 +563,36 @@
     const btn = document.getElementById('theme-toggle');
     if (btn && saved === 'dark') btn.textContent = '☀️ Clair';
   });
+
+  // ---- Stats utilisateur ----
+  function loadStats() {
+    const s = JSON.parse(localStorage.getItem('serein_stats') || '{"sessions":0,"minutes":0,"streak":0,"lastDate":""}');
+    document.getElementById('stat-streak').textContent = s.streak;
+    document.getElementById('stat-sessions').textContent = s.sessions;
+    const h = Math.floor(s.minutes / 60);
+    const m = s.minutes % 60;
+    document.getElementById('stat-time').textContent = h > 0 ? h + 'h ' + m + 'min' : m + ' min';
+  }
+
+  function recordSession(minutes) {
+    const s = JSON.parse(localStorage.getItem('serein_stats') || '{"sessions":0,"minutes":0,"streak":0,"lastDate":""}');
+    const today = new Date().toISOString().slice(0,10);
+    if (s.lastDate === today) {
+      // déjà comptée aujourd'hui, on cumule juste le temps
+    } else if (s.lastDate === new Date(Date.now()-86400000).toISOString().slice(0,10)) {
+      s.streak += 1;
+    } else {
+      s.streak = 1;
+    }
+    s.lastDate = today;
+    s.sessions += 1;
+    s.minutes += minutes;
+    localStorage.setItem('serein_stats', JSON.stringify(s));
+    loadStats();
+  }
+
+  document.addEventListener('DOMContentLoaded', loadStats);
+
 </script>
 
 </body>
