@@ -1,0 +1,43 @@
+# robots.txt — Serein
+# Ce fichier indique aux robots d'indexation ce qu'ils sont autorisés à faire.
+
+# Bots IA généraux — interdiction d'aspirer le contenu
+User-agent: GPTBot
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: Claude-Web
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: PerplexityBot
+Disallow: /
+
+User-agent: Omgilibot
+Disallow: /
+
+User-agent: FacebookBot
+Disallow: /
+
+User-agent: Amazonbot
+Disallow: /
+
+# Dossier audio : interdit à tous les robots sans exception
+User-agent: *
+Disallow: /assets/audio/
+
+# Moteurs de recherche classiques : autorisés sur le reste
+User-agent: Googlebot
+Allow: /
+Disallow: /assets/audio/
+
+User-agent: Bingbot
+Allow: /
+Disallow: /assets/audio/
