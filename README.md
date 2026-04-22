@@ -1,6 +1,6 @@
 # Serein
 
-**Serein** est un projet de méditation en français conçu comme une alternative éthique, open source et respectueuse de la vie privée des applications de méditation grand public.
+**Serein** est un projet d'appliction de méditation en français conçu comme une alternative éthique, open source et respectueuse de la vie privée des applications de méditation grand public.
 
 L’objectif est simple : aider les personnes à respirer, dormir et se recentrer grâce à des audios guidés en français, sans publicité, sans paywall agressif et sans tracking tiers.
 
