@@ -162,6 +162,16 @@
       h1 { font-size: 1.5rem; }
       .card-grid { grid-template-columns: 1fr; }
     }
+
+    [data-theme="dark"] {
+      --color-bg: #0f1f1b;
+      --color-surface: #1a2e28;
+      --color-primary: #4db896;
+      --color-primary-light: #1e3d33;
+      --color-text: #e0f0eb;
+      --color-muted: #7aada0;
+      --color-border: rgba(255,255,255,.08);
+    }
   </style>
 </head>
 <body>
@@ -346,14 +356,7 @@
   </header>
 
   <div class="settings-list">
-    <article class="card setting-item">
-      <div class="info">
-        <h3>Langue</h3>
-        <p>Interface et séances en français</p>
-      </div>
-      <span class="setting-tag">Français</span>
-    </article>
-    <article class="card setting-item">
+<article class="card setting-item">
       <div class="info">
         <h3>Audio</h3>
         <p>Voix, volume, sons d'ambiance</p>
@@ -458,6 +461,28 @@
     playing = !playing;
     document.getElementById('play-btn').textContent = playing ? '⏸' : '▶';
   }
+
+  function toggleTheme() {
+    const html = document.documentElement;
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    document.getElementById('theme-toggle').textContent = isDark ? '🌙 Sombre' : '☀️ Clair';
+    localStorage.setItem('theme', isDark ? 'light' : 'dark');
+  }
+
+  // Restaurer le thème sauvegardé
+  (function() {
+    const saved = localStorage.getItem('theme');
+    if (saved === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
+  })();
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const saved = localStorage.getItem('theme');
+    const btn = document.getElementById('theme-toggle');
+    if (btn && saved === 'dark') btn.textContent = '☀️ Clair';
+  });
 </script>
 
 </body>
