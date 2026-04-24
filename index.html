@@ -30,7 +30,6 @@
       padding-bottom: 80px;
     }
 
-    /* ---- Navigation ---- */
     .nav {
       position: fixed;
       bottom: 0; left: 0; right: 0;
@@ -61,11 +60,9 @@
     .nav-btn.active { color: var(--color-primary); font-weight: 600; }
     .nav-btn svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
-    /* ---- Écrans ---- */
     .screen { display: none; padding: 2rem 1.25rem 1.5rem; max-width: 760px; margin: 0 auto; }
     .screen.active { display: block; }
 
-    /* ---- Commun ---- */
     .eyebrow { text-transform: uppercase; letter-spacing: .1em; font-size: .75rem; color: var(--color-muted); margin-bottom: .5rem; }
     h1 { font-size: 2rem; line-height: 1.2; margin-bottom: .75rem; }
     h2 { font-size: 1.4rem; margin-bottom: .5rem; }
@@ -99,7 +96,6 @@
       margin-top: 1.25rem;
     }
 
-    /* ---- Trust bar ---- */
     .trust {
       display: flex; flex-wrap: wrap; gap: .75rem;
       margin: 1.5rem 0;
@@ -112,18 +108,15 @@
       padding: .35rem .85rem;
     }
 
-    /* ---- Parcours cartes ---- */
     .path-card { cursor: pointer; transition: box-shadow .2s; }
     .path-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.08); }
     .path-card .meta { font-size: .8rem; color: var(--color-muted); margin-top: .5rem; }
     .path-icon { font-size: 1.75rem; margin-bottom: .5rem; }
 
-    /* ---- Séances cartes ---- */
     .session-card { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
     .session-info p { font-size: .85rem; color: var(--color-muted); margin-top: .2rem; }
     .session-list { display: flex; flex-direction: column; gap: .75rem; margin-top: 1.25rem; }
 
-    /* ---- Filtres ---- */
     .filter-tabs { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; }
     .tab {
       border: 1px solid var(--color-border); background: var(--color-surface);
@@ -132,7 +125,6 @@
     }
     .tab.active { background: var(--color-primary); color: #fff; border-color: transparent; }
 
-    /* ---- Player ---- */
     .player-card { text-align: center; max-width: 480px; margin: 0 auto; }
     .player-card .session-meta { font-size: .85rem; color: var(--color-muted); margin-bottom: 1rem; }
     .player-card h2 { font-size: 1.6rem; margin-bottom: 1.5rem; }
@@ -198,7 +190,6 @@
     .player-note { font-style: italic; color: var(--color-muted); margin-top: 1.25rem; font-size: .95rem; }
     .audio-loading { font-size: .8rem; color: var(--color-muted); margin-top: .5rem; min-height: 1.2em; }
 
-    /* ---- Réglages ---- */
     .settings-list { display: flex; flex-direction: column; gap: .75rem; margin-top: 1.25rem; }
     .setting-item { display: flex; justify-content: space-between; align-items: center; }
     .setting-item p { font-size: .85rem; color: var(--color-muted); margin-top: .2rem; }
@@ -222,7 +213,6 @@
       --color-border: rgba(255,255,255,.08);
     }
 
-    /* ---- Widget stats accueil ---- */
     .stats-widget {
       display: flex;
       gap: .75rem;
@@ -244,7 +234,6 @@
     .stat-chip .stat-value { font-size: 1.3rem; font-weight: 700; color: var(--color-primary); line-height: 1.1; }
     .stat-chip .stat-label { font-size: .7rem; color: var(--color-muted); margin-top: .2rem; text-align: center; }
 
-    /* ---- Instagram link ---- */
     .insta-link {
       display: flex;
       align-items: center;
@@ -264,7 +253,6 @@
     .insta-text .insta-title { font-size: .95rem; font-weight: 600; }
     .insta-text .insta-handle { font-size: .8rem; color: var(--color-muted); }
 
-    /* ---- Badge séances à venir ---- */
     .badge-coming {
       font-size: 0.65rem;
       background: var(--color-muted);
@@ -282,9 +270,6 @@
 </head>
 <body>
 
-<!-- ================================
-     ÉCRAN 1 — ACCUEIL
-================================ -->
 <section id="home" class="screen active">
 
   <header>
@@ -300,7 +285,6 @@
     </div>
   </header>
 
-  <!-- Widget statistiques -->
   <div class="stats-widget" id="stats-widget">
     <div class="stat-chip">
       <span class="stat-value" id="stat-streak">0</span>
@@ -367,9 +351,6 @@
 
 </section>
 
-<!-- ================================
-     ÉCRAN 2 — EXPLORER
-================================ -->
 <section id="explore" class="screen">
 
   <header>
@@ -389,19 +370,21 @@
   </nav>
 
   <div class="session-list">
+
+    <!-- PREMIERS PAS -->
     <article class="card session-card" data-parcours="Premiers pas">
       <div class="session-info">
         <h3>Première respiration consciente</h3>
         <p>Premiers pas · 5 min</p>
       </div>
-      <button class="btn btn-primary" onclick="launchPlayer('premiere-respiration-consciente')">Lancer</button>
+      <button class="btn btn-primary" onclick="launchPlayer('premiere-respiration-consciente', 'Première respiration consciente', 'Premiers pas', '5 min', 'assets/audio/Méditation Premiere Respiration Consciente.mp3')">Lancer</button>
     </article>
     <article class="card session-card" data-parcours="Premiers pas">
       <div class="session-info">
-        <h3>S'asseoir, ne rien faire <span class="badge-coming">À venir</span></h3>
+        <h3>S'asseoir, ne rien faire</h3>
         <p>Premiers pas · 5 min</p>
       </div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
+      <button class="btn btn-primary" onclick="launchPlayer('sasseoir-ne-rien-faire', 'S\'asseoir, ne rien faire', 'Premiers pas', '5 min', 'assets/audio/Revenir au souffle.mp3')">Lancer</button>
     </article>
     <article class="card session-card" data-parcours="Premiers pas">
       <div class="session-info">
@@ -438,6 +421,8 @@
       </div>
       <button class="btn btn-primary" disabled>Bientôt</button>
     </article>
+
+    <!-- CALME & STRESS -->
     <article class="card session-card" data-parcours="Calme &amp; Stress">
       <div class="session-info">
         <h3>SOS Stress en 3 minutes <span class="badge-coming">À venir</span></h3>
@@ -480,12 +465,14 @@
       </div>
       <button class="btn btn-primary" disabled>Bientôt</button>
     </article>
+
+    <!-- SOMMEIL -->
     <article class="card session-card" data-parcours="Sommeil">
       <div class="session-info">
-        <h3>Rituel de déconnexion <span class="badge-coming">À venir</span></h3>
+        <h3>Rituel de déconnexion</h3>
         <p>Sommeil · 10 min</p>
       </div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
+      <button class="btn btn-primary" onclick="launchPlayer('rituel-deconnexion', 'Rituel de déconnexion', 'Sommeil', '10 min', 'assets/audio/Préparer le sommeil.mp3')">Lancer</button>
     </article>
     <article class="card session-card" data-parcours="Sommeil">
       <div class="session-info">
@@ -522,6 +509,8 @@
       </div>
       <button class="btn btn-primary" disabled>Bientôt</button>
     </article>
+
+    <!-- RESPIRER -->
     <article class="card session-card" data-parcours="Respirer">
       <div class="session-info">
         <h3>La respiration naturelle <span class="badge-coming">À venir</span></h3>
@@ -557,6 +546,8 @@
       </div>
       <button class="btn btn-primary" disabled>Bientôt</button>
     </article>
+
+    <!-- ANXIÉTÉ -->
     <article class="card session-card" data-parcours="Anxiété">
       <div class="session-info">
         <h3>SOS Anxiété — ancrage immédiat <span class="badge-coming">À venir</span></h3>
@@ -599,6 +590,8 @@
       </div>
       <button class="btn btn-primary" disabled>Bientôt</button>
     </article>
+
+    <!-- CONCENTRATION -->
     <article class="card session-card" data-parcours="Concentration">
       <div class="session-info">
         <h3>Mise en route mentale <span class="badge-coming">À venir</span></h3>
@@ -634,6 +627,7 @@
       </div>
       <button class="btn btn-primary" disabled>Bientôt</button>
     </article>
+
   </div>
 
   <p style="text-align:center; color:var(--color-muted); font-size:.85rem; margin-top:2rem;">
@@ -642,9 +636,6 @@
 
 </section>
 
-<!-- ================================
-     ÉCRAN 3 — LECTEUR
-================================ -->
 <section id="player" class="screen">
 
   <header>
@@ -718,9 +709,6 @@
 
 </section>
 
-<!-- ================================
-     ÉCRAN 4 — RÉGLAGES
-================================ -->
 <section id="settings" class="screen">
 
   <header>
@@ -801,9 +789,6 @@
 
 </section>
 
-<!-- ================================
-     NAVIGATION BAS DE PAGE
-================================ -->
 <nav class="nav" aria-label="Navigation principale">
   <button class="nav-btn active" id="nav-home" onclick="showScreen('home')">
     <svg viewBox="0 0 24 24"><path d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-4h4v4h4a1 1 0 001-1v-9"/></svg>
@@ -823,13 +808,7 @@
   </button>
 </nav>
 
-<!-- ================================
-     JAVASCRIPT
-================================ -->
 <script>
-  // ════════════════════════════════════════════
-  //  NAVIGATION
-  // ════════════════════════════════════════════
   const screens = ['home', 'explore', 'player', 'settings'];
 
   function showScreen(id) {
@@ -867,18 +846,6 @@
   }
 
   // ════════════════════════════════════════════
-  //  CATALOGUE DES SÉANCES
-  //  → Ajoute ici chaque nouvelle séance enregistrée
-  // ════════════════════════════════════════════
-  const SESSIONS = {
-    'premiere-respiration-consciente': {
-      title: 'Première respiration consciente',
-      parcours: 'Premiers pas',
-      audio: 'assets/audio/Méditation Premiere Respiration Consciente.mp3',
-    },
-  };
-
-  // ════════════════════════════════════════════
   //  LECTEUR AUDIO
   // ════════════════════════════════════════════
   const audio         = document.getElementById('audio-engine');
@@ -887,7 +854,6 @@
   const progressThumb = document.getElementById('progress-thumb');
   const timeCurrent   = document.getElementById('time-current');
   const timeTotal     = document.getElementById('time-total');
-  const playBtn       = document.getElementById('play-btn');
   const iconPlay      = document.getElementById('icon-play');
   const iconPause     = document.getElementById('icon-pause');
   const audioLoading  = document.getElementById('audio-loading');
@@ -895,9 +861,8 @@
   const completeScreen= document.getElementById('complete-screen');
   const volumeSlider  = document.getElementById('volume-slider');
 
-  let currentSessionId  = null;
-  let sessionStartTime  = null;
-  let isDragging        = false;
+  let sessionStartTime = null;
+  let isDragging       = false;
 
   function fmtTime(sec) {
     if (!isFinite(sec) || sec < 0) return '--:--';
@@ -961,24 +926,11 @@
     iconPause.style.display = playing ? 'block' : 'none';
   }
 
-  function launchPlayer(sessionId) {
-    const session = SESSIONS[sessionId];
-    if (!session) {
-      document.getElementById('player-title').textContent = sessionId;
-      document.getElementById('player-meta').textContent = 'À venir';
-      audioLoading.textContent = '⏳ Cet enregistrement n\'est pas encore disponible.';
-      audio.src = '';
-      showScreen('player');
-      return;
-    }
-
-    currentSessionId = sessionId;
-    sessionStartTime = null;
-
-    document.getElementById('player-title').textContent = session.title;
-    document.getElementById('player-meta').textContent  = session.parcours;
-    document.getElementById('complete-title').textContent = session.title;
-    audioLoading.textContent = 'Chargement…';
+  // launchPlayer(id, title, parcours, duree, audioSrc)
+  function launchPlayer(id, title, parcours, duree, audioSrc) {
+    document.getElementById('player-title').textContent = title;
+    document.getElementById('player-meta').textContent  = parcours + ' · ' + duree;
+    document.getElementById('complete-title').textContent = title;
 
     progressFill.style.width = '0%';
     progressThumb.style.left = '0%';
@@ -987,12 +939,19 @@
     setPlayingUI(false);
     playerMain.classList.remove('hidden');
     completeScreen.classList.remove('visible');
+    sessionStartTime = null;
 
-    audio.src = session.audio;
-    audio.load();
-    audio.play().catch(() => {
-      audioLoading.textContent = 'Appuie sur ▶ pour démarrer';
-    });
+    if (audioSrc) {
+      audioLoading.textContent = 'Chargement…';
+      audio.src = audioSrc;
+      audio.load();
+      audio.play().catch(() => {
+        audioLoading.textContent = 'Appuie sur ▶ pour démarrer';
+      });
+    } else {
+      audioLoading.textContent = '⏳ Cet enregistrement n\'est pas encore disponible.';
+      audio.src = '';
+    }
 
     showScreen('player');
   }
