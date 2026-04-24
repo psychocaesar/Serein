@@ -153,12 +153,11 @@
     .btn-skip:hover { opacity: .8; }
     .btn-skip span { font-size: .6rem; line-height: 1; }
 
-    /* Barre de progression seekable */
     .progress-wrap { margin: 1.25rem 0; }
     .progress-track {
       width: 100%; height: 6px; background: var(--color-primary-light);
       border-radius: 999px; position: relative; cursor: pointer;
-      padding: 8px 0; margin: -8px 0; /* zone de clic élargie */
+      padding: 8px 0; margin: -8px 0;
       box-sizing: content-box;
     }
     .progress-track-inner {
@@ -176,7 +175,6 @@
     .progress-track:hover .progress-thumb { opacity: 1; }
     .progress-times { display: flex; justify-content: space-between; font-size: .78rem; color: var(--color-muted); margin-top: .4rem; }
 
-    /* Volume */
     .volume-wrap { display: flex; align-items: center; gap: .6rem; margin-top: 1rem; justify-content: center; }
     .volume-wrap span { font-size: .85rem; }
     input[type=range].volume-slider {
@@ -190,18 +188,14 @@
       background: var(--color-primary); cursor: pointer;
     }
 
-    /* Écran fin de séance */
     .complete-screen { display: none; text-align: center; padding: 2rem 0; }
     .complete-screen.visible { display: block; }
-    .player-main { }
     .player-main.hidden { display: none; }
 
     .complete-icon { font-size: 3.5rem; margin-bottom: 1rem; animation: pop .4s ease; }
     @keyframes pop { 0% { transform: scale(.5); opacity: 0; } 80% { transform: scale(1.15); } 100% { transform: scale(1); opacity: 1; } }
 
     .player-note { font-style: italic; color: var(--color-muted); margin-top: 1.25rem; font-size: .95rem; }
-
-    /* Spinner chargement audio */
     .audio-loading { font-size: .8rem; color: var(--color-muted); margin-top: .5rem; min-height: 1.2em; }
 
     /* ---- Réglages ---- */
@@ -211,10 +205,6 @@
     .setting-item .info { flex: 1; }
     .setting-tag { font-size: .8rem; color: var(--color-primary); background: var(--color-primary-light); border-radius: 999px; padding: .25rem .75rem; }
 
-    /* ---- Section fin ---- */
-    .complete-icon { font-size: 3rem; margin-bottom: 1rem; }
-
-    /* ---- Footer note ---- */
     .footer-note { text-align: center; font-size: .8rem; color: var(--color-muted); padding: 2rem 1rem; }
 
     @media (max-width: 480px) {
@@ -273,6 +263,21 @@
     .insta-icon svg { width: 20px; height: 20px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
     .insta-text .insta-title { font-size: .95rem; font-weight: 600; }
     .insta-text .insta-handle { font-size: .8rem; color: var(--color-muted); }
+
+    /* ---- Badge séances à venir ---- */
+    .badge-coming {
+      font-size: 0.65rem;
+      background: var(--color-muted);
+      color: #fff;
+      border-radius: 4px;
+      padding: 1px 6px;
+      vertical-align: middle;
+      margin-left: 4px;
+    }
+    button[disabled] {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
   </style>
 </head>
 <body>
@@ -321,35 +326,41 @@
   <section>
     <h2>Parcours</h2>
     <div class="card-grid">
-      <article class="card path-card" onclick="showScreen('explore')">
+      <article class="card path-card" onclick="filterParcours('Premiers pas')">
         <div class="path-icon">🌱</div>
-        <h3>Débuter</h3>
+        <h3>Premiers pas</h3>
         <p>Pour entrer doucement dans la pratique.</p>
+        <p class="meta">7 séances</p>
+      </article>
+      <article class="card path-card" onclick="filterParcours('Calme &amp; Stress')">
+        <div class="path-icon">😮‍💨</div>
+        <h3>Calme &amp; Stress</h3>
+        <p>Pour relâcher la pression au quotidien.</p>
         <p class="meta">6 séances</p>
       </article>
-      <article class="card path-card" onclick="showScreen('explore')">
-        <div class="path-icon">🌬️</div>
-        <h3>Stress</h3>
-        <p>Pour relâcher la pression.</p>
-        <p class="meta">6 séances</p>
-      </article>
-      <article class="card path-card" onclick="showScreen('explore')">
+      <article class="card path-card" onclick="filterParcours('Sommeil')">
         <div class="path-icon">🌙</div>
         <h3>Sommeil</h3>
-        <p>Pour préparer le coucher.</p>
-        <p class="meta">8 séances</p>
+        <p>Pour préparer le coucher et bien dormir.</p>
+        <p class="meta">6 séances</p>
       </article>
-      <article class="card path-card" onclick="showScreen('explore')">
-        <div class="path-icon">💨</div>
-        <h3>Respiration</h3>
-        <p>Pour revenir au souffle.</p>
+      <article class="card path-card" onclick="filterParcours('Respirer')">
+        <div class="path-icon">🌬️</div>
+        <h3>Respirer</h3>
+        <p>Pour explorer les techniques de respiration.</p>
         <p class="meta">5 séances</p>
       </article>
-      <article class="card path-card" onclick="showScreen('explore')">
-        <div class="path-icon">🤍</div>
+      <article class="card path-card" onclick="filterParcours('Anxiété')">
+        <div class="path-icon">🌀</div>
         <h3>Anxiété</h3>
         <p>Pour apaiser l'agitation mentale.</p>
         <p class="meta">6 séances</p>
+      </article>
+      <article class="card path-card" onclick="filterParcours('Concentration')">
+        <div class="path-icon">🎯</div>
+        <h3>Concentration</h3>
+        <p>Pour clarifier l'esprit et entrer dans la zone.</p>
+        <p class="meta">5 séances</p>
       </article>
     </div>
   </section>
@@ -369,55 +380,259 @@
 
   <nav class="filter-tabs" aria-label="Filtres">
     <button class="tab active" onclick="filterTab(this)">Toutes</button>
-    <button class="tab" onclick="filterTab(this)">Débuter</button>
-    <button class="tab" onclick="filterTab(this)">Stress</button>
+    <button class="tab" onclick="filterTab(this)">Premiers pas</button>
+    <button class="tab" onclick="filterTab(this)">Calme &amp; Stress</button>
     <button class="tab" onclick="filterTab(this)">Sommeil</button>
-    <button class="tab" onclick="filterTab(this)">Respiration</button>
+    <button class="tab" onclick="filterTab(this)">Respirer</button>
     <button class="tab" onclick="filterTab(this)">Anxiété</button>
+    <button class="tab" onclick="filterTab(this)">Concentration</button>
   </nav>
 
   <div class="session-list">
-    <article class="card session-card">
+    <article class="card session-card" data-parcours="Premiers pas">
       <div class="session-info">
         <h3>Première respiration consciente</h3>
-        <p>Débuter · ~5 min</p>
+        <p>Premiers pas · 5 min</p>
       </div>
       <button class="btn btn-primary" onclick="launchPlayer('premiere-respiration-consciente')">Lancer</button>
     </article>
-    <article class="card session-card">
+    <article class="card session-card" data-parcours="Premiers pas">
       <div class="session-info">
-        <h3>Revenir au souffle</h3>
-        <p>Débuter · ~5 min</p>
+        <h3>S'asseoir, ne rien faire <span class="badge-coming">À venir</span></h3>
+        <p>Premiers pas · 5 min</p>
       </div>
-      <button class="btn btn-primary" onclick="launchPlayer('revenir-au-souffle')">Lancer</button>
+      <button class="btn btn-primary" disabled>Bientôt</button>
     </article>
-        <article class="card session-card">
+    <article class="card session-card" data-parcours="Premiers pas">
       <div class="session-info">
-        <h3>Préparer le sommeil</h3>
-        <p>Débuter · ~10 min</p>
+        <h3>Observer ses pensées sans les juger <span class="badge-coming">À venir</span></h3>
+        <p>Premiers pas · 7 min</p>
       </div>
-      <button class="btn btn-primary" onclick="launchPlayer('preparer-le-sommeil')">Lancer</button>
+      <button class="btn btn-primary" disabled>Bientôt</button>
     </article>
-    <article class="card session-card">
+    <article class="card session-card" data-parcours="Premiers pas">
       <div class="session-info">
-        <h3>Apaiser la journée</h3>
-        <p>Stress · À venir</p>
+        <h3>Le scan corporel — découvrir ses sensations <span class="badge-coming">À venir</span></h3>
+        <p>Premiers pas · 10 min</p>
       </div>
-      <button class="btn btn-secondary" onclick="launchPlayer('apaiser-la-journee')">Bientôt</button>
+      <button class="btn btn-primary" disabled>Bientôt</button>
     </article>
-    <article class="card session-card">
+    <article class="card session-card" data-parcours="Premiers pas">
       <div class="session-info">
-        <h3>Retrouver un rythme calme</h3>
-        <p>Débuter · À venir</p>
+        <h3>Revenir à l'instant présent <span class="badge-coming">À venir</span></h3>
+        <p>Premiers pas · 7 min</p>
       </div>
-      <button class="btn btn-secondary" onclick="launchPlayer('retrouver-un-rythme-calme')">Bientôt</button>
+      <button class="btn btn-primary" disabled>Bientôt</button>
     </article>
-    <article class="card session-card">
+    <article class="card session-card" data-parcours="Premiers pas">
       <div class="session-info">
-        <h3>Traverser un moment d'anxiété</h3>
-        <p>Anxiété · À venir</p>
+        <h3>La bienveillance envers soi <span class="badge-coming">À venir</span></h3>
+        <p>Premiers pas · 10 min</p>
       </div>
-      <button class="btn btn-secondary" onclick="launchPlayer('traverser-anxiete')">Bientôt</button>
+      <button class="btn btn-primary" disabled>Bientôt</button>
+    </article>
+    <article class="card session-card" data-parcours="Premiers pas">
+      <div class="session-info">
+        <h3>Mon ancre personnelle <span class="badge-coming">À venir</span></h3>
+        <p>Premiers pas · 10 min</p>
+      </div>
+      <button class="btn btn-primary" disabled>Bientôt</button>
+    </article>
+    <article class="card session-card" data-parcours="Calme &amp; Stress">
+      <div class="session-info">
+        <h3>SOS Stress en 3 minutes <span class="badge-coming">À venir</span></h3>
+        <p>Calme &amp; Stress · 3 min</p>
+      </div>
+      <button class="btn btn-primary" disabled>Bientôt</button>
+    </article>
+    <article class="card session-card" data-parcours="Calme &amp; Stress">
+      <div class="session-info">
+        <h3>Lâcher prise sur l'urgence <span class="badge-coming">À venir</span></h3>
+        <p>Calme &amp; Stress · 7 min</p>
+      </div>
+      <button class="btn btn-primary" disabled>Bientôt</button>
+    </article>
+    <article class="card session-card" data-parcours="Calme &amp; Stress">
+      <div class="session-info">
+        <h3>La cohérence cardiaque guidée <span class="badge-coming">À venir</span></h3>
+        <p>Calme &amp; Stress · 5 min</p>
+      </div>
+      <button class="btn btn-primary" disabled>Bientôt</button>
+    </article>
+    <article class="card session-card" data-parcours="Calme &amp; Stress">
+      <div class="session-info">
+        <h3>Le corps qui tient le stress <span class="badge-coming">À venir</span></h3>
+        <p>Calme &amp; Stress · 10 min</p>
+      </div>
+      <button class="btn btn-primary" disabled>Bientôt</button>
+    </article>
+    <article class="card session-card" data-parcours="Calme &amp; Stress">
+      <div class="session-info">
+        <h3>Fin de journée — déposer le poids <span class="badge-coming">À venir</span></h3>
+        <p>Calme &amp; Stress · 12 min</p>
+      </div>
+      <button class="btn btn-primary" disabled>Bientôt</button>
+    </article>
+    <article class="card session-card" data-parcours="Calme &amp; Stress">
+      <div class="session-info">
+        <h3>Transformer le stress en énergie <span class="badge-coming">À venir</span></h3>
+        <p>Calme &amp; Stress · 10 min</p>
+      </div>
+      <button class="btn btn-primary" disabled>Bientôt</button>
+    </article>
+    <article class="card session-card" data-parcours="Sommeil">
+      <div class="session-info">
+        <h3>Rituel de déconnexion <span class="badge-coming">À venir</span></h3>
+        <p>Sommeil · 10 min</p>
+      </div>
+      <button class="btn btn-primary" disabled>Bientôt</button>
+    </article>
+    <article class="card session-card" data-parcours="Sommeil">
+      <div class="session-info">
+        <h3>Relâcher le corps, couche après couche <span class="badge-coming">À venir</span></h3>
+        <p>Sommeil · 12 min</p>
+      </div>
+      <button class="btn btn-primary" disabled>Bientôt</button>
+    </article>
+    <article class="card session-card" data-parcours="Sommeil">
+      <div class="session-info">
+        <h3>Le voyage intérieur <span class="badge-coming">À venir</span></h3>
+        <p>Sommeil · 15 min</p>
+      </div>
+      <button class="btn btn-primary" disabled>Bientôt</button>
+    </article>
+    <article class="card session-card" data-parcours="Sommeil">
+      <div class="session-info">
+        <h3>Sons &amp; silence — endormissement profond <span class="badge-coming">À venir</span></h3>
+        <p>Sommeil · 20 min</p>
+      </div>
+      <button class="btn btn-primary" disabled>Bientôt</button>
+    </article>
+    <article class="card session-card" data-parcours="Sommeil">
+      <div class="session-info">
+        <h3>Réveils nocturnes — retrouver le calme <span class="badge-coming">À venir</span></h3>
+        <p>Sommeil · 8 min</p>
+      </div>
+      <button class="btn btn-primary" disabled>Bientôt</button>
+    </article>
+    <article class="card session-card" data-parcours="Sommeil">
+      <div class="session-info">
+        <h3>Méditation du matin reposé <span class="badge-coming">À venir</span></h3>
+        <p>Sommeil · 7 min</p>
+      </div>
+      <button class="btn btn-primary" disabled>Bientôt</button>
+    </article>
+    <article class="card session-card" data-parcours="Respirer">
+      <div class="session-info">
+        <h3>La respiration naturelle <span class="badge-coming">À venir</span></h3>
+        <p>Respirer · 5 min</p>
+      </div>
+      <button class="btn btn-primary" disabled>Bientôt</button>
+    </article>
+    <article class="card session-card" data-parcours="Respirer">
+      <div class="session-info">
+        <h3>Cohérence cardiaque 5-5 <span class="badge-coming">À venir</span></h3>
+        <p>Respirer · 5 min</p>
+      </div>
+      <button class="btn btn-primary" disabled>Bientôt</button>
+    </article>
+    <article class="card session-card" data-parcours="Respirer">
+      <div class="session-info">
+        <h3>Respiration 4-7-8 — calme profond <span class="badge-coming">À venir</span></h3>
+        <p>Respirer · 7 min</p>
+      </div>
+      <button class="btn btn-primary" disabled>Bientôt</button>
+    </article>
+    <article class="card session-card" data-parcours="Respirer">
+      <div class="session-info">
+        <h3>Box breathing <span class="badge-coming">À venir</span></h3>
+        <p>Respirer · 8 min</p>
+      </div>
+      <button class="btn btn-primary" disabled>Bientôt</button>
+    </article>
+    <article class="card session-card" data-parcours="Respirer">
+      <div class="session-info">
+        <h3>Souffle et énergie — la respiration activante <span class="badge-coming">À venir</span></h3>
+        <p>Respirer · 10 min</p>
+      </div>
+      <button class="btn btn-primary" disabled>Bientôt</button>
+    </article>
+    <article class="card session-card" data-parcours="Anxiété">
+      <div class="session-info">
+        <h3>SOS Anxiété — ancrage immédiat <span class="badge-coming">À venir</span></h3>
+        <p>Anxiété · 5 min</p>
+      </div>
+      <button class="btn btn-primary" disabled>Bientôt</button>
+    </article>
+    <article class="card session-card" data-parcours="Anxiété">
+      <div class="session-info">
+        <h3>Accueillir l'anxiété sans la combattre <span class="badge-coming">À venir</span></h3>
+        <p>Anxiété · 8 min</p>
+      </div>
+      <button class="btn btn-primary" disabled>Bientôt</button>
+    </article>
+    <article class="card session-card" data-parcours="Anxiété">
+      <div class="session-info">
+        <h3>La pensée qui tourne en boucle <span class="badge-coming">À venir</span></h3>
+        <p>Anxiété · 10 min</p>
+      </div>
+      <button class="btn btn-primary" disabled>Bientôt</button>
+    </article>
+    <article class="card session-card" data-parcours="Anxiété">
+      <div class="session-info">
+        <h3>Mon corps face à la peur <span class="badge-coming">À venir</span></h3>
+        <p>Anxiété · 10 min</p>
+      </div>
+      <button class="btn btn-primary" disabled>Bientôt</button>
+    </article>
+    <article class="card session-card" data-parcours="Anxiété">
+      <div class="session-info">
+        <h3>Technique 5-4-3-2-1 guidée <span class="badge-coming">À venir</span></h3>
+        <p>Anxiété · 7 min</p>
+      </div>
+      <button class="btn btn-primary" disabled>Bientôt</button>
+    </article>
+    <article class="card session-card" data-parcours="Anxiété">
+      <div class="session-info">
+        <h3>Créer mon espace de sécurité intérieur <span class="badge-coming">À venir</span></h3>
+        <p>Anxiété · 12 min</p>
+      </div>
+      <button class="btn btn-primary" disabled>Bientôt</button>
+    </article>
+    <article class="card session-card" data-parcours="Concentration">
+      <div class="session-info">
+        <h3>Mise en route mentale <span class="badge-coming">À venir</span></h3>
+        <p>Concentration · 5 min</p>
+      </div>
+      <button class="btn btn-primary" disabled>Bientôt</button>
+    </article>
+    <article class="card session-card" data-parcours="Concentration">
+      <div class="session-info">
+        <h3>Pleine conscience de la tâche <span class="badge-coming">À venir</span></h3>
+        <p>Concentration · 7 min</p>
+      </div>
+      <button class="btn btn-primary" disabled>Bientôt</button>
+    </article>
+    <article class="card session-card" data-parcours="Concentration">
+      <div class="session-info">
+        <h3>Récupération rapide entre deux efforts <span class="badge-coming">À venir</span></h3>
+        <p>Concentration · 5 min</p>
+      </div>
+      <button class="btn btn-primary" disabled>Bientôt</button>
+    </article>
+    <article class="card session-card" data-parcours="Concentration">
+      <div class="session-info">
+        <h3>Clarté mentale — faire le vide <span class="badge-coming">À venir</span></h3>
+        <p>Concentration · 10 min</p>
+      </div>
+      <button class="btn btn-primary" disabled>Bientôt</button>
+    </article>
+    <article class="card session-card" data-parcours="Concentration">
+      <div class="session-info">
+        <h3>Flow — entrer dans la zone <span class="badge-coming">À venir</span></h3>
+        <p>Concentration · 12 min</p>
+      </div>
+      <button class="btn btn-primary" disabled>Bientôt</button>
     </article>
   </div>
 
@@ -437,19 +652,16 @@
     <p class="lead">Installe-toi comme tu veux. Tu peux mettre en pause à tout moment.</p>
   </header>
 
-  <!-- Élément audio caché — c'est lui qui fait le vrai travail -->
   <audio id="audio-engine" preload="metadata"></audio>
 
   <div class="card player-card">
 
-    <!-- ── Partie principale (masquée en fin de séance) ── -->
     <div class="player-main" id="player-main">
 
-      <p class="session-meta" id="player-meta">Respiration · 5 min</p>
-      <h2 id="player-title">Revenir au souffle</h2>
+      <p class="session-meta" id="player-meta">Premiers pas · 5 min</p>
+      <h2 id="player-title">Première respiration consciente</h2>
       <p class="audio-loading" id="audio-loading"></p>
 
-      <!-- Barre de progression seekable -->
       <div class="progress-wrap">
         <div class="progress-track" id="progress-track" role="slider" aria-label="Progression" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
           <div class="progress-track-inner">
@@ -463,7 +675,6 @@
         </div>
       </div>
 
-      <!-- Contrôles -->
       <div class="player-controls">
         <button class="btn-skip" id="btn-rewind" title="Reculer 15s" aria-label="Reculer de 15 secondes">
           ↺<span>15s</span>
@@ -477,7 +688,6 @@
         </button>
       </div>
 
-      <!-- Volume -->
       <div class="volume-wrap">
         <span>🔈</span>
         <input type="range" class="volume-slider" id="volume-slider" min="0" max="1" step="0.02" value="1" aria-label="Volume">
@@ -491,7 +701,6 @@
       </div>
     </div>
 
-    <!-- ── Écran de fin de séance ── -->
     <div class="complete-screen" id="complete-screen">
       <div class="complete-icon">🌿</div>
       <h2>Séance terminée</h2>
@@ -528,7 +737,7 @@
       </div>
       <button class="btn btn-ghost" id="theme-toggle" onclick="toggleTheme()" style="padding:.4rem .9rem;font-size:.85rem;">🌙 Sombre</button>
     </article>
-<article class="card setting-item">
+    <article class="card setting-item">
       <div class="info">
         <h3>Audio</h3>
         <p>Voix, volume, sons d'ambiance</p>
@@ -566,25 +775,25 @@
       <div class="trust" style="margin-top:1rem;">
         <span class="trust-item">Open source</span>
         <span class="trust-item">MIT / CC BY</span>
-        <span class="trust-item">Alpha v0.1</span>
+        <span class="trust-item">Alpha v0.2</span>
       </div>
     </article>
   </div>
 
-    <article class="card setting-item">
-      <div class="info" style="flex:1;">
-        <a href="https://www.instagram.com/serein_project/" target="_blank" rel="noopener" class="insta-link">
-          <div class="insta-icon">
-            <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
-          </div>
-          <div class="insta-text">
-            <div class="insta-title">Suivez-nous sur Instagram</div>
-            <div class="insta-handle">@serein_project</div>
-          </div>
-        </a>
-      </div>
-      <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--color-muted);fill:none;stroke-width:2;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
-    </article>
+  <article class="card setting-item" style="margin-top:.75rem;">
+    <div class="info" style="flex:1;">
+      <a href="https://www.instagram.com/serein_project/" target="_blank" rel="noopener" class="insta-link">
+        <div class="insta-icon">
+          <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+        </div>
+        <div class="insta-text">
+          <div class="insta-title">Suivez-nous sur Instagram</div>
+          <div class="insta-handle">@serein_project</div>
+        </div>
+      </a>
+    </div>
+    <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--color-muted);fill:none;stroke-width:2;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
+  </article>
 
   <p class="footer-note">
     Serein - méditation en français, sans publicité, sans tracking tiers.
@@ -635,6 +844,26 @@
   function filterTab(el) {
     document.querySelectorAll('.filter-tabs .tab').forEach(t => t.classList.remove('active'));
     el.classList.add('active');
+    const filter = el.textContent.trim();
+    document.querySelectorAll('.session-card').forEach(card => {
+      const p = card.dataset.parcours || '';
+      card.style.display = (filter === 'Toutes' || p === filter) ? '' : 'none';
+    });
+  }
+
+  function filterParcours(parcours) {
+    showScreen('explore');
+    setTimeout(() => {
+      const tabs = document.querySelectorAll('.filter-tabs .tab');
+      tabs.forEach(t => {
+        if (t.textContent.trim() === parcours) {
+          t.classList.add('active');
+          filterTab(t);
+        } else {
+          t.classList.remove('active');
+        }
+      });
+    }, 50);
   }
 
   // ════════════════════════════════════════════
@@ -644,21 +873,9 @@
   const SESSIONS = {
     'premiere-respiration-consciente': {
       title: 'Première respiration consciente',
-      parcours: 'Débuter',
-      // Chemin relatif depuis index.html sur le Pi
+      parcours: 'Premiers pas',
       audio: 'assets/audio/Méditation Premiere Respiration Consciente.mp3',
     },
-'revenir-au-souffle': {
-  title: 'Revenir au souffle',
-  parcours: 'Débuter',
-  audio: 'assets/audio/Revenir au souffle.mp3',
-    },
-    'preparer-le-sommeil': {
-  title: 'Préparer le sommeil',
-  parcours: 'Débuter',
-  audio: 'assets/audio/Préparer le sommeil.mp3',
-    },
-    
   };
 
   // ════════════════════════════════════════════
@@ -679,10 +896,9 @@
   const volumeSlider  = document.getElementById('volume-slider');
 
   let currentSessionId  = null;
-  let sessionStartTime  = null; // pour calculer les minutes écoutées
+  let sessionStartTime  = null;
   let isDragging        = false;
 
-  // ── Utilitaire : formater les secondes en m:ss ──
   function fmtTime(sec) {
     if (!isFinite(sec) || sec < 0) return '--:--';
     const m = Math.floor(sec / 60);
@@ -690,7 +906,6 @@
     return m + ':' + String(s).padStart(2, '0');
   }
 
-  // ── Mettre à jour l'affichage de la barre ──
   function updateProgress() {
     if (!audio.duration || isDragging) return;
     const pct = audio.currentTime / audio.duration;
@@ -700,7 +915,6 @@
     progressTrack.setAttribute('aria-valuenow', Math.round(pct * 100));
   }
 
-  // ── Événements de l'élément <audio> ──
   audio.addEventListener('timeupdate', updateProgress);
 
   audio.addEventListener('loadedmetadata', () => {
@@ -722,22 +936,16 @@
     setPlayingUI(false);
   });
 
-  // ── Fin de séance détectée automatiquement ──
   audio.addEventListener('ended', () => {
     setPlayingUI(false);
     progressFill.style.width = '100%';
     progressThumb.style.left = '100%';
-
-    // Calculer les minutes réellement écoutées
     const listenedSec = sessionStartTime
       ? Math.round((Date.now() - sessionStartTime) / 1000)
       : Math.round(audio.duration || 0);
     const listenedMin = Math.max(1, Math.round(listenedSec / 60));
-
     recordSession(listenedMin);
     sessionStartTime = null;
-
-    // Afficher l'écran de fin
     playerMain.classList.add('hidden');
     completeScreen.classList.add('visible');
     document.getElementById('complete-title').textContent =
@@ -748,17 +956,14 @@
     audioLoading.textContent = '⚠️ Fichier audio introuvable. Vérifie le chemin sur le Pi.';
   });
 
-  // ── Icônes play/pause ──
   function setPlayingUI(playing) {
     iconPlay.style.display  = playing ? 'none'  : 'block';
     iconPause.style.display = playing ? 'block' : 'none';
   }
 
-  // ── Lancer une séance depuis la liste ──
   function launchPlayer(sessionId) {
     const session = SESSIONS[sessionId];
     if (!session) {
-      // Séance sans audio encore (placeholder)
       document.getElementById('player-title').textContent = sessionId;
       document.getElementById('player-meta').textContent = 'À venir';
       audioLoading.textContent = '⏳ Cet enregistrement n\'est pas encore disponible.';
@@ -775,7 +980,6 @@
     document.getElementById('complete-title').textContent = session.title;
     audioLoading.textContent = 'Chargement…';
 
-    // Reset UI
     progressFill.style.width = '0%';
     progressThumb.style.left = '0%';
     timeCurrent.textContent  = '0:00';
@@ -784,18 +988,15 @@
     playerMain.classList.remove('hidden');
     completeScreen.classList.remove('visible');
 
-    // Charger + lancer l'audio
     audio.src = session.audio;
     audio.load();
     audio.play().catch(() => {
-      // Navigateur bloque l'autoplay → l'utilisateur appuie sur Play
       audioLoading.textContent = 'Appuie sur ▶ pour démarrer';
     });
 
     showScreen('player');
   }
 
-  // ── Play / Pause ──
   function togglePlay() {
     if (!audio.src) return;
     if (audio.paused) {
@@ -805,7 +1006,6 @@
     }
   }
 
-  // ── Seek ±15 secondes ──
   document.getElementById('btn-rewind').addEventListener('click', () => {
     audio.currentTime = Math.max(0, audio.currentTime - 15);
   });
@@ -813,7 +1013,6 @@
     audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + 15);
   });
 
-  // ── Seek via clic sur la barre ──
   function seekTo(e) {
     if (!audio.duration) return;
     const rect = progressTrack.getBoundingClientRect();
@@ -831,24 +1030,20 @@
   document.addEventListener('mouseup',   () => { isDragging = false; });
   document.addEventListener('touchend',  () => { isDragging = false; });
 
-  // Clavier (accessibilité) : flèches gauche/droite sur la barre
   progressTrack.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowRight') audio.currentTime = Math.min(audio.duration, audio.currentTime + 5);
     if (e.key === 'ArrowLeft')  audio.currentTime = Math.max(0, audio.currentTime - 5);
   });
 
-  // ── Volume ──
   volumeSlider.addEventListener('input', () => {
     audio.volume = volumeSlider.value;
   });
 
-  // ── Retour sans stopper ──
   function stopAndReturn() {
     audio.pause();
     showScreen('explore');
   }
 
-  // ── Rejouer depuis le début ──
   function replaySession() {
     playerMain.classList.remove('hidden');
     completeScreen.classList.remove('visible');
