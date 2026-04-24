@@ -136,16 +136,73 @@
     .player-card { text-align: center; max-width: 480px; margin: 0 auto; }
     .player-card .session-meta { font-size: .85rem; color: var(--color-muted); margin-bottom: 1rem; }
     .player-card h2 { font-size: 1.6rem; margin-bottom: 1.5rem; }
-    .player-controls { display: flex; justify-content: center; gap: 1rem; margin: 1.5rem 0; flex-wrap: wrap; }
+    .player-controls { display: flex; justify-content: center; align-items: center; gap: 1rem; margin: 1.5rem 0; flex-wrap: wrap; }
     .btn-play {
       width: 72px; height: 72px; border-radius: 50%; font-size: 1.75rem;
       background: var(--color-primary); color: #fff; border: none; cursor: pointer;
+      transition: transform .15s, opacity .2s;
+      display: flex; align-items: center; justify-content: center;
     }
+    .btn-play:active { transform: scale(.93); }
+    .btn-skip {
+      width: 44px; height: 44px; border-radius: 50%; font-size: .8rem; font-weight: 700;
+      background: var(--color-primary-light); color: var(--color-primary);
+      border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 1px; transition: opacity .2s;
+    }
+    .btn-skip:hover { opacity: .8; }
+    .btn-skip span { font-size: .6rem; line-height: 1; }
+
+    /* Barre de progression seekable */
     .progress-wrap { margin: 1.25rem 0; }
-    .progress-bar { width: 100%; height: 6px; background: var(--color-primary-light); border-radius: 999px; overflow: hidden; }
-    .progress-fill { height: 100%; width: 35%; background: var(--color-primary); border-radius: 999px; }
-    .progress-text { font-size: .8rem; color: var(--color-muted); margin-top: .5rem; }
+    .progress-track {
+      width: 100%; height: 6px; background: var(--color-primary-light);
+      border-radius: 999px; position: relative; cursor: pointer;
+      padding: 8px 0; margin: -8px 0; /* zone de clic élargie */
+      box-sizing: content-box;
+    }
+    .progress-track-inner {
+      width: 100%; height: 6px; background: var(--color-primary-light);
+      border-radius: 999px; overflow: hidden; position: relative;
+    }
+    .progress-fill { height: 100%; width: 0%; background: var(--color-primary); border-radius: 999px; transition: width .25s linear; }
+    .progress-thumb {
+      position: absolute; top: 50%; right: auto;
+      width: 14px; height: 14px; border-radius: 50%;
+      background: var(--color-primary); transform: translate(-50%, -50%);
+      left: 0%; opacity: 0; transition: opacity .2s;
+      pointer-events: none; margin-top: -3px;
+    }
+    .progress-track:hover .progress-thumb { opacity: 1; }
+    .progress-times { display: flex; justify-content: space-between; font-size: .78rem; color: var(--color-muted); margin-top: .4rem; }
+
+    /* Volume */
+    .volume-wrap { display: flex; align-items: center; gap: .6rem; margin-top: 1rem; justify-content: center; }
+    .volume-wrap span { font-size: .85rem; }
+    input[type=range].volume-slider {
+      -webkit-appearance: none; appearance: none;
+      width: 100px; height: 4px; border-radius: 999px;
+      background: var(--color-primary-light); cursor: pointer; outline: none;
+    }
+    input[type=range].volume-slider::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none;
+      width: 14px; height: 14px; border-radius: 50%;
+      background: var(--color-primary); cursor: pointer;
+    }
+
+    /* Écran fin de séance */
+    .complete-screen { display: none; text-align: center; padding: 2rem 0; }
+    .complete-screen.visible { display: block; }
+    .player-main { }
+    .player-main.hidden { display: none; }
+
+    .complete-icon { font-size: 3.5rem; margin-bottom: 1rem; animation: pop .4s ease; }
+    @keyframes pop { 0% { transform: scale(.5); opacity: 0; } 80% { transform: scale(1.15); } 100% { transform: scale(1); opacity: 1; } }
+
     .player-note { font-style: italic; color: var(--color-muted); margin-top: 1.25rem; font-size: .95rem; }
+
+    /* Spinner chargement audio */
+    .audio-loading { font-size: .8rem; color: var(--color-muted); margin-top: .5rem; min-height: 1.2em; }
 
     /* ---- Réglages ---- */
     .settings-list { display: flex; flex-direction: column; gap: .75rem; margin-top: 1.25rem; }
@@ -322,45 +379,45 @@
   <div class="session-list">
     <article class="card session-card">
       <div class="session-info">
-        <h3>Revenir au souffle</h3>
-        <p>Respiration · 5 min</p>
+        <h3>Première respiration consciente</h3>
+        <p>Débuter · ~5 min</p>
       </div>
-      <button class="btn btn-primary" onclick="launchPlayer('Revenir au souffle', 'Respiration', '5 min')">Lancer</button>
+      <button class="btn btn-primary" onclick="launchPlayer('premiere-respiration-consciente')">Lancer</button>
+    </article>
+    <article class="card session-card">
+      <div class="session-info">
+        <h3>Revenir au souffle</h3>
+        <p>Respiration · À venir</p>
+      </div>
+      <button class="btn btn-secondary" onclick="launchPlayer('revenir-au-souffle')">Bientôt</button>
     </article>
     <article class="card session-card">
       <div class="session-info">
         <h3>Apaiser la journée</h3>
-        <p>Stress · 8 min</p>
+        <p>Stress · À venir</p>
       </div>
-      <button class="btn btn-primary" onclick="launchPlayer('Apaiser la journée', 'Stress', '8 min')">Lancer</button>
+      <button class="btn btn-secondary" onclick="launchPlayer('apaiser-la-journee')">Bientôt</button>
     </article>
     <article class="card session-card">
       <div class="session-info">
         <h3>Préparer le sommeil</h3>
-        <p>Sommeil · 10 min</p>
+        <p>Sommeil · À venir</p>
       </div>
-      <button class="btn btn-primary" onclick="launchPlayer('Préparer le sommeil', 'Sommeil', '10 min')">Lancer</button>
+      <button class="btn btn-secondary" onclick="launchPlayer('preparer-le-sommeil')">Bientôt</button>
     </article>
     <article class="card session-card">
       <div class="session-info">
         <h3>Retrouver un rythme calme</h3>
-        <p>Débuter · 6 min</p>
+        <p>Débuter · À venir</p>
       </div>
-      <button class="btn btn-primary" onclick="launchPlayer('Retrouver un rythme calme', 'Débuter', '6 min')">Lancer</button>
+      <button class="btn btn-secondary" onclick="launchPlayer('retrouver-un-rythme-calme')">Bientôt</button>
     </article>
     <article class="card session-card">
       <div class="session-info">
         <h3>Traverser un moment d'anxiété</h3>
-        <p>Anxiété · 9 min</p>
+        <p>Anxiété · À venir</p>
       </div>
-      <button class="btn btn-primary" onclick="launchPlayer('Traverser un moment d'anxiété', 'Anxiété', '9 min')">Lancer</button>
-    </article>
-    <article class="card session-card">
-      <div class="session-info">
-        <h3>Première respiration consciente</h3>
-        <p>Débuter · 5 min</p>
-      </div>
-      <button class="btn btn-primary" onclick="launchPlayer('Première respiration consciente', 'Débuter', '5 min')">Lancer</button>
+      <button class="btn btn-secondary" onclick="launchPlayer('traverser-anxiete')">Bientôt</button>
     </article>
   </div>
 
@@ -380,26 +437,74 @@
     <p class="lead">Installe-toi comme tu veux. Tu peux mettre en pause à tout moment.</p>
   </header>
 
+  <!-- Élément audio caché — c'est lui qui fait le vrai travail -->
+  <audio id="audio-engine" preload="metadata"></audio>
+
   <div class="card player-card">
-    <p class="session-meta" id="player-meta">Respiration · 5 min</p>
-    <h2 id="player-title">Revenir au souffle</h2>
 
-    <div class="progress-wrap">
-      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
-      <p class="progress-text" id="progress-text">0:00 / 5:00</p>
+    <!-- ── Partie principale (masquée en fin de séance) ── -->
+    <div class="player-main" id="player-main">
+
+      <p class="session-meta" id="player-meta">Respiration · 5 min</p>
+      <h2 id="player-title">Revenir au souffle</h2>
+      <p class="audio-loading" id="audio-loading"></p>
+
+      <!-- Barre de progression seekable -->
+      <div class="progress-wrap">
+        <div class="progress-track" id="progress-track" role="slider" aria-label="Progression" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
+          <div class="progress-track-inner">
+            <div class="progress-fill" id="progress-fill"></div>
+          </div>
+          <div class="progress-thumb" id="progress-thumb"></div>
+        </div>
+        <div class="progress-times">
+          <span id="time-current">0:00</span>
+          <span id="time-total">--:--</span>
+        </div>
+      </div>
+
+      <!-- Contrôles -->
+      <div class="player-controls">
+        <button class="btn-skip" id="btn-rewind" title="Reculer 15s" aria-label="Reculer de 15 secondes">
+          ↺<span>15s</span>
+        </button>
+        <button class="btn-play" id="play-btn" onclick="togglePlay()" aria-label="Lecture / Pause">
+          <svg id="icon-play" viewBox="0 0 24 24" width="28" height="28" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          <svg id="icon-pause" viewBox="0 0 24 24" width="28" height="28" fill="white" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+        </button>
+        <button class="btn-skip" id="btn-forward" title="Avancer 15s" aria-label="Avancer de 15 secondes">
+          ↻<span>15s</span>
+        </button>
+      </div>
+
+      <!-- Volume -->
+      <div class="volume-wrap">
+        <span>🔈</span>
+        <input type="range" class="volume-slider" id="volume-slider" min="0" max="1" step="0.02" value="1" aria-label="Volume">
+        <span>🔊</span>
+      </div>
+
+      <p class="player-note">Prends ton temps.</p>
+
+      <div class="actions" style="justify-content:center; margin-top:1.5rem;">
+        <button class="btn btn-ghost" onclick="stopAndReturn()">← Retour aux séances</button>
+      </div>
     </div>
 
-    <div class="player-controls">
-      <button class="btn btn-ghost" onclick="alert('Séance précédente')">⏮</button>
-      <button class="btn-play" id="play-btn" onclick="togglePlay()">▶</button>
-      <button class="btn btn-ghost" onclick="alert('Séance suivante')">⏭</button>
+    <!-- ── Écran de fin de séance ── -->
+    <div class="complete-screen" id="complete-screen">
+      <div class="complete-icon">🌿</div>
+      <h2>Séance terminée</h2>
+      <p id="complete-title" style="color:var(--color-muted);margin:.5rem 0 1.5rem;"></p>
+      <p style="color:var(--color-muted);font-size:.95rem;line-height:1.6;margin-bottom:1.5rem;">
+        Prends un instant avant de continuer.<br>Comment tu te sens ?
+      </p>
+      <div class="actions" style="justify-content:center;">
+        <button class="btn btn-primary" onclick="showScreen('explore')">Explorer les séances</button>
+        <button class="btn btn-ghost" onclick="replaySession()">↩ Rejouer</button>
+      </div>
     </div>
 
-    <p class="player-note">Prends ton temps.</p>
-
-    <div class="actions" style="justify-content:center; margin-top:1.5rem;">
-      <button class="btn btn-ghost" onclick="showScreen('explore')">← Retour aux séances</button>
-    </div>
   </div>
 
 </section>
@@ -513,6 +618,9 @@
      JAVASCRIPT
 ================================ -->
 <script>
+  // ════════════════════════════════════════════
+  //  NAVIGATION
+  // ════════════════════════════════════════════
   const screens = ['home', 'explore', 'player', 'settings'];
 
   function showScreen(id) {
@@ -529,47 +637,248 @@
     el.classList.add('active');
   }
 
-  function launchPlayer(title, parcours, duree) {
-    document.getElementById('player-title').textContent = title;
-    document.getElementById('player-meta').textContent = parcours + ' · ' + duree + ' · Hors ligne';
-    document.getElementById('progress-text').textContent = '0:00 / ' + duree;
-    document.getElementById('progress-fill').style.width = '0%';
-    document.getElementById('play-btn').textContent = '▶';
+  // ════════════════════════════════════════════
+  //  CATALOGUE DES SÉANCES
+  //  → Ajoute ici chaque nouvelle séance enregistrée
+  // ════════════════════════════════════════════
+  const SESSIONS = {
+    'premiere-respiration-consciente': {
+      title: 'Première respiration consciente',
+      parcours: 'Débuter',
+      // Chemin relatif depuis index.html sur le Pi
+      audio: 'assets/audio/Méditation Premiere Respiration Consciente.mp3',
+    },
+    // Exemple pour ajouter la prochaine :
+    // 'revenir-au-souffle': {
+    //   title: 'Revenir au souffle',
+    //   parcours: 'Respiration',
+    //   audio: 'assets/audio/Revenir au souffle.mp3',
+    // },
+  };
+
+  // ════════════════════════════════════════════
+  //  LECTEUR AUDIO
+  // ════════════════════════════════════════════
+  const audio         = document.getElementById('audio-engine');
+  const progressTrack = document.getElementById('progress-track');
+  const progressFill  = document.getElementById('progress-fill');
+  const progressThumb = document.getElementById('progress-thumb');
+  const timeCurrent   = document.getElementById('time-current');
+  const timeTotal     = document.getElementById('time-total');
+  const playBtn       = document.getElementById('play-btn');
+  const iconPlay      = document.getElementById('icon-play');
+  const iconPause     = document.getElementById('icon-pause');
+  const audioLoading  = document.getElementById('audio-loading');
+  const playerMain    = document.getElementById('player-main');
+  const completeScreen= document.getElementById('complete-screen');
+  const volumeSlider  = document.getElementById('volume-slider');
+
+  let currentSessionId  = null;
+  let sessionStartTime  = null; // pour calculer les minutes écoutées
+  let isDragging        = false;
+
+  // ── Utilitaire : formater les secondes en m:ss ──
+  function fmtTime(sec) {
+    if (!isFinite(sec) || sec < 0) return '--:--';
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60);
+    return m + ':' + String(s).padStart(2, '0');
+  }
+
+  // ── Mettre à jour l'affichage de la barre ──
+  function updateProgress() {
+    if (!audio.duration || isDragging) return;
+    const pct = audio.currentTime / audio.duration;
+    progressFill.style.width  = (pct * 100) + '%';
+    progressThumb.style.left  = (pct * 100) + '%';
+    timeCurrent.textContent   = fmtTime(audio.currentTime);
+    progressTrack.setAttribute('aria-valuenow', Math.round(pct * 100));
+  }
+
+  // ── Événements de l'élément <audio> ──
+  audio.addEventListener('timeupdate', updateProgress);
+
+  audio.addEventListener('loadedmetadata', () => {
+    timeTotal.textContent = fmtTime(audio.duration);
+    audioLoading.textContent = '';
+  });
+
+  audio.addEventListener('waiting', () => {
+    audioLoading.textContent = 'Chargement…';
+  });
+
+  audio.addEventListener('playing', () => {
+    audioLoading.textContent = '';
+    sessionStartTime = sessionStartTime || Date.now();
+    setPlayingUI(true);
+  });
+
+  audio.addEventListener('pause', () => {
+    setPlayingUI(false);
+  });
+
+  // ── Fin de séance détectée automatiquement ──
+  audio.addEventListener('ended', () => {
+    setPlayingUI(false);
+    progressFill.style.width = '100%';
+    progressThumb.style.left = '100%';
+
+    // Calculer les minutes réellement écoutées
+    const listenedSec = sessionStartTime
+      ? Math.round((Date.now() - sessionStartTime) / 1000)
+      : Math.round(audio.duration || 0);
+    const listenedMin = Math.max(1, Math.round(listenedSec / 60));
+
+    recordSession(listenedMin);
+    sessionStartTime = null;
+
+    // Afficher l'écran de fin
+    playerMain.classList.add('hidden');
+    completeScreen.classList.add('visible');
+    document.getElementById('complete-title').textContent =
+      document.getElementById('player-title').textContent;
+  });
+
+  audio.addEventListener('error', () => {
+    audioLoading.textContent = '⚠️ Fichier audio introuvable. Vérifie le chemin sur le Pi.';
+  });
+
+  // ── Icônes play/pause ──
+  function setPlayingUI(playing) {
+    iconPlay.style.display  = playing ? 'none'  : 'block';
+    iconPause.style.display = playing ? 'block' : 'none';
+  }
+
+  // ── Lancer une séance depuis la liste ──
+  function launchPlayer(sessionId) {
+    const session = SESSIONS[sessionId];
+    if (!session) {
+      // Séance sans audio encore (placeholder)
+      document.getElementById('player-title').textContent = sessionId;
+      document.getElementById('player-meta').textContent = 'À venir';
+      audioLoading.textContent = '⏳ Cet enregistrement n\'est pas encore disponible.';
+      audio.src = '';
+      showScreen('player');
+      return;
+    }
+
+    currentSessionId = sessionId;
+    sessionStartTime = null;
+
+    document.getElementById('player-title').textContent = session.title;
+    document.getElementById('player-meta').textContent  = session.parcours;
+    document.getElementById('complete-title').textContent = session.title;
+    audioLoading.textContent = 'Chargement…';
+
+    // Reset UI
+    progressFill.style.width = '0%';
+    progressThumb.style.left = '0%';
+    timeCurrent.textContent  = '0:00';
+    timeTotal.textContent    = '--:--';
+    setPlayingUI(false);
+    playerMain.classList.remove('hidden');
+    completeScreen.classList.remove('visible');
+
+    // Charger + lancer l'audio
+    audio.src = session.audio;
+    audio.load();
+    audio.play().catch(() => {
+      // Navigateur bloque l'autoplay → l'utilisateur appuie sur Play
+      audioLoading.textContent = 'Appuie sur ▶ pour démarrer';
+    });
+
     showScreen('player');
   }
 
-  let playing = false;
+  // ── Play / Pause ──
   function togglePlay() {
-    playing = !playing;
-    document.getElementById('play-btn').textContent = playing ? '⏸' : '▶';
+    if (!audio.src) return;
+    if (audio.paused) {
+      audio.play();
+    } else {
+      audio.pause();
+    }
   }
 
+  // ── Seek ±15 secondes ──
+  document.getElementById('btn-rewind').addEventListener('click', () => {
+    audio.currentTime = Math.max(0, audio.currentTime - 15);
+  });
+  document.getElementById('btn-forward').addEventListener('click', () => {
+    audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + 15);
+  });
+
+  // ── Seek via clic sur la barre ──
+  function seekTo(e) {
+    if (!audio.duration) return;
+    const rect = progressTrack.getBoundingClientRect();
+    const x    = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+    const pct  = Math.max(0, Math.min(1, x / rect.width));
+    audio.currentTime = pct * audio.duration;
+    progressFill.style.width = (pct * 100) + '%';
+    progressThumb.style.left = (pct * 100) + '%';
+  }
+
+  progressTrack.addEventListener('mousedown',  (e) => { isDragging = true; seekTo(e); });
+  progressTrack.addEventListener('touchstart', (e) => { isDragging = true; seekTo(e); }, { passive: true });
+  document.addEventListener('mousemove',  (e) => { if (isDragging) seekTo(e); });
+  document.addEventListener('touchmove',  (e) => { if (isDragging) seekTo(e); }, { passive: true });
+  document.addEventListener('mouseup',   () => { isDragging = false; });
+  document.addEventListener('touchend',  () => { isDragging = false; });
+
+  // Clavier (accessibilité) : flèches gauche/droite sur la barre
+  progressTrack.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') audio.currentTime = Math.min(audio.duration, audio.currentTime + 5);
+    if (e.key === 'ArrowLeft')  audio.currentTime = Math.max(0, audio.currentTime - 5);
+  });
+
+  // ── Volume ──
+  volumeSlider.addEventListener('input', () => {
+    audio.volume = volumeSlider.value;
+  });
+
+  // ── Retour sans stopper ──
+  function stopAndReturn() {
+    audio.pause();
+    showScreen('explore');
+  }
+
+  // ── Rejouer depuis le début ──
+  function replaySession() {
+    playerMain.classList.remove('hidden');
+    completeScreen.classList.remove('visible');
+    audio.currentTime = 0;
+    audio.play();
+  }
+
+  // ════════════════════════════════════════════
+  //  THÈME
+  // ════════════════════════════════════════════
   function toggleTheme() {
-    const html = document.documentElement;
+    const html  = document.documentElement;
     const isDark = html.getAttribute('data-theme') === 'dark';
     html.setAttribute('data-theme', isDark ? 'light' : 'dark');
     document.getElementById('theme-toggle').textContent = isDark ? '🌙 Sombre' : '☀️ Clair';
     localStorage.setItem('theme', isDark ? 'light' : 'dark');
   }
 
-  // Restaurer le thème sauvegardé
   (function() {
     const saved = localStorage.getItem('theme');
-    if (saved === 'dark') {
-      document.documentElement.setAttribute('data-theme', 'dark');
-    }
+    if (saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
   })();
 
   document.addEventListener('DOMContentLoaded', function() {
     const saved = localStorage.getItem('theme');
-    const btn = document.getElementById('theme-toggle');
+    const btn   = document.getElementById('theme-toggle');
     if (btn && saved === 'dark') btn.textContent = '☀️ Clair';
   });
 
-  // ---- Stats utilisateur ----
+  // ════════════════════════════════════════════
+  //  STATS UTILISATEUR
+  // ════════════════════════════════════════════
   function loadStats() {
     const s = JSON.parse(localStorage.getItem('serein_stats') || '{"sessions":0,"minutes":0,"streak":0,"lastDate":""}');
-    document.getElementById('stat-streak').textContent = s.streak;
+    document.getElementById('stat-streak').textContent  = s.streak;
     document.getElementById('stat-sessions').textContent = s.sessions;
     const h = Math.floor(s.minutes / 60);
     const m = s.minutes % 60;
@@ -577,24 +886,20 @@
   }
 
   function recordSession(minutes) {
-    const s = JSON.parse(localStorage.getItem('serein_stats') || '{"sessions":0,"minutes":0,"streak":0,"lastDate":""}');
-    const today = new Date().toISOString().slice(0,10);
-    if (s.lastDate === today) {
-      // déjà comptée aujourd'hui, on cumule juste le temps
-    } else if (s.lastDate === new Date(Date.now()-86400000).toISOString().slice(0,10)) {
-      s.streak += 1;
-    } else {
-      s.streak = 1;
+    const s     = JSON.parse(localStorage.getItem('serein_stats') || '{"sessions":0,"minutes":0,"streak":0,"lastDate":""}');
+    const today = new Date().toISOString().slice(0, 10);
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    if (s.lastDate !== today) {
+      s.streak = (s.lastDate === yesterday) ? s.streak + 1 : 1;
     }
     s.lastDate = today;
     s.sessions += 1;
-    s.minutes += minutes;
+    s.minutes  += minutes;
     localStorage.setItem('serein_stats', JSON.stringify(s));
     loadStats();
   }
 
   document.addEventListener('DOMContentLoaded', loadStats);
-
 </script>
 
 </body>
