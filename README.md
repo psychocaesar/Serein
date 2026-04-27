@@ -1,18 +1,18 @@
 # Serein
 
-**Serein** est un projet d'appliction de méditation en français conçu comme une alternative éthique, open source et respectueuse de la vie privée des applications de méditation grand public.
+**Serein** est un projet d'application de méditation en français conçu comme une alternative éthique, open source et respectueuse de la vie privée des applications de méditation grand public.
 
-L’objectif est simple : aider les personnes à respirer, dormir et se recentrer grâce à des audios guidés en français, sans publicité, sans paywall agressif et sans tracking tiers.
+L'objectif est simple : aider les personnes à respirer, dormir et se recentrer grâce à des audios guidés en français, sans publicité, sans paywall agressif et sans tracking tiers.
 
 ## Vision
 
 Serein traite la méditation comme un **bien public numérique**.
 
-Nous pensons qu’un produit destiné au calme, au sommeil ou à l’anxiété ne devrait pas se reposer sur l’extraction d’attention, le profilage comportemental ou une monétisation manipulatrice.
+Nous pensons qu'un produit destiné au calme, au sommeil ou à l'anxiété ne devrait pas se reposer sur l'extraction d'attention, le profilage comportemental ou une monétisation manipulatrice.
 
 Nous voulons construire une expérience de méditation qui soit :
 - librement accessible ;
-- open source au niveau de l’application ;
+- open source au niveau de l'application ;
 - respectueuse de la vie privée par défaut ;
 - compréhensible par des utilisateurs non techniques ;
 - suffisamment simple pour lancer, et utile pour faire une vraie différence.
@@ -32,14 +32,14 @@ Nous voulons construire une expérience de méditation qui soit :
 
 Objectif de MVP initial :
 - 30 séances audio en français.
-- 5 parcours guidés : débuter, stress, sommeil, respiration, gestion de l’anxiété.
+- 5 parcours guidés : débuter, stress, sommeil, respiration, gestion de l'anxiété.
 - Lecture hors ligne.
 - PWA installable comme premier format de publication.
 - Manifeste public et politique de confidentialité simple.
 
 ## Pourquoi ce projet
 
-Les observateurs de la vie privée ont régulièrement mis en lumière les faiblesses des applications de santé mentale et de bien-être, tandis que des autorités de protection des données, comme la CNIL, insistent sur la transparence, la minimisation des données et une information claire pour les utilisateurs dans les applications mobiles.[web:40][web:87][web:36][web:103]
+Les observateurs de la vie privée ont régulièrement mis en lumière les faiblesses des applications de santé mentale et de bien-être, tandis que des autorités de protection des données, comme la CNIL, insistent sur la transparence, la minimisation des données et une information claire pour les utilisateurs dans les applications mobiles.
 
 Serein existe pour explorer un autre modèle : une application de méditation utile, qui gagne la confiance par sa conception.
 
@@ -78,10 +78,10 @@ Structure suggérée :
 ### Pour les contributeurs non techniques
 
 Vous pouvez aider sur :
-- l’écriture de scripts ;
-- l’enregistrement de voix de méditation ;
+- l'écriture de scripts ;
+- l'enregistrement de voix de méditation ;
 - la relecture et la correction en français ;
-- des revues d’accessibilité ;
+- des revues d'accessibilité ;
 - des revues de confidentialité ;
 - le contrôle de qualité éditoriale.
 
@@ -92,48 +92,51 @@ Les contributions sont les bienvenues, mais Serein doit rester cohérent avec sa
 Avant de proposer une contribution importante :
 - lisez le manifeste ;
 - vérifiez si le changement ajoute une complexité inutile ;
-- évitez d’ajouter par défaut des SDK tiers ;
-- privilégiez les motifs “local-first” quand c’est possible ;
-- expliquez comment la proposition affecte la confidentialité, l’utilisabilité et la maintenance.
+- évitez d'ajouter par défaut des SDK tiers ;
+- privilégiez les motifs "local-first" quand c'est possible ;
+- expliquez comment la proposition affecte la confidentialité, l'utilisabilité et la maintenance.
 
 Premières contributions intéressantes :
 - améliorer les textes et la documentation ;
 - affiner le parcours de découverte (onboarding) ;
 - ajouter des métadonnées pour les séances audio ;
 - améliorer le comportement hors ligne ;
-- améliorer l’accessibilité ;
+- améliorer l'accessibilité ;
 - traduire les textes produits.
 
-## Approche de licence
+## Licence
 
 ### Code
 
-Recommandation par défaut : **MIT** pour une réutilisation large, ou **AGPLv3** si le projet décide plus tard que les modifications côté serveur doivent également rester ouvertes.
+Le code source de Serein est distribué sous licence **GNU Affero General Public License v3.0 (AGPL-3.0)**.
+
+Cela signifie que toute modification du code — y compris si elle est déployée en tant que service en ligne — doit être rendue publique sous la même licence. Serein restera toujours un bien commun.
+
+SPDX-License-Identifier: `AGPL-3.0-or-later`
+
+Voir le fichier [LICENSE](LICENSE) pour le texte complet.
 
 ### Contenus audio
 
-Les contenus audio doivent être licensed séparément de la base de code.
+Les contenus audio sont licenciés séparément sous **Creative Commons BY 4.0** (attribution requise).
 
-Options possibles :
-- **CC BY 4.0** pour une large réutilisation avec attribution ;
-- **CC BY-NC 4.0** si la réutilisation commerciale doit être restreinte ;
-- accords personnalisés pour des contributeurs invités ou payés.
+Voir le fichier [LICENSE-audio.md](LICENSE-audio.md) pour les détails.
 
 ## Position sur la vie privée
 
 Serein vise à éviter :
-- les SDK d’analyse tiers ;
+- les SDK d'analyse tiers ;
 - les pixels publicitaires ;
 - les permissions inutiles ;
 - la collecte de données cachée ;
 - les modèles de consentement manipulatoires (dark patterns).
 
-Si une mesure technique devait un jour s’avérer nécessaire, elle doit rester minimale, documentée et compréhensible.
+Si une mesure technique devait un jour s'avérer nécessaire, elle doit rester minimale, documentée et compréhensible.
 
 ## Feuille de route
 
 - Publication du manifeste et de la landing page.
-- Lancement d’une version alpha PWA installable.
+- Lancement d'une version alpha PWA installable.
 - Remplacement des audios de démonstration par des sessions originales en français.
 - Recrutement de premiers utilisateurs bêta.
 - Ajout de la documentation de contribution.
@@ -141,8 +144,12 @@ Si une mesure technique devait un jour s’avérer nécessaire, elle doit rester
 
 ## Statut du projet
 
-Serein est actuellement un projet précoce, piloté par un seul fondateur, en phase d’exploration.
+Serein est actuellement un projet précoce, piloté par un seul fondateur, en phase alpha active.
 
 ## Contact
 
 Si vous souhaitez contribuer, tester le produit ou participer à la définition de la ligne éditoriale, ouvrez une issue ou commencez par la documentation.
+
+---
+
+Copyright (C) 2026 César Broche Aguilar — [sereinapp.fr](https://sereinapp.fr)
