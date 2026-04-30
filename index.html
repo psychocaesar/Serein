@@ -692,7 +692,7 @@
     <div class="player-main" id="player-main">
       <p class="session-meta" id="player-meta">Premiers pas · 5 min</p>
       <h2 id="player-title">Première respiration consciente</h2>
-      <div id="player-voice-tag" class="player-voice-tag">🎤 Voix masculine</div>
+      <div id="player-voice-tag" class="player-voice-tag">👨 Voix masculine</div>
       <p class="audio-loading" id="audio-loading"></p>
 
       <div class="progress-wrap">
@@ -916,9 +916,10 @@
   }
 
   function getAudioPath(filename) {
-    // Structure : assets/audio/masculine/fichier.mp3
-    //             assets/audio/feminine/fichier.mp3
-    return 'assets/audio/' + getVoice() + '/' + filename;
+    // Dossiers sur le Pi : assets/audio/masculin/ et assets/audio/feminin/
+    const v = getVoice();
+    const folder = v === 'feminine' ? 'feminin' : 'masculin';
+    return 'assets/audio/' + folder + '/' + filename;
   }
 
   function updateVoiceUI() {
@@ -1002,7 +1003,6 @@
     document.getElementById('player-meta').textContent  = parcours + ' · ' + duree;
     document.getElementById('complete-title').textContent = title;
 
-    // Affiche la voix active dans le player
     const v = getVoice();
     const voiceTag = document.getElementById('player-voice-tag');
     voiceTag.textContent = v === 'feminine' ? '👩 Voix féminine' : '👨 Voix masculine';
