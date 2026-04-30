@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#1a3d32">
   <title>Serein — Méditation en français</title>
   <link rel="icon" type="image/png" href="assets/logo.png">
-<link rel="apple-touch-icon" href="assets/logo.png">
+  <link rel="apple-touch-icon" href="assets/logo.png">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -198,6 +198,54 @@
 
     .footer-note { text-align: center; font-size: .8rem; color: var(--color-muted); padding: 2rem 1rem; }
 
+    /* Sélecteur de voix */
+    .voice-selector {
+      display: flex;
+      gap: .5rem;
+      flex-wrap: wrap;
+    }
+    .voice-btn {
+      border: 2px solid var(--color-border);
+      background: var(--color-surface);
+      border-radius: var(--radius-sm);
+      padding: .45rem .9rem;
+      font-size: .85rem;
+      cursor: pointer;
+      color: var(--color-muted);
+      transition: all .2s;
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+    }
+    .voice-btn.active {
+      border-color: var(--color-primary);
+      background: var(--color-primary-light);
+      color: var(--color-primary);
+      font-weight: 600;
+    }
+    .voice-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .voice-badge {
+      font-size: 0.6rem;
+      background: var(--color-muted);
+      color: #fff;
+      border-radius: 4px;
+      padding: 1px 5px;
+    }
+
+    /* Indicateur de voix active dans le player */
+    .player-voice-tag {
+      display: inline-block;
+      font-size: .72rem;
+      background: var(--color-primary-light);
+      color: var(--color-primary);
+      border-radius: 999px;
+      padding: .2rem .65rem;
+      margin-bottom: .75rem;
+    }
+
     @media (max-width: 480px) {
       h1 { font-size: 1.5rem; }
       .card-grid { grid-template-columns: 1fr; }
@@ -271,7 +319,6 @@
 <body>
 
 <section id="home" class="screen active">
-
   <header>
     <p class="eyebrow">Serein</p>
     <h1>Respirer, s'apaiser, se recentrer.</h1>
@@ -348,11 +395,9 @@
       </article>
     </div>
   </section>
-
 </section>
 
 <section id="explore" class="screen">
-
   <header>
     <p class="eyebrow">Explorer</p>
     <h1>Choisis une séance selon ton besoin du moment.</h1>
@@ -377,21 +422,21 @@
         <h3>Première respiration consciente</h3>
         <p>Premiers pas · 5 min</p>
       </div>
-      <button class="btn btn-primary" onclick="launchPlayer('premiere-respiration-consciente', 'Première respiration consciente', 'Premiers pas', '5 min', 'assets/audio/Méditation Premiere Respiration Consciente.mp3')">Lancer</button>
+      <button class="btn btn-primary" onclick="launchPlayer('premiere-respiration-consciente', 'Première respiration consciente', 'Premiers pas', '5 min', 'Méditation Premiere Respiration Consciente.mp3')">Lancer</button>
     </article>
     <article class="card session-card" data-parcours="Premiers pas">
       <div class="session-info">
         <h3>S'asseoir, ne rien faire</h3>
         <p>Premiers pas · 5 min</p>
       </div>
-      <button class="btn btn-primary" onclick="launchPlayer('sasseoir-ne-rien-faire', 'S\'asseoir, ne rien faire', 'Premiers pas', '5 min', 'assets/audio/Revenir au souffle.mp3')">Lancer</button>
+      <button class="btn btn-primary" onclick="launchPlayer('sasseoir-ne-rien-faire', 'S\'asseoir, ne rien faire', 'Premiers pas', '5 min', 'Revenir au souffle.mp3')">Lancer</button>
     </article>
     <article class="card session-card" data-parcours="Premiers pas">
       <div class="session-info">
         <h3>Observer ses pensées sans les juger</h3>
         <p>Premiers pas · 7 min</p>
       </div>
-      <button class="btn btn-primary" onclick="launchPlayer('observer-ses-pensees', 'Observer ses pensées sans les juger', 'Premiers pas', '7 min', 'assets/audio/Observer ses pensées sans les juger.mp3')">Lancer</button>
+      <button class="btn btn-primary" onclick="launchPlayer('observer-ses-pensees', 'Observer ses pensées sans les juger', 'Premiers pas', '7 min', 'Observer ses pensées sans les juger.mp3')">Lancer</button>
     </article>
     <article class="card session-card" data-parcours="Premiers pas">
       <div class="session-info">
@@ -472,7 +517,7 @@
         <h3>Rituel de déconnexion</h3>
         <p>Sommeil · 10 min</p>
       </div>
-      <button class="btn btn-primary" onclick="launchPlayer('rituel-deconnexion', 'Rituel de déconnexion', 'Sommeil', '10 min', 'assets/audio/Préparer le sommeil.mp3')">Lancer</button>
+      <button class="btn btn-primary" onclick="launchPlayer('rituel-deconnexion', 'Rituel de déconnexion', 'Sommeil', '10 min', 'Préparer le sommeil.mp3')">Lancer</button>
     </article>
     <article class="card session-card" data-parcours="Sommeil">
       <div class="session-info">
@@ -633,11 +678,9 @@
   <p style="text-align:center; color:var(--color-muted); font-size:.85rem; margin-top:2rem;">
     De nouvelles séances arriveront au fil du projet.
   </p>
-
 </section>
 
 <section id="player" class="screen">
-
   <header>
     <p class="eyebrow">Lecteur</p>
     <p class="lead">Installe-toi comme tu veux. Tu peux mettre en pause à tout moment.</p>
@@ -646,11 +689,10 @@
   <audio id="audio-engine" preload="metadata"></audio>
 
   <div class="card player-card">
-
     <div class="player-main" id="player-main">
-
       <p class="session-meta" id="player-meta">Premiers pas · 5 min</p>
       <h2 id="player-title">Première respiration consciente</h2>
+      <div id="player-voice-tag" class="player-voice-tag">🎤 Voix masculine</div>
       <p class="audio-loading" id="audio-loading"></p>
 
       <div class="progress-wrap">
@@ -704,13 +746,10 @@
         <button class="btn btn-ghost" onclick="replaySession()">↩ Rejouer</button>
       </div>
     </div>
-
   </div>
-
 </section>
 
 <section id="settings" class="screen">
-
   <header>
     <p class="eyebrow">Réglages</p>
     <h1>Personnalise l'expérience.</h1>
@@ -718,6 +757,24 @@
   </header>
 
   <div class="settings-list">
+
+    <!-- VOIX -->
+    <article class="card setting-item">
+      <div class="info">
+        <h3>🎤 Voix</h3>
+        <p>Choisis la voix qui te correspond le mieux</p>
+      </div>
+      <div class="voice-selector">
+        <button class="voice-btn active" id="voice-btn-masculine" onclick="setVoice('masculine')">
+          👨 Masculine
+        </button>
+        <button class="voice-btn" id="voice-btn-feminine" onclick="setVoice('feminine')" disabled>
+          👩 Féminine <span class="voice-badge">À venir</span>
+        </button>
+      </div>
+    </article>
+
+    <!-- THÈME -->
     <article class="card setting-item">
       <div class="info">
         <h3>Apparence</h3>
@@ -725,10 +782,11 @@
       </div>
       <button class="btn btn-ghost" id="theme-toggle" onclick="toggleTheme()" style="padding:.4rem .9rem;font-size:.85rem;">🌙 Sombre</button>
     </article>
+
     <article class="card setting-item">
       <div class="info">
         <h3>Audio</h3>
-        <p>Voix, volume, sons d'ambiance</p>
+        <p>Sons d'ambiance</p>
       </div>
       <span class="setting-tag">À venir</span>
     </article>
@@ -786,7 +844,6 @@
   <p class="footer-note">
     Serein - méditation en français, sans publicité, sans tracking tiers.
   </p>
-
 </section>
 
 <nav class="nav" aria-label="Navigation principale">
@@ -846,6 +903,31 @@
   }
 
   // ════════════════════════════════════════════
+  //  VOIX
+  // ════════════════════════════════════════════
+  function getVoice() {
+    return localStorage.getItem('serein_voice') || 'masculine';
+  }
+
+  function setVoice(v) {
+    localStorage.setItem('serein_voice', v);
+    document.getElementById('voice-btn-masculine').classList.toggle('active', v === 'masculine');
+    document.getElementById('voice-btn-feminine').classList.toggle('active', v === 'feminine');
+  }
+
+  function getAudioPath(filename) {
+    // Structure : assets/audio/masculine/fichier.mp3
+    //             assets/audio/feminine/fichier.mp3
+    return 'assets/audio/' + getVoice() + '/' + filename;
+  }
+
+  function updateVoiceUI() {
+    const v = getVoice();
+    document.getElementById('voice-btn-masculine').classList.toggle('active', v === 'masculine');
+    document.getElementById('voice-btn-feminine').classList.toggle('active', v === 'feminine');
+  }
+
+  // ════════════════════════════════════════════
   //  LECTEUR AUDIO
   // ════════════════════════════════════════════
   const audio         = document.getElementById('audio-engine');
@@ -881,42 +963,28 @@
   }
 
   audio.addEventListener('timeupdate', updateProgress);
-
   audio.addEventListener('loadedmetadata', () => {
     timeTotal.textContent = fmtTime(audio.duration);
     audioLoading.textContent = '';
   });
-
-  audio.addEventListener('waiting', () => {
-    audioLoading.textContent = 'Chargement…';
-  });
-
+  audio.addEventListener('waiting', () => { audioLoading.textContent = 'Chargement…'; });
   audio.addEventListener('playing', () => {
     audioLoading.textContent = '';
     sessionStartTime = sessionStartTime || Date.now();
     setPlayingUI(true);
   });
-
-  audio.addEventListener('pause', () => {
-    setPlayingUI(false);
-  });
-
+  audio.addEventListener('pause', () => { setPlayingUI(false); });
   audio.addEventListener('ended', () => {
     setPlayingUI(false);
     progressFill.style.width = '100%';
     progressThumb.style.left = '100%';
-    const listenedSec = sessionStartTime
-      ? Math.round((Date.now() - sessionStartTime) / 1000)
-      : Math.round(audio.duration || 0);
-    const listenedMin = Math.max(1, Math.round(listenedSec / 60));
-    recordSession(listenedMin);
+    const listenedSec = sessionStartTime ? Math.round((Date.now() - sessionStartTime) / 1000) : Math.round(audio.duration || 0);
+    recordSession(Math.max(1, Math.round(listenedSec / 60)));
     sessionStartTime = null;
     playerMain.classList.add('hidden');
     completeScreen.classList.add('visible');
-    document.getElementById('complete-title').textContent =
-      document.getElementById('player-title').textContent;
+    document.getElementById('complete-title').textContent = document.getElementById('player-title').textContent;
   });
-
   audio.addEventListener('error', () => {
     audioLoading.textContent = '⚠️ Fichier audio introuvable. Vérifie le chemin sur le Pi.';
   });
@@ -926,11 +994,18 @@
     iconPause.style.display = playing ? 'block' : 'none';
   }
 
-  // launchPlayer(id, title, parcours, duree, audioSrc)
-  function launchPlayer(id, title, parcours, duree, audioSrc) {
+  // launchPlayer(id, title, parcours, duree, audioFilename)
+  // audioFilename = nom du fichier seul (ex: "Revenir au souffle.mp3")
+  // Le dossier voix est ajouté automatiquement via getAudioPath()
+  function launchPlayer(id, title, parcours, duree, audioFilename) {
     document.getElementById('player-title').textContent = title;
     document.getElementById('player-meta').textContent  = parcours + ' · ' + duree;
     document.getElementById('complete-title').textContent = title;
+
+    // Affiche la voix active dans le player
+    const v = getVoice();
+    const voiceTag = document.getElementById('player-voice-tag');
+    voiceTag.textContent = v === 'feminine' ? '👩 Voix féminine' : '👨 Voix masculine';
 
     progressFill.style.width = '0%';
     progressThumb.style.left = '0%';
@@ -941,7 +1016,8 @@
     completeScreen.classList.remove('visible');
     sessionStartTime = null;
 
-    if (audioSrc) {
+    if (audioFilename) {
+      const audioSrc = getAudioPath(audioFilename);
       audioLoading.textContent = 'Chargement…';
       audio.src = audioSrc;
       audio.load();
@@ -958,11 +1034,7 @@
 
   function togglePlay() {
     if (!audio.src) return;
-    if (audio.paused) {
-      audio.play();
-    } else {
-      audio.pause();
-    }
+    audio.paused ? audio.play() : audio.pause();
   }
 
   document.getElementById('btn-rewind').addEventListener('click', () => {
@@ -994,9 +1066,7 @@
     if (e.key === 'ArrowLeft')  audio.currentTime = Math.max(0, audio.currentTime - 5);
   });
 
-  volumeSlider.addEventListener('input', () => {
-    audio.volume = volumeSlider.value;
-  });
+  volumeSlider.addEventListener('input', () => { audio.volume = volumeSlider.value; });
 
   function stopAndReturn() {
     audio.pause();
@@ -1014,7 +1084,7 @@
   //  THÈME
   // ════════════════════════════════════════════
   function toggleTheme() {
-    const html  = document.documentElement;
+    const html   = document.documentElement;
     const isDark = html.getAttribute('data-theme') === 'dark';
     html.setAttribute('data-theme', isDark ? 'light' : 'dark');
     document.getElementById('theme-toggle').textContent = isDark ? '🌙 Sombre' : '☀️ Clair';
@@ -1030,6 +1100,7 @@
     const saved = localStorage.getItem('theme');
     const btn   = document.getElementById('theme-toggle');
     if (btn && saved === 'dark') btn.textContent = '☀️ Clair';
+    updateVoiceUI();
   });
 
   // ════════════════════════════════════════════
@@ -1037,7 +1108,7 @@
   // ════════════════════════════════════════════
   function loadStats() {
     const s = JSON.parse(localStorage.getItem('serein_stats') || '{"sessions":0,"minutes":0,"streak":0,"lastDate":""}');
-    document.getElementById('stat-streak').textContent  = s.streak;
+    document.getElementById('stat-streak').textContent   = s.streak;
     document.getElementById('stat-sessions').textContent = s.sessions;
     const h = Math.floor(s.minutes / 60);
     const m = s.minutes % 60;
@@ -1045,8 +1116,8 @@
   }
 
   function recordSession(minutes) {
-    const s     = JSON.parse(localStorage.getItem('serein_stats') || '{"sessions":0,"minutes":0,"streak":0,"lastDate":""}');
-    const today = new Date().toISOString().slice(0, 10);
+    const s         = JSON.parse(localStorage.getItem('serein_stats') || '{"sessions":0,"minutes":0,"streak":0,"lastDate":""}');
+    const today     = new Date().toISOString().slice(0, 10);
     const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
     if (s.lastDate !== today) {
       s.streak = (s.lastDate === yesterday) ? s.streak + 1 : 1;
