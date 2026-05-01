@@ -199,11 +199,7 @@
     .footer-note { text-align: center; font-size: .8rem; color: var(--color-muted); padding: 2rem 1rem; }
 
     /* Sélecteur de voix */
-    .voice-selector {
-      display: flex;
-      gap: .5rem;
-      flex-wrap: wrap;
-    }
+    .voice-selector { display: flex; gap: .5rem; flex-wrap: wrap; }
     .voice-btn {
       border: 2px solid var(--color-border);
       background: var(--color-surface);
@@ -223,19 +219,9 @@
       color: var(--color-primary);
       font-weight: 600;
     }
-    .voice-btn:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
-    .voice-badge {
-      font-size: 0.6rem;
-      background: var(--color-muted);
-      color: #fff;
-      border-radius: 4px;
-      padding: 1px 5px;
-    }
+    .voice-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .voice-badge { font-size: 0.6rem; background: var(--color-muted); color: #fff; border-radius: 4px; padding: 1px 5px; }
 
-    /* Indicateur de voix active dans le player */
     .player-voice-tag {
       display: inline-block;
       font-size: .72rem;
@@ -282,14 +268,7 @@
     .stat-chip .stat-value { font-size: 1.3rem; font-weight: 700; color: var(--color-primary); line-height: 1.1; }
     .stat-chip .stat-label { font-size: .7rem; color: var(--color-muted); margin-top: .2rem; text-align: center; }
 
-    .insta-link {
-      display: flex;
-      align-items: center;
-      gap: .75rem;
-      text-decoration: none;
-      color: var(--color-text);
-      width: 100%;
-    }
+    .insta-link { display: flex; align-items: center; gap: .75rem; text-decoration: none; color: var(--color-text); width: 100%; }
     .insta-link:hover { opacity: .8; }
     .insta-icon {
       width: 36px; height: 36px; border-radius: 10px;
@@ -310,10 +289,57 @@
       vertical-align: middle;
       margin-left: 4px;
     }
-    button[disabled] {
-      opacity: 0.45;
-      cursor: not-allowed;
+    button[disabled] { opacity: 0.45; cursor: not-allowed; }
+
+    /* Sons d'ambiance */
+    .ambiance-section {
+      margin-top: 1.25rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--color-border);
+      text-align: center;
     }
+    .ambiance-label {
+      font-size: .75rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--color-muted);
+      margin-bottom: .6rem;
+    }
+    .ambiance-btns {
+      display: flex;
+      justify-content: center;
+      gap: .4rem;
+      flex-wrap: wrap;
+      margin-bottom: .75rem;
+    }
+    .ambiance-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .2rem;
+      background: var(--color-primary-light);
+      border: 2px solid transparent;
+      border-radius: var(--radius-sm);
+      padding: .45rem .6rem;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all .2s;
+      min-width: 52px;
+      color: var(--color-text);
+    }
+    .ambiance-btn span { font-size: .62rem; color: var(--color-muted); line-height: 1; }
+    .ambiance-btn.active {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 2px var(--color-primary);
+    }
+    .ambiance-volume-wrap {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      justify-content: center;
+      margin-top: .25rem;
+    }
+    .ambiance-volume-wrap span { font-size: .85rem; }
   </style>
 </head>
 <body>
@@ -687,6 +713,7 @@
   </header>
 
   <audio id="audio-engine" preload="metadata"></audio>
+  <audio id="ambiance-engine" loop preload="none"></audio>
 
   <div class="card player-card">
     <div class="player-main" id="player-main">
@@ -723,8 +750,25 @@
 
       <div class="volume-wrap">
         <span>🔈</span>
-        <input type="range" class="volume-slider" id="volume-slider" min="0" max="1" step="0.02" value="1" aria-label="Volume">
+        <input type="range" class="volume-slider" id="volume-slider" min="0" max="1" step="0.02" value="1" aria-label="Volume voix">
         <span>🔊</span>
+      </div>
+
+      <div class="ambiance-section" id="ambiance-section">
+        <p class="ambiance-label">Son d'ambiance</p>
+        <div class="ambiance-btns">
+          <button class="ambiance-btn active" id="amb-off" onclick="setAmbiance(null)">🔇<span>Aucun</span></button>
+          <button class="ambiance-btn" id="amb-pluie" onclick="setAmbiance('pluie.mp3')">🌧️<span>Pluie</span></button>
+          <button class="ambiance-btn" id="amb-foret" onclick="setAmbiance('foret.mp3')">🌿<span>Forêt</span></button>
+          <button class="ambiance-btn" id="amb-vagues" onclick="setAmbiance('vagues.mp3')">🌊<span>Vagues</span></button>
+          <button class="ambiance-btn" id="amb-feu" onclick="setAmbiance('feu.mp3')">🔥<span>Feu</span></button>
+          <button class="ambiance-btn" id="amb-blanc" onclick="setAmbiance('bruit-blanc.mp3')">〰️<span>Blanc</span></button>
+        </div>
+        <div class="ambiance-volume-wrap" id="ambiance-volume-wrap" style="display:none">
+          <span>🎵</span>
+          <input type="range" class="volume-slider" id="ambiance-volume-slider" min="0" max="1" step="0.02" value="0.3" aria-label="Volume ambiance">
+          <span>🔊</span>
+        </div>
       </div>
 
       <p class="player-note">Prends ton temps.</p>
@@ -783,13 +827,15 @@
       <button class="btn btn-ghost" id="theme-toggle" onclick="toggleTheme()" style="padding:.4rem .9rem;font-size:.85rem;">🌙 Sombre</button>
     </article>
 
+    <!-- SONS D'AMBIANCE -->
     <article class="card setting-item">
       <div class="info">
-        <h3>Audio</h3>
-        <p>Sons d'ambiance</p>
+        <h3>🎵 Sons d'ambiance</h3>
+        <p>Pluie, forêt, vagues… Accessible depuis le lecteur</p>
       </div>
-      <span class="setting-tag">À venir</span>
+      <span class="setting-tag" id="ambiance-settings-tag">Aucun</span>
     </article>
+
     <article class="card setting-item">
       <div class="info">
         <h3>Hors ligne</h3>
@@ -916,7 +962,6 @@
   }
 
   function getAudioPath(filename) {
-    // Dossiers sur le Pi : assets/audio/masculin/ et assets/audio/feminin/
     const v = getVoice();
     const folder = v === 'feminine' ? 'feminin' : 'masculin';
     return 'assets/audio/' + folder + '/' + filename;
@@ -995,9 +1040,6 @@
     iconPause.style.display = playing ? 'block' : 'none';
   }
 
-  // launchPlayer(id, title, parcours, duree, audioFilename)
-  // audioFilename = nom du fichier seul (ex: "Revenir au souffle.mp3")
-  // Le dossier voix est ajouté automatiquement via getAudioPath()
   function launchPlayer(id, title, parcours, duree, audioFilename) {
     document.getElementById('player-title').textContent = title;
     document.getElementById('player-meta').textContent  = parcours + ' · ' + duree;
@@ -1081,6 +1123,59 @@
   }
 
   // ════════════════════════════════════════════
+  //  SONS D'AMBIANCE
+  // ════════════════════════════════════════════
+  const ambianceAudio      = document.getElementById('ambiance-engine');
+  const ambianceSlider     = document.getElementById('ambiance-volume-slider');
+  const ambianceVolumeWrap = document.getElementById('ambiance-volume-wrap');
+
+  const AMBIANCES = [
+    { id: 'pluie',  label: 'Pluie',       file: 'pluie.mp3' },
+    { id: 'foret',  label: 'Forêt',       file: 'foret.mp3' },
+    { id: 'vagues', label: 'Vagues',      file: 'vagues.mp3' },
+    { id: 'feu',    label: 'Feu',         file: 'feu.mp3' },
+    { id: 'blanc',  label: 'Bruit blanc', file: 'bruit-blanc.mp3' },
+  ];
+
+  function setAmbiance(filename) {
+    document.querySelectorAll('.ambiance-btn').forEach(b => b.classList.remove('active'));
+    let btnId = 'amb-off';
+    if (filename) {
+      const base = filename.replace('.mp3', '').replace('bruit-blanc', 'blanc');
+      btnId = 'amb-' + base;
+    }
+    const btn = document.getElementById(btnId);
+    if (btn) btn.classList.add('active');
+
+    if (!filename) {
+      ambianceAudio.pause();
+      ambianceAudio.src = '';
+      ambianceVolumeWrap.style.display = 'none';
+      localStorage.removeItem('serein_ambiance');
+      updateAmbianceTag('Aucun');
+      return;
+    }
+
+    ambianceAudio.src = 'assets/audio/ambiance/' + filename;
+    ambianceAudio.volume = parseFloat(ambianceSlider.value);
+    ambianceAudio.load();
+    ambianceAudio.play().catch(() => {});
+    ambianceVolumeWrap.style.display = 'flex';
+    localStorage.setItem('serein_ambiance', filename);
+    const found = AMBIANCES.find(a => a.file === filename);
+    updateAmbianceTag(found ? found.label : '');
+  }
+
+  function updateAmbianceTag(label) {
+    const tag = document.getElementById('ambiance-settings-tag');
+    if (tag) tag.textContent = label;
+  }
+
+  ambianceSlider.addEventListener('input', () => {
+    ambianceAudio.volume = parseFloat(ambianceSlider.value);
+  });
+
+  // ════════════════════════════════════════════
   //  THÈME
   // ════════════════════════════════════════════
   function toggleTheme() {
@@ -1101,6 +1196,8 @@
     const btn   = document.getElementById('theme-toggle');
     if (btn && saved === 'dark') btn.textContent = '☀️ Clair';
     updateVoiceUI();
+    const savedAmb = localStorage.getItem('serein_ambiance');
+    if (savedAmb) setAmbiance(savedAmb);
   });
 
   // ════════════════════════════════════════════
