@@ -1242,11 +1242,16 @@
     if (audioFilename) {
       const audioSrc = getAudioPath(audioFilename, voice);
       audioLoading.textContent = 'Chargement…';
+
+      const tryPlayWhenReady = () => {
+        audio.play().catch(() => {
+          audioLoading.textContent = 'Appuie sur ▶ pour démarrer';
+        });
+      };
+
       audio.src = audioSrc;
       audio.load();
-      audio.play().catch(() => {
-        audioLoading.textContent = 'Appuie sur ▶ pour démarrer';
-      });
+      audio.addEventListener('canplay', tryPlayWhenReady, { once: true });
     } else {
       audioLoading.textContent = '⏳ Cet enregistrement n\'est pas encore disponible.';
       audio.src = '';
