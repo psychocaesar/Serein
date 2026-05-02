@@ -1248,17 +1248,6 @@
 
   volumeSlider.addEventListener('input', () => { audio.volume = volumeSlider.value; });
 
-  function stopAmbiance() {
-    ambianceAudio.pause();
-    ambianceAudio.src = '';
-    ambianceVolumeWrap.style.display = 'none';
-    localStorage.removeItem('serein_ambiance');
-    document.querySelectorAll('.ambiance-btn').forEach(b => b.classList.remove('active'));
-    const offBtn = document.getElementById('amb-off');
-    if (offBtn) offBtn.classList.add('active');
-    updateAmbianceTag('Aucun');
-  }
-
   function stopAndReturn() {
     audio.pause();
     stopAmbiance();
@@ -1275,6 +1264,8 @@
 
   // ════════════════════════════════════════════
   //  SONS D'AMBIANCE
+  //  (déclaré après stopAndReturn pour que stopAmbiance() puisse
+  //   accéder aux const ambianceAudio / ambianceVolumeWrap)
   // ════════════════════════════════════════════
   const ambianceAudio      = document.getElementById('ambiance-engine');
   const ambianceSlider     = document.getElementById('ambiance-volume-slider');
@@ -1287,6 +1278,17 @@
     { id: 'feu',    label: 'Feu',         file: 'feu.mp3' },
     { id: 'blanc',  label: 'Bruit blanc', file: 'bruit-blanc.mp3' },
   ];
+
+  function stopAmbiance() {
+    ambianceAudio.pause();
+    ambianceAudio.src = '';
+    ambianceVolumeWrap.style.display = 'none';
+    localStorage.removeItem('serein_ambiance');
+    document.querySelectorAll('.ambiance-btn').forEach(b => b.classList.remove('active'));
+    const offBtn = document.getElementById('amb-off');
+    if (offBtn) offBtn.classList.add('active');
+    updateAmbianceTag('Aucun');
+  }
 
   function setAmbiance(filename) {
     document.querySelectorAll('.ambiance-btn').forEach(b => b.classList.remove('active'));
