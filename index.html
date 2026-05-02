@@ -1008,6 +1008,16 @@
 </nav>
 
 <script>
+  // Réinitialisation sécurisée : on s'assure que la voix stockée est valide.
+  // Si 'feminine' est stockée mais qu'on n'a pas encore de catalogue féminin complet,
+  // on la réinitialise à 'masculine' pour éviter les erreurs de fichier introuvable.
+  (function() {
+    const v = localStorage.getItem('serein_voice');
+    if (!v || (v !== 'masculine' && v !== 'feminine')) {
+      localStorage.setItem('serein_voice', 'masculine');
+    }
+  })();
+
   const screens = ['home', 'explore', 'player', 'settings'];
 
   function showScreen(id) {
@@ -1065,12 +1075,14 @@
 
   function launchPlayer(id, title, parcours, duree, audioFilename, hasBothVoices) {
     if (hasBothVoices) {
+      // Séance avec les deux versions : afficher le sélecteur de voix
       _pendingSession = { id, title, parcours, duree, audioFilename };
       _selectedVoiceInSheet = getVoice();
       updateVoiceSheetUI();
       document.getElementById('voice-overlay').classList.add('open');
     } else {
-      _doLaunchPlayer(id, title, parcours, duree, audioFilename, getVoice());
+      // Séance avec une seule version (masculine uniquement) : forcer masculine
+      _doLaunchPlayer(id, title, parcours, duree, audioFilename, 'masculine');
     }
   }
 
@@ -1264,8 +1276,6 @@
 
   // ════════════════════════════════════════════
   //  SONS D'AMBIANCE
-  //  (déclaré après stopAndReturn pour que stopAmbiance() puisse
-  //   accéder aux const ambianceAudio / ambianceVolumeWrap)
   // ════════════════════════════════════════════
   const ambianceAudio      = document.getElementById('ambiance-engine');
   const ambianceSlider     = document.getElementById('ambiance-volume-slider');
