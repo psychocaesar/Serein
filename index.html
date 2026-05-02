@@ -198,7 +198,7 @@
 
     .footer-note { text-align: center; font-size: .8rem; color: var(--color-muted); padding: 2rem 1rem; }
 
-    /* Sélecteur de voix */
+    /* Sélecteur de voix global (réglages) */
     .voice-selector { display: flex; gap: .5rem; flex-wrap: wrap; }
     .voice-btn {
       border: 2px solid var(--color-border);
@@ -340,9 +340,152 @@
       margin-top: .25rem;
     }
     .ambiance-volume-wrap span { font-size: .85rem; }
+
+    /* ── Overlay sélecteur de voix (style Medito) ── */
+    .voice-overlay-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.45);
+      z-index: 200;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .voice-overlay-backdrop.open {
+      display: flex;
+      animation: fadeInBd .2s ease;
+    }
+    @keyframes fadeInBd { from { opacity: 0; } to { opacity: 1; } }
+
+    .voice-sheet {
+      background: var(--color-surface);
+      border-radius: var(--radius) var(--radius) 0 0;
+      padding: 1.5rem 1.5rem 2.5rem;
+      width: 100%;
+      max-width: 480px;
+      animation: slideUp .25s cubic-bezier(.16,1,.3,1);
+    }
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+    .voice-sheet-title {
+      font-size: .75rem;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--color-muted);
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+    .voice-sheet-options {
+      display: flex;
+      flex-direction: column;
+      gap: .6rem;
+      margin-bottom: 1.25rem;
+    }
+    .voice-option {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: .85rem 1rem;
+      border-radius: var(--radius-sm);
+      border: 2px solid var(--color-border);
+      background: var(--color-bg);
+      cursor: pointer;
+      transition: all .18s;
+      text-align: left;
+    }
+    .voice-option:hover {
+      border-color: var(--color-primary);
+      background: var(--color-primary-light);
+    }
+    .voice-option.selected {
+      border-color: var(--color-primary);
+      background: var(--color-primary-light);
+    }
+    .voice-option-icon {
+      font-size: 1.4rem;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    .voice-option-info { flex: 1; }
+    .voice-option-name { font-size: .95rem; font-weight: 600; color: var(--color-text); }
+    .voice-option-desc { font-size: .78rem; color: var(--color-muted); margin-top: .1rem; }
+    .voice-option-check {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      border: 2px solid var(--color-border);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: all .18s;
+    }
+    .voice-option.selected .voice-option-check {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+    }
+    .voice-option.selected .voice-option-check::after {
+      content: '';
+      display: block;
+      width: 5px; height: 9px;
+      border: 2px solid #fff;
+      border-top: none; border-left: none;
+      transform: rotate(45deg) translate(-1px, -1px);
+    }
+    .voice-sheet-launch {
+      width: 100%;
+      padding: .95rem;
+      background: var(--color-primary);
+      color: #fff;
+      border: none;
+      border-radius: 999px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity .2s;
+    }
+    .voice-sheet-launch:hover { opacity: .85; }
+    .voice-sheet-cancel {
+      display: block;
+      width: 100%;
+      text-align: center;
+      margin-top: .75rem;
+      font-size: .85rem;
+      color: var(--color-muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: .4rem;
+    }
   </style>
 </head>
 <body>
+
+<!-- ══════════════════════════════════════════════
+     OVERLAY SÉLECTEUR DE VOIX (style Medito)
+     ══════════════════════════════════════════════ -->
+<div class="voice-overlay-backdrop" id="voice-overlay" role="dialog" aria-modal="true" aria-label="Choisir une voix">
+  <div class="voice-sheet">
+    <p class="voice-sheet-title">Choisir la voix</p>
+    <div class="voice-sheet-options" id="voice-sheet-options">
+      <button class="voice-option selected" id="vopt-masculine" onclick="selectVoiceOption('masculine')">
+        <span class="voice-option-icon">🧑</span>
+        <div class="voice-option-info">
+          <div class="voice-option-name">Voix masculine</div>
+          <div class="voice-option-desc">Intervenant homme</div>
+        </div>
+        <span class="voice-option-check"></span>
+      </button>
+      <button class="voice-option" id="vopt-feminine" onclick="selectVoiceOption('feminine')">
+        <span class="voice-option-icon">🧕</span>
+        <div class="voice-option-info">
+          <div class="voice-option-name">Voix féminine</div>
+          <div class="voice-option-desc">Intervenante femme</div>
+        </div>
+        <span class="voice-option-check"></span>
+      </button>
+    </div>
+    <button class="voice-sheet-launch" id="voice-sheet-launch-btn" onclick="confirmVoiceAndLaunch()">▶ Lancer la séance</button>
+    <button class="voice-sheet-cancel" onclick="closeVoiceOverlay()">Annuler</button>
+  </div>
+</div>
 
 <section id="home" class="screen active">
   <header>
@@ -448,21 +591,21 @@
         <h3>Première respiration consciente</h3>
         <p>Premiers pas · 5 min</p>
       </div>
-      <button class="btn btn-primary" onclick="launchPlayer('premiere-respiration-consciente', 'Première respiration consciente', 'Premiers pas', '5 min', 'Méditation Premiere Respiration Consciente.mp3')">Lancer</button>
+      <button class="btn btn-primary" onclick="launchPlayer('premiere-respiration-consciente', 'Première respiration consciente', 'Premiers pas', '5 min', 'Méditation Premiere Respiration Consciente.mp3', false)">Lancer</button>
     </article>
     <article class="card session-card" data-parcours="Premiers pas">
       <div class="session-info">
         <h3>S'asseoir, ne rien faire</h3>
         <p>Premiers pas · 5 min</p>
       </div>
-      <button class="btn btn-primary" onclick="launchPlayer('sasseoir-ne-rien-faire', 'S\'asseoir, ne rien faire', 'Premiers pas', '5 min', 'Revenir au souffle.mp3')">Lancer</button>
+      <button class="btn btn-primary" onclick="launchPlayer('sasseoir-ne-rien-faire', 'S\'asseoir, ne rien faire', 'Premiers pas', '5 min', 'Revenir au souffle.mp3', false)">Lancer</button>
     </article>
     <article class="card session-card" data-parcours="Premiers pas">
       <div class="session-info">
         <h3>Observer ses pensées sans les juger</h3>
         <p>Premiers pas · 7 min 50</p>
       </div>
-      <button class="btn btn-primary" onclick="launchPlayer('observer-ses-pensees', 'Observer ses pensées sans les juger', 'Premiers pas', '7 min 50', 'Observer ses pensées sans les juger.mp3')">Lancer</button>
+      <button class="btn btn-primary" onclick="launchPlayer('observer-ses-pensees', 'Observer ses pensées sans les juger', 'Premiers pas', '7 min 50', 'Observer ses pensées sans les juger.mp3', true)">Lancer</button>
     </article>
     <article class="card session-card" data-parcours="Premiers pas">
       <div class="session-info">
@@ -543,7 +686,7 @@
         <h3>Rituel de déconnexion</h3>
         <p>Sommeil · 10 min</p>
       </div>
-      <button class="btn btn-primary" onclick="launchPlayer('rituel-deconnexion', 'Rituel de déconnexion', 'Sommeil', '10 min', 'Préparer le sommeil.mp3')">Lancer</button>
+      <button class="btn btn-primary" onclick="launchPlayer('rituel-deconnexion', 'Rituel de déconnexion', 'Sommeil', '10 min', 'Préparer le sommeil.mp3', false)">Lancer</button>
     </article>
     <article class="card session-card" data-parcours="Sommeil">
       <div class="session-info">
@@ -638,7 +781,7 @@
         <h3>La pensée qui tourne en boucle</h3>
         <p>Anxiété · 9 min</p>
       </div>
-      <button class="btn btn-primary" onclick="launchPlayer('pensee-tourne-boucle', 'La pensée qui tourne en boucle', 'Anxiété', '9 min', 'La pensée qui tourne en boucle.mp3')">Lancer</button>
+      <button class="btn btn-primary" onclick="launchPlayer('pensee-tourne-boucle', 'La pensée qui tourne en boucle', 'Anxiété', '9 min', 'La pensée qui tourne en boucle.mp3', false)">Lancer</button>
     </article>
     <article class="card session-card" data-parcours="Anxiété">
       <div class="session-info">
@@ -758,7 +901,7 @@
         <p class="ambiance-label">Son d'ambiance</p>
         <div class="ambiance-btns">
           <button class="ambiance-btn active" id="amb-off" onclick="setAmbiance(null)">🔇<span>Aucun</span></button>
-          <button class="ambiance-btn" id="amb-pluie" onclick="setAmbiance('pluie.mp3')">🌧️<span>Pluie</span></button>
+          <button class="ambiance-btn" id="amb-pluie" onclick="setAmbiance('Pluie.mp3')">🌧️<span>Pluie</span></button>
           <button class="ambiance-btn" id="amb-foret" onclick="setAmbiance('foret.mp3')">🌿<span>Forêt</span></button>
           <button class="ambiance-btn" id="amb-vagues" onclick="setAmbiance('vagues.mp3')">🌊<span>Vagues</span></button>
           <button class="ambiance-btn" id="amb-feu" onclick="setAmbiance('feu.mp3')">🔥<span>Feu</span></button>
@@ -805,16 +948,12 @@
     <!-- VOIX -->
     <article class="card setting-item">
       <div class="info">
-        <h3>🎤 Voix</h3>
-        <p>Choisis la voix qui te correspond le mieux</p>
+        <h3>🎤 Voix par défaut</h3>
+        <p>Utilisée pour les séances sans choix de voix disponible</p>
       </div>
       <div class="voice-selector">
-        <button class="voice-btn active" id="voice-btn-masculine" onclick="setVoice('masculine')">
-          Masculine
-        </button>
-        <button class="voice-btn" id="voice-btn-feminine" onclick="setVoice('feminine')">
-          Féminine
-        </button>
+        <button class="voice-btn active" id="voice-btn-masculine" onclick="setVoice('masculine')">Masculine</button>
+        <button class="voice-btn" id="voice-btn-feminine" onclick="setVoice('feminine')">Féminine</button>
       </div>
     </article>
 
@@ -949,7 +1088,7 @@
   }
 
   // ════════════════════════════════════════════
-  //  VOIX
+  //  VOIX (réglage global)
   // ════════════════════════════════════════════
   function getVoice() {
     return localStorage.getItem('serein_voice') || 'masculine';
@@ -961,8 +1100,8 @@
     document.getElementById('voice-btn-feminine').classList.toggle('active', v === 'feminine');
   }
 
-  function getAudioPath(filename) {
-    const v = getVoice();
+  function getAudioPath(filename, voiceOverride) {
+    const v = voiceOverride || getVoice();
     const folder = v === 'feminine' ? 'feminin' : 'masculin';
     return 'assets/audio/' + folder + '/' + filename;
   }
@@ -972,6 +1111,53 @@
     document.getElementById('voice-btn-masculine').classList.toggle('active', v === 'masculine');
     document.getElementById('voice-btn-feminine').classList.toggle('active', v === 'feminine');
   }
+
+  // ════════════════════════════════════════════
+  //  OVERLAY SÉLECTEUR DE VOIX (style Medito)
+  // ════════════════════════════════════════════
+  let _pendingSession = null;   // stocke les params en attente
+  let _selectedVoiceInSheet = getVoice();
+
+  function launchPlayer(id, title, parcours, duree, audioFilename, hasBothVoices) {
+    if (hasBothVoices) {
+      // Afficher le sélecteur de voix avant de lancer
+      _pendingSession = { id, title, parcours, duree, audioFilename };
+      _selectedVoiceInSheet = getVoice();
+      updateVoiceSheetUI();
+      document.getElementById('voice-overlay').classList.add('open');
+    } else {
+      // Lancer directement avec la voix par défaut
+      _doLaunchPlayer(id, title, parcours, duree, audioFilename, getVoice());
+    }
+  }
+
+  function selectVoiceOption(voice) {
+    _selectedVoiceInSheet = voice;
+    updateVoiceSheetUI();
+  }
+
+  function updateVoiceSheetUI() {
+    document.getElementById('vopt-masculine').classList.toggle('selected', _selectedVoiceInSheet === 'masculine');
+    document.getElementById('vopt-feminine').classList.toggle('selected', _selectedVoiceInSheet === 'feminine');
+  }
+
+  function confirmVoiceAndLaunch() {
+    closeVoiceOverlay();
+    if (!_pendingSession) return;
+    const s = _pendingSession;
+    _pendingSession = null;
+    _doLaunchPlayer(s.id, s.title, s.parcours, s.duree, s.audioFilename, _selectedVoiceInSheet);
+  }
+
+  function closeVoiceOverlay() {
+    document.getElementById('voice-overlay').classList.remove('open');
+    _pendingSession = null;
+  }
+
+  // Fermer en cliquant sur le backdrop
+  document.getElementById('voice-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeVoiceOverlay();
+  });
 
   // ════════════════════════════════════════════
   //  LECTEUR AUDIO
@@ -991,6 +1177,7 @@
 
   let sessionStartTime = null;
   let isDragging       = false;
+  let _currentSession  = null;  // pour rejouer avec la même voix
 
   function fmtTime(sec) {
     if (!isFinite(sec) || sec < 0) return '--:--';
@@ -1040,14 +1227,15 @@
     iconPause.style.display = playing ? 'block' : 'none';
   }
 
-  function launchPlayer(id, title, parcours, duree, audioFilename) {
+  function _doLaunchPlayer(id, title, parcours, duree, audioFilename, voice) {
+    _currentSession = { id, title, parcours, duree, audioFilename, voice };
+
     document.getElementById('player-title').textContent = title;
     document.getElementById('player-meta').textContent  = parcours + ' · ' + duree;
     document.getElementById('complete-title').textContent = title;
 
-    const v = getVoice();
     const voiceTag = document.getElementById('player-voice-tag');
-    voiceTag.textContent = v === 'feminine' ? 'Voix féminine' : 'Voix masculine';
+    voiceTag.textContent = voice === 'feminine' ? 'Voix féminine' : 'Voix masculine';
 
     progressFill.style.width = '0%';
     progressThumb.style.left = '0%';
@@ -1059,7 +1247,7 @@
     sessionStartTime = null;
 
     if (audioFilename) {
-      const audioSrc = getAudioPath(audioFilename);
+      const audioSrc = getAudioPath(audioFilename, voice);
       audioLoading.textContent = 'Chargement…';
       audio.src = audioSrc;
       audio.load();
@@ -1116,6 +1304,7 @@
   }
 
   function replaySession() {
+    if (!_currentSession) return;
     playerMain.classList.remove('hidden');
     completeScreen.classList.remove('visible');
     audio.currentTime = 0;
@@ -1130,7 +1319,7 @@
   const ambianceVolumeWrap = document.getElementById('ambiance-volume-wrap');
 
   const AMBIANCES = [
-    { id: 'pluie',  label: 'Pluie',       file: 'pluie.mp3' },
+    { id: 'pluie',  label: 'Pluie',       file: 'Pluie.mp3' },
     { id: 'foret',  label: 'Forêt',       file: 'foret.mp3' },
     { id: 'vagues', label: 'Vagues',      file: 'vagues.mp3' },
     { id: 'feu',    label: 'Feu',         file: 'feu.mp3' },
@@ -1141,7 +1330,7 @@
     document.querySelectorAll('.ambiance-btn').forEach(b => b.classList.remove('active'));
     let btnId = 'amb-off';
     if (filename) {
-      const base = filename.replace('.mp3', '').replace('bruit-blanc', 'blanc');
+      const base = filename.replace('.mp3', '').replace('Pluie', 'pluie').replace('bruit-blanc', 'blanc');
       btnId = 'amb-' + base;
     }
     const btn = document.getElementById(btnId);
