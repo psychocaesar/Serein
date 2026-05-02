@@ -198,7 +198,6 @@
 
     .footer-note { text-align: center; font-size: .8rem; color: var(--color-muted); padding: 2rem 1rem; }
 
-    /* Sélecteur de voix global (réglages) */
     .voice-selector { display: flex; gap: .5rem; flex-wrap: wrap; }
     .voice-btn {
       border: 2px solid var(--color-border);
@@ -291,7 +290,6 @@
     }
     button[disabled] { opacity: 0.45; cursor: not-allowed; }
 
-    /* Sons d'ambiance */
     .ambiance-section {
       margin-top: 1.25rem;
       padding-top: 1rem;
@@ -341,7 +339,6 @@
     }
     .ambiance-volume-wrap span { font-size: .85rem; }
 
-    /* ── Overlay sélecteur de voix (style Medito) ── */
     .voice-overlay-backdrop {
       display: none;
       position: fixed;
@@ -458,9 +455,6 @@
 </head>
 <body>
 
-<!-- ══════════════════════════════════════════════
-     OVERLAY SÉLECTEUR DE VOIX (style Medito)
-     ══════════════════════════════════════════════ -->
 <div class="voice-overlay-backdrop" id="voice-overlay" role="dialog" aria-modal="true" aria-label="Choisir une voix">
   <div class="voice-sheet">
     <p class="voice-sheet-title">Choisir la voix</p>
@@ -945,7 +939,6 @@
 
   <div class="settings-list">
 
-    <!-- VOIX -->
     <article class="card setting-item">
       <div class="info">
         <h3>🎤 Voix par défaut</h3>
@@ -957,7 +950,6 @@
       </div>
     </article>
 
-    <!-- THÈME -->
     <article class="card setting-item">
       <div class="info">
         <h3>Apparence</h3>
@@ -966,7 +958,6 @@
       <button class="btn btn-ghost" id="theme-toggle" onclick="toggleTheme()" style="padding:.4rem .9rem;font-size:.85rem;">🌙 Sombre</button>
     </article>
 
-    <!-- SONS D'AMBIANCE -->
     <article class="card setting-item">
       <div class="info">
         <h3>🎵 Sons d'ambiance</h3>
@@ -1113,7 +1104,7 @@
   }
 
   // ════════════════════════════════════════════
-  //  OVERLAY SÉLECTEUR DE VOIX (style Medito)
+  //  OVERLAY SÉLECTEUR DE VOIX
   // ════════════════════════════════════════════
   let _pendingSession = null;
   let _selectedVoiceInSheet = getVoice();
@@ -1140,11 +1131,16 @@
   }
 
   function confirmVoiceAndLaunch() {
-    closeVoiceOverlay();
-    if (!_pendingSession) return;
-    const s = _pendingSession;
+    // On sauvegarde la session ET la voix avant de fermer l'overlay
+    const session = _pendingSession;
+    const voice   = _selectedVoiceInSheet;
+    if (!session) return;
+
+    // Fermeture de l'overlay (remet _pendingSession à null, c'est OK on l'a déjà copé)
+    document.getElementById('voice-overlay').classList.remove('open');
     _pendingSession = null;
-    _doLaunchPlayer(s.id, s.title, s.parcours, s.duree, s.audioFilename, _selectedVoiceInSheet);
+
+    _doLaunchPlayer(session.id, session.title, session.parcours, session.duree, session.audioFilename, voice);
   }
 
   function closeVoiceOverlay() {
