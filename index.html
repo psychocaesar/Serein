@@ -198,29 +198,6 @@
 
     .footer-note { text-align: center; font-size: .8rem; color: var(--color-muted); padding: 2rem 1rem; }
 
-    .voice-selector { display: flex; gap: .5rem; flex-wrap: wrap; }
-    .voice-btn {
-      border: 2px solid var(--color-border);
-      background: var(--color-surface);
-      border-radius: var(--radius-sm);
-      padding: .45rem .9rem;
-      font-size: .85rem;
-      cursor: pointer;
-      color: var(--color-muted);
-      transition: all .2s;
-      display: flex;
-      align-items: center;
-      gap: .4rem;
-    }
-    .voice-btn.active {
-      border-color: var(--color-primary);
-      background: var(--color-primary-light);
-      color: var(--color-primary);
-      font-weight: 600;
-    }
-    .voice-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-    .voice-badge { font-size: 0.6rem; background: var(--color-muted); color: #fff; border-radius: 4px; padding: 1px 5px; }
-
     .player-voice-tag {
       display: inline-block;
       font-size: .72rem;
@@ -941,17 +918,6 @@
 
     <article class="card setting-item">
       <div class="info">
-        <h3>🎤 Voix par défaut</h3>
-        <p>Utilisée pour les séances sans choix de voix disponible</p>
-      </div>
-      <div class="voice-selector">
-        <button class="voice-btn active" id="voice-btn-masculine" onclick="setVoice('masculine')">Masculine</button>
-        <button class="voice-btn" id="voice-btn-feminine" onclick="setVoice('feminine')">Féminine</button>
-      </div>
-    </article>
-
-    <article class="card setting-item">
-      <div class="info">
         <h3>Apparence</h3>
         <p>Basculer entre le mode clair et sombre</p>
       </div>
@@ -1079,28 +1045,16 @@
   }
 
   // ════════════════════════════════════════════
-  //  VOIX (réglage global)
+  //  VOIX
   // ════════════════════════════════════════════
   function getVoice() {
     return localStorage.getItem('serein_voice') || 'masculine';
-  }
-
-  function setVoice(v) {
-    localStorage.setItem('serein_voice', v);
-    document.getElementById('voice-btn-masculine').classList.toggle('active', v === 'masculine');
-    document.getElementById('voice-btn-feminine').classList.toggle('active', v === 'feminine');
   }
 
   function getAudioPath(filename, voiceOverride) {
     const v = voiceOverride || getVoice();
     const folder = v === 'feminine' ? 'feminin' : 'masculin';
     return 'assets/audio/' + folder + '/' + filename;
-  }
-
-  function updateVoiceUI() {
-    const v = getVoice();
-    document.getElementById('voice-btn-masculine').classList.toggle('active', v === 'masculine');
-    document.getElementById('voice-btn-feminine').classList.toggle('active', v === 'feminine');
   }
 
   // ════════════════════════════════════════════
@@ -1131,15 +1085,12 @@
   }
 
   function confirmVoiceAndLaunch() {
-    // On sauvegarde la session ET la voix avant de fermer l'overlay
     const session = _pendingSession;
     const voice   = _selectedVoiceInSheet;
     if (!session) return;
-
-    // Fermeture de l'overlay (remet _pendingSession à null, c'est OK on l'a déjà copé)
+    localStorage.setItem('serein_voice', voice);
     document.getElementById('voice-overlay').classList.remove('open');
     _pendingSession = null;
-
     _doLaunchPlayer(session.id, session.title, session.parcours, session.duree, session.audioFilename, voice);
   }
 
@@ -1207,6 +1158,7 @@
     const listenedSec = sessionStartTime ? Math.round((Date.now() - sessionStartTime) / 1000) : Math.round(audio.duration || 0);
     recordSession(Math.max(1, Math.round(listenedSec / 60)));
     sessionStartTime = null;
+    stopAmbiance();
     playerMain.classList.add('hidden');
     completeScreen.classList.add('visible');
     document.getElementById('complete-title').textContent = document.getElementById('player-title').textContent;
@@ -1296,8 +1248,20 @@
 
   volumeSlider.addEventListener('input', () => { audio.volume = volumeSlider.value; });
 
+  function stopAmbiance() {
+    ambianceAudio.pause();
+    ambianceAudio.src = '';
+    ambianceVolumeWrap.style.display = 'none';
+    localStorage.removeItem('serein_ambiance');
+    document.querySelectorAll('.ambiance-btn').forEach(b => b.classList.remove('active'));
+    const offBtn = document.getElementById('amb-off');
+    if (offBtn) offBtn.classList.add('active');
+    updateAmbianceTag('Aucun');
+  }
+
   function stopAndReturn() {
     audio.pause();
+    stopAmbiance();
     showScreen('explore');
   }
 
@@ -1382,9 +1346,6 @@
     const saved = localStorage.getItem('theme');
     const btn   = document.getElementById('theme-toggle');
     if (btn && saved === 'dark') btn.textContent = '☀️ Clair';
-    updateVoiceUI();
-    const savedAmb = localStorage.getItem('serein_ambiance');
-    if (savedAmb) setAmbiance(savedAmb);
   });
 
   // ════════════════════════════════════════════
