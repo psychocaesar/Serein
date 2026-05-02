@@ -901,7 +901,7 @@
         <p class="ambiance-label">Son d'ambiance</p>
         <div class="ambiance-btns">
           <button class="ambiance-btn active" id="amb-off" onclick="setAmbiance(null)">🔇<span>Aucun</span></button>
-          <button class="ambiance-btn" id="amb-pluie" onclick="setAmbiance('Pluie.mp3')">🌧️<span>Pluie</span></button>
+          <button class="ambiance-btn" id="amb-pluie" onclick="setAmbiance('pluie.mp3')">🌧️<span>Pluie</span></button>
           <button class="ambiance-btn" id="amb-foret" onclick="setAmbiance('foret.mp3')">🌿<span>Forêt</span></button>
           <button class="ambiance-btn" id="amb-vagues" onclick="setAmbiance('vagues.mp3')">🌊<span>Vagues</span></button>
           <button class="ambiance-btn" id="amb-feu" onclick="setAmbiance('feu.mp3')">🔥<span>Feu</span></button>
@@ -1115,18 +1115,16 @@
   // ════════════════════════════════════════════
   //  OVERLAY SÉLECTEUR DE VOIX (style Medito)
   // ════════════════════════════════════════════
-  let _pendingSession = null;   // stocke les params en attente
+  let _pendingSession = null;
   let _selectedVoiceInSheet = getVoice();
 
   function launchPlayer(id, title, parcours, duree, audioFilename, hasBothVoices) {
     if (hasBothVoices) {
-      // Afficher le sélecteur de voix avant de lancer
       _pendingSession = { id, title, parcours, duree, audioFilename };
       _selectedVoiceInSheet = getVoice();
       updateVoiceSheetUI();
       document.getElementById('voice-overlay').classList.add('open');
     } else {
-      // Lancer directement avec la voix par défaut
       _doLaunchPlayer(id, title, parcours, duree, audioFilename, getVoice());
     }
   }
@@ -1154,7 +1152,6 @@
     _pendingSession = null;
   }
 
-  // Fermer en cliquant sur le backdrop
   document.getElementById('voice-overlay').addEventListener('click', function(e) {
     if (e.target === this) closeVoiceOverlay();
   });
@@ -1177,7 +1174,7 @@
 
   let sessionStartTime = null;
   let isDragging       = false;
-  let _currentSession  = null;  // pour rejouer avec la même voix
+  let _currentSession  = null;
 
   function fmtTime(sec) {
     if (!isFinite(sec) || sec < 0) return '--:--';
@@ -1319,7 +1316,7 @@
   const ambianceVolumeWrap = document.getElementById('ambiance-volume-wrap');
 
   const AMBIANCES = [
-    { id: 'pluie',  label: 'Pluie',       file: 'Pluie.mp3' },
+    { id: 'pluie',  label: 'Pluie',       file: 'pluie.mp3' },
     { id: 'foret',  label: 'Forêt',       file: 'foret.mp3' },
     { id: 'vagues', label: 'Vagues',      file: 'vagues.mp3' },
     { id: 'feu',    label: 'Feu',         file: 'feu.mp3' },
@@ -1330,7 +1327,7 @@
     document.querySelectorAll('.ambiance-btn').forEach(b => b.classList.remove('active'));
     let btnId = 'amb-off';
     if (filename) {
-      const base = filename.replace('.mp3', '').replace('Pluie', 'pluie').replace('bruit-blanc', 'blanc');
+      const base = filename.replace('.mp3', '').replace('bruit-blanc', 'blanc');
       btnId = 'amb-' + base;
     }
     const btn = document.getElementById(btnId);
