@@ -445,7 +445,7 @@
         <span class="voice-option-check"></span>
       </button>
       <button class="voice-option" id="vopt-feminine" onclick="selectVoiceOption('feminine')">
-        <span class="voice-option-icon">🧕</span>
+        <span class="voice-option-icon">👩</span>
         <div class="voice-option-info">
           <div class="voice-option-name">Voix féminine</div>
           <div class="voice-option-desc">Daïdrée</div>
@@ -1009,8 +1009,6 @@
 
 <script>
   // Réinitialisation sécurisée : on s'assure que la voix stockée est valide.
-  // Si 'feminine' est stockée mais qu'on n'a pas encore de catalogue féminin complet,
-  // on la réinitialise à 'masculine' pour éviter les erreurs de fichier introuvable.
   (function() {
     const v = localStorage.getItem('serein_voice');
     if (!v || (v !== 'masculine' && v !== 'feminine')) {
@@ -1075,7 +1073,6 @@
 
   function launchPlayer(id, title, parcours, duree, audioFilename, hasBothVoices) {
     if (hasBothVoices) {
-      // Séance avec les deux versions : afficher le sélecteur de voix
       _pendingSession = { id, title, parcours, duree, audioFilename };
       _selectedVoiceInSheet = getVoice();
       updateVoiceSheetUI();
