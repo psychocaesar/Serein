@@ -749,6 +749,13 @@
     </article>
     <article class="card session-card" data-parcours="Anxiété">
       <div class="session-info">
+        <h3>Les sons autour de toi</h3>
+        <p>Anxiété · 8 min</p>
+      </div>
+      <button class="btn btn-primary" onclick="launchPlayer('les-sons-autour-de-toi', 'Les sons autour de toi', 'Anxiété', '8 min', 'Les sons autour de toi.mp3', false)">Lancer</button>
+    </article>
+    <article class="card session-card" data-parcours="Anxiété">
+      <div class="session-info">
         <h3>La pensée qui tourne en boucle</h3>
         <p>Anxiété · 9 min</p>
       </div>
@@ -941,7 +948,7 @@
     </article>
     <article class="card setting-item">
       <div class="info">
-        <h3>Accessibilité</h3>
+      <h3>Accessibilité</h3>
         <p>Taille du texte, contraste, lisibilité</p>
       </div>
       <span class="setting-tag">À venir</span>
@@ -1008,7 +1015,6 @@
 </nav>
 
 <script>
-  // Réinitialisation sécurisée : on s'assure que la voix stockée est valide.
   (function() {
     const v = localStorage.getItem('serein_voice');
     if (!v || (v !== 'masculine' && v !== 'feminine')) {
@@ -1052,9 +1058,6 @@
     }, 50);
   }
 
-  // ════════════════════════════════════════════
-  //  VOIX
-  // ════════════════════════════════════════════
   function getVoice() {
     return localStorage.getItem('serein_voice') || 'masculine';
   }
@@ -1065,9 +1068,6 @@
     return 'assets/audio/' + folder + '/' + filename;
   }
 
-  // ════════════════════════════════════════════
-  //  OVERLAY SÉLECTEUR DE VOIX
-  // ════════════════════════════════════════════
   let _pendingSession = null;
   let _selectedVoiceInSheet = getVoice();
 
@@ -1111,9 +1111,6 @@
     if (e.target === this) closeVoiceOverlay();
   });
 
-  // ════════════════════════════════════════════
-  //  LECTEUR AUDIO
-  // ════════════════════════════════════════════
   const audio         = document.getElementById('audio-engine');
   const progressTrack = document.getElementById('progress-track');
   const progressFill  = document.getElementById('progress-fill');
@@ -1270,9 +1267,6 @@
     audio.play();
   }
 
-  // ════════════════════════════════════════════
-  //  SONS D'AMBIANCE
-  // ════════════════════════════════════════════
   const ambianceAudio      = document.getElementById('ambiance-engine');
   const ambianceSlider     = document.getElementById('ambiance-volume-slider');
   const ambianceVolumeWrap = document.getElementById('ambiance-volume-wrap');
@@ -1334,9 +1328,6 @@
     ambianceAudio.volume = parseFloat(ambianceSlider.value);
   });
 
-  // ════════════════════════════════════════════
-  //  THÈME
-  // ════════════════════════════════════════════
   function toggleTheme() {
     const html   = document.documentElement;
     const isDark = html.getAttribute('data-theme') === 'dark';
@@ -1356,9 +1347,6 @@
     if (btn && saved === 'dark') btn.textContent = '☀️ Clair';
   });
 
-  // ════════════════════════════════════════════
-  //  STATS UTILISATEUR
-  // ════════════════════════════════════════════
   function loadStats() {
     const s = JSON.parse(localStorage.getItem('serein_stats') || '{"sessions":0,"minutes":0,"streak":0,"lastDate":""}');
     document.getElementById('stat-streak').textContent   = s.streak;
