@@ -574,9 +574,9 @@
     <article class="card session-card" data-parcours="Premiers pas">
       <div class="session-info">
         <h3>Observer ses pensées sans les juger</h3>
-        <p>Premiers pas · 7 min 50</p>
+        <p>Premiers pas · 9 min</p>
       </div>
-      <button class="btn btn-primary" onclick="launchPlayer('observer-ses-pensees', 'Observer ses pensées sans les juger', 'Premiers pas', '7 min 50', 'Observer ses pensées sans les juger.mp3', true)">Lancer</button>
+      <button class="btn btn-primary" onclick="launchPlayer('observer-ses-pensees', 'Observer ses pensées sans les juger', 'Premiers pas', '9 min', 'Observer ses pensées sans les juger.mp3', true)">Lancer</button>
     </article>
     <article class="card session-card" data-parcours="Premiers pas">
       <div class="session-info">
@@ -1078,7 +1078,6 @@
       updateVoiceSheetUI();
       document.getElementById('voice-overlay').classList.add('open');
     } else {
-      // Séance avec une seule version (masculine uniquement) : forcer masculine
       _doLaunchPlayer(id, title, parcours, duree, audioFilename, 'masculine');
     }
   }
