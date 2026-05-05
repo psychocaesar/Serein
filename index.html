@@ -4,498 +4,150 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#1a3d32">
-  <!-- Sécurité : Content Security Policy -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; media-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'">
   <title>Serein — Méditation en français</title>
   <link rel="icon" type="image/png" href="assets/logo.png">
   <link rel="apple-touch-icon" href="assets/logo.png">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --color-bg: #f0f5f3;
-      --color-surface: #ffffff;
-      --color-primary: #2f6f5e;
-      --color-primary-light: #e0eeea;
-      --color-text: #15332b;
-      --color-muted: #5a7a72;
-      --color-border: rgba(0,0,0,.08);
-      --radius: 1.25rem;
-      --radius-sm: .75rem;
+      --color-bg: #f0f5f3; --color-surface: #ffffff; --color-primary: #2f6f5e;
+      --color-primary-light: #e0eeea; --color-text: #15332b; --color-muted: #5a7a72;
+      --color-border: rgba(0,0,0,.08); --radius: 1.25rem; --radius-sm: .75rem;
     }
-
-    body {
-      font-family: system-ui, -apple-system, sans-serif;
-      background: var(--color-bg);
-      color: var(--color-text);
-      min-height: 100vh;
-      padding-bottom: 80px;
-    }
-
-    .nav {
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      background: var(--color-surface);
-      border-top: 1px solid var(--color-border);
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      padding: .75rem 0 1rem;
-      z-index: 100;
-    }
-
-    .nav-btn {
-      background: none;
-      border: none;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: .25rem;
-      font-size: .75rem;
-      color: var(--color-muted);
-      cursor: pointer;
-      padding: .25rem .75rem;
-      border-radius: var(--radius-sm);
-      transition: color .2s;
-    }
-
+    body { font-family: system-ui, -apple-system, sans-serif; background: var(--color-bg); color: var(--color-text); min-height: 100vh; padding-bottom: 80px; }
+    .nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--color-surface); border-top: 1px solid var(--color-border); display: flex; justify-content: space-around; align-items: center; padding: .75rem 0 1rem; z-index: 100; }
+    .nav-btn { background: none; border: none; display: flex; flex-direction: column; align-items: center; gap: .25rem; font-size: .75rem; color: var(--color-muted); cursor: pointer; padding: .25rem .75rem; border-radius: var(--radius-sm); transition: color .2s; }
     .nav-btn.active { color: var(--color-primary); font-weight: 600; }
     .nav-btn svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-
     .screen { display: none; padding: 2rem 1.25rem 1.5rem; max-width: 760px; margin: 0 auto; }
     .screen.active { display: block; }
-
     .eyebrow { text-transform: uppercase; letter-spacing: .1em; font-size: .75rem; color: var(--color-muted); margin-bottom: .5rem; }
     h1 { font-size: 2rem; line-height: 1.2; margin-bottom: .75rem; }
     h2 { font-size: 1.4rem; margin-bottom: .5rem; }
     h3 { font-size: 1rem; margin-bottom: .35rem; }
     .lead { font-size: 1.05rem; color: var(--color-muted); line-height: 1.6; max-width: 55ch; margin-bottom: 1.5rem; }
-
-    .btn {
-      display: inline-flex; align-items: center; justify-content: center;
-      padding: .85rem 1.4rem; border-radius: 999px;
-      border: none; font-size: 1rem; cursor: pointer; transition: opacity .2s;
-      text-decoration: none;
-    }
+    .btn { display: inline-flex; align-items: center; justify-content: center; padding: .85rem 1.4rem; border-radius: 999px; border: none; font-size: 1rem; cursor: pointer; transition: opacity .2s; text-decoration: none; }
     .btn:hover { opacity: .85; }
     .btn-primary { background: var(--color-primary); color: #fff; }
-    .btn-secondary { background: var(--color-primary-light); color: var(--color-primary); }
     .btn-ghost { background: transparent; color: var(--color-muted); border: 1px solid var(--color-border); }
-
     .actions { display: flex; gap: .75rem; flex-wrap: wrap; margin-top: 1.25rem; }
-
-    .card {
-      background: var(--color-surface);
-      border-radius: var(--radius);
-      border: 1px solid var(--color-border);
-      padding: 1.25rem;
-    }
-
-    .card-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 1rem;
-      margin-top: 1.25rem;
-    }
-
-    .trust {
-      display: flex; flex-wrap: wrap; gap: .75rem;
-      margin: 1.5rem 0;
-      font-size: .85rem; color: var(--color-muted);
-    }
-    .trust-item {
-      background: var(--color-primary-light);
-      color: var(--color-primary);
-      border-radius: 999px;
-      padding: .35rem .85rem;
-    }
-
+    .card { background: var(--color-surface); border-radius: var(--radius); border: 1px solid var(--color-border); padding: 1.25rem; }
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; margin-top: 1.25rem; }
+    .trust { display: flex; flex-wrap: wrap; gap: .75rem; margin: 1.5rem 0; font-size: .85rem; color: var(--color-muted); }
+    .trust-item { background: var(--color-primary-light); color: var(--color-primary); border-radius: 999px; padding: .35rem .85rem; }
     .path-card { cursor: pointer; transition: box-shadow .2s; }
     .path-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.08); }
     .path-card .meta { font-size: .8rem; color: var(--color-muted); margin-top: .5rem; }
     .path-icon { font-size: 1.75rem; margin-bottom: .5rem; }
-
     .session-card { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
     .session-info p { font-size: .85rem; color: var(--color-muted); margin-top: .2rem; }
     .session-list { display: flex; flex-direction: column; gap: .75rem; margin-top: 1.25rem; }
-
     .filter-tabs { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; }
-    .tab {
-      border: 1px solid var(--color-border); background: var(--color-surface);
-      border-radius: 999px; padding: .4rem .9rem; font-size: .85rem; cursor: pointer;
-      transition: background .2s, color .2s;
-    }
+    .tab { border: 1px solid var(--color-border); background: var(--color-surface); border-radius: 999px; padding: .4rem .9rem; font-size: .85rem; cursor: pointer; transition: background .2s, color .2s; }
     .tab.active { background: var(--color-primary); color: #fff; border-color: transparent; }
-
-    /* ── Player ─────────────────────────────────────────────────────────────── */
     .player-card { text-align: center; max-width: 480px; margin: 0 auto; }
     .player-card .session-meta { font-size: .85rem; color: var(--color-muted); margin-bottom: 1rem; }
     .player-card h2 { font-size: 1.6rem; margin-bottom: 1.5rem; }
     .player-controls { display: flex; justify-content: center; align-items: center; gap: 1rem; margin: 1.5rem 0; flex-wrap: wrap; }
-
-    .btn-play {
-      width: 72px; height: 72px; border-radius: 50%; font-size: 1.75rem;
-      background: var(--color-primary); color: #fff; border: none; cursor: pointer;
-      transition: transform .15s, opacity .2s;
-      display: flex; align-items: center; justify-content: center;
-    }
+    .btn-play { width: 72px; height: 72px; border-radius: 50%; background: var(--color-primary); color: #fff; border: none; cursor: pointer; transition: transform .15s, opacity .2s; display: flex; align-items: center; justify-content: center; }
     .btn-play:active { transform: scale(.93); }
-
-    .btn-skip {
-      width: 44px; height: 44px; border-radius: 50%; font-size: .8rem; font-weight: 700;
-      background: var(--color-primary-light); color: var(--color-primary);
-      border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
-      flex-direction: column; gap: 1px; transition: opacity .2s;
-    }
+    .btn-skip { width: 44px; height: 44px; border-radius: 50%; font-size: .8rem; font-weight: 700; background: var(--color-primary-light); color: var(--color-primary); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 1px; transition: opacity .2s; }
     .btn-skip:hover { opacity: .8; }
     .btn-skip span { font-size: .6rem; line-height: 1; }
-
-    /* Barre de progression seekable */
     .progress-wrap { margin: 1.25rem 0; }
-    .progress-track {
-      width: 100%; height: 6px; background: var(--color-primary-light);
-      border-radius: 999px; position: relative; cursor: pointer;
-      padding: 8px 0; margin: -8px 0;
-      box-sizing: content-box;
-    }
-    .progress-track-inner {
-      width: 100%; height: 6px; background: var(--color-primary-light);
-      border-radius: 999px; overflow: hidden; position: relative;
-    }
+    .progress-track { width: 100%; height: 6px; background: var(--color-primary-light); border-radius: 999px; position: relative; cursor: pointer; padding: 8px 0; margin: -8px 0; box-sizing: content-box; }
+    .progress-track-inner { width: 100%; height: 6px; background: var(--color-primary-light); border-radius: 999px; overflow: hidden; position: relative; }
     .progress-fill { height: 100%; width: 0%; background: var(--color-primary); border-radius: 999px; transition: width .25s linear; }
-    .progress-thumb {
-      position: absolute; top: 50%; right: auto;
-      width: 14px; height: 14px; border-radius: 50%;
-      background: var(--color-primary); transform: translate(-50%, -50%);
-      left: 0%; opacity: 0; transition: opacity .2s;
-      pointer-events: none; margin-top: -3px;
-    }
+    .progress-thumb { position: absolute; top: 50%; right: auto; width: 14px; height: 14px; border-radius: 50%; background: var(--color-primary); transform: translate(-50%, -50%); left: 0%; opacity: 0; transition: opacity .2s; pointer-events: none; margin-top: -3px; }
     .progress-track:hover .progress-thumb { opacity: 1; }
     .progress-times { display: flex; justify-content: space-between; font-size: .78rem; color: var(--color-muted); margin-top: .4rem; }
-
-    /* Volume */
     .volume-wrap { display: flex; align-items: center; gap: .6rem; margin-top: 1rem; justify-content: center; }
     .volume-wrap span { font-size: .85rem; }
-    input[type=range].volume-slider {
-      -webkit-appearance: none; appearance: none;
-      width: 100px; height: 4px; border-radius: 999px;
-      background: var(--color-primary-light); cursor: pointer; outline: none;
-    }
-    input[type=range].volume-slider::-webkit-slider-thumb {
-      -webkit-appearance: none; appearance: none;
-      width: 14px; height: 14px; border-radius: 50%;
-      background: var(--color-primary); cursor: pointer;
-    }
-
-    /* Vitesse de lecture */
-    .speed-wrap {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: .4rem;
-      margin-top: .85rem;
-      flex-wrap: wrap;
-    }
-    .speed-label {
-      font-size: .75rem;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      color: var(--color-muted);
-      margin-right: .25rem;
-    }
-    .speed-btn {
-      background: var(--color-primary-light);
-      color: var(--color-primary);
-      border: 2px solid transparent;
-      border-radius: 999px;
-      padding: .25rem .6rem;
-      font-size: .8rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all .18s;
-    }
-    .speed-btn.active {
-      background: var(--color-primary);
-      color: #fff;
-      border-color: var(--color-primary);
-    }
+    input[type=range].volume-slider { -webkit-appearance: none; appearance: none; width: 100px; height: 4px; border-radius: 999px; background: var(--color-primary-light); cursor: pointer; outline: none; }
+    input[type=range].volume-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--color-primary); cursor: pointer; }
+    .speed-wrap { display: flex; align-items: center; justify-content: center; gap: .4rem; margin-top: .85rem; flex-wrap: wrap; }
+    .speed-label { font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; color: var(--color-muted); margin-right: .25rem; }
+    .speed-btn { background: var(--color-primary-light); color: var(--color-primary); border: 2px solid transparent; border-radius: 999px; padding: .25rem .6rem; font-size: .8rem; font-weight: 600; cursor: pointer; transition: all .18s; }
+    .speed-btn.active { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
     .speed-btn:hover:not(.active) { opacity: .75; }
-
-    /* Bouton hors-ligne sur les cards */
     .session-actions { display: flex; align-items: center; gap: .5rem; flex-shrink: 0; }
-    .btn-offline {
-      width: 36px; height: 36px; border-radius: 50%;
-      border: 1px solid var(--color-border);
-      background: var(--color-surface);
-      color: var(--color-muted);
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      font-size: .9rem;
-      transition: all .2s;
-      flex-shrink: 0;
-    }
+    .btn-offline { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: .9rem; transition: all .2s; flex-shrink: 0; }
     .btn-offline:hover { border-color: var(--color-primary); color: var(--color-primary); }
     .btn-offline.cached { background: var(--color-primary-light); border-color: var(--color-primary); color: var(--color-primary); }
     .btn-offline.loading { opacity: .6; cursor: wait; }
-
-    /* Écran fin de séance */
     .complete-screen { display: none; text-align: center; padding: 2rem 0; }
     .complete-screen.visible { display: block; }
     .player-main.hidden { display: none; }
-
     .complete-icon { font-size: 3.5rem; margin-bottom: 1rem; animation: pop .4s ease; }
     @keyframes pop { 0% { transform: scale(.5); opacity: 0; } 80% { transform: scale(1.15); } 100% { transform: scale(1); opacity: 1; } }
-
     .player-note { font-style: italic; color: var(--color-muted); margin-top: 1.25rem; font-size: .95rem; }
     .audio-loading { font-size: .8rem; color: var(--color-muted); margin-top: .5rem; min-height: 1.2em; }
-
-    /* Tag voix */
-    .player-voice-tag {
-      display: inline-block;
-      font-size: .72rem;
-      background: var(--color-primary-light);
-      color: var(--color-primary);
-      border-radius: 999px;
-      padding: .2rem .65rem;
-      margin-bottom: .75rem;
-    }
-
-    /* Son d'ambiance */
-    .ambiance-section {
-      margin-top: 1.25rem;
-      padding-top: 1rem;
-      border-top: 1px solid var(--color-border);
-      text-align: center;
-    }
-    .ambiance-label {
-      font-size: .75rem;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      color: var(--color-muted);
-      margin-bottom: .6rem;
-    }
-    .ambiance-btns {
-      display: flex;
-      justify-content: center;
-      gap: .4rem;
-      flex-wrap: wrap;
-      margin-bottom: .75rem;
-    }
-    .ambiance-btn {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: .2rem;
-      background: var(--color-primary-light);
-      border: 2px solid transparent;
-      border-radius: var(--radius-sm);
-      padding: .45rem .6rem;
-      font-size: 1.1rem;
-      cursor: pointer;
-      transition: all .2s;
-      min-width: 52px;
-      color: var(--color-text);
-    }
+    .player-voice-tag { display: inline-block; font-size: .72rem; background: var(--color-primary-light); color: var(--color-primary); border-radius: 999px; padding: .2rem .65rem; margin-bottom: .75rem; }
+    .ambiance-section { margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--color-border); text-align: center; }
+    .ambiance-label { font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; color: var(--color-muted); margin-bottom: .6rem; }
+    .ambiance-btns { display: flex; justify-content: center; gap: .4rem; flex-wrap: wrap; margin-bottom: .75rem; }
+    .ambiance-btn { display: flex; flex-direction: column; align-items: center; gap: .2rem; background: var(--color-primary-light); border: 2px solid transparent; border-radius: var(--radius-sm); padding: .45rem .6rem; font-size: 1.1rem; cursor: pointer; transition: all .2s; min-width: 52px; color: var(--color-text); }
     .ambiance-btn span { font-size: .62rem; color: var(--color-muted); line-height: 1; }
-    .ambiance-btn.active {
-      border-color: var(--color-primary);
-      box-shadow: 0 0 0 2px var(--color-primary);
-    }
-    .ambiance-volume-wrap {
-      display: flex;
-      align-items: center;
-      gap: .6rem;
-      justify-content: center;
-      margin-top: .25rem;
-    }
+    .ambiance-btn.active { border-color: var(--color-primary); box-shadow: 0 0 0 2px var(--color-primary); }
+    .ambiance-volume-wrap { display: flex; align-items: center; gap: .6rem; justify-content: center; margin-top: .25rem; }
     .ambiance-volume-wrap span { font-size: .85rem; }
-
-    /* Overlay voix */
-    .voice-overlay-backdrop {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.45);
-      z-index: 200;
-      align-items: flex-end;
-      justify-content: center;
-    }
-    .voice-overlay-backdrop.open {
-      display: flex;
-      animation: fadeInBd .2s ease;
-    }
+    .voice-overlay-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 200; align-items: flex-end; justify-content: center; }
+    .voice-overlay-backdrop.open { display: flex; animation: fadeInBd .2s ease; }
     @keyframes fadeInBd { from { opacity: 0; } to { opacity: 1; } }
-
-    .voice-sheet {
-      background: var(--color-surface);
-      border-radius: var(--radius) var(--radius) 0 0;
-      padding: 1.5rem 1.5rem 2.5rem;
-      width: 100%;
-      max-width: 480px;
-      animation: slideUp .25s cubic-bezier(.16,1,.3,1);
-    }
+    .voice-sheet { background: var(--color-surface); border-radius: var(--radius) var(--radius) 0 0; padding: 1.5rem 1.5rem 2.5rem; width: 100%; max-width: 480px; animation: slideUp .25s cubic-bezier(.16,1,.3,1); }
     @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-
-    .voice-sheet-title {
-      font-size: .75rem;
-      text-transform: uppercase;
-      letter-spacing: .1em;
-      color: var(--color-muted);
-      margin-bottom: 1rem;
-      text-align: center;
-    }
-    .voice-sheet-options {
-      display: flex;
-      flex-direction: column;
-      gap: .6rem;
-      margin-bottom: 1.25rem;
-    }
-    .voice-option {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      padding: .85rem 1rem;
-      border-radius: var(--radius-sm);
-      border: 2px solid var(--color-border);
-      background: var(--color-bg);
-      cursor: pointer;
-      transition: all .18s;
-      text-align: left;
-      width: 100%;
-    }
+    .voice-sheet-title { font-size: .75rem; text-transform: uppercase; letter-spacing: .1em; color: var(--color-muted); margin-bottom: 1rem; text-align: center; }
+    .voice-sheet-options { display: flex; flex-direction: column; gap: .6rem; margin-bottom: 1.25rem; }
+    .voice-option { display: flex; align-items: center; gap: 1rem; padding: .85rem 1rem; border-radius: var(--radius-sm); border: 2px solid var(--color-border); background: var(--color-bg); cursor: pointer; transition: all .18s; text-align: left; width: 100%; }
     .voice-option:hover { border-color: var(--color-primary); background: var(--color-primary-light); }
     .voice-option.selected { border-color: var(--color-primary); background: var(--color-primary-light); }
     .voice-option-icon { font-size: 1.4rem; line-height: 1; flex-shrink: 0; }
     .voice-option-info { flex: 1; }
     .voice-option-name { font-size: .95rem; font-weight: 600; color: var(--color-text); }
     .voice-option-desc { font-size: .78rem; color: var(--color-muted); margin-top: .1rem; }
-    .voice-option-check {
-      width: 20px; height: 20px;
-      border-radius: 50%;
-      border: 2px solid var(--color-border);
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-      transition: all .18s;
-    }
+    .voice-option-check { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--color-border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all .18s; }
     .voice-option.selected .voice-option-check { background: var(--color-primary); border-color: var(--color-primary); }
-    .voice-option.selected .voice-option-check::after {
-      content: '';
-      display: block;
-      width: 5px; height: 9px;
-      border: 2px solid #fff;
-      border-top: none; border-left: none;
-      transform: rotate(45deg) translate(-1px, -1px);
-    }
-    .voice-sheet-launch {
-      width: 100%;
-      padding: .95rem;
-      background: var(--color-primary);
-      color: #fff;
-      border: none;
-      border-radius: 999px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: opacity .2s;
-    }
+    .voice-option.selected .voice-option-check::after { content: ''; display: block; width: 5px; height: 9px; border: 2px solid #fff; border-top: none; border-left: none; transform: rotate(45deg) translate(-1px, -1px); }
+    .voice-sheet-launch { width: 100%; padding: .95rem; background: var(--color-primary); color: #fff; border: none; border-radius: 999px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: opacity .2s; }
     .voice-sheet-launch:hover { opacity: .85; }
-    .voice-sheet-cancel {
-      display: block;
-      width: 100%;
-      text-align: center;
-      margin-top: .75rem;
-      font-size: .85rem;
-      color: var(--color-muted);
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: .4rem;
-    }
-
-    /* Réglages */
+    .voice-sheet-cancel { display: block; width: 100%; text-align: center; margin-top: .75rem; font-size: .85rem; color: var(--color-muted); background: none; border: none; cursor: pointer; padding: .4rem; }
     .settings-list { display: flex; flex-direction: column; gap: .75rem; margin-top: 1.25rem; }
     .setting-item { display: flex; justify-content: space-between; align-items: center; }
     .setting-item p { font-size: .85rem; color: var(--color-muted); margin-top: .2rem; }
     .setting-item .info { flex: 1; }
     .setting-tag { font-size: .8rem; color: var(--color-primary); background: var(--color-primary-light); border-radius: 999px; padding: .25rem .75rem; white-space: nowrap; }
     .footer-note { text-align: center; font-size: .8rem; color: var(--color-muted); padding: 2rem 1rem; }
-
-    /* Stats */
     .stats-widget { display: flex; gap: .75rem; margin-top: 2rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
-    .stat-chip {
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-sm);
-      padding: .6rem 1rem;
-      display: flex; flex-direction: column; align-items: center;
-      flex: 1; min-width: 80px;
-    }
+    .stat-chip { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: .6rem 1rem; display: flex; flex-direction: column; align-items: center; flex: 1; min-width: 80px; }
     .stat-chip .stat-value { font-size: 1.3rem; font-weight: 700; color: var(--color-primary); line-height: 1.1; }
     .stat-chip .stat-label { font-size: .7rem; color: var(--color-muted); margin-top: .2rem; text-align: center; }
-
-    /* Instagram */
     .insta-link { display: flex; align-items: center; gap: .75rem; text-decoration: none; color: var(--color-text); width: 100%; }
     .insta-link:hover { opacity: .8; }
-    .insta-icon {
-      width: 36px; height: 36px; border-radius: 10px;
-      background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
-      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-    }
+    .insta-icon { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .insta-icon svg { width: 20px; height: 20px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
     .insta-text .insta-title { font-size: .95rem; font-weight: 600; }
     .insta-text .insta-handle { font-size: .8rem; color: var(--color-muted); }
-
-    /* Badge À venir */
-    .badge-coming {
-      font-size: 0.65rem;
-      background: var(--color-muted);
-      color: #fff;
-      border-radius: 4px;
-      padding: 1px 6px;
-      vertical-align: middle;
-      margin-left: 4px;
-    }
+    .badge-coming { font-size: 0.65rem; background: var(--color-muted); color: #fff; border-radius: 4px; padding: 1px 6px; vertical-align: middle; margin-left: 4px; }
     button[disabled] { opacity: 0.45; cursor: not-allowed; }
-
-    @media (max-width: 480px) {
-      h1 { font-size: 1.5rem; }
-      .card-grid { grid-template-columns: 1fr; }
-    }
-
-    [data-theme="dark"] {
-      --color-bg: #0f1f1b;
-      --color-surface: #1a2e28;
-      --color-primary: #4db896;
-      --color-primary-light: #1e3d33;
-      --color-text: #e0f0eb;
-      --color-muted: #7aada0;
-      --color-border: rgba(255,255,255,.08);
-    }
+    @media (max-width: 480px) { h1 { font-size: 1.5rem; } .card-grid { grid-template-columns: 1fr; } }
+    [data-theme="dark"] { --color-bg: #0f1f1b; --color-surface: #1a2e28; --color-primary: #4db896; --color-primary-light: #1e3d33; --color-text: #e0f0eb; --color-muted: #7aada0; --color-border: rgba(255,255,255,.08); }
   </style>
 </head>
 <body>
 
-<!-- ════════════════════════════════════════════
-     OVERLAY CHOIX DE VOIX
-════════════════════════════════════════════ -->
 <div class="voice-overlay-backdrop" id="voice-overlay" role="dialog" aria-modal="true" aria-label="Choisir une voix">
   <div class="voice-sheet">
     <p class="voice-sheet-title">Choisir la voix</p>
     <div class="voice-sheet-options">
       <button class="voice-option selected" id="vopt-masculine" onclick="selectVoiceOption('masculine')">
         <span class="voice-option-icon">🧑</span>
-        <div class="voice-option-info">
-          <div class="voice-option-name">Voix masculine</div>
-          <div class="voice-option-desc">César</div>
-        </div>
+        <div class="voice-option-info"><div class="voice-option-name">Voix masculine</div><div class="voice-option-desc">César</div></div>
         <span class="voice-option-check"></span>
       </button>
       <button class="voice-option" id="vopt-feminine" onclick="selectVoiceOption('feminine')">
         <span class="voice-option-icon">👩</span>
-        <div class="voice-option-info">
-          <div class="voice-option-name">Voix féminine</div>
-          <div class="voice-option-desc">Daïdrée</div>
-        </div>
+        <div class="voice-option-info"><div class="voice-option-name">Voix féminine</div><div class="voice-option-desc">Daïdrée</div></div>
         <span class="voice-option-check"></span>
       </button>
     </div>
@@ -504,96 +156,46 @@
   </div>
 </div>
 
-<!-- ════════════════════════════════════════════
-     ÉCRAN 1 — ACCUEIL
-════════════════════════════════════════════ -->
 <section id="home" class="screen active">
   <header>
     <p class="eyebrow">Serein</p>
     <h1>Respirer, s'apaiser, se recentrer.</h1>
-    <p class="lead">Des séances guidées en français pour t'aider à retrouver un peu d'espace,
-      sans publicité, sans paywall agressif et sans tracking tiers.</p>
+    <p class="lead">Des séances guidées en français pour t'aider à retrouver un peu d'espace, sans publicité, sans paywall agressif et sans tracking tiers.</p>
     <div class="actions">
       <button class="btn btn-primary" onclick="showScreen('explore')">Commencer</button>
       <button class="btn btn-ghost" onclick="showScreen('settings')">À propos</button>
     </div>
   </header>
-
   <div class="stats-widget">
-    <div class="stat-chip">
-      <span class="stat-value" id="stat-streak">0</span>
-      <span class="stat-label">🔥 Jours<br>d'affilée</span>
-    </div>
-    <div class="stat-chip">
-      <span class="stat-value" id="stat-sessions">0</span>
-      <span class="stat-label">▶ Séances<br>terminées</span>
-    </div>
-    <div class="stat-chip">
-      <span class="stat-value" id="stat-time">0 min</span>
-      <span class="stat-label">⏱ Temps<br>total</span>
-    </div>
+    <div class="stat-chip"><span class="stat-value" id="stat-streak">0</span><span class="stat-label">🔥 Jours<br>d'affilée</span></div>
+    <div class="stat-chip"><span class="stat-value" id="stat-sessions">0</span><span class="stat-label">▶ Séances<br>terminées</span></div>
+    <div class="stat-chip"><span class="stat-value" id="stat-time">0 min</span><span class="stat-label">⏱ Temps<br>total</span></div>
   </div>
-
   <div class="trust">
     <span class="trust-item">✓ Aucun compte requis</span>
     <span class="trust-item">✓ Lecture hors ligne</span>
     <span class="trust-item">✓ Sans publicité</span>
     <span class="trust-item">✓ Open source</span>
   </div>
-
   <section>
     <h2>Parcours</h2>
     <div class="card-grid">
-      <article class="card path-card" onclick="filterParcours('Premiers pas')">
-        <div class="path-icon">🌱</div>
-        <h3>Premiers pas</h3>
-        <p>Pour entrer doucement dans la pratique.</p>
-        <p class="meta">7 séances</p>
-      </article>
-      <article class="card path-card" onclick="filterParcours('Calme &amp; Stress')">
-        <div class="path-icon">😮‍💨</div>
-        <h3>Calme &amp; Stress</h3>
-        <p>Pour relâcher la pression au quotidien.</p>
-        <p class="meta">6 séances</p>
-      </article>
-      <article class="card path-card" onclick="filterParcours('Sommeil')">
-        <div class="path-icon">🌙</div>
-        <h3>Sommeil</h3>
-        <p>Pour préparer le coucher et bien dormir.</p>
-        <p class="meta">6 séances</p>
-      </article>
-      <article class="card path-card" onclick="filterParcours('Respirer')">
-        <div class="path-icon">🌬️</div>
-        <h3>Respirer</h3>
-        <p>Pour explorer les techniques de respiration.</p>
-        <p class="meta">5 séances</p>
-      </article>
-      <article class="card path-card" onclick="filterParcours('Anxiété')">
-        <div class="path-icon">🌀</div>
-        <h3>Anxiété</h3>
-        <p>Pour apaiser l'agitation mentale.</p>
-        <p class="meta">6 séances</p>
-      </article>
-      <article class="card path-card" onclick="filterParcours('Concentration')">
-        <div class="path-icon">🎯</div>
-        <h3>Concentration</h3>
-        <p>Pour clarifier l'esprit et entrer dans la zone.</p>
-        <p class="meta">5 séances</p>
-      </article>
+      <article class="card path-card" onclick="filterParcours('Premiers pas')"><div class="path-icon">🌱</div><h3>Premiers pas</h3><p>Pour entrer doucement dans la pratique.</p><p class="meta">7 séances</p></article>
+      <article class="card path-card" onclick="filterParcours('Calme &amp; Stress')"><div class="path-icon">😮‍💨</div><h3>Calme &amp; Stress</h3><p>Pour relâcher la pression au quotidien.</p><p class="meta">6 séances</p></article>
+      <article class="card path-card" onclick="filterParcours('Sommeil')"><div class="path-icon">🌙</div><h3>Sommeil</h3><p>Pour préparer le coucher et bien dormir.</p><p class="meta">6 séances</p></article>
+      <article class="card path-card" onclick="filterParcours('Respirer')"><div class="path-icon">🌬️</div><h3>Respirer</h3><p>Pour explorer les techniques de respiration.</p><p class="meta">5 séances</p></article>
+      <article class="card path-card" onclick="filterParcours('Anxiété')"><div class="path-icon">🌀</div><h3>Anxiété</h3><p>Pour apaiser l'agitation mentale.</p><p class="meta">6 séances</p></article>
+      <article class="card path-card" onclick="filterParcours('Concentration')"><div class="path-icon">🎯</div><h3>Concentration</h3><p>Pour clarifier l'esprit et entrer dans la zone.</p><p class="meta">5 séances</p></article>
     </div>
   </section>
 </section>
 
-<!-- ════════════════════════════════════════════
-     ÉCRAN 2 — EXPLORER
-════════════════════════════════════════════ -->
 <section id="explore" class="screen">
   <header>
     <p class="eyebrow">Explorer</p>
     <h1>Choisis une séance selon ton besoin du moment.</h1>
     <p class="lead">Parcours toutes les séances disponibles par thème ou durée.</p>
   </header>
-
   <nav class="filter-tabs" aria-label="Filtres">
     <button class="tab active" onclick="filterTab(this)">Toutes</button>
     <button class="tab" onclick="filterTab(this)">Premiers pas</button>
@@ -603,270 +205,135 @@
     <button class="tab" onclick="filterTab(this)">Anxiété</button>
     <button class="tab" onclick="filterTab(this)">Concentration</button>
   </nav>
-
   <div class="session-list">
-
     <!-- PREMIERS PAS -->
     <article class="card session-card" data-parcours="Premiers pas">
-      <div class="session-info">
-        <h3>Première respiration consciente</h3>
-        <p>Premiers pas · 5 min</p>
-      </div>
+      <div class="session-info"><h3>Première respiration consciente</h3><p>Premiers pas · 5 min</p></div>
       <div class="session-actions">
-        <button class="btn-offline" data-filename="Méditation Premiere Respiration Consciente.mp3" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this, 'Méditation Premiere Respiration Consciente.mp3')">⬇</button>
-        <button class="btn btn-primary" onclick="openVoiceOverlay('premiere-respiration-consciente', 'Première respiration consciente', 'Premiers pas', '5 min', 'Méditation Premiere Respiration Consciente.mp3', false)">Lancer</button>
+        <button class="btn-offline" data-filename="Méditation Premiere Respiration Consciente.mp3" onclick="toggleOfflineCache(this,'Méditation Premiere Respiration Consciente.mp3')">⬇</button>
+        <button class="btn btn-primary" onclick="openVoiceOverlay('premiere-respiration-consciente','Première respiration consciente','Premiers pas','5 min','Méditation Premiere Respiration Consciente.mp3',false)">Lancer</button>
       </div>
     </article>
-
     <article class="card session-card" data-parcours="Premiers pas">
-      <div class="session-info">
-        <h3>S'asseoir, ne rien faire</h3>
-        <p>Premiers pas · 5 min</p>
-      </div>
+      <div class="session-info"><h3>S'asseoir, ne rien faire</h3><p>Premiers pas · 5 min</p></div>
       <div class="session-actions">
-        <button class="btn-offline" data-filename="Sasseoir ne rien faire.mp3" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this, 'Sasseoir ne rien faire.mp3')">⬇</button>
-        <button class="btn btn-primary" onclick="openVoiceOverlay('sasseoir-ne-rien-faire', 'S\'asseoir, ne rien faire', 'Premiers pas', '5 min', 'Sasseoir ne rien faire.mp3', false)">Lancer</button>
+        <button class="btn-offline" data-filename="Sasseoir ne rien faire.mp3" onclick="toggleOfflineCache(this,'Sasseoir ne rien faire.mp3')">⬇</button>
+        <button class="btn btn-primary" onclick="openVoiceOverlay('sasseoir-ne-rien-faire','S\'asseoir, ne rien faire','Premiers pas','5 min','Sasseoir ne rien faire.mp3',false)">Lancer</button>
       </div>
     </article>
-
     <article class="card session-card" data-parcours="Premiers pas">
-      <div class="session-info">
-        <h3>Observer ses pensées sans les juger</h3>
-        <p>Premiers pas · 9 min</p>
-      </div>
+      <div class="session-info"><h3>Observer ses pensées sans les juger</h3><p>Premiers pas · 9 min</p></div>
       <div class="session-actions">
-        <button class="btn-offline" data-filename="Observer ses pensées sans les juger.mp3" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this, 'Observer ses pensées sans les juger.mp3')">⬇</button>
-        <button class="btn btn-primary" onclick="openVoiceOverlay('observer-ses-pensees', 'Observer ses pensées sans les juger', 'Premiers pas', '9 min', 'Observer ses pensées sans les juger.mp3', false)">Lancer</button>
+        <button class="btn-offline" data-filename="Observer ses pensées sans les juger.mp3" onclick="toggleOfflineCache(this,'Observer ses pensées sans les juger.mp3')">⬇</button>
+        <button class="btn btn-primary" onclick="openVoiceOverlay('observer-ses-pensees','Observer ses pensées sans les juger','Premiers pas','9 min','Observer ses pensées sans les juger.mp3',false)">Lancer</button>
       </div>
     </article>
-
     <article class="card session-card" data-parcours="Premiers pas">
-      <div class="session-info">
-        <h3>Le scan corporel — découvrir ses sensations</h3>
-        <p>Premiers pas · 10 min</p>
-      </div>
+      <div class="session-info"><h3>Le scan corporel — découvrir ses sensations</h3><p>Premiers pas · 10 min</p></div>
       <div class="session-actions">
-        <button class="btn-offline" data-filename="Le scan corporel.mp3" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this, 'Le scan corporel.mp3')">⬇</button>
-        <button class="btn btn-primary" onclick="openVoiceOverlay('scan-corporel-sensations', 'Le scan corporel — découvrir ses sensations', 'Premiers pas', '10 min', 'Le scan corporel.mp3', false)">Lancer</button>
+        <button class="btn-offline" data-filename="Le scan corporel.mp3" onclick="toggleOfflineCache(this,'Le scan corporel.mp3')">⬇</button>
+        <button class="btn btn-primary" onclick="openVoiceOverlay('scan-corporel-sensations','Le scan corporel — découvrir ses sensations','Premiers pas','10 min','Le scan corporel.mp3',false)">Lancer</button>
       </div>
     </article>
-
-    <article class="card session-card" data-parcours="Premiers pas">
-      <div class="session-info"><h3>Revenir à l'instant présent <span class="badge-coming">À venir</span></h3><p>Premiers pas · 7 min</p></div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
-    <article class="card session-card" data-parcours="Premiers pas">
-      <div class="session-info"><h3>La bienveillance envers soi <span class="badge-coming">À venir</span></h3><p>Premiers pas · 10 min</p></div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
-    <article class="card session-card" data-parcours="Premiers pas">
-      <div class="session-info"><h3>Mon ancre personnelle <span class="badge-coming">À venir</span></h3><p>Premiers pas · 10 min</p></div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
-
+    <article class="card session-card" data-parcours="Premiers pas"><div class="session-info"><h3>Revenir à l'instant présent <span class="badge-coming">À venir</span></h3><p>Premiers pas · 7 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
+    <article class="card session-card" data-parcours="Premiers pas"><div class="session-info"><h3>La bienveillance envers soi <span class="badge-coming">À venir</span></h3><p>Premiers pas · 10 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
+    <article class="card session-card" data-parcours="Premiers pas"><div class="session-info"><h3>Mon ancre personnelle <span class="badge-coming">À venir</span></h3><p>Premiers pas · 10 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
     <!-- CALME & STRESS -->
-    <article class="card session-card" data-parcours="Calme &amp; Stress">
-      <div class="session-info"><h3>SOS Stress en 3 minutes <span class="badge-coming">À venir</span></h3><p>Calme &amp; Stress · 3 min</p></div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
-    <article class="card session-card" data-parcours="Calme &amp; Stress">
-      <div class="session-info"><h3>Lâcher prise sur l'urgence <span class="badge-coming">À venir</span></h3><p>Calme &amp; Stress · 7 min</p></div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
-    <article class="card session-card" data-parcours="Calme &amp; Stress">
-      <div class="session-info"><h3>La cohérence cardiaque guidée <span class="badge-coming">À venir</span></h3><p>Calme &amp; Stress · 5 min</p></div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
-    <article class="card session-card" data-parcours="Calme &amp; Stress">
-      <div class="session-info"><h3>Le corps qui tient le stress <span class="badge-coming">À venir</span></h3><p>Calme &amp; Stress · 10 min</p></div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
-    <article class="card session-card" data-parcours="Calme &amp; Stress">
-      <div class="session-info"><h3>Fin de journée — déposer le poids <span class="badge-coming">À venir</span></h3><p>Calme &amp; Stress · 12 min</p></div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
-    <article class="card session-card" data-parcours="Calme &amp; Stress">
-      <div class="session-info"><h3>Transformer le stress en énergie <span class="badge-coming">À venir</span></h3><p>Calme &amp; Stress · 10 min</p></div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
-
+    <article class="card session-card" data-parcours="Calme &amp; Stress"><div class="session-info"><h3>SOS Stress en 3 minutes <span class="badge-coming">À venir</span></h3><p>Calme &amp; Stress · 3 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
+    <article class="card session-card" data-parcours="Calme &amp; Stress"><div class="session-info"><h3>Lâcher prise sur l'urgence <span class="badge-coming">À venir</span></h3><p>Calme &amp; Stress · 7 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
+    <article class="card session-card" data-parcours="Calme &amp; Stress"><div class="session-info"><h3>La cohérence cardiaque guidée <span class="badge-coming">À venir</span></h3><p>Calme &amp; Stress · 5 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
+    <article class="card session-card" data-parcours="Calme &amp; Stress"><div class="session-info"><h3>Le corps qui tient le stress <span class="badge-coming">À venir</span></h3><p>Calme &amp; Stress · 10 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
+    <article class="card session-card" data-parcours="Calme &amp; Stress"><div class="session-info"><h3>Fin de journée — déposer le poids <span class="badge-coming">À venir</span></h3><p>Calme &amp; Stress · 12 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
+    <article class="card session-card" data-parcours="Calme &amp; Stress"><div class="session-info"><h3>Transformer le stress en énergie <span class="badge-coming">À venir</span></h3><p>Calme &amp; Stress · 10 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
     <!-- SOMMEIL -->
     <article class="card session-card" data-parcours="Sommeil">
-      <div class="session-info">
-        <h3>Rituel de déconnexion</h3>
-        <p>Sommeil · 10 min</p>
-      </div>
+      <div class="session-info"><h3>Rituel de déconnexion</h3><p>Sommeil · 10 min</p></div>
       <div class="session-actions">
-        <button class="btn-offline" data-filename="Rituel de déconnexion.mp3" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this, 'Rituel de déconnexion.mp3')">⬇</button>
-        <button class="btn btn-primary" onclick="openVoiceOverlay('rituel-deconnexion', 'Rituel de déconnexion', 'Sommeil', '10 min', 'Rituel de déconnexion.mp3', false)">Lancer</button>
+        <button class="btn-offline" data-filename="Rituel de déconnexion.mp3" onclick="toggleOfflineCache(this,'Rituel de déconnexion.mp3')">⬇</button>
+        <button class="btn btn-primary" onclick="openVoiceOverlay('rituel-deconnexion','Rituel de déconnexion','Sommeil','10 min','Rituel de déconnexion.mp3',false)">Lancer</button>
       </div>
     </article>
+    <article class="card session-card" data-parcours="Sommeil"><div class="session-info"><h3>Relâcher le corps, couche après couche <span class="badge-coming">À venir</span></h3><p>Sommeil · 12 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
+    <article class="card session-card" data-parcours="Sommeil"><div class="session-info"><h3>Le voyage intérieur <span class="badge-coming">À venir</span></h3><p>Sommeil · 15 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
+    <article class="card session-card" data-parcours="Sommeil"><div class="session-info"><h3>Sons &amp; silence — endormissement profond <span class="badge-coming">À venir</span></h3><p>Sommeil · 20 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
     <article class="card session-card" data-parcours="Sommeil">
-      <div class="session-info"><h3>Relâcher le corps, couche après couche <span class="badge-coming">À venir</span></h3><p>Sommeil · 12 min</p></div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
-    <article class="card session-card" data-parcours="Sommeil">
-      <div class="session-info"><h3>Le voyage intérieur <span class="badge-coming">À venir</span></h3><p>Sommeil · 15 min</p></div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
-    <article class="card session-card" data-parcours="Sommeil">
-      <div class="session-info"><h3>Sons &amp; silence — endormissement profond <span class="badge-coming">À venir</span></h3><p>Sommeil · 20 min</p></div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
-    <article class="card session-card" data-parcours="Sommeil">
-      <div class="session-info">
-        <h3>Réveils nocturnes — retrouver le calme</h3>
-        <p>Sommeil · 18 min</p>
-      </div>
+      <div class="session-info"><h3>Réveils nocturnes — retrouver le calme</h3><p>Sommeil · 18 min</p></div>
       <div class="session-actions">
-        <button class="btn-offline" data-filename="Reveils nocturnes.mp3" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this, 'Reveils nocturnes.mp3')">⬇</button>
-        <button class="btn btn-primary" onclick="openVoiceOverlay('reveils-nocturnes-calme', 'Réveils nocturnes — retrouver le calme', 'Sommeil', '18 min', 'Reveils nocturnes.mp3', false)">Lancer</button>
+        <button class="btn-offline" data-filename="Reveils nocturnes.mp3" onclick="toggleOfflineCache(this,'Reveils nocturnes.mp3')">⬇</button>
+        <button class="btn btn-primary" onclick="openVoiceOverlay('reveils-nocturnes-calme','Réveils nocturnes — retrouver le calme','Sommeil','18 min','Reveils nocturnes.mp3',false)">Lancer</button>
       </div>
     </article>
-    <article class="card session-card" data-parcours="Sommeil">
-      <div class="session-info"><h3>Méditation du matin reposé <span class="badge-coming">À venir</span></h3><p>Sommeil · 7 min</p></div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
-
+    <article class="card session-card" data-parcours="Sommeil"><div class="session-info"><h3>Méditation du matin reposé <span class="badge-coming">À venir</span></h3><p>Sommeil · 7 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
     <!-- RESPIRER -->
+    <article class="card session-card" data-parcours="Respirer"><div class="session-info"><h3>La respiration naturelle <span class="badge-coming">À venir</span></h3><p>Respirer · 5 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
     <article class="card session-card" data-parcours="Respirer">
-      <div class="session-info"><h3>La respiration naturelle <span class="badge-coming">À venir</span></h3><p>Respirer · 5 min</p></div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
-    <article class="card session-card" data-parcours="Respirer">
-      <div class="session-info">
-        <h3>Cohérence cardiaque 5 minutes</h3>
-        <p>Respirer · 5 min</p>
-      </div>
+      <div class="session-info"><h3>Cohérence cardiaque 5 minutes</h3><p>Respirer · 5 min</p></div>
       <div class="session-actions">
-        <button class="btn-offline" data-filename="Cohérence cardiaque 5 minutes.mp3" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this, 'Cohérence cardiaque 5 minutes.mp3')">⬇</button>
-        <button class="btn btn-primary" onclick="openVoiceOverlay('coherence-cardiaque-5min', 'Cohérence cardiaque 5 minutes', 'Respirer', '5 min', 'Cohérence cardiaque 5 minutes.mp3', false)">Lancer</button>
+        <button class="btn-offline" data-filename="Cohérence cardiaque 5 minutes.mp3" onclick="toggleOfflineCache(this,'Cohérence cardiaque 5 minutes.mp3')">⬇</button>
+        <button class="btn btn-primary" onclick="openVoiceOverlay('coherence-cardiaque-5min','Cohérence cardiaque 5 minutes','Respirer','5 min','Cohérence cardiaque 5 minutes.mp3',false)">Lancer</button>
       </div>
     </article>
-    <article class="card session-card" data-parcours="Respirer">
-      <div class="session-info"><h3>Respiration 4-7-8 — calme profond <span class="badge-coming">À venir</span></h3><p>Respirer · 7 min</p></div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
-    <article class="card session-card" data-parcours="Respirer">
-      <div class="session-info"><h3>Box breathing <span class="badge-coming">À venir</span></h3><p>Respirer · 8 min</p></div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
-    <article class="card session-card" data-parcours="Respirer">
-      <div class="session-info"><h3>Souffle et énergie — la respiration activante <span class="badge-coming">À venir</span></h3><p>Respirer · 10 min</p></div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
-
-    <!-- ANXIÉTÉ -->
+    <article class="card session-card" data-parcours="Respirer"><div class="session-info"><h3>Respiration 4-7-8 — calme profond <span class="badge-coming">À venir</span></h3><p>Respirer · 7 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
+    <article class="card session-card" data-parcours="Respirer"><div class="session-info"><h3>Box breathing <span class="badge-coming">À venir</span></h3><p>Respirer · 8 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
+    <article class="card session-card" data-parcours="Respirer"><div class="session-info"><h3>Souffle et énergie — la respiration activante <span class="badge-coming">À venir</span></h3><p>Respirer · 10 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
+    <!-- ANXIETE -->
     <article class="card session-card" data-parcours="Anxiété">
-      <div class="session-info">
-        <h3>SOS Anxiété — ancrage immédiat</h3>
-        <p>Anxiété · 5 min</p>
-      </div>
+      <div class="session-info"><h3>SOS Anxiété — ancrage immédiat</h3><p>Anxiété · 5 min</p></div>
       <div class="session-actions">
-        <button class="btn-offline" data-filename="SOS Anxiété ancrage immédiat.mp3" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this, 'SOS Anxiété ancrage immédiat.mp3')">⬇</button>
-        <button class="btn btn-primary" onclick="openVoiceOverlay('sos-anxiete', 'SOS Anxiété — ancrage immédiat', 'Anxiété', '5 min', 'SOS Anxiété ancrage immédiat.mp3', false)">Lancer</button>
+        <button class="btn-offline" data-filename="SOS Anxiété ancrage immédiat.mp3" onclick="toggleOfflineCache(this,'SOS Anxiété ancrage immédiat.mp3')">⬇</button>
+        <button class="btn btn-primary" onclick="openVoiceOverlay('sos-anxiete','SOS Anxiété — ancrage immédiat','Anxiété','5 min','SOS Anxiété ancrage immédiat.mp3',false)">Lancer</button>
       </div>
     </article>
     <article class="card session-card" data-parcours="Anxiété">
-      <div class="session-info">
-        <h3>Accueillir l'anxiété sans la combattre</h3>
-        <p>Anxiété · 10 min</p>
-      </div>
+      <div class="session-info"><h3>Accueillir l'anxiété sans la combattre</h3><p>Anxiété · 10 min</p></div>
       <div class="session-actions">
-        <button class="btn-offline" data-filename="Accueillir l'anxiété sans la combattre.mp3" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this, &quot;Accueillir l'anxiété sans la combattre.mp3&quot;)">⬇</button>
-        <button class="btn btn-primary" onclick="openVoiceOverlay('accueillir-anxiete', 'Accueillir l\'anxiété sans la combattre', 'Anxiété', '10 min', &quot;Accueillir l'anxiété sans la combattre.mp3&quot;, false)">Lancer</button>
+        <button class="btn-offline" data-filename="Accueillir l'anxiété sans la combattre.mp3" onclick="toggleOfflineCache(this,&quot;Accueillir l'anxiété sans la combattre.mp3&quot;)">⬇</button>
+        <button class="btn btn-primary" onclick="openVoiceOverlay('accueillir-anxiete','Accueillir l\'anxiété sans la combattre','Anxiété','10 min',&quot;Accueillir l'anxiété sans la combattre.mp3&quot;,false)">Lancer</button>
       </div>
     </article>
     <article class="card session-card" data-parcours="Anxiété">
-      <div class="session-info">
-        <h3>Les sons autour de toi</h3>
-        <p>Anxiété · 8 min</p>
-      </div>
+      <div class="session-info"><h3>Les sons autour de toi</h3><p>Anxiété · 8 min</p></div>
       <div class="session-actions">
-        <button class="btn-offline" data-filename="Les sons autour de toi.mp3" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this, 'Les sons autour de toi.mp3')">⬇</button>
-        <button class="btn btn-primary" onclick="openVoiceOverlay('les-sons-autour-de-toi', 'Les sons autour de toi', 'Anxiété', '8 min', 'Les sons autour de toi.mp3', false)">Lancer</button>
+        <button class="btn-offline" data-filename="Les sons autour de toi.mp3" onclick="toggleOfflineCache(this,'Les sons autour de toi.mp3')">⬇</button>
+        <button class="btn btn-primary" onclick="openVoiceOverlay('les-sons-autour-de-toi','Les sons autour de toi','Anxiété','8 min','Les sons autour de toi.mp3',false)">Lancer</button>
       </div>
     </article>
     <article class="card session-card" data-parcours="Anxiété">
-      <div class="session-info">
-        <h3>La pensée qui tourne en boucle</h3>
-        <p>Anxiété · 9 min</p>
-      </div>
+      <div class="session-info"><h3>La pensée qui tourne en boucle</h3><p>Anxiété · 9 min</p></div>
       <div class="session-actions">
-        <button class="btn-offline" data-filename="La pensée qui tourne en boucle.mp3" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this, 'La pensée qui tourne en boucle.mp3')">⬇</button>
-        <button class="btn btn-primary" onclick="openVoiceOverlay('pensee-tourne-boucle', 'La pensée qui tourne en boucle', 'Anxiété', '9 min', 'La pensée qui tourne en boucle.mp3', false)">Lancer</button>
+        <button class="btn-offline" data-filename="La pensée qui tourne en boucle.mp3" onclick="toggleOfflineCache(this,'La pensée qui tourne en boucle.mp3')">⬇</button>
+        <button class="btn btn-primary" onclick="openVoiceOverlay('pensee-tourne-boucle','La pensée qui tourne en boucle','Anxiété','9 min','La pensée qui tourne en boucle.mp3',false)">Lancer</button>
       </div>
     </article>
-    <article class="card session-card" data-parcours="Anxiété">
-      <div class="session-info"><h3>Mon corps face à la peur <span class="badge-coming">À venir</span></h3><p>Anxiété · 9 min</p></div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
-    <article class="card session-card" data-parcours="Anxiété">
-      <div class="session-info"><h3>Technique 5-4-3-2-1 guidée <span class="badge-coming">À venir</span></h3><p>Anxiété · 7 min</p></div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
-
+    <article class="card session-card" data-parcours="Anxiété"><div class="session-info"><h3>Mon corps face à la peur <span class="badge-coming">À venir</span></h3><p>Anxiété · 9 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
+    <article class="card session-card" data-parcours="Anxiété"><div class="session-info"><h3>Technique 5-4-3-2-1 guidée <span class="badge-coming">À venir</span></h3><p>Anxiété · 7 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
     <!-- CONCENTRATION -->
-    <article class="card session-card" data-parcours="Concentration">
-      <div class="session-info"><h3>Mise en route mentale <span class="badge-coming">À venir</span></h3><p>Concentration · 5 min</p></div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
-    <article class="card session-card" data-parcours="Concentration">
-      <div class="session-info"><h3>Pleine conscience de la tâche <span class="badge-coming">À venir</span></h3><p>Concentration · 7 min</p></div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
-    <article class="card session-card" data-parcours="Concentration">
-      <div class="session-info"><h3>Récupération rapide entre deux efforts <span class="badge-coming">À venir</span></h3><p>Concentration · 5 min</p></div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
-    <article class="card session-card" data-parcours="Concentration">
-      <div class="session-info"><h3>Clarté mentale — faire le vide <span class="badge-coming">À venir</span></h3><p>Concentration · 10 min</p></div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
-    <article class="card session-card" data-parcours="Concentration">
-      <div class="session-info"><h3>Flow — entrer dans la zone <span class="badge-coming">À venir</span></h3><p>Concentration · 12 min</p></div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
-
+    <article class="card session-card" data-parcours="Concentration"><div class="session-info"><h3>Mise en route mentale <span class="badge-coming">À venir</span></h3><p>Concentration · 5 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
+    <article class="card session-card" data-parcours="Concentration"><div class="session-info"><h3>Pleine conscience de la tâche <span class="badge-coming">À venir</span></h3><p>Concentration · 7 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
+    <article class="card session-card" data-parcours="Concentration"><div class="session-info"><h3>Récupération rapide entre deux efforts <span class="badge-coming">À venir</span></h3><p>Concentration · 5 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
+    <article class="card session-card" data-parcours="Concentration"><div class="session-info"><h3>Clarté mentale — faire le vide <span class="badge-coming">À venir</span></h3><p>Concentration · 10 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
+    <article class="card session-card" data-parcours="Concentration"><div class="session-info"><h3>Flow — entrer dans la zone <span class="badge-coming">À venir</span></h3><p>Concentration · 12 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
   </div>
-
-  <p style="text-align:center; color:var(--color-muted); font-size:.85rem; margin-top:2rem;">
-    De nouvelles séances arriveront au fil du projet.
-  </p>
+  <p style="text-align:center;color:var(--color-muted);font-size:.85rem;margin-top:2rem;">De nouvelles séances arriveront au fil du projet.</p>
 </section>
 
-<!-- ════════════════════════════════════════════
-     ÉCRAN 3 — LECTEUR
-════════════════════════════════════════════ -->
 <section id="player" class="screen">
-  <header>
-    <p class="eyebrow">Lecteur</p>
-    <p class="lead">Installe-toi comme tu veux. Tu peux mettre en pause à tout moment.</p>
-  </header>
-
+  <header><p class="eyebrow">Lecteur</p><p class="lead">Installe-toi comme tu veux. Tu peux mettre en pause à tout moment.</p></header>
   <audio id="audio-engine" preload="metadata"></audio>
   <audio id="ambiance-engine" loop preload="none"></audio>
-
   <div class="card player-card">
     <div class="player-main" id="player-main">
       <p class="session-meta" id="player-meta">Premiers pas · 5 min</p>
       <h2 id="player-title">Première respiration consciente</h2>
       <div id="player-voice-tag" class="player-voice-tag">Voix masculine</div>
       <p class="audio-loading" id="audio-loading"></p>
-
       <div class="progress-wrap">
         <div class="progress-track" id="progress-track" role="slider" aria-label="Progression" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
-          <div class="progress-track-inner">
-            <div class="progress-fill" id="progress-fill"></div>
-          </div>
+          <div class="progress-track-inner"><div class="progress-fill" id="progress-fill"></div></div>
           <div class="progress-thumb" id="progress-thumb"></div>
         </div>
-        <div class="progress-times">
-          <span id="time-current">0:00</span>
-          <span id="time-total">--:--</span>
-        </div>
+        <div class="progress-times"><span id="time-current">0:00</span><span id="time-total">--:--</span></div>
       </div>
-
       <div class="player-controls">
         <button class="btn-skip" id="btn-rewind" aria-label="Reculer de 15 secondes">↺<span>15s</span></button>
         <button class="btn-play" id="play-btn" onclick="togglePlay()" aria-label="Lecture / Pause">
@@ -875,13 +342,9 @@
         </button>
         <button class="btn-skip" id="btn-forward" aria-label="Avancer de 15 secondes">↻<span>15s</span></button>
       </div>
-
       <div class="volume-wrap">
-        <span>🔈</span>
-        <input type="range" class="volume-slider" id="volume-slider" min="0" max="1" step="0.02" value="1" aria-label="Volume voix">
-        <span>🔊</span>
+        <span>🔈</span><input type="range" class="volume-slider" id="volume-slider" min="0" max="1" step="0.02" value="1" aria-label="Volume voix"><span>🔊</span>
       </div>
-
       <div class="speed-wrap">
         <span class="speed-label">Vitesse</span>
         <button class="speed-btn" onclick="setSpeed(0.7)">×0.7</button>
@@ -889,38 +352,30 @@
         <button class="speed-btn" onclick="setSpeed(0.9)">×0.9</button>
         <button class="speed-btn active" onclick="setSpeed(1.0)">×1.0</button>
       </div>
-
       <div class="ambiance-section">
         <p class="ambiance-label">Son d'ambiance</p>
         <div class="ambiance-btns">
-          <button class="ambiance-btn active" id="amb-off"    onclick="setAmbiance(null)">🔇<span>Aucun</span></button>
-          <button class="ambiance-btn"         id="amb-pluie" onclick="setAmbiance('pluie.mp3')">🌧️<span>Pluie</span></button>
-          <button class="ambiance-btn"         id="amb-foret" onclick="setAmbiance('foret.mp3')">🌿<span>Forêt</span></button>
-          <button class="ambiance-btn"         id="amb-vagues" onclick="setAmbiance('vagues.mp3')">🌊<span>Vagues</span></button>
-          <button class="ambiance-btn"         id="amb-feu"   onclick="setAmbiance('feu.mp3')">🔥<span>Feu</span></button>
-          <button class="ambiance-btn"         id="amb-blanc" onclick="setAmbiance('bruit-blanc.mp3')">〰️<span>Blanc</span></button>
+          <button class="ambiance-btn active" id="amb-off" onclick="setAmbiance(null)">🔇<span>Aucun</span></button>
+          <button class="ambiance-btn" id="amb-pluie" onclick="setAmbiance('pluie.mp3')">🌧️<span>Pluie</span></button>
+          <button class="ambiance-btn" id="amb-foret" onclick="setAmbiance('foret.mp3')">🌿<span>Forêt</span></button>
+          <button class="ambiance-btn" id="amb-vagues" onclick="setAmbiance('vagues.mp3')">🌊<span>Vagues</span></button>
+          <button class="ambiance-btn" id="amb-feu" onclick="setAmbiance('feu.mp3')">🔥<span>Feu</span></button>
+          <button class="ambiance-btn" id="amb-blanc" onclick="setAmbiance('bruit-blanc.mp3')">〰️<span>Blanc</span></button>
         </div>
         <div class="ambiance-volume-wrap" id="ambiance-volume-wrap" style="display:none">
-          <span>🎵</span>
-          <input type="range" class="volume-slider" id="ambiance-volume-slider" min="0" max="1" step="0.02" value="0.3" aria-label="Volume ambiance">
-          <span>🔊</span>
+          <span>🎵</span><input type="range" class="volume-slider" id="ambiance-volume-slider" min="0" max="1" step="0.02" value="0.3" aria-label="Volume ambiance"><span>🔊</span>
         </div>
       </div>
-
       <p class="player-note">Prends ton temps.</p>
-
-      <div class="actions" style="justify-content:center; margin-top:1.5rem;">
+      <div class="actions" style="justify-content:center;margin-top:1.5rem;">
         <button class="btn btn-ghost" onclick="stopAndReturn()">← Retour aux séances</button>
       </div>
     </div>
-
     <div class="complete-screen" id="complete-screen">
       <div class="complete-icon">🌿</div>
       <h2>Séance terminée</h2>
       <p id="complete-title" style="color:var(--color-muted);margin:.5rem 0 1.5rem;"></p>
-      <p style="color:var(--color-muted);font-size:.95rem;line-height:1.6;margin-bottom:1.5rem;">
-        Prends un instant avant de continuer.<br>Comment tu te sens ?
-      </p>
+      <p style="color:var(--color-muted);font-size:.95rem;line-height:1.6;margin-bottom:1.5rem;">Prends un instant avant de continuer.<br>Comment tu te sens ?</p>
       <div class="actions" style="justify-content:center;">
         <button class="btn btn-primary" onclick="showScreen('explore')">Explorer les séances</button>
         <button class="btn btn-ghost" onclick="replaySession()">↩ Rejouer</button>
@@ -929,126 +384,56 @@
   </div>
 </section>
 
-<!-- ════════════════════════════════════════════
-     ÉCRAN 4 — RÉGLAGES
-════════════════════════════════════════════ -->
 <section id="settings" class="screen">
-  <header>
-    <p class="eyebrow">Réglages</p>
-    <h1>Personnalise l'expérience.</h1>
-    <p class="lead">Serein ne demande pas de compte, n'affiche pas de publicité et évite les trackers tiers.</p>
-  </header>
-
+  <header><p class="eyebrow">Réglages</p><h1>Personnalise l'expérience.</h1><p class="lead">Serein ne demande pas de compte, n'affiche pas de publicité et évite les trackers tiers.</p></header>
   <div class="settings-list">
-    <article class="card setting-item">
-      <div class="info"><h3>Apparence</h3><p>Basculer entre le mode clair et sombre</p></div>
-      <button class="btn btn-ghost" id="theme-toggle" onclick="toggleTheme()" style="padding:.4rem .9rem;font-size:.85rem;">🌙 Sombre</button>
-    </article>
-    <article class="card setting-item">
-      <div class="info"><h3>🎵 Sons d'ambiance</h3><p>Pluie, forêt, vagues… Accessible depuis le lecteur</p></div>
-      <span class="setting-tag" id="ambiance-settings-tag">Aucun</span>
-    </article>
-    <article class="card setting-item">
-      <div class="info"><h3>📥 Hors ligne</h3><p>Appuie sur ⬇ sur une séance pour la mettre en cache</p></div>
-      <span class="setting-tag" id="offline-count-tag">0 séance</span>
-    </article>
-    <article class="card setting-item">
-      <div class="info"><h3>Accessibilité</h3><p>Taille du texte, contraste, lisibilité</p></div>
-      <span class="setting-tag">À venir</span>
-    </article>
-    <article class="card setting-item">
-      <div class="info"><h3>Confidentialité</h3><p>Aucune publicité · Aucun tracker · Aucun compte requis</p></div>
-      <span class="setting-tag">✓</span>
-    </article>
+    <article class="card setting-item"><div class="info"><h3>Apparence</h3><p>Basculer entre le mode clair et sombre</p></div><button class="btn btn-ghost" id="theme-toggle" onclick="toggleTheme()" style="padding:.4rem .9rem;font-size:.85rem;">🌙 Sombre</button></article>
+    <article class="card setting-item"><div class="info"><h3>🎵 Sons d'ambiance</h3><p>Pluie, forêt, vagues… Accessible depuis le lecteur</p></div><span class="setting-tag" id="ambiance-settings-tag">Aucun</span></article>
+    <article class="card setting-item"><div class="info"><h3>📥 Hors ligne</h3><p>Appuie sur ⬇ sur une séance pour la mettre en cache</p></div><span class="setting-tag" id="offline-count-tag">0 séance</span></article>
+    <article class="card setting-item"><div class="info"><h3>Accessibilité</h3><p>Taille du texte, contraste, lisibilité</p></div><span class="setting-tag">À venir</span></article>
+    <article class="card setting-item"><div class="info"><h3>Confidentialité</h3><p>Aucune publicité · Aucun tracker · Aucun compte requis</p></div><span class="setting-tag">✓</span></article>
     <article class="card">
       <h3>À propos de Serein</h3>
-      <p style="color:var(--color-muted);font-size:.9rem;margin-top:.5rem;line-height:1.6;">
-        Serein est un projet de méditation en français, open source, pensé pour rester simple,
-        compréhensible et respectueux de la vie privée. Pas de publicité, pas de vente de données,
-        pas de compte obligatoire au lancement.
-      </p>
-      <p style="color:var(--color-muted);font-size:.8rem;margin-top:.75rem;line-height:1.5;">
-        Les sessions audio sont publiées sous licence CC BY-NC-ND 4.0. Utilisation IA et clonage vocal interdits.
-      </p>
-      <div class="trust" style="margin-top:1rem;">
-        <span class="trust-item">Open source</span>
-        <span class="trust-item">AGPL-3.0 / CC BY-NC-ND</span>
-        <span class="trust-item">Alpha v0.3</span>
-      </div>
+      <p style="color:var(--color-muted);font-size:.9rem;margin-top:.5rem;line-height:1.6;">Serein est un projet de méditation en français, open source, pensé pour rester simple, compréhensible et respectueux de la vie privée.</p>
+      <p style="color:var(--color-muted);font-size:.8rem;margin-top:.75rem;line-height:1.5;">Les sessions audio sont publiées sous licence CC BY-NC-ND 4.0. Utilisation IA et clonage vocal interdits.</p>
+      <div class="trust" style="margin-top:1rem;"><span class="trust-item">Open source</span><span class="trust-item">AGPL-3.0 / CC BY-NC-ND</span><span class="trust-item">Alpha v0.3</span></div>
     </article>
   </div>
-
   <article class="card setting-item" style="margin-top:.75rem;">
     <div class="info" style="flex:1;">
       <a href="https://www.instagram.com/serein_project/" target="_blank" rel="noopener noreferrer" class="insta-link">
-        <div class="insta-icon">
-          <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
-        </div>
-        <div class="insta-text">
-          <div class="insta-title">Suivez-nous sur Instagram</div>
-          <div class="insta-handle">@serein_project</div>
-        </div>
+        <div class="insta-icon"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></div>
+        <div class="insta-text"><div class="insta-title">Suivez-nous sur Instagram</div><div class="insta-handle">@serein_project</div></div>
       </a>
     </div>
     <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--color-muted);fill:none;stroke-width:2;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
   </article>
-
   <p class="footer-note">Serein — méditation en français, sans publicité, sans tracking tiers.</p>
 </section>
 
-<!-- ════════════════════════════════════════════
-     NAVIGATION
-════════════════════════════════════════════ -->
 <nav class="nav" aria-label="Navigation principale">
-  <button class="nav-btn active" id="nav-home" onclick="showScreen('home')">
-    <svg viewBox="0 0 24 24"><path d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-4h4v4h4a1 1 0 001-1v-9"/></svg>
-    Accueil
-  </button>
-  <button class="nav-btn" id="nav-explore" onclick="showScreen('explore')">
-    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-    Explorer
-  </button>
-  <button class="nav-btn" id="nav-player" onclick="showScreen('player')">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
-    Lecteur
-  </button>
-  <button class="nav-btn" id="nav-settings" onclick="showScreen('settings')">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-    Réglages
-  </button>
+  <button class="nav-btn active" id="nav-home" onclick="showScreen('home')"><svg viewBox="0 0 24 24"><path d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-4h4v4h4a1 1 0 001-1v-9"/></svg>Accueil</button>
+  <button class="nav-btn" id="nav-explore" onclick="showScreen('explore')"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Explorer</button>
+  <button class="nav-btn" id="nav-player" onclick="showScreen('player')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>Lecteur</button>
+  <button class="nav-btn" id="nav-settings" onclick="showScreen('settings')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Réglages</button>
 </nav>
 
 <script>
-// ════════════════════════════════════════════
-//  SERVICE WORKER
-// ════════════════════════════════════════════
 let swReady = false;
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js').then(reg => {
-    swReady = true;
-    console.log('[SW] Enregistré', reg.scope);
-  }).catch(err => console.warn('[SW] Erreur', err));
-
+  navigator.serviceWorker.register('/sw.js').then(reg => { swReady = true; }).catch(err => console.warn('[SW] Erreur', err));
   navigator.serviceWorker.addEventListener('message', event => {
     if (event.data.type === 'CACHE_DONE') {
-      event.data.urls.forEach(url => {
-        const filename = decodeURIComponent(url.split('/').pop());
-        markButtonCached(filename);
-      });
+      event.data.urls.forEach(url => markButtonCached(decodeURIComponent(url.split('/').pop())));
       updateOfflineCount();
     }
     if (event.data.type === 'CACHE_STATUS') {
-      const filename = decodeURIComponent(event.data.url.split('/').pop());
-      if (event.data.cached) markButtonCached(filename);
+      if (event.data.cached) markButtonCached(decodeURIComponent(event.data.url.split('/').pop()));
     }
   });
 }
 
-// ════════════════════════════════════════════
-//  NAVIGATION
-// ════════════════════════════════════════════
-const screens = ['home', 'explore', 'player', 'settings'];
-
+const screens = ['home','explore','player','settings'];
 function showScreen(id) {
   screens.forEach(s => {
     document.getElementById(s).classList.toggle('active', s === id);
@@ -1063,12 +448,7 @@ function filterTab(el) {
   el.classList.add('active');
   const label = el.textContent.trim();
   document.querySelectorAll('.session-list .session-card').forEach(card => {
-    if (label === 'Toutes') {
-      card.style.display = '';
-    } else {
-      const parcours = card.getAttribute('data-parcours') || '';
-      card.style.display = parcours === label ? '' : 'none';
-    }
+    card.style.display = (label === 'Toutes' || (card.getAttribute('data-parcours') || '') === label) ? '' : 'none';
   });
 }
 
@@ -1083,112 +463,75 @@ function filterParcours(parcours) {
   }, 50);
 }
 
-// ════════════════════════════════════════════
-//  OVERLAY VOIX
-//  hasVoiceChoice = true  → affiche le sheet de choix
-//  hasVoiceChoice = false → lance directement en voix masculine
-// ════════════════════════════════════════════
 let pendingSession = null;
-let selectedVoice  = localStorage.getItem('serein_voice') || 'masculine';
+let selectedVoice = localStorage.getItem('serein_voice') || 'masculine';
 
 function openVoiceOverlay(id, title, parcours, duree, filename, hasVoiceChoice) {
-  if (!hasVoiceChoice) {
-    // Pas de double voix disponible : lancement direct
-    launchPlayer(id, title, parcours, duree, filename, 'masculine');
-    return;
-  }
+  if (!hasVoiceChoice) { launchPlayer(id, title, parcours, duree, filename, 'masculine'); return; }
   pendingSession = { id, title, parcours, duree, filename };
   selectVoiceOption(selectedVoice, false);
   document.getElementById('voice-overlay').classList.add('open');
 }
-
 function closeVoiceOverlay() {
   document.getElementById('voice-overlay').classList.remove('open');
   pendingSession = null;
 }
-
 function selectVoiceOption(voice, save = true) {
   selectedVoice = voice;
   if (save) localStorage.setItem('serein_voice', voice);
-  document.querySelectorAll('.voice-option').forEach(opt => {
-    opt.classList.toggle('selected', opt.id === 'vopt-' + voice);
-  });
+  document.querySelectorAll('.voice-option').forEach(opt => opt.classList.toggle('selected', opt.id === 'vopt-' + voice));
 }
-
 function confirmVoiceAndLaunch() {
   if (!pendingSession) return;
   closeVoiceOverlay();
   const { id, title, parcours, duree, filename } = pendingSession;
   launchPlayer(id, title, parcours, duree, filename, selectedVoice);
 }
+document.getElementById('voice-overlay').addEventListener('click', function(e) { if (e.target === this) closeVoiceOverlay(); });
 
-document.getElementById('voice-overlay').addEventListener('click', function(e) {
-  if (e.target === this) closeVoiceOverlay();
-});
-
-// ════════════════════════════════════════════
-//  LECTEUR AUDIO
-// ════════════════════════════════════════════
-const audio          = document.getElementById('audio-engine');
-const ambianceAudio  = document.getElementById('ambiance-engine');
-const progressTrack  = document.getElementById('progress-track');
-const progressFill   = document.getElementById('progress-fill');
-const progressThumb  = document.getElementById('progress-thumb');
-const timeCurrent    = document.getElementById('time-current');
-const timeTotal      = document.getElementById('time-total');
-const iconPlay       = document.getElementById('icon-play');
-const iconPause      = document.getElementById('icon-pause');
-const audioLoading   = document.getElementById('audio-loading');
-const playerMain     = document.getElementById('player-main');
+const audio = document.getElementById('audio-engine');
+const ambianceAudio = document.getElementById('ambiance-engine');
+const progressTrack = document.getElementById('progress-track');
+const progressFill = document.getElementById('progress-fill');
+const progressThumb = document.getElementById('progress-thumb');
+const timeCurrent = document.getElementById('time-current');
+const timeTotal = document.getElementById('time-total');
+const iconPlay = document.getElementById('icon-play');
+const iconPause = document.getElementById('icon-pause');
+const audioLoading = document.getElementById('audio-loading');
+const playerMain = document.getElementById('player-main');
 const completeScreen = document.getElementById('complete-screen');
 
 let sessionStartTime = null;
-let isDragging       = false;
-let currentSpeed     = parseFloat(localStorage.getItem('serein_speed') || '1.0');
+let isDragging = false;
+let currentSpeed = parseFloat(localStorage.getItem('serein_speed') || '1.0');
 
 function fmtTime(sec) {
   if (!isFinite(sec) || sec < 0) return '--:--';
-  const m = Math.floor(sec / 60);
-  const s = Math.floor(sec % 60);
-  return m + ':' + String(s).padStart(2, '0');
+  return Math.floor(sec/60) + ':' + String(Math.floor(sec%60)).padStart(2,'0');
 }
-
 function setPlayingUI(playing) {
-  iconPlay.style.display  = playing ? 'none'  : 'block';
+  iconPlay.style.display = playing ? 'none' : 'block';
   iconPause.style.display = playing ? 'block' : 'none';
 }
-
 function updateProgress() {
   if (!audio.duration || isDragging) return;
   const pct = audio.currentTime / audio.duration;
-  progressFill.style.width = (pct * 100) + '%';
-  progressThumb.style.left = (pct * 100) + '%';
-  timeCurrent.textContent  = fmtTime(audio.currentTime);
-  progressTrack.setAttribute('aria-valuenow', Math.round(pct * 100));
+  progressFill.style.width = (pct*100)+'%';
+  progressThumb.style.left = (pct*100)+'%';
+  timeCurrent.textContent = fmtTime(audio.currentTime);
+  progressTrack.setAttribute('aria-valuenow', Math.round(pct*100));
 }
-
 audio.addEventListener('timeupdate', updateProgress);
-
-audio.addEventListener('loadedmetadata', () => {
-  timeTotal.textContent = fmtTime(audio.duration);
-  audioLoading.textContent = '';
-  audio.playbackRate = currentSpeed;
-});
-
-audio.addEventListener('waiting',  () => { audioLoading.textContent = 'Chargement…'; });
-audio.addEventListener('playing',  () => {
-  audioLoading.textContent = '';
-  sessionStartTime = sessionStartTime || Date.now();
-  setPlayingUI(true);
-});
-audio.addEventListener('pause',    () => { setPlayingUI(false); });
-audio.addEventListener('error',    () => { audioLoading.textContent = '⚠️ Fichier audio introuvable. Vérifie le chemin sur le Pi.'; });
-
+audio.addEventListener('loadedmetadata', () => { timeTotal.textContent = fmtTime(audio.duration); audioLoading.textContent = ''; audio.playbackRate = currentSpeed; });
+audio.addEventListener('waiting', () => { audioLoading.textContent = 'Chargement…'; });
+audio.addEventListener('playing', () => { audioLoading.textContent = ''; sessionStartTime = sessionStartTime || Date.now(); setPlayingUI(true); });
+audio.addEventListener('pause', () => setPlayingUI(false));
+audio.addEventListener('error', () => { audioLoading.textContent = '⚠️ Fichier audio introuvable. Vérifie le chemin sur le Pi.'; });
 audio.addEventListener('ended', () => {
   setPlayingUI(false);
-  progressFill.style.width = '100%';
-  progressThumb.style.left = '100%';
-  const listenedMin = Math.max(1, Math.round(((Date.now() - (sessionStartTime || Date.now())) / 1000 + (audio.duration || 0)) / 60));
+  progressFill.style.width = '100%'; progressThumb.style.left = '100%';
+  const listenedMin = Math.max(1, Math.round(((Date.now()-(sessionStartTime||Date.now()))/1000+(audio.duration||0))/60));
   recordSession(listenedMin);
   sessionStartTime = null;
   ambianceAudio.pause();
@@ -1201,98 +544,146 @@ function launchPlayer(id, title, parcours, duree, filename, voice) {
   sessionStartTime = null;
   voice = voice || selectedVoice;
   const voiceFolder = voice === 'feminine' ? 'feminin' : 'masculin';
-  const voiceLabel  = voice === 'feminine' ? 'Voix féminine' : 'Voix masculine';
-
+  const voiceLabel = voice === 'feminine' ? 'Voix féminine' : 'Voix masculine';
   document.getElementById('player-title').textContent = title;
-  document.getElementById('player-meta').textContent  = parcours + ' · ' + duree;
+  document.getElementById('player-meta').textContent = parcours + ' · ' + duree;
   document.getElementById('player-voice-tag').textContent = voiceLabel;
   document.getElementById('complete-title').textContent = title;
   audioLoading.textContent = 'Chargement…';
-
-  progressFill.style.width = '0%';
-  progressThumb.style.left = '0%';
-  timeCurrent.textContent  = '0:00';
-  timeTotal.textContent    = '--:--';
+  progressFill.style.width = '0%'; progressThumb.style.left = '0%';
+  timeCurrent.textContent = '0:00'; timeTotal.textContent = '--:--';
   setPlayingUI(false);
   playerMain.classList.remove('hidden');
   completeScreen.classList.remove('visible');
-
   audio.src = 'assets/audio/' + voiceFolder + '/' + encodeURIComponent(filename);
   audio.load();
-  audio.play().catch(() => {
-    audioLoading.textContent = 'Appuie sur ▶ pour démarrer';
-  });
-
+  audio.play().catch(() => { audioLoading.textContent = 'Appuie sur ▶ pour démarrer'; });
   showScreen('player');
 }
 
-function togglePlay() {
-  if (!audio.src) return;
-  if (audio.paused) { audio.play(); } else { audio.pause(); }
-}
+function togglePlay() { if (!audio.src) return; audio.paused ? audio.play() : audio.pause(); }
 
-document.getElementById('btn-rewind').addEventListener('click', () => {
-  audio.currentTime = Math.max(0, audio.currentTime - 15);
-});
-document.getElementById('btn-forward').addEventListener('click', () => {
-  audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + 15);
-});
+document.getElementById('btn-rewind').addEventListener('click', () => { audio.currentTime = Math.max(0, audio.currentTime-15); });
+document.getElementById('btn-forward').addEventListener('click', () => { audio.currentTime = Math.min(audio.duration||0, audio.currentTime+15); });
 
 function seekTo(e) {
   if (!audio.duration) return;
   const rect = progressTrack.getBoundingClientRect();
-  const x    = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-  const pct  = Math.max(0, Math.min(1, x / rect.width));
+  const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+  const pct = Math.max(0, Math.min(1, x/rect.width));
   audio.currentTime = pct * audio.duration;
-  progressFill.style.width = (pct * 100) + '%';
-  progressThumb.style.left = (pct * 100) + '%';
+  progressFill.style.width = (pct*100)+'%'; progressThumb.style.left = (pct*100)+'%';
 }
-
-progressTrack.addEventListener('mousedown',  e => { isDragging = true; seekTo(e); });
-progressTrack.addEventListener('touchstart', e => { isDragging = true; seekTo(e); }, { passive: true });
-document.addEventListener('mousemove',  e => { if (isDragging) seekTo(e); });
-document.addEventListener('touchmove',  e => { if (isDragging) seekTo(e); }, { passive: true });
-document.addEventListener('mouseup',  () => { isDragging = false; });
-document.addEventListener('touchend', () => { isDragging = false; });
-
+progressTrack.addEventListener('mousedown', e => { isDragging=true; seekTo(e); });
+progressTrack.addEventListener('touchstart', e => { isDragging=true; seekTo(e); }, { passive:true });
+document.addEventListener('mousemove', e => { if (isDragging) seekTo(e); });
+document.addEventListener('touchmove', e => { if (isDragging) seekTo(e); }, { passive:true });
+document.addEventListener('mouseup', () => { isDragging=false; });
+document.addEventListener('touchend', () => { isDragging=false; });
 progressTrack.addEventListener('keydown', e => {
-  if (e.key === 'ArrowRight') audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + 5);
-  if (e.key === 'ArrowLeft')  audio.currentTime = Math.max(0, audio.currentTime - 5);
+  if (e.key==='ArrowRight') audio.currentTime = Math.min(audio.duration||0, audio.currentTime+5);
+  if (e.key==='ArrowLeft') audio.currentTime = Math.max(0, audio.currentTime-5);
 });
-
-document.getElementById('volume-slider').addEventListener('input', function() {
-  audio.volume = this.value;
-});
+document.getElementById('volume-slider').addEventListener('input', function() { audio.volume = this.value; });
 
 function setSpeed(rate) {
-  currentSpeed = rate;
-  audio.playbackRate = rate;
+  currentSpeed = rate; audio.playbackRate = rate;
   localStorage.setItem('serein_speed', rate);
-  document.querySelectorAll('.speed-btn').forEach(btn => {
-    btn.classList.toggle('active', parseFloat(btn.textContent.replace('×','')) === rate);
+  document.querySelectorAll('.speed-btn').forEach(btn => btn.classList.toggle('active', parseFloat(btn.textContent.replace('×',''))===rate));
+}
+(function() { document.querySelectorAll('.speed-btn').forEach(btn => btn.classList.toggle('active', parseFloat(btn.textContent.replace('×',''))===currentSpeed)); })();
+
+function stopAndReturn() { audio.pause(); ambianceAudio.pause(); showScreen('explore'); }
+function replaySession() { playerMain.classList.remove('hidden'); completeScreen.classList.remove('visible'); audio.currentTime=0; audio.play(); }
+
+let currentAmbiance = null;
+function setAmbiance(filename) {
+  document.querySelectorAll('.ambiance-btn').forEach(b => b.classList.remove('active'));
+  const volWrap = document.getElementById('ambiance-volume-wrap');
+  if (!filename) {
+    ambianceAudio.pause(); ambianceAudio.src = ''; currentAmbiance = null;
+    document.getElementById('amb-off').classList.add('active');
+    volWrap.style.display = 'none';
+    document.getElementById('ambiance-settings-tag').textContent = 'Aucun';
+    return;
+  }
+  currentAmbiance = filename;
+  ambianceAudio.src = 'assets/audio/ambiance/' + encodeURIComponent(filename);
+  ambianceAudio.volume = parseFloat(document.getElementById('ambiance-volume-slider').value);
+  ambianceAudio.play().catch(()=>{});
+  volWrap.style.display = 'flex';
+  const idMap = {'pluie.mp3':'amb-pluie','foret.mp3':'amb-foret','vagues.mp3':'amb-vagues','feu.mp3':'amb-feu','bruit-blanc.mp3':'amb-blanc'};
+  if (idMap[filename]) document.getElementById(idMap[filename]).classList.add('active');
+  const labelMap = {'pluie.mp3':'Pluie','foret.mp3':'Forêt','vagues.mp3':'Vagues','feu.mp3':'Feu','bruit-blanc.mp3':'Bruit blanc'};
+  document.getElementById('ambiance-settings-tag').textContent = labelMap[filename] || filename;
+}
+document.getElementById('ambiance-volume-slider').addEventListener('input', function() { ambianceAudio.volume = this.value; });
+
+function toggleOfflineCache(btn, filename) {
+  if (btn.classList.contains('cached')) return;
+  if (!swReady || !navigator.serviceWorker.controller) { alert('Le service worker n\'est pas encore prêt, réessaie dans un instant.'); return; }
+  btn.classList.add('loading'); btn.textContent = '⏳'; btn.dataset.filename = filename;
+  const urls = [
+    location.origin + '/assets/audio/masculin/' + encodeURIComponent(filename),
+    location.origin + '/assets/audio/feminin/' + encodeURIComponent(filename)
+  ];
+  navigator.serviceWorker.controller.postMessage({ type: 'CACHE_AUDIO', urls });
+}
+function markButtonCached(filename) {
+  document.querySelectorAll('.btn-offline').forEach(btn => {
+    if (decodeURIComponent(btn.dataset.filename||'') === decodeURIComponent(filename)) {
+      btn.classList.remove('loading'); btn.classList.add('cached'); btn.textContent = '✓'; btn.title = 'Disponible hors ligne';
+    }
   });
 }
-
-(function() {
-  document.querySelectorAll('.speed-btn').forEach(btn => {
-    btn.classList.toggle('active', parseFloat(btn.textContent.replace('×','')) === currentSpeed);
+function updateOfflineCount() {
+  const cached = document.querySelectorAll('.btn-offline.cached').length;
+  const tag = document.getElementById('offline-count-tag');
+  if (tag) tag.textContent = cached + (cached <= 1 ? ' séance' : ' séances');
+}
+function checkAllCacheStatus() {
+  if (!navigator.serviceWorker.controller) return;
+  document.querySelectorAll('.btn-offline[data-filename]').forEach(btn => {
+    navigator.serviceWorker.controller.postMessage({ type: 'CHECK_CACHE', url: location.origin+'/assets/audio/masculin/'+encodeURIComponent(btn.dataset.filename) });
   });
+}
+if ('serviceWorker' in navigator) { navigator.serviceWorker.ready.then(() => { setTimeout(checkAllCacheStatus, 800); }); }
+
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.getElementById('theme-toggle').textContent = isDark ? '🌙 Sombre' : '☀️ Clair';
+  localStorage.setItem('theme', isDark ? 'light' : 'dark');
+}
+(function() {
+  const saved = localStorage.getItem('theme');
+  if (saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
 })();
 
-function stopAndReturn() {
-  audio.pause();
-  ambianceAudio.pause();
-  showScreen('explore');
-}
+document.addEventListener('DOMContentLoaded', () => {
+  const saved = localStorage.getItem('theme');
+  const btn = document.getElementById('theme-toggle');
+  if (btn && saved === 'dark') btn.textContent = '☀️ Clair';
+  loadStats();
+});
 
-function replaySession() {
-  playerMain.classList.remove('hidden');
-  completeScreen.classList.remove('visible');
-  audio.currentTime = 0;
-  audio.play();
+function loadStats() {
+  const s = JSON.parse(localStorage.getItem('serein_stats') || '{"sessions":0,"minutes":0,"streak":0,"lastDate":""}');
+  document.getElementById('stat-streak').textContent = s.streak;
+  document.getElementById('stat-sessions').textContent = s.sessions;
+  const h = Math.floor(s.minutes/60), m = s.minutes%60;
+  document.getElementById('stat-time').textContent = h > 0 ? h+'h '+m+'min' : m+' min';
 }
-
-// ════════════════════════════════════════════
-//  SON D'AMBIANCE
-// ════════════════════════════════════════════
-let 
+function recordSession(minutes) {
+  const s = JSON.parse(localStorage.getItem('serein_stats') || '{"sessions":0,"minutes":0,"streak":0,"lastDate":""}');
+  const today = new Date().toISOString().slice(0,10);
+  const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
+  if (s.lastDate !== today) s.streak = (s.lastDate === yesterday) ? s.streak+1 : 1;
+  s.lastDate = today; s.sessions += 1; s.minutes += minutes;
+  localStorage.setItem('serein_stats', JSON.stringify(s));
+  loadStats();
+}
+</script>
+</body>
+</html>
