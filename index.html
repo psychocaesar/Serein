@@ -180,58 +180,36 @@
       background: var(--color-primary); cursor: pointer;
     }
 
-    /* ── Vitesse de lecture ─────────────────────────────────────────────────── */
+    /* Vitesse de lecture */
     .speed-wrap {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: .4rem;
-      margin-top: .85rem;
-      flex-wrap: wrap;
+      display: flex; align-items: center; justify-content: center;
+      gap: .4rem; margin-top: .85rem; flex-wrap: wrap;
     }
     .speed-label {
-      font-size: .75rem;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      color: var(--color-muted);
-      margin-right: .25rem;
+      font-size: .75rem; text-transform: uppercase;
+      letter-spacing: .08em; color: var(--color-muted); margin-right: .25rem;
     }
     .speed-btn {
-      background: var(--color-primary-light);
-      color: var(--color-primary);
-      border: 2px solid transparent;
-      border-radius: 999px;
-      padding: .25rem .6rem;
-      font-size: .8rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all .18s;
+      background: var(--color-primary-light); color: var(--color-primary);
+      border: 2px solid transparent; border-radius: 999px;
+      padding: .25rem .6rem; font-size: .8rem; font-weight: 600;
+      cursor: pointer; transition: all .18s;
     }
-    .speed-btn.active {
-      background: var(--color-primary);
-      color: #fff;
-      border-color: var(--color-primary);
-    }
+    .speed-btn.active { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
     .speed-btn:hover:not(.active) { opacity: .75; }
 
-    /* ── Bouton hors-ligne sur les cards ────────────────────────────────────── */
+    /* Bouton hors-ligne */
     .session-actions { display: flex; align-items: center; gap: .5rem; flex-shrink: 0; }
     .btn-offline {
       width: 36px; height: 36px; border-radius: 50%;
       border: 1px solid var(--color-border);
-      background: var(--color-surface);
-      color: var(--color-muted);
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      font-size: .9rem;
-      transition: all .2s;
-      flex-shrink: 0;
-      position: relative;
+      background: var(--color-surface); color: var(--color-muted);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      font-size: .9rem; transition: all .2s; flex-shrink: 0;
     }
     .btn-offline:hover { border-color: var(--color-primary); color: var(--color-primary); }
     .btn-offline.cached { background: var(--color-primary-light); border-color: var(--color-primary); color: var(--color-primary); }
     .btn-offline.loading { opacity: .6; cursor: wait; }
-    .btn-offline title { display: none; }
 
     .complete-screen { display: none; text-align: center; padding: 2rem 0; }
     .complete-screen.visible { display: block; }
@@ -252,13 +230,9 @@
     .footer-note { text-align: center; font-size: .8rem; color: var(--color-muted); padding: 2rem 1rem; }
 
     .player-voice-tag {
-      display: inline-block;
-      font-size: .72rem;
-      background: var(--color-primary-light);
-      color: var(--color-primary);
-      border-radius: 999px;
-      padding: .2rem .65rem;
-      margin-bottom: .75rem;
+      display: inline-block; font-size: .72rem;
+      background: var(--color-primary-light); color: var(--color-primary);
+      border-radius: 999px; padding: .2rem .65rem; margin-bottom: .75rem;
     }
 
     @media (max-width: 480px) {
@@ -276,23 +250,11 @@
       --color-border: rgba(255,255,255,.08);
     }
 
-    .stats-widget {
-      display: flex;
-      gap: .75rem;
-      margin-top: 2rem;
-      margin-bottom: 1.5rem;
-      flex-wrap: wrap;
-    }
+    .stats-widget { display: flex; gap: .75rem; margin-top: 2rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
     .stat-chip {
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-sm);
-      padding: .6rem 1rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      flex: 1;
-      min-width: 80px;
+      background: var(--color-surface); border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm); padding: .6rem 1rem;
+      display: flex; flex-direction: column; align-items: center; flex: 1; min-width: 80px;
     }
     .stat-chip .stat-value { font-size: 1.3rem; font-weight: 700; color: var(--color-primary); line-height: 1.1; }
     .stat-chip .stat-label { font-size: .7rem; color: var(--color-muted); margin-top: .2rem; text-align: center; }
@@ -302,184 +264,84 @@
     .insta-icon {
       width: 36px; height: 36px; border-radius: 10px;
       background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
     }
     .insta-icon svg { width: 20px; height: 20px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
     .insta-text .insta-title { font-size: .95rem; font-weight: 600; }
     .insta-text .insta-handle { font-size: .8rem; color: var(--color-muted); }
 
     .badge-coming {
-      font-size: 0.65rem;
-      background: var(--color-muted);
-      color: #fff;
-      border-radius: 4px;
-      padding: 1px 6px;
-      vertical-align: middle;
-      margin-left: 4px;
+      font-size: 0.65rem; background: var(--color-muted); color: #fff;
+      border-radius: 4px; padding: 1px 6px; vertical-align: middle; margin-left: 4px;
     }
     button[disabled] { opacity: 0.45; cursor: not-allowed; }
 
-    .ambiance-section {
-      margin-top: 1.25rem;
-      padding-top: 1rem;
-      border-top: 1px solid var(--color-border);
-      text-align: center;
-    }
-    .ambiance-label {
-      font-size: .75rem;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      color: var(--color-muted);
-      margin-bottom: .6rem;
-    }
-    .ambiance-btns {
-      display: flex;
-      justify-content: center;
-      gap: .4rem;
-      flex-wrap: wrap;
-      margin-bottom: .75rem;
-    }
+    .ambiance-section { margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--color-border); text-align: center; }
+    .ambiance-label { font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; color: var(--color-muted); margin-bottom: .6rem; }
+    .ambiance-btns { display: flex; justify-content: center; gap: .4rem; flex-wrap: wrap; margin-bottom: .75rem; }
     .ambiance-btn {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: .2rem;
-      background: var(--color-primary-light);
-      border: 2px solid transparent;
-      border-radius: var(--radius-sm);
-      padding: .45rem .6rem;
-      font-size: 1.1rem;
-      cursor: pointer;
-      transition: all .2s;
-      min-width: 52px;
-      color: var(--color-text);
+      display: flex; flex-direction: column; align-items: center; gap: .2rem;
+      background: var(--color-primary-light); border: 2px solid transparent;
+      border-radius: var(--radius-sm); padding: .45rem .6rem; font-size: 1.1rem;
+      cursor: pointer; transition: all .2s; min-width: 52px; color: var(--color-text);
     }
     .ambiance-btn span { font-size: .62rem; color: var(--color-muted); line-height: 1; }
-    .ambiance-btn.active {
-      border-color: var(--color-primary);
-      box-shadow: 0 0 0 2px var(--color-primary);
-    }
-    .ambiance-volume-wrap {
-      display: flex;
-      align-items: center;
-      gap: .6rem;
-      justify-content: center;
-      margin-top: .25rem;
-    }
+    .ambiance-btn.active { border-color: var(--color-primary); box-shadow: 0 0 0 2px var(--color-primary); }
+    .ambiance-volume-wrap { display: flex; align-items: center; gap: .6rem; justify-content: center; margin-top: .25rem; }
     .ambiance-volume-wrap span { font-size: .85rem; }
 
     .voice-overlay-backdrop {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.45);
-      z-index: 200;
-      align-items: flex-end;
-      justify-content: center;
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.45); z-index: 200;
+      align-items: flex-end; justify-content: center;
     }
-    .voice-overlay-backdrop.open {
-      display: flex;
-      animation: fadeInBd .2s ease;
-    }
+    .voice-overlay-backdrop.open { display: flex; animation: fadeInBd .2s ease; }
     @keyframes fadeInBd { from { opacity: 0; } to { opacity: 1; } }
 
     .voice-sheet {
       background: var(--color-surface);
       border-radius: var(--radius) var(--radius) 0 0;
       padding: 1.5rem 1.5rem 2.5rem;
-      width: 100%;
-      max-width: 480px;
+      width: 100%; max-width: 480px;
       animation: slideUp .25s cubic-bezier(.16,1,.3,1);
     }
     @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
-    .voice-sheet-title {
-      font-size: .75rem;
-      text-transform: uppercase;
-      letter-spacing: .1em;
-      color: var(--color-muted);
-      margin-bottom: 1rem;
-      text-align: center;
-    }
-    .voice-sheet-options {
-      display: flex;
-      flex-direction: column;
-      gap: .6rem;
-      margin-bottom: 1.25rem;
-    }
+    .voice-sheet-title { font-size: .75rem; text-transform: uppercase; letter-spacing: .1em; color: var(--color-muted); margin-bottom: 1rem; text-align: center; }
+    .voice-sheet-options { display: flex; flex-direction: column; gap: .6rem; margin-bottom: 1.25rem; }
     .voice-option {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      padding: .85rem 1rem;
-      border-radius: var(--radius-sm);
-      border: 2px solid var(--color-border);
-      background: var(--color-bg);
-      cursor: pointer;
-      transition: all .18s;
-      text-align: left;
+      display: flex; align-items: center; gap: 1rem;
+      padding: .85rem 1rem; border-radius: var(--radius-sm);
+      border: 2px solid var(--color-border); background: var(--color-bg);
+      cursor: pointer; transition: all .18s; text-align: left;
     }
-    .voice-option:hover {
-      border-color: var(--color-primary);
-      background: var(--color-primary-light);
-    }
-    .voice-option.selected {
-      border-color: var(--color-primary);
-      background: var(--color-primary-light);
-    }
-    .voice-option-icon {
-      font-size: 1.4rem;
-      line-height: 1;
-      flex-shrink: 0;
-    }
+    .voice-option:hover { border-color: var(--color-primary); background: var(--color-primary-light); }
+    .voice-option.selected { border-color: var(--color-primary); background: var(--color-primary-light); }
+    .voice-option-icon { font-size: 1.4rem; line-height: 1; flex-shrink: 0; }
     .voice-option-info { flex: 1; }
     .voice-option-name { font-size: .95rem; font-weight: 600; color: var(--color-text); }
     .voice-option-desc { font-size: .78rem; color: var(--color-muted); margin-top: .1rem; }
     .voice-option-check {
-      width: 20px; height: 20px;
-      border-radius: 50%;
+      width: 20px; height: 20px; border-radius: 50%;
       border: 2px solid var(--color-border);
       display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-      transition: all .18s;
+      flex-shrink: 0; transition: all .18s;
     }
-    .voice-option.selected .voice-option-check {
-      background: var(--color-primary);
-      border-color: var(--color-primary);
-    }
+    .voice-option.selected .voice-option-check { background: var(--color-primary); border-color: var(--color-primary); }
     .voice-option.selected .voice-option-check::after {
-      content: '';
-      display: block;
-      width: 5px; height: 9px;
-      border: 2px solid #fff;
-      border-top: none; border-left: none;
+      content: ''; display: block; width: 5px; height: 9px;
+      border: 2px solid #fff; border-top: none; border-left: none;
       transform: rotate(45deg) translate(-1px, -1px);
     }
     .voice-sheet-launch {
-      width: 100%;
-      padding: .95rem;
-      background: var(--color-primary);
-      color: #fff;
-      border: none;
-      border-radius: 999px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: opacity .2s;
+      width: 100%; padding: .95rem; background: var(--color-primary); color: #fff;
+      border: none; border-radius: 999px; font-size: 1rem; font-weight: 600;
+      cursor: pointer; transition: opacity .2s;
     }
     .voice-sheet-launch:hover { opacity: .85; }
     .voice-sheet-cancel {
-      display: block;
-      width: 100%;
-      text-align: center;
-      margin-top: .75rem;
-      font-size: .85rem;
-      color: var(--color-muted);
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: .4rem;
+      display: block; width: 100%; text-align: center; margin-top: .75rem;
+      font-size: .85rem; color: var(--color-muted); background: none; border: none; cursor: pointer; padding: .4rem;
     }
   </style>
 </head>
@@ -515,10 +377,7 @@
   <header>
     <p class="eyebrow">Serein</p>
     <h1>Respirer, s'apaiser, se recentrer.</h1>
-    <p class="lead">
-      Des séances guidées en français pour t'aider à retrouver un peu d'espace,
-      sans publicité, sans paywall agressif et sans tracking tiers.
-    </p>
+    <p class="lead">Des séances guidées en français pour t'aider à retrouver un peu d'espace, sans publicité, sans paywall agressif et sans tracking tiers.</p>
     <div class="actions">
       <button class="btn btn-primary" onclick="showScreen('explore')">Commencer</button>
       <button class="btn btn-ghost" onclick="showScreen('settings')">À propos</button>
@@ -616,7 +475,7 @@
         <p>Premiers pas · 5 min</p>
       </div>
       <div class="session-actions">
-        <button class="btn-offline" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this, 'Méditation Premiere Respiration Consciente.mp3')">⬇</button>
+        <button class="btn-offline" data-file="Méditation Premiere Respiration Consciente.mp3" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this)">⬇</button>
         <button class="btn btn-primary" onclick="launchPlayer('premiere-respiration-consciente', 'Première respiration consciente', 'Premiers pas', '5 min', 'Méditation Premiere Respiration Consciente.mp3', false)">Lancer</button>
       </div>
     </article>
@@ -626,7 +485,7 @@
         <p>Premiers pas · 5 min</p>
       </div>
       <div class="session-actions">
-        <button class="btn-offline" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this, 'Revenir au souffle.mp3')">⬇</button>
+        <button class="btn-offline" data-file="Revenir au souffle.mp3" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this)">⬇</button>
         <button class="btn btn-primary" onclick="launchPlayer('sasseoir-ne-rien-faire', 'S\'asseoir, ne rien faire', 'Premiers pas', '5 min', 'Revenir au souffle.mp3', false)">Lancer</button>
       </div>
     </article>
@@ -636,7 +495,7 @@
         <p>Premiers pas · 9 min</p>
       </div>
       <div class="session-actions">
-        <button class="btn-offline" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this, 'Observer ses pensées sans les juger.mp3')">⬇</button>
+        <button class="btn-offline" data-file="Observer ses pensées sans les juger.mp3" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this)">⬇</button>
         <button class="btn btn-primary" onclick="launchPlayer('observer-ses-pensees', 'Observer ses pensées sans les juger', 'Premiers pas', '9 min', 'Observer ses pensées sans les juger.mp3', true)">Lancer</button>
       </div>
     </article>
@@ -646,75 +505,30 @@
         <p>Premiers pas · 10 min</p>
       </div>
       <div class="session-actions">
-        <button class="btn-offline" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this, 'Le scan corporel - découvrir ses sensations.mp3')">⬇</button>
+        <button class="btn-offline" data-file="Le scan corporel - découvrir ses sensations.mp3" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this)">⬇</button>
         <button class="btn btn-primary" onclick="launchPlayer('scan-corporel-sensations', 'Le scan corporel — découvrir ses sensations', 'Premiers pas', '10 min', 'Le scan corporel - découvrir ses sensations.mp3', false)">Lancer</button>
       </div>
     </article>
     <article class="card session-card" data-parcours="Premiers pas">
-      <div class="session-info">
-        <h3>Revenir à l'instant présent <span class="badge-coming">À venir</span></h3>
-        <p>Premiers pas · 7 min</p>
-      </div>
+      <div class="session-info"><h3>Revenir à l'instant présent <span class="badge-coming">À venir</span></h3><p>Premiers pas · 7 min</p></div>
       <button class="btn btn-primary" disabled>Bientôt</button>
     </article>
     <article class="card session-card" data-parcours="Premiers pas">
-      <div class="session-info">
-        <h3>La bienveillance envers soi <span class="badge-coming">À venir</span></h3>
-        <p>Premiers pas · 10 min</p>
-      </div>
+      <div class="session-info"><h3>La bienveillance envers soi <span class="badge-coming">À venir</span></h3><p>Premiers pas · 10 min</p></div>
       <button class="btn btn-primary" disabled>Bientôt</button>
     </article>
     <article class="card session-card" data-parcours="Premiers pas">
-      <div class="session-info">
-        <h3>Mon ancre personnelle <span class="badge-coming">À venir</span></h3>
-        <p>Premiers pas · 10 min</p>
-      </div>
+      <div class="session-info"><h3>Mon ancre personnelle <span class="badge-coming">À venir</span></h3><p>Premiers pas · 10 min</p></div>
       <button class="btn btn-primary" disabled>Bientôt</button>
     </article>
 
     <!-- CALME & STRESS -->
-    <article class="card session-card" data-parcours="Calme &amp; Stress">
-      <div class="session-info">
-        <h3>SOS Stress en 3 minutes <span class="badge-coming">À venir</span></h3>
-        <p>Calme &amp; Stress · 3 min</p>
-      </div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
-    <article class="card session-card" data-parcours="Calme &amp; Stress">
-      <div class="session-info">
-        <h3>Lâcher prise sur l'urgence <span class="badge-coming">À venir</span></h3>
-        <p>Calme &amp; Stress · 7 min</p>
-      </div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
-    <article class="card session-card" data-parcours="Calme &amp; Stress">
-      <div class="session-info">
-        <h3>La cohérence cardiaque guidée <span class="badge-coming">À venir</span></h3>
-        <p>Calme &amp; Stress · 5 min</p>
-      </div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
-    <article class="card session-card" data-parcours="Calme &amp; Stress">
-      <div class="session-info">
-        <h3>Le corps qui tient le stress <span class="badge-coming">À venir</span></h3>
-        <p>Calme &amp; Stress · 10 min</p>
-      </div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
-    <article class="card session-card" data-parcours="Calme &amp; Stress">
-      <div class="session-info">
-        <h3>Fin de journée — déposer le poids <span class="badge-coming">À venir</span></h3>
-        <p>Calme &amp; Stress · 12 min</p>
-      </div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
-    <article class="card session-card" data-parcours="Calme &amp; Stress">
-      <div class="session-info">
-        <h3>Transformer le stress en énergie <span class="badge-coming">À venir</span></h3>
-        <p>Calme &amp; Stress · 10 min</p>
-      </div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
+    <article class="card session-card" data-parcours="Calme &amp; Stress"><div class="session-info"><h3>SOS Stress en 3 minutes <span class="badge-coming">À venir</span></h3><p>Calme &amp; Stress · 3 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
+    <article class="card session-card" data-parcours="Calme &amp; Stress"><div class="session-info"><h3>Lâcher prise sur l'urgence <span class="badge-coming">À venir</span></h3><p>Calme &amp; Stress · 7 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
+    <article class="card session-card" data-parcours="Calme &amp; Stress"><div class="session-info"><h3>La cohérence cardiaque guidée <span class="badge-coming">À venir</span></h3><p>Calme &amp; Stress · 5 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
+    <article class="card session-card" data-parcours="Calme &amp; Stress"><div class="session-info"><h3>Le corps qui tient le stress <span class="badge-coming">À venir</span></h3><p>Calme &amp; Stress · 10 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
+    <article class="card session-card" data-parcours="Calme &amp; Stress"><div class="session-info"><h3>Fin de journée — déposer le poids <span class="badge-coming">À venir</span></h3><p>Calme &amp; Stress · 12 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
+    <article class="card session-card" data-parcours="Calme &amp; Stress"><div class="session-info"><h3>Transformer le stress en énergie <span class="badge-coming">À venir</span></h3><p>Calme &amp; Stress · 10 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
 
     <!-- SOMMEIL -->
     <article class="card session-card" data-parcours="Sommeil">
@@ -723,85 +537,31 @@
         <p>Sommeil · 10 min</p>
       </div>
       <div class="session-actions">
-        <button class="btn-offline" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this, 'Préparer le sommeil.mp3')">⬇</button>
+        <button class="btn-offline" data-file="Préparer le sommeil.mp3" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this)">⬇</button>
         <button class="btn btn-primary" onclick="launchPlayer('rituel-deconnexion', 'Rituel de déconnexion', 'Sommeil', '10 min', 'Préparer le sommeil.mp3', false)">Lancer</button>
       </div>
     </article>
-    <article class="card session-card" data-parcours="Sommeil">
-      <div class="session-info">
-        <h3>Relâcher le corps, couche après couche <span class="badge-coming">À venir</span></h3>
-        <p>Sommeil · 12 min</p>
-      </div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
-    <article class="card session-card" data-parcours="Sommeil">
-      <div class="session-info">
-        <h3>Le voyage intérieur <span class="badge-coming">À venir</span></h3>
-        <p>Sommeil · 15 min</p>
-      </div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
-    <article class="card session-card" data-parcours="Sommeil">
-      <div class="session-info">
-        <h3>Sons &amp; silence — endormissement profond <span class="badge-coming">À venir</span></h3>
-        <p>Sommeil · 20 min</p>
-      </div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
+    <article class="card session-card" data-parcours="Sommeil"><div class="session-info"><h3>Relâcher le corps, couche après couche <span class="badge-coming">À venir</span></h3><p>Sommeil · 12 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
+    <article class="card session-card" data-parcours="Sommeil"><div class="session-info"><h3>Le voyage intérieur <span class="badge-coming">À venir</span></h3><p>Sommeil · 15 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
+    <article class="card session-card" data-parcours="Sommeil"><div class="session-info"><h3>Sons &amp; silence — endormissement profond <span class="badge-coming">À venir</span></h3><p>Sommeil · 20 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
     <article class="card session-card" data-parcours="Sommeil">
       <div class="session-info">
         <h3>Réveils nocturnes — retrouver le calme</h3>
         <p>Sommeil · 18 min</p>
       </div>
       <div class="session-actions">
-        <button class="btn-offline" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this, 'Reveils nocturnes-retrouver le calme.mp3')">⬇</button>
+        <button class="btn-offline" data-file="Reveils nocturnes-retrouver le calme.mp3" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this)">⬇</button>
         <button class="btn btn-primary" onclick="launchPlayer('reveils-nocturnes-calme', 'Réveils nocturnes — retrouver le calme', 'Sommeil', '18 min', 'Reveils nocturnes-retrouver le calme.mp3', false)">Lancer</button>
       </div>
     </article>
-    <article class="card session-card" data-parcours="Sommeil">
-      <div class="session-info">
-        <h3>Méditation du matin reposé <span class="badge-coming">À venir</span></h3>
-        <p>Sommeil · 7 min</p>
-      </div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
+    <article class="card session-card" data-parcours="Sommeil"><div class="session-info"><h3>Méditation du matin reposé <span class="badge-coming">À venir</span></h3><p>Sommeil · 7 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
 
     <!-- RESPIRER -->
-    <article class="card session-card" data-parcours="Respirer">
-      <div class="session-info">
-        <h3>La respiration naturelle <span class="badge-coming">À venir</span></h3>
-        <p>Respirer · 5 min</p>
-      </div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
-    <article class="card session-card" data-parcours="Respirer">
-      <div class="session-info">
-        <h3>Cohérence cardiaque 5-5 <span class="badge-coming">À venir</span></h3>
-        <p>Respirer · 5 min</p>
-      </div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
-    <article class="card session-card" data-parcours="Respirer">
-      <div class="session-info">
-        <h3>Respiration 4-7-8 — calme profond <span class="badge-coming">À venir</span></h3>
-        <p>Respirer · 7 min</p>
-      </div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
-    <article class="card session-card" data-parcours="Respirer">
-      <div class="session-info">
-        <h3>Box breathing <span class="badge-coming">À venir</span></h3>
-        <p>Respirer · 8 min</p>
-      </div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
-    <article class="card session-card" data-parcours="Respirer">
-      <div class="session-info">
-        <h3>Souffle et énergie — la respiration activante <span class="badge-coming">À venir</span></h3>
-        <p>Respirer · 10 min</p>
-      </div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
+    <article class="card session-card" data-parcours="Respirer"><div class="session-info"><h3>La respiration naturelle <span class="badge-coming">À venir</span></h3><p>Respirer · 5 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
+    <article class="card session-card" data-parcours="Respirer"><div class="session-info"><h3>Cohérence cardiaque 5-5 <span class="badge-coming">À venir</span></h3><p>Respirer · 5 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
+    <article class="card session-card" data-parcours="Respirer"><div class="session-info"><h3>Respiration 4-7-8 — calme profond <span class="badge-coming">À venir</span></h3><p>Respirer · 7 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
+    <article class="card session-card" data-parcours="Respirer"><div class="session-info"><h3>Box breathing <span class="badge-coming">À venir</span></h3><p>Respirer · 8 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
+    <article class="card session-card" data-parcours="Respirer"><div class="session-info"><h3>Souffle et énergie — la respiration activante <span class="badge-coming">À venir</span></h3><p>Respirer · 10 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
 
     <!-- ANXIÉTÉ -->
     <article class="card session-card" data-parcours="Anxiété">
@@ -810,7 +570,7 @@
         <p>Anxiété · 5 min</p>
       </div>
       <div class="session-actions">
-        <button class="btn-offline" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this, 'SOS Anxiété ancrage immédiat.mp3')">⬇</button>
+        <button class="btn-offline" data-file="SOS Anxiété ancrage immédiat.mp3" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this)">⬇</button>
         <button class="btn btn-primary" onclick="launchPlayer('sos-anxiete-ancrage-immediat', 'SOS Anxiété — ancrage immédiat', 'Anxiété', '5 min', 'SOS Anxiété ancrage immédiat.mp3', false)">Lancer</button>
       </div>
     </article>
@@ -820,7 +580,7 @@
         <p>Anxiété · 10 min</p>
       </div>
       <div class="session-actions">
-        <button class="btn-offline" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this, 'Accueillir l\'anxiété sans la combattre.mp3')">⬇</button>
+        <button class="btn-offline" data-file="Accueillir l'anxiété sans la combattre.mp3" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this)">⬇</button>
         <button class="btn btn-primary" onclick="launchPlayer('accueillir-anxiete', 'Accueillir l\'anxiété sans la combattre', 'Anxiété', '10 min', 'Accueillir l\'anxiété sans la combattre.mp3', false)">Lancer</button>
       </div>
     </article>
@@ -830,7 +590,7 @@
         <p>Anxiété · 8 min</p>
       </div>
       <div class="session-actions">
-        <button class="btn-offline" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this, 'Les sons autour de toi.mp3')">⬇</button>
+        <button class="btn-offline" data-file="Les sons autour de toi.mp3" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this)">⬇</button>
         <button class="btn btn-primary" onclick="launchPlayer('les-sons-autour-de-toi', 'Les sons autour de toi', 'Anxiété', '8 min', 'Les sons autour de toi.mp3', false)">Lancer</button>
       </div>
     </article>
@@ -840,68 +600,20 @@
         <p>Anxiété · 9 min</p>
       </div>
       <div class="session-actions">
-        <button class="btn-offline" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this, 'La pensée qui tourne en boucle.mp3')">⬇</button>
+        <button class="btn-offline" data-file="La pensée qui tourne en boucle.mp3" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this)">⬇</button>
         <button class="btn btn-primary" onclick="launchPlayer('pensee-tourne-boucle', 'La pensée qui tourne en boucle', 'Anxiété', '9 min', 'La pensée qui tourne en boucle.mp3', false)">Lancer</button>
       </div>
     </article>
-    <article class="card session-card" data-parcours="Anxiété">
-      <div class="session-info">
-        <h3>Mon corps face à la peur <span class="badge-coming">À venir</span></h3>
-        <p>Anxiété · 9 min</p>
-      </div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
-    <article class="card session-card" data-parcours="Anxiété">
-      <div class="session-info">
-        <h3>Technique 5-4-3-2-1 guidée <span class="badge-coming">À venir</span></h3>
-        <p>Anxiété · 7 min</p>
-      </div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
-    <article class="card session-card" data-parcours="Anxiété">
-      <div class="session-info">
-        <h3>Créer mon espace de sécurité intérieur <span class="badge-coming">À venir</span></h3>
-        <p>Anxiété · 12 min</p>
-      </div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
+    <article class="card session-card" data-parcours="Anxiété"><div class="session-info"><h3>Mon corps face à la peur <span class="badge-coming">À venir</span></h3><p>Anxiété · 9 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
+    <article class="card session-card" data-parcours="Anxiété"><div class="session-info"><h3>Technique 5-4-3-2-1 guidée <span class="badge-coming">À venir</span></h3><p>Anxiété · 7 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
+    <article class="card session-card" data-parcours="Anxiété"><div class="session-info"><h3>Créer mon espace de sécurité intérieur <span class="badge-coming">À venir</span></h3><p>Anxiété · 12 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
 
     <!-- CONCENTRATION -->
-    <article class="card session-card" data-parcours="Concentration">
-      <div class="session-info">
-        <h3>Mise en route mentale <span class="badge-coming">À venir</span></h3>
-        <p>Concentration · 5 min</p>
-      </div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
-    <article class="card session-card" data-parcours="Concentration">
-      <div class="session-info">
-        <h3>Pleine conscience de la tâche <span class="badge-coming">À venir</span></h3>
-        <p>Concentration · 7 min</p>
-      </div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
-    <article class="card session-card" data-parcours="Concentration">
-      <div class="session-info">
-        <h3>Récupération rapide entre deux efforts <span class="badge-coming">À venir</span></h3>
-        <p>Concentration · 5 min</p>
-      </div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
-    <article class="card session-card" data-parcours="Concentration">
-      <div class="session-info">
-        <h3>Clarté mentale — faire le vide <span class="badge-coming">À venir</span></h3>
-        <p>Concentration · 10 min</p>
-      </div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
-    <article class="card session-card" data-parcours="Concentration">
-      <div class="session-info">
-        <h3>Flow — entrer dans la zone <span class="badge-coming">À venir</span></h3>
-        <p>Concentration · 12 min</p>
-      </div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
-    </article>
+    <article class="card session-card" data-parcours="Concentration"><div class="session-info"><h3>Mise en route mentale <span class="badge-coming">À venir</span></h3><p>Concentration · 5 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
+    <article class="card session-card" data-parcours="Concentration"><div class="session-info"><h3>Pleine conscience de la tâche <span class="badge-coming">À venir</span></h3><p>Concentration · 7 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
+    <article class="card session-card" data-parcours="Concentration"><div class="session-info"><h3>Récupération rapide entre deux efforts <span class="badge-coming">À venir</span></h3><p>Concentration · 5 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
+    <article class="card session-card" data-parcours="Concentration"><div class="session-info"><h3>Clarté mentale — faire le vide <span class="badge-coming">À venir</span></h3><p>Concentration · 10 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
+    <article class="card session-card" data-parcours="Concentration"><div class="session-info"><h3>Flow — entrer dans la zone <span class="badge-coming">À venir</span></h3><p>Concentration · 12 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
 
   </div>
 
@@ -940,16 +652,12 @@
       </div>
 
       <div class="player-controls">
-        <button class="btn-skip" id="btn-rewind" title="Reculer 15s" aria-label="Reculer de 15 secondes">
-          ↺<span>15s</span>
-        </button>
+        <button class="btn-skip" id="btn-rewind" title="Reculer 15s" aria-label="Reculer de 15 secondes">↺<span>15s</span></button>
         <button class="btn-play" id="play-btn" onclick="togglePlay()" aria-label="Lecture / Pause">
           <svg id="icon-play" viewBox="0 0 24 24" width="28" height="28" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
           <svg id="icon-pause" viewBox="0 0 24 24" width="28" height="28" fill="white" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
         </button>
-        <button class="btn-skip" id="btn-forward" title="Avancer 15s" aria-label="Avancer de 15 secondes">
-          ↻<span>15s</span>
-        </button>
+        <button class="btn-skip" id="btn-forward" title="Avancer 15s" aria-label="Avancer de 15 secondes">↻<span>15s</span></button>
       </div>
 
       <div class="volume-wrap">
@@ -958,14 +666,13 @@
         <span>🔊</span>
       </div>
 
-      <!-- Contrôle de vitesse -->
       <div class="speed-wrap" id="speed-wrap">
         <span class="speed-label">Vitesse</span>
         <button class="speed-btn" onclick="setSpeed(0.6)">×0.6</button>
         <button class="speed-btn" onclick="setSpeed(0.7)">×0.7</button>
         <button class="speed-btn" onclick="setSpeed(0.8)">×0.8</button>
         <button class="speed-btn" onclick="setSpeed(0.9)">×0.9</button>
-        <button class="speed-btn active" onclick="setSpeed(1.0)">×1.0</button>
+        <button class="speed-btn active" id="speed-btn-1" onclick="setSpeed(1.0)">×1.0</button>
       </div>
 
       <div class="ambiance-section" id="ambiance-section">
@@ -1015,42 +722,24 @@
   </header>
 
   <div class="settings-list">
-
     <article class="card setting-item">
-      <div class="info">
-        <h3>Apparence</h3>
-        <p>Basculer entre le mode clair et sombre</p>
-      </div>
+      <div class="info"><h3>Apparence</h3><p>Basculer entre le mode clair et sombre</p></div>
       <button class="btn btn-ghost" id="theme-toggle" onclick="toggleTheme()" style="padding:.4rem .9rem;font-size:.85rem;">🌙 Sombre</button>
     </article>
-
     <article class="card setting-item">
-      <div class="info">
-        <h3>🎵 Sons d'ambiance</h3>
-        <p>Pluie, forêt, vagues… Accessible depuis le lecteur</p>
-      </div>
+      <div class="info"><h3>🎵 Sons d'ambiance</h3><p>Pluie, forêt, vagues… Accessible depuis le lecteur</p></div>
       <span class="setting-tag" id="ambiance-settings-tag">Aucun</span>
     </article>
-
     <article class="card setting-item">
-      <div class="info">
-        <h3>📥 Hors ligne</h3>
-        <p>Appuie sur ⬇ sur une séance pour la mettre en cache</p>
-      </div>
+      <div class="info"><h3>📥 Hors ligne</h3><p>Appuie sur ⬇ sur une séance pour la mettre en cache</p></div>
       <span class="setting-tag" id="offline-count-tag">0 séance</span>
     </article>
     <article class="card setting-item">
-      <div class="info">
-      <h3>Accessibilité</h3>
-        <p>Taille du texte, contraste, lisibilité</p>
-      </div>
+      <div class="info"><h3>Accessibilité</h3><p>Taille du texte, contraste, lisibilité</p></div>
       <span class="setting-tag">À venir</span>
     </article>
     <article class="card setting-item">
-      <div class="info">
-        <h3>Confidentialité</h3>
-        <p>Aucune publicité · Aucun tracker · Aucun compte requis</p>
-      </div>
+      <div class="info"><h3>Confidentialité</h3><p>Aucune publicité · Aucun tracker · Aucun compte requis</p></div>
       <span class="setting-tag">✓</span>
     </article>
     <article class="card">
@@ -1083,9 +772,7 @@
     <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--color-muted);fill:none;stroke-width:2;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
   </article>
 
-  <p class="footer-note">
-    Serein - méditation en français, sans publicité, sans tracking tiers.
-  </p>
+  <p class="footer-note">Serein - méditation en français, sans publicité, sans tracking tiers.</p>
 </section>
 
 <nav class="nav" aria-label="Navigation principale">
@@ -1108,8 +795,376 @@
 </nav>
 
 <script>
-  // ── Service Worker ────────────────────────────────────────────────────────
+  // ── Init voix ─────────────────────────────────────────────────────────────
+  (function() {
+    const v = localStorage.getItem('serein_voice');
+    if (!v || (v !== 'masculine' && v !== 'feminine')) {
+      localStorage.setItem('serein_voice', 'masculine');
+    }
+  })();
+
+  // ── Navigation ────────────────────────────────────────────────────────────
+  const screens = ['home', 'explore', 'player', 'settings'];
+
+  function showScreen(id) {
+    screens.forEach(s => {
+      document.getElementById(s).classList.toggle('active', s === id);
+      const btn = document.getElementById('nav-' + s);
+      if (btn) btn.classList.toggle('active', s === id);
+    });
+    window.scrollTo(0, 0);
+  }
+
+  function filterTab(el) {
+    document.querySelectorAll('.filter-tabs .tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    const filter = el.textContent.trim();
+    document.querySelectorAll('.session-card').forEach(card => {
+      const p = card.dataset.parcours || '';
+      card.style.display = (filter === 'Toutes' || p === filter) ? '' : 'none';
+    });
+  }
+
+  function filterParcours(parcours) {
+    showScreen('explore');
+    setTimeout(() => {
+      document.querySelectorAll('.filter-tabs .tab').forEach(t => {
+        const match = t.textContent.trim() === parcours;
+        t.classList.toggle('active', match);
+        if (match) filterTab(t);
+      });
+    }, 50);
+  }
+
+  // ── Voix ──────────────────────────────────────────────────────────────────
+  function getVoice() { return localStorage.getItem('serein_voice') || 'masculine'; }
+
+  function getAudioPath(filename, voiceOverride) {
+    const v = voiceOverride || getVoice();
+    const folder = v === 'feminine' ? 'feminin' : 'masculin';
+    return 'assets/audio/' + folder + '/' + filename;
+  }
+
+  let _pendingSession = null;
+  let _selectedVoiceInSheet = getVoice();
+
+  function launchPlayer(id, title, parcours, duree, audioFilename, hasBothVoices) {
+    if (hasBothVoices) {
+      _pendingSession = { id, title, parcours, duree, audioFilename };
+      _selectedVoiceInSheet = getVoice();
+      updateVoiceSheetUI();
+      document.getElementById('voice-overlay').classList.add('open');
+    } else {
+      _doLaunchPlayer(id, title, parcours, duree, audioFilename, 'masculine');
+    }
+  }
+
+  function selectVoiceOption(voice) {
+    _selectedVoiceInSheet = voice;
+    updateVoiceSheetUI();
+  }
+
+  function updateVoiceSheetUI() {
+    document.getElementById('vopt-masculine').classList.toggle('selected', _selectedVoiceInSheet === 'masculine');
+    document.getElementById('vopt-feminine').classList.toggle('selected', _selectedVoiceInSheet === 'feminine');
+  }
+
+  function confirmVoiceAndLaunch() {
+    const session = _pendingSession;
+    const voice   = _selectedVoiceInSheet;
+    if (!session) return;
+    localStorage.setItem('serein_voice', voice);
+    document.getElementById('voice-overlay').classList.remove('open');
+    _pendingSession = null;
+    _doLaunchPlayer(session.id, session.title, session.parcours, session.duree, session.audioFilename, voice);
+  }
+
+  function closeVoiceOverlay() {
+    document.getElementById('voice-overlay').classList.remove('open');
+    _pendingSession = null;
+  }
+
+  document.getElementById('voice-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeVoiceOverlay();
+  });
+
+  // ── Lecteur audio ─────────────────────────────────────────────────────────
+  const audio         = document.getElementById('audio-engine');
+  const progressTrack = document.getElementById('progress-track');
+  const progressFill  = document.getElementById('progress-fill');
+  const progressThumb = document.getElementById('progress-thumb');
+  const timeCurrent   = document.getElementById('time-current');
+  const timeTotal     = document.getElementById('time-total');
+  const iconPlay      = document.getElementById('icon-play');
+  const iconPause     = document.getElementById('icon-pause');
+  const audioLoading  = document.getElementById('audio-loading');
+  const playerMain    = document.getElementById('player-main');
+  const completeScreen= document.getElementById('complete-screen');
+  const volumeSlider  = document.getElementById('volume-slider');
+
+  let sessionStartTime = null;
+  let isDragging       = false;
+  let _currentSession  = null;
+
+  function fmtTime(sec) {
+    if (!isFinite(sec) || sec < 0) return '--:--';
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60);
+    return m + ':' + String(s).padStart(2, '0');
+  }
+
+  function updateProgress() {
+    if (!audio.duration || isDragging) return;
+    const pct = audio.currentTime / audio.duration;
+    progressFill.style.width  = (pct * 100) + '%';
+    progressThumb.style.left  = (pct * 100) + '%';
+    timeCurrent.textContent   = fmtTime(audio.currentTime);
+    progressTrack.setAttribute('aria-valuenow', Math.round(pct * 100));
+  }
+
+  audio.addEventListener('timeupdate', updateProgress);
+  audio.addEventListener('loadedmetadata', () => { timeTotal.textContent = fmtTime(audio.duration); audioLoading.textContent = ''; });
+  audio.addEventListener('waiting', () => { audioLoading.textContent = 'Chargement…'; });
+  audio.addEventListener('playing', () => {
+    audioLoading.textContent = '';
+    sessionStartTime = sessionStartTime || Date.now();
+    setPlayingUI(true);
+  });
+  audio.addEventListener('pause', () => { setPlayingUI(false); });
+  audio.addEventListener('ended', () => {
+    setPlayingUI(false);
+    progressFill.style.width = '100%';
+    progressThumb.style.left = '100%';
+    const listenedSec = sessionStartTime ? Math.round((Date.now() - sessionStartTime) / 1000) : Math.round(audio.duration || 0);
+    recordSession(Math.max(1, Math.round(listenedSec / 60)));
+    sessionStartTime = null;
+    stopAmbiance();
+    playerMain.classList.add('hidden');
+    completeScreen.classList.add('visible');
+    document.getElementById('complete-title').textContent = document.getElementById('player-title').textContent;
+  });
+  audio.addEventListener('error', () => {
+    audioLoading.textContent = '⚠️ Fichier audio introuvable. Vérifie le chemin sur le Pi.';
+  });
+
+  function setPlayingUI(playing) {
+    iconPlay.style.display  = playing ? 'none'  : 'block';
+    iconPause.style.display = playing ? 'block' : 'none';
+  }
+
+  function _doLaunchPlayer(id, title, parcours, duree, audioFilename, voice) {
+    _currentSession = { id, title, parcours, duree, audioFilename, voice };
+    document.getElementById('player-title').textContent = title;
+    document.getElementById('player-meta').textContent  = parcours + ' · ' + duree;
+    document.getElementById('complete-title').textContent = title;
+
+    const voiceTag = document.getElementById('player-voice-tag');
+    voiceTag.textContent = voice === 'feminine' ? 'Voix féminine' : 'Voix masculine';
+
+    progressFill.style.width = '0%';
+    progressThumb.style.left = '0%';
+    timeCurrent.textContent  = '0:00';
+    timeTotal.textContent    = '--:--';
+    setPlayingUI(false);
+    playerMain.classList.remove('hidden');
+    completeScreen.classList.remove('visible');
+    sessionStartTime = null;
+
+    // Applique la vitesse mémorisée
+    audio.playbackRate = currentSpeed;
+
+    if (audioFilename) {
+      const audioSrc = getAudioPath(audioFilename, voice);
+      audioLoading.textContent = 'Chargement…';
+      audio.src = audioSrc;
+      audio.load();
+      audio.addEventListener('canplay', function tryPlay() {
+        audio.removeEventListener('canplay', tryPlay);
+        audio.play().catch(() => { audioLoading.textContent = 'Appuie sur ▶ pour démarrer'; });
+      });
+    } else {
+      audioLoading.textContent = '⏳ Cet enregistrement n\'est pas encore disponible.';
+      audio.src = '';
+    }
+
+    showScreen('player');
+  }
+
+  function togglePlay() {
+    if (!audio.src) return;
+    audio.paused ? audio.play() : audio.pause();
+  }
+
+  document.getElementById('btn-rewind').addEventListener('click', () => { audio.currentTime = Math.max(0, audio.currentTime - 15); });
+  document.getElementById('btn-forward').addEventListener('click', () => { audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + 15); });
+
+  function seekTo(e) {
+    if (!audio.duration) return;
+    const rect = progressTrack.getBoundingClientRect();
+    const x    = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+    const pct  = Math.max(0, Math.min(1, x / rect.width));
+    audio.currentTime = pct * audio.duration;
+    progressFill.style.width = (pct * 100) + '%';
+    progressThumb.style.left = (pct * 100) + '%';
+  }
+
+  progressTrack.addEventListener('mousedown',  (e) => { isDragging = true; seekTo(e); });
+  progressTrack.addEventListener('touchstart', (e) => { isDragging = true; seekTo(e); }, { passive: true });
+  document.addEventListener('mousemove',  (e) => { if (isDragging) seekTo(e); });
+  document.addEventListener('touchmove',  (e) => { if (isDragging) seekTo(e); }, { passive: true });
+  document.addEventListener('mouseup',   () => { isDragging = false; });
+  document.addEventListener('touchend',  () => { isDragging = false; });
+
+  progressTrack.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') audio.currentTime = Math.min(audio.duration, audio.currentTime + 5);
+    if (e.key === 'ArrowLeft')  audio.currentTime = Math.max(0, audio.currentTime - 5);
+  });
+
+  volumeSlider.addEventListener('input', () => { audio.volume = volumeSlider.value; });
+
+  function stopAndReturn() {
+    audio.pause();
+    stopAmbiance();
+    showScreen('explore');
+  }
+
+  function replaySession() {
+    if (!_currentSession) return;
+    playerMain.classList.remove('hidden');
+    completeScreen.classList.remove('visible');
+    audio.currentTime = 0;
+    audio.play();
+  }
+
+  // ── Vitesse de lecture ────────────────────────────────────────────────────
+  let currentSpeed = parseFloat(localStorage.getItem('serein_speed') || '1.0');
+
+  function setSpeed(rate) {
+    currentSpeed = rate;
+    audio.playbackRate = rate;
+    localStorage.setItem('serein_speed', rate);
+    document.querySelectorAll('.speed-btn').forEach(btn => {
+      btn.classList.toggle('active', parseFloat(btn.textContent.replace('×', '')) === rate);
+    });
+  }
+
+  // Applique la vitesse mémorisée au chargement
+  (function() {
+    const saved = parseFloat(localStorage.getItem('serein_speed') || '1.0');
+    document.querySelectorAll('.speed-btn').forEach(btn => {
+      btn.classList.toggle('active', parseFloat(btn.textContent.replace('×', '')) === saved);
+    });
+  })();
+
+  // ── Ambiance ──────────────────────────────────────────────────────────────
+  const ambianceAudio      = document.getElementById('ambiance-engine');
+  const ambianceSlider     = document.getElementById('ambiance-volume-slider');
+  const ambianceVolumeWrap = document.getElementById('ambiance-volume-wrap');
+
+  const AMBIANCES = [
+    { id: 'pluie',  label: 'Pluie',       file: 'pluie.mp3' },
+    { id: 'foret',  label: 'Forêt',       file: 'foret.mp3' },
+    { id: 'vagues', label: 'Vagues',      file: 'vagues.mp3' },
+    { id: 'feu',    label: 'Feu',         file: 'feu.mp3' },
+    { id: 'blanc',  label: 'Bruit blanc', file: 'bruit-blanc.mp3' },
+  ];
+
+  function stopAmbiance() {
+    ambianceAudio.pause();
+    ambianceAudio.src = '';
+    ambianceVolumeWrap.style.display = 'none';
+    localStorage.removeItem('serein_ambiance');
+    document.querySelectorAll('.ambiance-btn').forEach(b => b.classList.remove('active'));
+    const offBtn = document.getElementById('amb-off');
+    if (offBtn) offBtn.classList.add('active');
+    updateAmbianceTag('Aucun');
+  }
+
+  function setAmbiance(filename) {
+    document.querySelectorAll('.ambiance-btn').forEach(b => b.classList.remove('active'));
+    let btnId = 'amb-off';
+    if (filename) {
+      const base = filename.replace('.mp3', '').replace('bruit-blanc', 'blanc');
+      btnId = 'amb-' + base;
+    }
+    const btn = document.getElementById(btnId);
+    if (btn) btn.classList.add('active');
+
+    if (!filename) {
+      ambianceAudio.pause();
+      ambianceAudio.src = '';
+      ambianceVolumeWrap.style.display = 'none';
+      localStorage.removeItem('serein_ambiance');
+      updateAmbianceTag('Aucun');
+      return;
+    }
+
+    ambianceAudio.src = 'assets/audio/ambiance/' + filename;
+    ambianceAudio.volume = parseFloat(ambianceSlider.value);
+    ambianceAudio.load();
+    ambianceAudio.play().catch(() => {});
+    ambianceVolumeWrap.style.display = 'flex';
+    localStorage.setItem('serein_ambiance', filename);
+    const found = AMBIANCES.find(a => a.file === filename);
+    updateAmbianceTag(found ? found.label : '');
+  }
+
+  function updateAmbianceTag(label) {
+    const tag = document.getElementById('ambiance-settings-tag');
+    if (tag) tag.textContent = label;
+  }
+
+  ambianceSlider.addEventListener('input', () => { ambianceAudio.volume = parseFloat(ambianceSlider.value); });
+
+  // ── Thème ─────────────────────────────────────────────────────────────────
+  function toggleTheme() {
+    const html   = document.documentElement;
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    document.getElementById('theme-toggle').textContent = isDark ? '🌙 Sombre' : '☀️ Clair';
+    localStorage.setItem('theme', isDark ? 'light' : 'dark');
+  }
+
+  (function() {
+    const saved = localStorage.getItem('theme');
+    if (saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+  })();
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const saved = localStorage.getItem('theme');
+    const btn   = document.getElementById('theme-toggle');
+    if (btn && saved === 'dark') btn.textContent = '☀️ Clair';
+  });
+
+  // ── Stats ─────────────────────────────────────────────────────────────────
+  function loadStats() {
+    const s = JSON.parse(localStorage.getItem('serein_stats') || '{"sessions":0,"minutes":0,"streak":0,"lastDate":""}');
+    document.getElementById('stat-streak').textContent   = s.streak;
+    document.getElementById('stat-sessions').textContent = s.sessions;
+    const h = Math.floor(s.minutes / 60);
+    const m = s.minutes % 60;
+    document.getElementById('stat-time').textContent = h > 0 ? h + 'h ' + m + 'min' : m + ' min';
+  }
+
+  function recordSession(minutes) {
+    const s         = JSON.parse(localStorage.getItem('serein_stats') || '{"sessions":0,"minutes":0,"streak":0,"lastDate":""}');
+    const today     = new Date().toISOString().slice(0, 10);
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    if (s.lastDate !== today) {
+      s.streak = (s.lastDate === yesterday) ? s.streak + 1 : 1;
+    }
+    s.lastDate = today;
+    s.sessions += 1;
+    s.minutes  += minutes;
+    localStorage.setItem('serein_stats', JSON.stringify(s));
+    loadStats();
+  }
+
+  document.addEventListener('DOMContentLoaded', loadStats);
+
+  // ── Service Worker + cache hors-ligne ─────────────────────────────────────
   let swReady = false;
+
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js').then(reg => {
       swReady = true;
@@ -1119,41 +1174,41 @@
     navigator.serviceWorker.addEventListener('message', event => {
       if (event.data.type === 'CACHE_DONE') {
         event.data.urls.forEach(url => {
-          const filename = url.split('/').pop();
+          const filename = decodeURIComponent(url.split('/').pop());
           markButtonCached(filename);
         });
         updateOfflineCount();
       }
       if (event.data.type === 'CACHE_STATUS') {
-        const filename = event.data.url.split('/').pop();
+        const filename = decodeURIComponent(event.data.url.split('/').pop());
         if (event.data.cached) markButtonCached(filename);
       }
     });
+
+    navigator.serviceWorker.ready.then(() => {
+      setTimeout(checkAllCacheStatus, 800);
+    });
   }
 
-  // ── Hors-ligne : cache on-demand ──────────────────────────────────────────
-  const VOICES = ['masculin', 'feminin'];
-
-  function getAudioUrls(filename) {
-    return VOICES.map(v => location.origin + '/assets/audio/' + v + '/' + encodeURIComponent(filename));
-  }
-
-  function toggleOfflineCache(btn, filename) {
-    if (btn.classList.contains('cached')) return; // déjà en cache, ne rien faire
+  function toggleOfflineCache(btn) {
+    if (btn.classList.contains('cached')) return;
+    const filename = btn.dataset.file;
+    if (!filename) return;
     if (!swReady || !navigator.serviceWorker.controller) {
       alert('Le service worker n\'est pas encore prêt, réessaie dans un instant.');
       return;
     }
     btn.classList.add('loading');
     btn.textContent = '⏳';
-    const urls = getAudioUrls(filename);
-    btn.dataset.filename = filename;
+    const urls = ['masculin', 'feminin'].map(v =>
+      location.origin + '/assets/audio/' + v + '/' + encodeURIComponent(filename)
+    );
     navigator.serviceWorker.controller.postMessage({ type: 'CACHE_AUDIO', urls });
   }
 
   function markButtonCached(filename) {
     document.querySelectorAll('.btn-offline').forEach(btn => {
-      const f = btn.dataset.filename || btn.getAttribute('onclick').match(/'([^']+\.mp3)'/)?.[1];
+      const f = btn.dataset.file;
       if (f && decodeURIComponent(f) === decodeURIComponent(filename)) {
         btn.classList.remove('loading');
         btn.classList.add('cached');
@@ -1165,10 +1220,8 @@
 
   function checkAllCacheStatus() {
     if (!navigator.serviceWorker.controller) return;
-    document.querySelectorAll('.btn-offline').forEach(btn => {
-      const match = btn.getAttribute('onclick').match(/'([^']+\.mp3)'/);
-      if (!match) return;
-      const filename = match[1];
+    document.querySelectorAll('.btn-offline[data-file]').forEach(btn => {
+      const filename = btn.dataset.file;
       const url = location.origin + '/assets/audio/masculin/' + encodeURIComponent(filename);
       navigator.serviceWorker.controller.postMessage({ type: 'CHECK_CACHE', url });
     });
@@ -1179,18 +1232,7 @@
     const tag = document.getElementById('offline-count-tag');
     if (tag) tag.textContent = cached + (cached <= 1 ? ' séance' : ' séances');
   }
+</script>
 
-  // Vérifie le cache une fois le SW prêt
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.ready.then(() => {
-      setTimeout(checkAllCacheStatus, 800);
-    });
-  }
-
-  // ── Vitesse de lecture ────────────────────────────────────────────────────
-  let currentSpeed = parseFloat(localStorage.getItem('serein_speed') || '1.0');
-
-  function setSpeed(rate) {
-    currentSpeed = rate;
-    audio.playbackRate = rate;
-    localStorage.setItem('ser
+</body>
+</html>
