@@ -614,7 +614,7 @@
       </div>
       <div class="session-actions">
         <button class="btn-offline" data-filename="Méditation Premiere Respiration Consciente.mp3" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this, 'Méditation Premiere Respiration Consciente.mp3')">⬇</button>
-        <button class="btn btn-primary" onclick="openVoiceOverlay('premiere-respiration-consciente', 'Première respiration consciente', 'Premiers pas', '5 min', 'Méditation Premiere Respiration Consciente.mp3')">Lancer</button>
+        <button class="btn btn-primary" onclick="openVoiceOverlay('premiere-respiration-consciente', 'Première respiration consciente', 'Premiers pas', '5 min', 'Méditation Premiere Respiration Consciente.mp3', false)">Lancer</button>
       </div>
     </article>
 
@@ -625,7 +625,7 @@
       </div>
       <div class="session-actions">
         <button class="btn-offline" data-filename="Sasseoir ne rien faire.mp3" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this, 'Sasseoir ne rien faire.mp3')">⬇</button>
-        <button class="btn btn-primary" onclick="openVoiceOverlay('sasseoir-ne-rien-faire', 'S\'asseoir, ne rien faire', 'Premiers pas', '5 min', 'Sasseoir ne rien faire.mp3')">Lancer</button>
+        <button class="btn btn-primary" onclick="openVoiceOverlay('sasseoir-ne-rien-faire', 'S\'asseoir, ne rien faire', 'Premiers pas', '5 min', 'Sasseoir ne rien faire.mp3', false)">Lancer</button>
       </div>
     </article>
 
@@ -636,7 +636,7 @@
       </div>
       <div class="session-actions">
         <button class="btn-offline" data-filename="Observer ses pensées sans les juger.mp3" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this, 'Observer ses pensées sans les juger.mp3')">⬇</button>
-        <button class="btn btn-primary" onclick="openVoiceOverlay('observer-ses-pensees', 'Observer ses pensées sans les juger', 'Premiers pas', '9 min', 'Observer ses pensées sans les juger.mp3')">Lancer</button>
+        <button class="btn btn-primary" onclick="openVoiceOverlay('observer-ses-pensees', 'Observer ses pensées sans les juger', 'Premiers pas', '9 min', 'Observer ses pensées sans les juger.mp3', false)">Lancer</button>
       </div>
     </article>
 
@@ -647,7 +647,7 @@
       </div>
       <div class="session-actions">
         <button class="btn-offline" data-filename="Le scan corporel.mp3" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this, 'Le scan corporel.mp3')">⬇</button>
-        <button class="btn btn-primary" onclick="openVoiceOverlay('scan-corporel-sensations', 'Le scan corporel — découvrir ses sensations', 'Premiers pas', '10 min', 'Le scan corporel.mp3')">Lancer</button>
+        <button class="btn btn-primary" onclick="openVoiceOverlay('scan-corporel-sensations', 'Le scan corporel — découvrir ses sensations', 'Premiers pas', '10 min', 'Le scan corporel.mp3', false)">Lancer</button>
       </div>
     </article>
 
@@ -698,7 +698,7 @@
       </div>
       <div class="session-actions">
         <button class="btn-offline" data-filename="Rituel de déconnexion.mp3" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this, 'Rituel de déconnexion.mp3')">⬇</button>
-        <button class="btn btn-primary" onclick="openVoiceOverlay('rituel-deconnexion', 'Rituel de déconnexion', 'Sommeil', '10 min', 'Rituel de déconnexion.mp3')">Lancer</button>
+        <button class="btn btn-primary" onclick="openVoiceOverlay('rituel-deconnexion', 'Rituel de déconnexion', 'Sommeil', '10 min', 'Rituel de déconnexion.mp3', false)">Lancer</button>
       </div>
     </article>
     <article class="card session-card" data-parcours="Sommeil">
@@ -720,7 +720,7 @@
       </div>
       <div class="session-actions">
         <button class="btn-offline" data-filename="Reveils nocturnes.mp3" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this, 'Reveils nocturnes.mp3')">⬇</button>
-        <button class="btn btn-primary" onclick="openVoiceOverlay('reveils-nocturnes-calme', 'Réveils nocturnes — retrouver le calme', 'Sommeil', '18 min', 'Reveils nocturnes.mp3')">Lancer</button>
+        <button class="btn btn-primary" onclick="openVoiceOverlay('reveils-nocturnes-calme', 'Réveils nocturnes — retrouver le calme', 'Sommeil', '18 min', 'Reveils nocturnes.mp3', false)">Lancer</button>
       </div>
     </article>
     <article class="card session-card" data-parcours="Sommeil">
@@ -734,8 +734,14 @@
       <button class="btn btn-primary" disabled>Bientôt</button>
     </article>
     <article class="card session-card" data-parcours="Respirer">
-      <div class="session-info"><h3>Cohérence cardiaque 5-5 <span class="badge-coming">À venir</span></h3><p>Respirer · 5 min</p></div>
-      <button class="btn btn-primary" disabled>Bientôt</button>
+      <div class="session-info">
+        <h3>Cohérence cardiaque 5 minutes</h3>
+        <p>Respirer · 5 min</p>
+      </div>
+      <div class="session-actions">
+        <button class="btn-offline" data-filename="Cohérence cardiaque 5 minutes.mp3" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this, 'Cohérence cardiaque 5 minutes.mp3')">⬇</button>
+        <button class="btn btn-primary" onclick="openVoiceOverlay('coherence-cardiaque-5min', 'Cohérence cardiaque 5 minutes', 'Respirer', '5 min', 'Cohérence cardiaque 5 minutes.mp3', false)">Lancer</button>
+      </div>
     </article>
     <article class="card session-card" data-parcours="Respirer">
       <div class="session-info"><h3>Respiration 4-7-8 — calme profond <span class="badge-coming">À venir</span></h3><p>Respirer · 7 min</p></div>
@@ -758,7 +764,7 @@
       </div>
       <div class="session-actions">
         <button class="btn-offline" data-filename="SOS Anxiété ancrage immédiat.mp3" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this, 'SOS Anxiété ancrage immédiat.mp3')">⬇</button>
-        <button class="btn btn-primary" onclick="openVoiceOverlay('sos-anxiete', 'SOS Anxiété — ancrage immédiat', 'Anxiété', '5 min', 'SOS Anxiété ancrage immédiat.mp3')">Lancer</button>
+        <button class="btn btn-primary" onclick="openVoiceOverlay('sos-anxiete', 'SOS Anxiété — ancrage immédiat', 'Anxiété', '5 min', 'SOS Anxiété ancrage immédiat.mp3', false)">Lancer</button>
       </div>
     </article>
     <article class="card session-card" data-parcours="Anxiété">
@@ -768,7 +774,7 @@
       </div>
       <div class="session-actions">
         <button class="btn-offline" data-filename="Accueillir l'anxiété sans la combattre.mp3" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this, &quot;Accueillir l'anxiété sans la combattre.mp3&quot;)">⬇</button>
-        <button class="btn btn-primary" onclick="openVoiceOverlay('accueillir-anxiete', 'Accueillir l\'anxiété sans la combattre', 'Anxiété', '10 min', &quot;Accueillir l'anxiété sans la combattre.mp3&quot;)">Lancer</button>
+        <button class="btn btn-primary" onclick="openVoiceOverlay('accueillir-anxiete', 'Accueillir l\'anxiété sans la combattre', 'Anxiété', '10 min', &quot;Accueillir l'anxiété sans la combattre.mp3&quot;, false)">Lancer</button>
       </div>
     </article>
     <article class="card session-card" data-parcours="Anxiété">
@@ -778,7 +784,7 @@
       </div>
       <div class="session-actions">
         <button class="btn-offline" data-filename="Les sons autour de toi.mp3" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this, 'Les sons autour de toi.mp3')">⬇</button>
-        <button class="btn btn-primary" onclick="openVoiceOverlay('les-sons-autour-de-toi', 'Les sons autour de toi', 'Anxiété', '8 min', 'Les sons autour de toi.mp3')">Lancer</button>
+        <button class="btn btn-primary" onclick="openVoiceOverlay('les-sons-autour-de-toi', 'Les sons autour de toi', 'Anxiété', '8 min', 'Les sons autour de toi.mp3', false)">Lancer</button>
       </div>
     </article>
     <article class="card session-card" data-parcours="Anxiété">
@@ -788,7 +794,7 @@
       </div>
       <div class="session-actions">
         <button class="btn-offline" data-filename="La pensée qui tourne en boucle.mp3" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this, 'La pensée qui tourne en boucle.mp3')">⬇</button>
-        <button class="btn btn-primary" onclick="openVoiceOverlay('pensee-tourne-boucle', 'La pensée qui tourne en boucle', 'Anxiété', '9 min', 'La pensée qui tourne en boucle.mp3')">Lancer</button>
+        <button class="btn btn-primary" onclick="openVoiceOverlay('pensee-tourne-boucle', 'La pensée qui tourne en boucle', 'Anxiété', '9 min', 'La pensée qui tourne en boucle.mp3', false)">Lancer</button>
       </div>
     </article>
     <article class="card session-card" data-parcours="Anxiété">
@@ -1068,7 +1074,6 @@ function filterTab(el) {
 
 function filterParcours(parcours) {
   showScreen('explore');
-  // Activer le bon onglet après rendu
   setTimeout(() => {
     document.querySelectorAll('.filter-tabs .tab').forEach(tab => {
       const match = tab.textContent.trim() === parcours;
@@ -1080,13 +1085,19 @@ function filterParcours(parcours) {
 
 // ════════════════════════════════════════════
 //  OVERLAY VOIX
+//  hasVoiceChoice = true  → affiche le sheet de choix
+//  hasVoiceChoice = false → lance directement en voix masculine
 // ════════════════════════════════════════════
 let pendingSession = null;
 let selectedVoice  = localStorage.getItem('serein_voice') || 'masculine';
 
-function openVoiceOverlay(id, title, parcours, duree, filename) {
+function openVoiceOverlay(id, title, parcours, duree, filename, hasVoiceChoice) {
+  if (!hasVoiceChoice) {
+    // Pas de double voix disponible : lancement direct
+    launchPlayer(id, title, parcours, duree, filename, 'masculine');
+    return;
+  }
   pendingSession = { id, title, parcours, duree, filename };
-  // Restaurer la sélection mémorisée
   selectVoiceOption(selectedVoice, false);
   document.getElementById('voice-overlay').classList.add('open');
 }
@@ -1111,7 +1122,6 @@ function confirmVoiceAndLaunch() {
   launchPlayer(id, title, parcours, duree, filename, selectedVoice);
 }
 
-// Fermer overlay en cliquant le fond
 document.getElementById('voice-overlay').addEventListener('click', function(e) {
   if (e.target === this) closeVoiceOverlay();
 });
@@ -1136,7 +1146,6 @@ let sessionStartTime = null;
 let isDragging       = false;
 let currentSpeed     = parseFloat(localStorage.getItem('serein_speed') || '1.0');
 
-// Utilitaire
 function fmtTime(sec) {
   if (!isFinite(sec) || sec < 0) return '--:--';
   const m = Math.floor(sec / 60);
@@ -1175,7 +1184,6 @@ audio.addEventListener('playing',  () => {
 audio.addEventListener('pause',    () => { setPlayingUI(false); });
 audio.addEventListener('error',    () => { audioLoading.textContent = '⚠️ Fichier audio introuvable. Vérifie le chemin sur le Pi.'; });
 
-// Fin de séance
 audio.addEventListener('ended', () => {
   setPlayingUI(false);
   progressFill.style.width = '100%';
@@ -1223,7 +1231,6 @@ function togglePlay() {
   if (audio.paused) { audio.play(); } else { audio.pause(); }
 }
 
-// Seek ±15s
 document.getElementById('btn-rewind').addEventListener('click', () => {
   audio.currentTime = Math.max(0, audio.currentTime - 15);
 });
@@ -1231,7 +1238,6 @@ document.getElementById('btn-forward').addEventListener('click', () => {
   audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + 15);
 });
 
-// Seek via barre
 function seekTo(e) {
   if (!audio.duration) return;
   const rect = progressTrack.getBoundingClientRect();
@@ -1254,12 +1260,10 @@ progressTrack.addEventListener('keydown', e => {
   if (e.key === 'ArrowLeft')  audio.currentTime = Math.max(0, audio.currentTime - 5);
 });
 
-// Volume voix
 document.getElementById('volume-slider').addEventListener('input', function() {
   audio.volume = this.value;
 });
 
-// Vitesse
 function setSpeed(rate) {
   currentSpeed = rate;
   audio.playbackRate = rate;
@@ -1269,14 +1273,12 @@ function setSpeed(rate) {
   });
 }
 
-// Initialiser le bouton de vitesse actif
 (function() {
   document.querySelectorAll('.speed-btn').forEach(btn => {
     btn.classList.toggle('active', parseFloat(btn.textContent.replace('×','')) === currentSpeed);
   });
 })();
 
-// Retour / Rejouer
 function stopAndReturn() {
   audio.pause();
   ambianceAudio.pause();
@@ -1293,141 +1295,4 @@ function replaySession() {
 // ════════════════════════════════════════════
 //  SON D'AMBIANCE
 // ════════════════════════════════════════════
-let currentAmbiance = null;
-
-function setAmbiance(filename) {
-  // Désélectionner tous les boutons
-  document.querySelectorAll('.ambiance-btn').forEach(b => b.classList.remove('active'));
-  const volWrap = document.getElementById('ambiance-volume-wrap');
-
-  if (!filename) {
-    ambianceAudio.pause();
-    ambianceAudio.src = '';
-    currentAmbiance = null;
-    document.getElementById('amb-off').classList.add('active');
-    volWrap.style.display = 'none';
-    document.getElementById('ambiance-settings-tag').textContent = 'Aucun';
-    return;
-  }
-
-  currentAmbiance = filename;
-  ambianceAudio.src = 'assets/audio/ambiance/' + encodeURIComponent(filename);
-  ambianceAudio.volume = parseFloat(document.getElementById('ambiance-volume-slider').value);
-  ambianceAudio.play().catch(() => {});
-  volWrap.style.display = 'flex';
-
-  // Activer le bon bouton
-  const idMap = { 'pluie.mp3':'amb-pluie','foret.mp3':'amb-foret','vagues.mp3':'amb-vagues','feu.mp3':'amb-feu','bruit-blanc.mp3':'amb-blanc' };
-  const btnId = idMap[filename];
-  if (btnId) document.getElementById(btnId).classList.add('active');
-
-  const labelMap = { 'pluie.mp3':'Pluie','foret.mp3':'Forêt','vagues.mp3':'Vagues','feu.mp3':'Feu','bruit-blanc.mp3':'Bruit blanc' };
-  document.getElementById('ambiance-settings-tag').textContent = labelMap[filename] || filename;
-}
-
-document.getElementById('ambiance-volume-slider').addEventListener('input', function() {
-  ambianceAudio.volume = this.value;
-});
-
-// ════════════════════════════════════════════
-//  HORS LIGNE — cache on-demand
-// ════════════════════════════════════════════
-function toggleOfflineCache(btn, filename) {
-  if (btn.classList.contains('cached')) return;
-  if (!swReady || !navigator.serviceWorker.controller) {
-    alert('Le service worker n\'est pas encore prêt, réessaie dans un instant.');
-    return;
-  }
-  btn.classList.add('loading');
-  btn.textContent = '⏳';
-  btn.dataset.filename = filename;
-  const urls = [
-    location.origin + '/assets/audio/masculin/' + encodeURIComponent(filename),
-    location.origin + '/assets/audio/feminin/'  + encodeURIComponent(filename),
-  ];
-  navigator.serviceWorker.controller.postMessage({ type: 'CACHE_AUDIO', urls });
-}
-
-function markButtonCached(filename) {
-  document.querySelectorAll('.btn-offline').forEach(btn => {
-    const f = btn.dataset.filename || '';
-    if (decodeURIComponent(f) === decodeURIComponent(filename)) {
-      btn.classList.remove('loading');
-      btn.classList.add('cached');
-      btn.textContent = '✓';
-      btn.title = 'Disponible hors ligne';
-    }
-  });
-}
-
-function updateOfflineCount() {
-  const cached = document.querySelectorAll('.btn-offline.cached').length;
-  const tag = document.getElementById('offline-count-tag');
-  if (tag) tag.textContent = cached + (cached <= 1 ? ' séance' : ' séances');
-}
-
-function checkAllCacheStatus() {
-  if (!navigator.serviceWorker.controller) return;
-  document.querySelectorAll('.btn-offline[data-filename]').forEach(btn => {
-    const url = location.origin + '/assets/audio/masculin/' + encodeURIComponent(btn.dataset.filename);
-    navigator.serviceWorker.controller.postMessage({ type: 'CHECK_CACHE', url });
-  });
-}
-
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.ready.then(() => {
-    setTimeout(checkAllCacheStatus, 800);
-  });
-}
-
-// ════════════════════════════════════════════
-//  THÈME
-// ════════════════════════════════════════════
-function toggleTheme() {
-  const html   = document.documentElement;
-  const isDark = html.getAttribute('data-theme') === 'dark';
-  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
-  document.getElementById('theme-toggle').textContent = isDark ? '🌙 Sombre' : '☀️ Clair';
-  localStorage.setItem('theme', isDark ? 'light' : 'dark');
-}
-
-(function() {
-  const saved = localStorage.getItem('theme');
-  if (saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
-})();
-
-document.addEventListener('DOMContentLoaded', () => {
-  const saved = localStorage.getItem('theme');
-  const btn   = document.getElementById('theme-toggle');
-  if (btn && saved === 'dark') btn.textContent = '☀️ Clair';
-  loadStats();
-});
-
-// ════════════════════════════════════════════
-//  STATS UTILISATEUR
-// ════════════════════════════════════════════
-function loadStats() {
-  const s = JSON.parse(localStorage.getItem('serein_stats') || '{"sessions":0,"minutes":0,"streak":0,"lastDate":""}');
-  document.getElementById('stat-streak').textContent   = s.streak;
-  document.getElementById('stat-sessions').textContent = s.sessions;
-  const h = Math.floor(s.minutes / 60);
-  const m = s.minutes % 60;
-  document.getElementById('stat-time').textContent = h > 0 ? h + 'h ' + m + 'min' : m + ' min';
-}
-
-function recordSession(minutes) {
-  const s         = JSON.parse(localStorage.getItem('serein_stats') || '{"sessions":0,"minutes":0,"streak":0,"lastDate":""}');
-  const today     = new Date().toISOString().slice(0, 10);
-  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
-  if (s.lastDate !== today) {
-    s.streak = (s.lastDate === yesterday) ? s.streak + 1 : 1;
-  }
-  s.lastDate  = today;
-  s.sessions += 1;
-  s.minutes  += minutes;
-  localStorage.setItem('serein_stats', JSON.stringify(s));
-  loadStats();
-}
-</script>
-</body>
-</html>
+let 
