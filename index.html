@@ -565,7 +565,16 @@
 
     <!-- RESPIRER -->
     <article class="card session-card" data-parcours="Respirer"><div class="session-info"><h3>La respiration naturelle <span class="badge-coming">À venir</span></h3><p>Respirer · 5 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
-    <article class="card session-card" data-parcours="Respirer"><div class="session-info"><h3>Cohérence cardiaque 5-5 <span class="badge-coming">À venir</span></h3><p>Respirer · 5 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
+    <article class="card session-card" data-parcours="Respirer">
+      <div class="session-info">
+        <h3>Cohérence cardiaque 5 minutes</h3>
+        <p>Respirer · 5 min</p>
+      </div>
+      <div class="session-actions">
+        <button class="btn-offline" data-file="Cohérence cardiaque 5 minutes.mp3" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this)">⬇</button>
+        <button class="btn btn-primary" onclick="launchPlayer('coherence-cardiaque-5min', 'Cohérence cardiaque 5 minutes', 'Respirer', '5 min', 'Cohérence cardiaque 5 minutes.mp3', false)">Lancer</button>
+      </div>
+    </article>
     <article class="card session-card" data-parcours="Respirer"><div class="session-info"><h3>Respiration 4-7-8 — calme profond <span class="badge-coming">À venir</span></h3><p>Respirer · 7 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
     <article class="card session-card" data-parcours="Respirer"><div class="session-info"><h3>Box breathing <span class="badge-coming">À venir</span></h3><p>Respirer · 8 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
     <article class="card session-card" data-parcours="Respirer"><div class="session-info"><h3>Souffle et énergie — la respiration activante <span class="badge-coming">À venir</span></h3><p>Respirer · 10 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
@@ -734,4 +743,389 @@
       <button class="btn btn-ghost" id="theme-toggle" onclick="toggleTheme()" style="padding:.4rem .9rem;font-size:.85rem;">🌙 Sombre</button>
     </article>
     <article class="card setting-item">
-      <div
+      <div class="info"><h3>Version</h3><p>Application web progressive (PWA)</p></div>
+      <span class="setting-tag">v0.4</span>
+    </article>
+    <article class="card setting-item">
+      <div class="info"><h3>Données</h3><p>Aucune donnée personnelle collectée</p></div>
+      <span class="setting-tag">✓ Local</span>
+    </article>
+    <article class="card">
+      <a class="insta-link" href="https://instagram.com/serein.meditation" target="_blank" rel="noopener">
+        <div class="insta-icon">
+          <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="white" stroke="none"/></svg>
+        </div>
+        <div class="insta-text">
+          <div class="insta-title">Suivre Serein</div>
+          <div class="insta-handle">@serein.meditation</div>
+        </div>
+      </a>
+    </article>
+  </div>
+
+  <p class="footer-note">Serein — fait avec soin, sans fioritures.</p>
+</section>
+
+<nav class="nav" role="navigation" aria-label="Navigation principale">
+  <button class="nav-btn active" id="nav-home" onclick="showScreen('home')">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    Accueil
+  </button>
+  <button class="nav-btn" id="nav-explore" onclick="showScreen('explore')">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    Explorer
+  </button>
+  <button class="nav-btn" id="nav-player" onclick="showScreen('player')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+    Lecteur
+  </button>
+  <button class="nav-btn" id="nav-settings" onclick="showScreen('settings')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    Réglages
+  </button>
+</nav>
+
+<script>
+  const AUDIO_BASE = 'assets/audio/masculin/';
+  const AUDIO_BASE_FEM = 'assets/audio/feminin/';
+  const CACHE_NAME = 'serein-audio-v1';
+
+  let currentSession = null;
+  let pendingVoiceSession = null;
+  let selectedVoice = 'masculine';
+  let currentAmbiance = null;
+
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    const nb = document.getElementById('nav-' + id);
+    if (nb) nb.classList.add('active');
+  }
+
+  function filterTab(btn) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    const label = btn.textContent.trim();
+    document.querySelectorAll('.session-card').forEach(card => {
+      if (label === 'Toutes') {
+        card.style.display = '';
+      } else {
+        const p = card.dataset.parcours || '';
+        card.style.display = (p === label) ? '' : 'none';
+      }
+    });
+  }
+
+  function filterParcours(name) {
+    showScreen('explore');
+    const tabs = document.querySelectorAll('.tab');
+    tabs.forEach(t => {
+      t.classList.remove('active');
+      if (t.textContent.trim() === name) t.classList.add('active');
+    });
+    document.querySelectorAll('.session-card').forEach(card => {
+      card.style.display = (card.dataset.parcours === name) ? '' : 'none';
+    });
+  }
+
+  function launchPlayer(id, title, parcours, duration, file, hasVoiceChoice) {
+    if (hasVoiceChoice) {
+      pendingVoiceSession = { id, title, parcours, duration, file };
+      openVoiceOverlay();
+    } else {
+      startSession(id, title, parcours, duration, file, 'masculine');
+    }
+  }
+
+  function openVoiceOverlay() {
+    selectVoiceOption(selectedVoice);
+    document.getElementById('voice-overlay').classList.add('open');
+  }
+
+  function closeVoiceOverlay() {
+    document.getElementById('voice-overlay').classList.remove('open');
+    pendingVoiceSession = null;
+  }
+
+  function selectVoiceOption(voice) {
+    selectedVoice = voice;
+    document.querySelectorAll('.voice-option').forEach(o => o.classList.remove('selected'));
+    document.getElementById('vopt-' + voice).classList.add('selected');
+  }
+
+  function confirmVoiceAndLaunch() {
+    if (!pendingVoiceSession) return;
+    const s = pendingVoiceSession;
+    document.getElementById('voice-overlay').classList.remove('open');
+    pendingVoiceSession = null;
+    startSession(s.id, s.title, s.parcours, s.duration, s.file, selectedVoice);
+  }
+
+  function startSession(id, title, parcours, duration, file, voice) {
+    const base = (voice === 'feminine') ? AUDIO_BASE_FEM : AUDIO_BASE;
+    const src = base + encodeURIComponent(file);
+
+    currentSession = { id, title, parcours, duration, file, voice };
+
+    document.getElementById('player-title').textContent = title;
+    document.getElementById('player-meta').textContent = parcours + ' · ' + duration;
+    document.getElementById('player-voice-tag').textContent = (voice === 'feminine') ? 'Voix féminine' : 'Voix masculine';
+
+    const audio = document.getElementById('audio-engine');
+    audio.src = src;
+    audio.load();
+
+    document.getElementById('audio-loading').textContent = 'Chargement…';
+    document.getElementById('progress-fill').style.width = '0%';
+    document.getElementById('progress-thumb').style.left = '0%';
+    document.getElementById('time-current').textContent = '0:00';
+    document.getElementById('time-total').textContent = '--:--';
+    document.getElementById('icon-play').style.display = '';
+    document.getElementById('icon-pause').style.display = 'none';
+
+    document.getElementById('complete-screen').classList.remove('visible');
+    document.getElementById('player-main').classList.remove('hidden');
+
+    resetSpeed();
+    showScreen('player');
+
+    audio.addEventListener('canplay', () => {
+      document.getElementById('audio-loading').textContent = '';
+    }, { once: true });
+
+    audio.addEventListener('error', () => {
+      document.getElementById('audio-loading').textContent = 'Fichier audio introuvable. Vérifie le chemin sur le Pi.';
+    }, { once: true });
+
+    audio.play().then(() => {
+      document.getElementById('icon-play').style.display = 'none';
+      document.getElementById('icon-pause').style.display = '';
+    }).catch(() => {});
+  }
+
+  function togglePlay() {
+    const audio = document.getElementById('audio-engine');
+    if (audio.paused) {
+      audio.play();
+      document.getElementById('icon-play').style.display = 'none';
+      document.getElementById('icon-pause').style.display = '';
+    } else {
+      audio.pause();
+      document.getElementById('icon-play').style.display = '';
+      document.getElementById('icon-pause').style.display = 'none';
+    }
+  }
+
+  function setSpeed(s) {
+    document.getElementById('audio-engine').playbackRate = s;
+    document.querySelectorAll('.speed-btn').forEach(b => {
+      b.classList.toggle('active', parseFloat(b.textContent.replace('×','')) === s);
+    });
+  }
+
+  function resetSpeed() {
+    document.getElementById('audio-engine').playbackRate = 1.0;
+    document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+    const d = document.getElementById('speed-btn-1');
+    if (d) d.classList.add('active');
+  }
+
+  function stopAndReturn() {
+    const audio = document.getElementById('audio-engine');
+    audio.pause();
+    audio.src = '';
+    stopAmbiance();
+    showScreen('explore');
+  }
+
+  function replaySession() {
+    if (!currentSession) return;
+    const s = currentSession;
+    document.getElementById('complete-screen').classList.remove('visible');
+    document.getElementById('player-main').classList.remove('hidden');
+    startSession(s.id, s.title, s.parcours, s.duration, s.file, s.voice);
+  }
+
+  const audioEl = document.getElementById('audio-engine');
+
+  audioEl.addEventListener('timeupdate', () => {
+    if (!audioEl.duration) return;
+    const pct = (audioEl.currentTime / audioEl.duration) * 100;
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-thumb').style.left = pct + '%';
+    document.getElementById('time-current').textContent = formatTime(audioEl.currentTime);
+    document.getElementById('progress-track').setAttribute('aria-valuenow', Math.round(pct));
+  });
+
+  audioEl.addEventListener('loadedmetadata', () => {
+    document.getElementById('time-total').textContent = formatTime(audioEl.duration);
+  });
+
+  audioEl.addEventListener('ended', () => {
+    document.getElementById('icon-play').style.display = '';
+    document.getElementById('icon-pause').style.display = 'none';
+    document.getElementById('player-main').classList.add('hidden');
+    const cs = document.getElementById('complete-screen');
+    cs.classList.add('visible');
+    document.getElementById('complete-title').textContent = currentSession ? currentSession.title : '';
+    stopAmbiance();
+    recordSession();
+  });
+
+  document.getElementById('volume-slider').addEventListener('input', e => {
+    audioEl.volume = parseFloat(e.target.value);
+  });
+
+  document.getElementById('btn-rewind').addEventListener('click', () => {
+    audioEl.currentTime = Math.max(0, audioEl.currentTime - 15);
+  });
+
+  document.getElementById('btn-forward').addEventListener('click', () => {
+    audioEl.currentTime = Math.min(audioEl.duration || 0, audioEl.currentTime + 15);
+  });
+
+  const track = document.getElementById('progress-track');
+  function seekFromEvent(e) {
+    const rect = track.getBoundingClientRect();
+    const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+    const pct = Math.max(0, Math.min(1, x / rect.width));
+    if (audioEl.duration) audioEl.currentTime = pct * audioEl.duration;
+  }
+  let seeking = false;
+  track.addEventListener('mousedown', e => { seeking = true; seekFromEvent(e); });
+  document.addEventListener('mousemove', e => { if (seeking) seekFromEvent(e); });
+  document.addEventListener('mouseup', () => { seeking = false; });
+  track.addEventListener('touchstart', seekFromEvent, { passive: true });
+  track.addEventListener('touchmove', seekFromEvent, { passive: true });
+
+  function formatTime(s) {
+    if (isNaN(s)) return '--:--';
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60);
+    return m + ':' + String(sec).padStart(2, '0');
+  }
+
+  function setAmbiance(file) {
+    const amb = document.getElementById('ambiance-engine');
+    document.querySelectorAll('.ambiance-btn').forEach(b => b.classList.remove('active'));
+    if (!file) {
+      amb.pause(); amb.src = '';
+      document.getElementById('amb-off').classList.add('active');
+      document.getElementById('ambiance-volume-wrap').style.display = 'none';
+      currentAmbiance = null;
+      return;
+    }
+    const btnId = 'amb-' + file.replace('.mp3','');
+    const btn = document.getElementById(btnId);
+    if (btn) btn.classList.add('active');
+    amb.src = 'assets/ambiances/' + file;
+    amb.volume = parseFloat(document.getElementById('ambiance-volume-slider').value);
+    amb.play().catch(() => {});
+    document.getElementById('ambiance-volume-wrap').style.display = 'flex';
+    currentAmbiance = file;
+  }
+
+  function stopAmbiance() {
+    const amb = document.getElementById('ambiance-engine');
+    amb.pause(); amb.src = '';
+    document.querySelectorAll('.ambiance-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('amb-off').classList.add('active');
+    document.getElementById('ambiance-volume-wrap').style.display = 'none';
+    currentAmbiance = null;
+  }
+
+  document.getElementById('ambiance-volume-slider').addEventListener('input', e => {
+    document.getElementById('ambiance-engine').volume = parseFloat(e.target.value);
+  });
+
+  async function toggleOfflineCache(btn) {
+    const file = btn.dataset.file;
+    if (!file || !('caches' in window)) return;
+    btn.classList.add('loading');
+    try {
+      const cache = await caches.open(CACHE_NAME);
+      const url = AUDIO_BASE + encodeURIComponent(file);
+      const existing = await cache.match(url);
+      if (existing) {
+        await cache.delete(url);
+        btn.classList.remove('cached', 'loading');
+        btn.textContent = '⬇';
+      } else {
+        btn.textContent = '⏳';
+        const resp = await fetch(url);
+        if (!resp.ok) throw new Error('fetch failed');
+        await cache.put(url, resp);
+        btn.classList.remove('loading');
+        btn.classList.add('cached');
+        btn.textContent = '✓';
+      }
+    } catch(e) {
+      btn.classList.remove('loading');
+      btn.textContent = '✗';
+      setTimeout(() => { btn.textContent = '⬇'; }, 2000);
+    }
+  }
+
+  async function initCacheButtons() {
+    if (!('caches' in window)) return;
+    const cache = await caches.open(CACHE_NAME);
+    document.querySelectorAll('.btn-offline[data-file]').forEach(async btn => {
+      const url = AUDIO_BASE + encodeURIComponent(btn.dataset.file);
+      const hit = await cache.match(url);
+      if (hit) { btn.classList.add('cached'); btn.textContent = '✓'; }
+    });
+  }
+  initCacheButtons();
+
+  function toggleTheme() {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    document.documentElement.setAttribute('data-theme', isDark ? '' : 'dark');
+    document.getElementById('theme-toggle').textContent = isDark ? '🌙 Sombre' : '☀️ Clair';
+    localStorage.setItem('serein-theme', isDark ? '' : 'dark');
+  }
+
+  function loadTheme() {
+    const t = localStorage.getItem('serein-theme');
+    if (t === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      document.getElementById('theme-toggle').textContent = '☀️ Clair';
+    }
+  }
+  loadTheme();
+
+  function recordSession() {
+    const stats = JSON.parse(localStorage.getItem('serein-stats') || '{"sessions":0,"minutes":0,"lastDate":""}');
+    stats.sessions = (stats.sessions || 0) + 1;
+    if (currentSession) {
+      const mins = parseInt(currentSession.duration) || 0;
+      stats.minutes = (stats.minutes || 0) + mins;
+    }
+    const today = new Date().toISOString().slice(0,10);
+    if (stats.lastDate !== today) {
+      stats.streak = (stats.streak || 0) + 1;
+      stats.lastDate = today;
+    }
+    localStorage.setItem('serein-stats', JSON.stringify(stats));
+    updateStatsWidget(stats);
+  }
+
+  function updateStatsWidget(stats) {
+    document.getElementById('stat-streak').textContent = stats.streak || 0;
+    document.getElementById('stat-sessions').textContent = stats.sessions || 0;
+    const m = stats.minutes || 0;
+    document.getElementById('stat-time').textContent = m >= 60 ? Math.floor(m/60) + 'h' + (m%60 ? (m%60)+'m' : '') : m + ' min';
+  }
+
+  function loadStats() {
+    const stats = JSON.parse(localStorage.getItem('serein-stats') || '{"sessions":0,"minutes":0,"streak":0,"lastDate":""}');
+    updateStatsWidget(stats);
+  }
+  loadStats();
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
+</script>
+</body>
+</html>
