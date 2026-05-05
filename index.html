@@ -180,6 +180,59 @@
       background: var(--color-primary); cursor: pointer;
     }
 
+    /* ── Vitesse de lecture ─────────────────────────────────────────────────── */
+    .speed-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .4rem;
+      margin-top: .85rem;
+      flex-wrap: wrap;
+    }
+    .speed-label {
+      font-size: .75rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--color-muted);
+      margin-right: .25rem;
+    }
+    .speed-btn {
+      background: var(--color-primary-light);
+      color: var(--color-primary);
+      border: 2px solid transparent;
+      border-radius: 999px;
+      padding: .25rem .6rem;
+      font-size: .8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .18s;
+    }
+    .speed-btn.active {
+      background: var(--color-primary);
+      color: #fff;
+      border-color: var(--color-primary);
+    }
+    .speed-btn:hover:not(.active) { opacity: .75; }
+
+    /* ── Bouton hors-ligne sur les cards ────────────────────────────────────── */
+    .session-actions { display: flex; align-items: center; gap: .5rem; flex-shrink: 0; }
+    .btn-offline {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 1px solid var(--color-border);
+      background: var(--color-surface);
+      color: var(--color-muted);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .9rem;
+      transition: all .2s;
+      flex-shrink: 0;
+      position: relative;
+    }
+    .btn-offline:hover { border-color: var(--color-primary); color: var(--color-primary); }
+    .btn-offline.cached { background: var(--color-primary-light); border-color: var(--color-primary); color: var(--color-primary); }
+    .btn-offline.loading { opacity: .6; cursor: wait; }
+    .btn-offline title { display: none; }
+
     .complete-screen { display: none; text-align: center; padding: 2rem 0; }
     .complete-screen.visible { display: block; }
     .player-main.hidden { display: none; }
@@ -562,28 +615,40 @@
         <h3>Première respiration consciente</h3>
         <p>Premiers pas · 5 min</p>
       </div>
-      <button class="btn btn-primary" onclick="launchPlayer('premiere-respiration-consciente', 'Première respiration consciente', 'Premiers pas', '5 min', 'Méditation Premiere Respiration Consciente.mp3', false)">Lancer</button>
+      <div class="session-actions">
+        <button class="btn-offline" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this, 'Méditation Premiere Respiration Consciente.mp3')">⬇</button>
+        <button class="btn btn-primary" onclick="launchPlayer('premiere-respiration-consciente', 'Première respiration consciente', 'Premiers pas', '5 min', 'Méditation Premiere Respiration Consciente.mp3', false)">Lancer</button>
+      </div>
     </article>
     <article class="card session-card" data-parcours="Premiers pas">
       <div class="session-info">
         <h3>S'asseoir, ne rien faire</h3>
         <p>Premiers pas · 5 min</p>
       </div>
-      <button class="btn btn-primary" onclick="launchPlayer('sasseoir-ne-rien-faire', 'S\'asseoir, ne rien faire', 'Premiers pas', '5 min', 'Revenir au souffle.mp3', false)">Lancer</button>
+      <div class="session-actions">
+        <button class="btn-offline" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this, 'Revenir au souffle.mp3')">⬇</button>
+        <button class="btn btn-primary" onclick="launchPlayer('sasseoir-ne-rien-faire', 'S\'asseoir, ne rien faire', 'Premiers pas', '5 min', 'Revenir au souffle.mp3', false)">Lancer</button>
+      </div>
     </article>
     <article class="card session-card" data-parcours="Premiers pas">
       <div class="session-info">
         <h3>Observer ses pensées sans les juger</h3>
         <p>Premiers pas · 9 min</p>
       </div>
-      <button class="btn btn-primary" onclick="launchPlayer('observer-ses-pensees', 'Observer ses pensées sans les juger', 'Premiers pas', '9 min', 'Observer ses pensées sans les juger.mp3', true)">Lancer</button>
+      <div class="session-actions">
+        <button class="btn-offline" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this, 'Observer ses pensées sans les juger.mp3')">⬇</button>
+        <button class="btn btn-primary" onclick="launchPlayer('observer-ses-pensees', 'Observer ses pensées sans les juger', 'Premiers pas', '9 min', 'Observer ses pensées sans les juger.mp3', true)">Lancer</button>
+      </div>
     </article>
     <article class="card session-card" data-parcours="Premiers pas">
       <div class="session-info">
         <h3>Le scan corporel — découvrir ses sensations</h3>
         <p>Premiers pas · 10 min</p>
       </div>
-      <button class="btn btn-primary" onclick="launchPlayer('scan-corporel-sensations', 'Le scan corporel — découvrir ses sensations', 'Premiers pas', '10 min', 'Le scan corporel - découvrir ses sensations.mp3', false)">Lancer</button>
+      <div class="session-actions">
+        <button class="btn-offline" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this, 'Le scan corporel - découvrir ses sensations.mp3')">⬇</button>
+        <button class="btn btn-primary" onclick="launchPlayer('scan-corporel-sensations', 'Le scan corporel — découvrir ses sensations', 'Premiers pas', '10 min', 'Le scan corporel - découvrir ses sensations.mp3', false)">Lancer</button>
+      </div>
     </article>
     <article class="card session-card" data-parcours="Premiers pas">
       <div class="session-info">
@@ -657,7 +722,10 @@
         <h3>Rituel de déconnexion</h3>
         <p>Sommeil · 10 min</p>
       </div>
-      <button class="btn btn-primary" onclick="launchPlayer('rituel-deconnexion', 'Rituel de déconnexion', 'Sommeil', '10 min', 'Préparer le sommeil.mp3', false)">Lancer</button>
+      <div class="session-actions">
+        <button class="btn-offline" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this, 'Préparer le sommeil.mp3')">⬇</button>
+        <button class="btn btn-primary" onclick="launchPlayer('rituel-deconnexion', 'Rituel de déconnexion', 'Sommeil', '10 min', 'Préparer le sommeil.mp3', false)">Lancer</button>
+      </div>
     </article>
     <article class="card session-card" data-parcours="Sommeil">
       <div class="session-info">
@@ -685,7 +753,10 @@
         <h3>Réveils nocturnes — retrouver le calme</h3>
         <p>Sommeil · 18 min</p>
       </div>
-      <button class="btn btn-primary" onclick="launchPlayer('reveils-nocturnes-calme', 'Réveils nocturnes — retrouver le calme', 'Sommeil', '18 min', 'Reveils nocturnes-retrouver le calme.mp3', false)">Lancer</button>
+      <div class="session-actions">
+        <button class="btn-offline" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this, 'Reveils nocturnes-retrouver le calme.mp3')">⬇</button>
+        <button class="btn btn-primary" onclick="launchPlayer('reveils-nocturnes-calme', 'Réveils nocturnes — retrouver le calme', 'Sommeil', '18 min', 'Reveils nocturnes-retrouver le calme.mp3', false)">Lancer</button>
+      </div>
     </article>
     <article class="card session-card" data-parcours="Sommeil">
       <div class="session-info">
@@ -738,28 +809,40 @@
         <h3>SOS Anxiété — ancrage immédiat</h3>
         <p>Anxiété · 5 min</p>
       </div>
-      <button class="btn btn-primary" onclick="launchPlayer('sos-anxiete-ancrage-immediat', 'SOS Anxiété — ancrage immédiat', 'Anxiété', '5 min', 'SOS Anxiété ancrage immédiat.mp3', false)">Lancer</button>
+      <div class="session-actions">
+        <button class="btn-offline" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this, 'SOS Anxiété ancrage immédiat.mp3')">⬇</button>
+        <button class="btn btn-primary" onclick="launchPlayer('sos-anxiete-ancrage-immediat', 'SOS Anxiété — ancrage immédiat', 'Anxiété', '5 min', 'SOS Anxiété ancrage immédiat.mp3', false)">Lancer</button>
+      </div>
     </article>
     <article class="card session-card" data-parcours="Anxiété">
       <div class="session-info">
         <h3>Accueillir l'anxiété sans la combattre</h3>
         <p>Anxiété · 10 min</p>
       </div>
-      <button class="btn btn-primary" onclick="launchPlayer('accueillir-anxiete', 'Accueillir l\'anxiété sans la combattre', 'Anxiété', '10 min', 'Accueillir l\'anxiété sans la combattre.mp3', false)">Lancer</button>
+      <div class="session-actions">
+        <button class="btn-offline" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this, 'Accueillir l\'anxiété sans la combattre.mp3')">⬇</button>
+        <button class="btn btn-primary" onclick="launchPlayer('accueillir-anxiete', 'Accueillir l\'anxiété sans la combattre', 'Anxiété', '10 min', 'Accueillir l\'anxiété sans la combattre.mp3', false)">Lancer</button>
+      </div>
     </article>
     <article class="card session-card" data-parcours="Anxiété">
       <div class="session-info">
         <h3>Les sons autour de toi</h3>
         <p>Anxiété · 8 min</p>
       </div>
-      <button class="btn btn-primary" onclick="launchPlayer('les-sons-autour-de-toi', 'Les sons autour de toi', 'Anxiété', '8 min', 'Les sons autour de toi.mp3', false)">Lancer</button>
+      <div class="session-actions">
+        <button class="btn-offline" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this, 'Les sons autour de toi.mp3')">⬇</button>
+        <button class="btn btn-primary" onclick="launchPlayer('les-sons-autour-de-toi', 'Les sons autour de toi', 'Anxiété', '8 min', 'Les sons autour de toi.mp3', false)">Lancer</button>
+      </div>
     </article>
     <article class="card session-card" data-parcours="Anxiété">
       <div class="session-info">
         <h3>La pensée qui tourne en boucle</h3>
         <p>Anxiété · 9 min</p>
       </div>
-      <button class="btn btn-primary" onclick="launchPlayer('pensee-tourne-boucle', 'La pensée qui tourne en boucle', 'Anxiété', '9 min', 'La pensée qui tourne en boucle.mp3', false)">Lancer</button>
+      <div class="session-actions">
+        <button class="btn-offline" title="Télécharger pour hors ligne" onclick="toggleOfflineCache(this, 'La pensée qui tourne en boucle.mp3')">⬇</button>
+        <button class="btn btn-primary" onclick="launchPlayer('pensee-tourne-boucle', 'La pensée qui tourne en boucle', 'Anxiété', '9 min', 'La pensée qui tourne en boucle.mp3', false)">Lancer</button>
+      </div>
     </article>
     <article class="card session-card" data-parcours="Anxiété">
       <div class="session-info">
@@ -875,6 +958,16 @@
         <span>🔊</span>
       </div>
 
+      <!-- Contrôle de vitesse -->
+      <div class="speed-wrap" id="speed-wrap">
+        <span class="speed-label">Vitesse</span>
+        <button class="speed-btn" onclick="setSpeed(0.6)">×0.6</button>
+        <button class="speed-btn" onclick="setSpeed(0.7)">×0.7</button>
+        <button class="speed-btn" onclick="setSpeed(0.8)">×0.8</button>
+        <button class="speed-btn" onclick="setSpeed(0.9)">×0.9</button>
+        <button class="speed-btn active" onclick="setSpeed(1.0)">×1.0</button>
+      </div>
+
       <div class="ambiance-section" id="ambiance-section">
         <p class="ambiance-label">Son d'ambiance</p>
         <div class="ambiance-btns">
@@ -941,10 +1034,10 @@
 
     <article class="card setting-item">
       <div class="info">
-        <h3>Hors ligne</h3>
-        <p>Télécharger des séances pour les écouter sans connexion</p>
+        <h3>📥 Hors ligne</h3>
+        <p>Appuie sur ⬇ sur une séance pour la mettre en cache</p>
       </div>
-      <span class="setting-tag">MVP</span>
+      <span class="setting-tag" id="offline-count-tag">0 séance</span>
     </article>
     <article class="card setting-item">
       <div class="info">
@@ -970,7 +1063,7 @@
       <div class="trust" style="margin-top:1rem;">
         <span class="trust-item">Open source</span>
         <span class="trust-item">AGPL-3.0 / CC BY</span>
-        <span class="trust-item">Alpha v0.2</span>
+        <span class="trust-item">Alpha v0.3</span>
       </div>
     </article>
   </div>
@@ -1015,363 +1108,89 @@
 </nav>
 
 <script>
-  (function() {
-    const v = localStorage.getItem('serein_voice');
-    if (!v || (v !== 'masculine' && v !== 'feminine')) {
-      localStorage.setItem('serein_voice', 'masculine');
-    }
-  })();
+  // ── Service Worker ────────────────────────────────────────────────────────
+  let swReady = false;
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').then(reg => {
+      swReady = true;
+      console.log('[SW] Enregistré', reg.scope);
+    }).catch(err => console.warn('[SW] Erreur', err));
 
-  const screens = ['home', 'explore', 'player', 'settings'];
-
-  function showScreen(id) {
-    screens.forEach(s => {
-      document.getElementById(s).classList.toggle('active', s === id);
-      const btn = document.getElementById('nav-' + s);
-      if (btn) btn.classList.toggle('active', s === id);
-    });
-    window.scrollTo(0, 0);
-  }
-
-  function filterTab(el) {
-    document.querySelectorAll('.filter-tabs .tab').forEach(t => t.classList.remove('active'));
-    el.classList.add('active');
-    const filter = el.textContent.trim();
-    document.querySelectorAll('.session-card').forEach(card => {
-      const p = card.dataset.parcours || '';
-      card.style.display = (filter === 'Toutes' || p === filter) ? '' : 'none';
-    });
-  }
-
-  function filterParcours(parcours) {
-    showScreen('explore');
-    setTimeout(() => {
-      const tabs = document.querySelectorAll('.filter-tabs .tab');
-      tabs.forEach(t => {
-        if (t.textContent.trim() === parcours) {
-          t.classList.add('active');
-          filterTab(t);
-        } else {
-          t.classList.remove('active');
-        }
-      });
-    }, 50);
-  }
-
-  function getVoice() {
-    return localStorage.getItem('serein_voice') || 'masculine';
-  }
-
-  function getAudioPath(filename, voiceOverride) {
-    const v = voiceOverride || getVoice();
-    const folder = v === 'feminine' ? 'feminin' : 'masculin';
-    return 'assets/audio/' + folder + '/' + filename;
-  }
-
-  let _pendingSession = null;
-  let _selectedVoiceInSheet = getVoice();
-
-  function launchPlayer(id, title, parcours, duree, audioFilename, hasBothVoices) {
-    if (hasBothVoices) {
-      _pendingSession = { id, title, parcours, duree, audioFilename };
-      _selectedVoiceInSheet = getVoice();
-      updateVoiceSheetUI();
-      document.getElementById('voice-overlay').classList.add('open');
-    } else {
-      _doLaunchPlayer(id, title, parcours, duree, audioFilename, 'masculine');
-    }
-  }
-
-  function selectVoiceOption(voice) {
-    _selectedVoiceInSheet = voice;
-    updateVoiceSheetUI();
-  }
-
-  function updateVoiceSheetUI() {
-    document.getElementById('vopt-masculine').classList.toggle('selected', _selectedVoiceInSheet === 'masculine');
-    document.getElementById('vopt-feminine').classList.toggle('selected', _selectedVoiceInSheet === 'feminine');
-  }
-
-  function confirmVoiceAndLaunch() {
-    const session = _pendingSession;
-    const voice   = _selectedVoiceInSheet;
-    if (!session) return;
-    localStorage.setItem('serein_voice', voice);
-    document.getElementById('voice-overlay').classList.remove('open');
-    _pendingSession = null;
-    _doLaunchPlayer(session.id, session.title, session.parcours, session.duree, session.audioFilename, voice);
-  }
-
-  function closeVoiceOverlay() {
-    document.getElementById('voice-overlay').classList.remove('open');
-    _pendingSession = null;
-  }
-
-  document.getElementById('voice-overlay').addEventListener('click', function(e) {
-    if (e.target === this) closeVoiceOverlay();
-  });
-
-  const audio         = document.getElementById('audio-engine');
-  const progressTrack = document.getElementById('progress-track');
-  const progressFill  = document.getElementById('progress-fill');
-  const progressThumb = document.getElementById('progress-thumb');
-  const timeCurrent   = document.getElementById('time-current');
-  const timeTotal     = document.getElementById('time-total');
-  const iconPlay      = document.getElementById('icon-play');
-  const iconPause     = document.getElementById('icon-pause');
-  const audioLoading  = document.getElementById('audio-loading');
-  const playerMain    = document.getElementById('player-main');
-  const completeScreen= document.getElementById('complete-screen');
-  const volumeSlider  = document.getElementById('volume-slider');
-
-  let sessionStartTime = null;
-  let isDragging       = false;
-  let _currentSession  = null;
-
-  function fmtTime(sec) {
-    if (!isFinite(sec) || sec < 0) return '--:--';
-    const m = Math.floor(sec / 60);
-    const s = Math.floor(sec % 60);
-    return m + ':' + String(s).padStart(2, '0');
-  }
-
-  function updateProgress() {
-    if (!audio.duration || isDragging) return;
-    const pct = audio.currentTime / audio.duration;
-    progressFill.style.width  = (pct * 100) + '%';
-    progressThumb.style.left  = (pct * 100) + '%';
-    timeCurrent.textContent   = fmtTime(audio.currentTime);
-    progressTrack.setAttribute('aria-valuenow', Math.round(pct * 100));
-  }
-
-  audio.addEventListener('timeupdate', updateProgress);
-  audio.addEventListener('loadedmetadata', () => {
-    timeTotal.textContent = fmtTime(audio.duration);
-    audioLoading.textContent = '';
-  });
-  audio.addEventListener('waiting', () => { audioLoading.textContent = 'Chargement…'; });
-  audio.addEventListener('playing', () => {
-    audioLoading.textContent = '';
-    sessionStartTime = sessionStartTime || Date.now();
-    setPlayingUI(true);
-  });
-  audio.addEventListener('pause', () => { setPlayingUI(false); });
-  audio.addEventListener('ended', () => {
-    setPlayingUI(false);
-    progressFill.style.width = '100%';
-    progressThumb.style.left = '100%';
-    const listenedSec = sessionStartTime ? Math.round((Date.now() - sessionStartTime) / 1000) : Math.round(audio.duration || 0);
-    recordSession(Math.max(1, Math.round(listenedSec / 60)));
-    sessionStartTime = null;
-    stopAmbiance();
-    playerMain.classList.add('hidden');
-    completeScreen.classList.add('visible');
-    document.getElementById('complete-title').textContent = document.getElementById('player-title').textContent;
-  });
-  audio.addEventListener('error', () => {
-    audioLoading.textContent = '⚠️ Fichier audio introuvable. Vérifie le chemin sur le Pi.';
-  });
-
-  function setPlayingUI(playing) {
-    iconPlay.style.display  = playing ? 'none'  : 'block';
-    iconPause.style.display = playing ? 'block' : 'none';
-  }
-
-  function _doLaunchPlayer(id, title, parcours, duree, audioFilename, voice) {
-    _currentSession = { id, title, parcours, duree, audioFilename, voice };
-
-    document.getElementById('player-title').textContent = title;
-    document.getElementById('player-meta').textContent  = parcours + ' · ' + duree;
-    document.getElementById('complete-title').textContent = title;
-
-    const voiceTag = document.getElementById('player-voice-tag');
-    voiceTag.textContent = voice === 'feminine' ? 'Voix féminine' : 'Voix masculine';
-
-    progressFill.style.width = '0%';
-    progressThumb.style.left = '0%';
-    timeCurrent.textContent  = '0:00';
-    timeTotal.textContent    = '--:--';
-    setPlayingUI(false);
-    playerMain.classList.remove('hidden');
-    completeScreen.classList.remove('visible');
-    sessionStartTime = null;
-
-    if (audioFilename) {
-      const audioSrc = getAudioPath(audioFilename, voice);
-      audioLoading.textContent = 'Chargement…';
-
-      const tryPlayWhenReady = () => {
-        audio.play().catch(() => {
-          audioLoading.textContent = 'Appuie sur ▶ pour démarrer';
+    navigator.serviceWorker.addEventListener('message', event => {
+      if (event.data.type === 'CACHE_DONE') {
+        event.data.urls.forEach(url => {
+          const filename = url.split('/').pop();
+          markButtonCached(filename);
         });
-      };
-
-      audio.src = audioSrc;
-      audio.load();
-      audio.addEventListener('canplay', tryPlayWhenReady, { once: true });
-    } else {
-      audioLoading.textContent = '⏳ Cet enregistrement n\'est pas encore disponible.';
-      audio.src = '';
-    }
-
-    showScreen('player');
+        updateOfflineCount();
+      }
+      if (event.data.type === 'CACHE_STATUS') {
+        const filename = event.data.url.split('/').pop();
+        if (event.data.cached) markButtonCached(filename);
+      }
+    });
   }
 
-  function togglePlay() {
-    if (!audio.src) return;
-    audio.paused ? audio.play() : audio.pause();
+  // ── Hors-ligne : cache on-demand ──────────────────────────────────────────
+  const VOICES = ['masculin', 'feminin'];
+
+  function getAudioUrls(filename) {
+    return VOICES.map(v => location.origin + '/assets/audio/' + v + '/' + encodeURIComponent(filename));
   }
 
-  document.getElementById('btn-rewind').addEventListener('click', () => {
-    audio.currentTime = Math.max(0, audio.currentTime - 15);
-  });
-  document.getElementById('btn-forward').addEventListener('click', () => {
-    audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + 15);
-  });
-
-  function seekTo(e) {
-    if (!audio.duration) return;
-    const rect = progressTrack.getBoundingClientRect();
-    const x    = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-    const pct  = Math.max(0, Math.min(1, x / rect.width));
-    audio.currentTime = pct * audio.duration;
-    progressFill.style.width = (pct * 100) + '%';
-    progressThumb.style.left = (pct * 100) + '%';
-  }
-
-  progressTrack.addEventListener('mousedown',  (e) => { isDragging = true; seekTo(e); });
-  progressTrack.addEventListener('touchstart', (e) => { isDragging = true; seekTo(e); }, { passive: true });
-  document.addEventListener('mousemove',  (e) => { if (isDragging) seekTo(e); });
-  document.addEventListener('touchmove',  (e) => { if (isDragging) seekTo(e); }, { passive: true });
-  document.addEventListener('mouseup',   () => { isDragging = false; });
-  document.addEventListener('touchend',  () => { isDragging = false; });
-
-  progressTrack.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowRight') audio.currentTime = Math.min(audio.duration, audio.currentTime + 5);
-    if (e.key === 'ArrowLeft')  audio.currentTime = Math.max(0, audio.currentTime - 5);
-  });
-
-  volumeSlider.addEventListener('input', () => { audio.volume = volumeSlider.value; });
-
-  function stopAndReturn() {
-    audio.pause();
-    stopAmbiance();
-    showScreen('explore');
-  }
-
-  function replaySession() {
-    if (!_currentSession) return;
-    playerMain.classList.remove('hidden');
-    completeScreen.classList.remove('visible');
-    audio.currentTime = 0;
-    audio.play();
-  }
-
-  const ambianceAudio      = document.getElementById('ambiance-engine');
-  const ambianceSlider     = document.getElementById('ambiance-volume-slider');
-  const ambianceVolumeWrap = document.getElementById('ambiance-volume-wrap');
-
-  const AMBIANCES = [
-    { id: 'pluie',  label: 'Pluie',       file: 'pluie.mp3' },
-    { id: 'foret',  label: 'Forêt',       file: 'foret.mp3' },
-    { id: 'vagues', label: 'Vagues',      file: 'vagues.mp3' },
-    { id: 'feu',    label: 'Feu',         file: 'feu.mp3' },
-    { id: 'blanc',  label: 'Bruit blanc', file: 'bruit-blanc.mp3' },
-  ];
-
-  function stopAmbiance() {
-    ambianceAudio.pause();
-    ambianceAudio.src = '';
-    ambianceVolumeWrap.style.display = 'none';
-    localStorage.removeItem('serein_ambiance');
-    document.querySelectorAll('.ambiance-btn').forEach(b => b.classList.remove('active'));
-    const offBtn = document.getElementById('amb-off');
-    if (offBtn) offBtn.classList.add('active');
-    updateAmbianceTag('Aucun');
-  }
-
-  function setAmbiance(filename) {
-    document.querySelectorAll('.ambiance-btn').forEach(b => b.classList.remove('active'));
-    let btnId = 'amb-off';
-    if (filename) {
-      const base = filename.replace('.mp3', '').replace('bruit-blanc', 'blanc');
-      btnId = 'amb-' + base;
-    }
-    const btn = document.getElementById(btnId);
-    if (btn) btn.classList.add('active');
-
-    if (!filename) {
-      ambianceAudio.pause();
-      ambianceAudio.src = '';
-      ambianceVolumeWrap.style.display = 'none';
-      localStorage.removeItem('serein_ambiance');
-      updateAmbianceTag('Aucun');
+  function toggleOfflineCache(btn, filename) {
+    if (btn.classList.contains('cached')) return; // déjà en cache, ne rien faire
+    if (!swReady || !navigator.serviceWorker.controller) {
+      alert('Le service worker n\'est pas encore prêt, réessaie dans un instant.');
       return;
     }
-
-    ambianceAudio.src = 'assets/audio/ambiance/' + filename;
-    ambianceAudio.volume = parseFloat(ambianceSlider.value);
-    ambianceAudio.load();
-    ambianceAudio.play().catch(() => {});
-    ambianceVolumeWrap.style.display = 'flex';
-    localStorage.setItem('serein_ambiance', filename);
-    const found = AMBIANCES.find(a => a.file === filename);
-    updateAmbianceTag(found ? found.label : '');
+    btn.classList.add('loading');
+    btn.textContent = '⏳';
+    const urls = getAudioUrls(filename);
+    btn.dataset.filename = filename;
+    navigator.serviceWorker.controller.postMessage({ type: 'CACHE_AUDIO', urls });
   }
 
-  function updateAmbianceTag(label) {
-    const tag = document.getElementById('ambiance-settings-tag');
-    if (tag) tag.textContent = label;
+  function markButtonCached(filename) {
+    document.querySelectorAll('.btn-offline').forEach(btn => {
+      const f = btn.dataset.filename || btn.getAttribute('onclick').match(/'([^']+\.mp3)'/)?.[1];
+      if (f && decodeURIComponent(f) === decodeURIComponent(filename)) {
+        btn.classList.remove('loading');
+        btn.classList.add('cached');
+        btn.textContent = '✓';
+        btn.title = 'Disponible hors ligne';
+      }
+    });
   }
 
-  ambianceSlider.addEventListener('input', () => {
-    ambianceAudio.volume = parseFloat(ambianceSlider.value);
-  });
-
-  function toggleTheme() {
-    const html   = document.documentElement;
-    const isDark = html.getAttribute('data-theme') === 'dark';
-    html.setAttribute('data-theme', isDark ? 'light' : 'dark');
-    document.getElementById('theme-toggle').textContent = isDark ? '🌙 Sombre' : '☀️ Clair';
-    localStorage.setItem('theme', isDark ? 'light' : 'dark');
+  function checkAllCacheStatus() {
+    if (!navigator.serviceWorker.controller) return;
+    document.querySelectorAll('.btn-offline').forEach(btn => {
+      const match = btn.getAttribute('onclick').match(/'([^']+\.mp3)'/);
+      if (!match) return;
+      const filename = match[1];
+      const url = location.origin + '/assets/audio/masculin/' + encodeURIComponent(filename);
+      navigator.serviceWorker.controller.postMessage({ type: 'CHECK_CACHE', url });
+    });
   }
 
-  (function() {
-    const saved = localStorage.getItem('theme');
-    if (saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
-  })();
-
-  document.addEventListener('DOMContentLoaded', function() {
-    const saved = localStorage.getItem('theme');
-    const btn   = document.getElementById('theme-toggle');
-    if (btn && saved === 'dark') btn.textContent = '☀️ Clair';
-  });
-
-  function loadStats() {
-    const s = JSON.parse(localStorage.getItem('serein_stats') || '{"sessions":0,"minutes":0,"streak":0,"lastDate":""}');
-    document.getElementById('stat-streak').textContent   = s.streak;
-    document.getElementById('stat-sessions').textContent = s.sessions;
-    const h = Math.floor(s.minutes / 60);
-    const m = s.minutes % 60;
-    document.getElementById('stat-time').textContent = h > 0 ? h + 'h ' + m + 'min' : m + ' min';
+  function updateOfflineCount() {
+    const cached = document.querySelectorAll('.btn-offline.cached').length;
+    const tag = document.getElementById('offline-count-tag');
+    if (tag) tag.textContent = cached + (cached <= 1 ? ' séance' : ' séances');
   }
 
-  function recordSession(minutes) {
-    const s         = JSON.parse(localStorage.getItem('serein_stats') || '{"sessions":0,"minutes":0,"streak":0,"lastDate":""}');
-    const today     = new Date().toISOString().slice(0, 10);
-    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
-    if (s.lastDate !== today) {
-      s.streak = (s.lastDate === yesterday) ? s.streak + 1 : 1;
-    }
-    s.lastDate = today;
-    s.sessions += 1;
-    s.minutes  += minutes;
-    localStorage.setItem('serein_stats', JSON.stringify(s));
-    loadStats();
+  // Vérifie le cache une fois le SW prêt
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.ready.then(() => {
+      setTimeout(checkAllCacheStatus, 800);
+    });
   }
 
-  document.addEventListener('DOMContentLoaded', loadStats);
-</script>
+  // ── Vitesse de lecture ────────────────────────────────────────────────────
+  let currentSpeed = parseFloat(localStorage.getItem('serein_speed') || '1.0');
 
-</body>
-</html>
+  function setSpeed(rate) {
+    currentSpeed = rate;
+    audio.playbackRate = rate;
+    localStorage.setItem('ser
