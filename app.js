@@ -95,7 +95,6 @@ function launchPlayer(id, title, parcours, duration, filename, voice) {
 }
 
 function togglePlay() {
-  // Mode ambiance seule (pas de séance chargée)
   if (!audio.src || audio.src === window.location.href) {
     if (!currentAmbiance) {
       document.getElementById('audio-loading').textContent = 'Aucune séance sélectionnée';
@@ -110,7 +109,6 @@ function togglePlay() {
     }
     return;
   }
-  // Mode normal : voix + ambiance synchronisées
   if (audio.paused) {
     audio.play();
     if (currentAmbiance) ambianceAudio.play().catch(() => {});
@@ -211,7 +209,6 @@ function setAmbiance(file) {
     document.getElementById('ambiance-volume-wrap').style.display = 'none';
     currentAmbiance = null;
     updateAmbianceTag('Aucun');
-    // Si pas de séance, repasser l'icône en pause
     if (!audio.src || audio.src === window.location.href) updatePlayIcon(false);
     return;
   }
@@ -225,7 +222,6 @@ function setAmbiance(file) {
   document.getElementById('ambiance-volume-wrap').style.display = 'flex';
   const label = file.replace('.mp3','').replace('bruit-blanc','Bruit blanc');
   updateAmbianceTag(label);
-  // Si pas de séance chargée, montrer l'icône pause (ambiance joue)
   if (!audio.src || audio.src === window.location.href) updatePlayIcon(true);
 }
 
@@ -277,7 +273,7 @@ async function restoreOfflineButtons() {
   if (!('caches' in window)) return;
   try {
     const cache = await caches.open('serein-audio-v1');
-    const btns  = Array.from(document.querySelectorAll('.btn-offline[data-filename]'));
+    const btns = Array.from(document.querySelectorAll('.btn-offline[data-filename]'));
     await Promise.all(btns.map(async btn => {
       const fn = btn.dataset.filename;
       if (!fn) return;
@@ -356,6 +352,11 @@ const GUIDE_MAP = {
     'court':  { title: 'Rituel de déconnexion', parcours: 'Sommeil', duration: '10 min', file: 'Préparer le sommeil.mp3', emoji: '🌙' },
     'moyen':  { title: 'Rituel de déconnexion', parcours: 'Sommeil', duration: '10 min', file: 'Préparer le sommeil.mp3', emoji: '🌙' },
     'long':   { title: 'Réveils nocturnes — retrouver le calme', parcours: 'Sommeil', duration: '18 min', file: 'Reveils nocturnes.mp3', emoji: '💤' }
+  },
+  'concentration': {
+    'court':  { title: 'Mise en route mentale', parcours: 'Concentration', duration: '7 min', file: 'Mise en route mentale.mp3', emoji: '🎯' },
+    'moyen':  { title: 'Mise en route mentale', parcours: 'Concentration', duration: '7 min', file: 'Mise en route mentale.mp3', emoji: '🎯' },
+    'long':   { title: 'Mise en route mentale', parcours: 'Concentration', duration: '7 min', file: 'Mise en route mentale.mp3', emoji: '🎯' }
   }
 };
 
@@ -376,13 +377,14 @@ function initGuide() {
     { label: '😰 Anxieux/se', value: 'anxiete' },
     { label: '😴 Fatigué(e)', value: 'fatigue' },
     { label: '😶 Brouillard mental', value: 'brouillard' },
-    { label: '🌙 Difficultés à dormir', value: 'sommeil' }
+    { label: '🌙 Difficultés à dormir', value: 'sommeil' },
+    { label: '🎯 Besoin de concentration', value: 'concentration' }
   ], onMoodChoice), 600);
 }
 
 function onMoodChoice(value) {
   guideMood = value;
-  const labels = { stress: 'Stressé(e)', anxiete: 'Anxieux/se', fatigue: 'Fatigué(e)', brouillard: 'Brouillard mental', sommeil: 'Difficultés à dormir' };
+  const labels = { stress: 'Stressé(e)', anxiete: 'Anxieux/se', fatigue: 'Fatigué(e)', brouillard: 'Brouillard mental', sommeil: 'Difficultés à dormir', concentration: 'Besoin de concentration' };
   addUserBubble(labels[value] || value);
   clearChoices();
   setTimeout(() => addBotBubble('Combien de temps as-tu\u00a0?'), 400);
@@ -404,7 +406,6 @@ function onDurationChoice(value) {
   }, 400);
 }
 
-// Stocke la reco en cours pour que le bouton puisse la lancer sans passer par le HTML
 let pendingGuideRec = null;
 
 function showGuideResult(rec) {
