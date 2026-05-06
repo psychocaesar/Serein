@@ -309,29 +309,29 @@ function applyTheme() {
 // ── GUIDE CHATBOT ──
 const GUIDE_MAP = {
   'stress': {
-    'court':  { title: 'SOS Stress en 6 minutes',        parcours: 'Calme & Stress', duration: '6 min',  file: 'SOS Stress en 6 minutes.mp3',          emoji: '😮‍💨' },
-    'moyen':  { title: 'La cohérence cardiaque guidée',   parcours: 'Calme & Stress', duration: '5 min',  file: 'Cohérence cardiaque 5 minutes.mp3',   emoji: '💚' },
-    'long':   { title: 'La cohérence cardiaque guidée',   parcours: 'Calme & Stress', duration: '5 min',  file: 'Cohérence cardiaque 5 minutes.mp3',   emoji: '💚' }
+    'court':  { title: 'SOS stress en 6 minutes',        parcours: 'Calme & Stress', duration: '6 min',  file: 'SOS stress en 6 minutes.mp3',          emoji: '😮‍💨' },
+    'moyen':  { title: 'La cohérence cardiaque guidée',   parcours: 'Calme & Stress', duration: '5 min',  file: 'Cohérence cardiaque 5 minutes.mp3',      emoji: '💚' },
+    'long':   { title: 'La cohérence cardiaque guidée',   parcours: 'Calme & Stress', duration: '5 min',  file: 'Cohérence cardiaque 5 minutes.mp3',      emoji: '💚' }
   },
   'anxiete': {
-    'court':  { title: 'SOS Anxiété — ancrage immédiat', parcours: 'Anxiété', duration: '5 min',  file: 'SOS Anxiété ancrage immédiat.mp3',    emoji: '🌀' },
+    'court':  { title: 'SOS anxiété — ancrage immédiat',  parcours: 'Anxiété', duration: '5 min',  file: 'SOS anxiété - ancrage immédiat.mp3',     emoji: '🌀' },
     'moyen':  { title: "Accueillir l'anxiété sans la combattre", parcours: 'Anxiété', duration: '10 min', file: "Accueillir l'anxiété sans la combattre.mp3", emoji: '🤍' },
-    'long':   { title: 'La pensée qui tourne en boucle',  parcours: 'Anxiété', duration: '9 min',  file: 'La pensée qui tourne en boucle.mp3',  emoji: '🧠' }
+    'long':   { title: 'La pensée qui tourne en boucle',  parcours: 'Anxiété', duration: '9 min',  file: 'La pensée qui tourne en boucle.mp3',      emoji: '🧠' }
   },
   'fatigue': {
     'court':  { title: 'Première respiration consciente',  parcours: 'Premiers pas', duration: '5 min',  file: 'Méditation Premiere Respiration Consciente.mp3', emoji: '🌱' },
-    'moyen':  { title: 'Le scan corporel — découvrir ses sensations', parcours: 'Premiers pas', duration: '10 min', file: 'Le scan corporel.mp3', emoji: '🌿' },
-    'long':   { title: 'Réveils nocturnes — retrouver le calme', parcours: 'Sommeil', duration: '18 min', file: 'Reveils nocturnes.mp3', emoji: '🌙' }
+    'moyen':  { title: 'Le scan corporel — découvrir ses sensations', parcours: 'Premiers pas', duration: '10 min', file: 'Le scan corporel - découvrir ses sensations.mp3', emoji: '🌿' },
+    'long':   { title: 'Réveils nocturnes — retrouver le calme', parcours: 'Sommeil', duration: '18 min', file: 'Réveils nocturnes-retrouver le calme.mp3', emoji: '🌙' }
   },
   'brouillard': {
-    'court':  { title: "S'asseoir, ne rien faire", parcours: 'Premiers pas', duration: '5 min', file: 'Sasseoir ne rien faire.mp3', emoji: '🧘' },
+    'court':  { title: 'Observer ses pensées sans les juger', parcours: 'Premiers pas', duration: '9 min', file: 'Observer ses pensées sans les juger.mp3', emoji: '🧘' },
     'moyen':  { title: 'Observer ses pensées sans les juger', parcours: 'Premiers pas', duration: '9 min', file: 'Observer ses pensées sans les juger.mp3', emoji: '👁️' },
     'long':   { title: 'Observer ses pensées sans les juger', parcours: 'Premiers pas', duration: '9 min', file: 'Observer ses pensées sans les juger.mp3', emoji: '👁️' }
   },
   'sommeil': {
-    'court':  { title: 'Rituel de déconnexion', parcours: 'Sommeil', duration: '10 min', file: 'Rituel de déconnexion.mp3', emoji: '🌙' },
-    'moyen':  { title: 'Rituel de déconnexion', parcours: 'Sommeil', duration: '10 min', file: 'Rituel de déconnexion.mp3', emoji: '🌙' },
-    'long':   { title: 'Réveils nocturnes — retrouver le calme', parcours: 'Sommeil', duration: '18 min', file: 'Reveils nocturnes.mp3', emoji: '💤' }
+    'court':  { title: 'Réveils nocturnes — retrouver le calme', parcours: 'Sommeil', duration: '18 min', file: 'Réveils nocturnes-retrouver le calme.mp3', emoji: '🌙' },
+    'moyen':  { title: 'Réveils nocturnes — retrouver le calme', parcours: 'Sommeil', duration: '18 min', file: 'Réveils nocturnes-retrouver le calme.mp3', emoji: '🌙' },
+    'long':   { title: 'Réveils nocturnes — retrouver le calme', parcours: 'Sommeil', duration: '18 min', file: 'Réveils nocturnes-retrouver le calme.mp3', emoji: '💤' }
   }
 };
 
@@ -346,7 +346,7 @@ function initGuide() {
   const win = document.getElementById('chat-window');
   const res = document.getElementById('guide-result');
   win.innerHTML = ''; res.style.display = 'none'; res.innerHTML = '';
-  setTimeout(() => addBotBubble('Bonjour 👋 Comment tu te sens en ce moment\u00a0?'), 200);
+  setTimeout(() => addBotBubble('Bonjour 👋 Comment tu te sens en ce moment ?'), 200);
   setTimeout(() => addChoices([
     { label: '😮‍💨 Stressé(e)', value: 'stress' },
     { label: '😰 Anxieux/se', value: 'anxiete' },
@@ -361,7 +361,7 @@ function onMoodChoice(value) {
   const labels = { stress: 'Stressé(e)', anxiete: 'Anxieux/se', fatigue: 'Fatigué(e)', brouillard: 'Brouillard mental', sommeil: 'Difficultés à dormir' };
   addUserBubble(labels[value] || value);
   clearChoices();
-  setTimeout(() => addBotBubble('Combien de temps as-tu\u00a0?'), 400);
+  setTimeout(() => addBotBubble('Combien de temps as-tu ?'), 400);
   setTimeout(() => addChoices([
     { label: '⚡ 5 minutes', value: 'court' },
     { label: '🌿 5–10 minutes', value: 'moyen' },
@@ -375,7 +375,7 @@ function onDurationChoice(value) {
   const rec = GUIDE_MAP[guideMood] && GUIDE_MAP[guideMood][value];
   if (!rec) { setTimeout(() => addBotBubble('Désolé, je n\'ai pas trouvé de séance pour ce profil.'), 400); return; }
   setTimeout(() => {
-    addBotBubble('Voilà ce que je te recommande\u00a0:');
+    addBotBubble('Voilà ce que je te recommande :');
     setTimeout(() => showGuideResult(rec), 400);
   }, 400);
 }
