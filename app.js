@@ -7,7 +7,6 @@ function showScreen(id) {
     const btn = document.getElementById('nav-' + s);
     if (btn) btn.classList.toggle('active', s === id);
   });
-  window.scrollTo(0, 0);
   if (id === 'guide') initGuide();
 }
 
@@ -250,7 +249,7 @@ async function updateOfflineCount() {
   } catch(e) {}
 }
 
-async async function restoreOfflineButtons() {
+async function restoreOfflineButtons() {
   if (!('caches' in window)) return;
   try {
     const cache = await caches.open('serein-audio-v1');
@@ -275,7 +274,7 @@ function loadStats() {
 function recordCompletion() {
   const s = JSON.parse(localStorage.getItem('serein-stats') || '{"sessions":0,"minutes":0,"lastDate":"","streak":0}');
   s.sessions = (s.sessions || 0) + 1;
-  const dur = currentSession ? (parseFloat(currentSession.duration) || Math.round((audio.duration || 0) / 60)) : 0;
+  const dur = currentSession ? parseInt(currentSession.duration) || 0 : 0;
   s.minutes = (s.minutes || 0) + dur;
   const today = new Date().toISOString().slice(0,10);
   if (s.lastDate === today) {
@@ -293,9 +292,9 @@ function recordCompletion() {
 // ── THÈME ──
 function toggleTheme() {
   const dark = document.documentElement.getAttribute('data-theme') === 'dark';
-  document.documentElement.setAttribute('data-theme', dark ? '' : 'dark');
+  document.documentElement.setAttribute('data-theme', dark ? 'light' : 'dark');
   document.getElementById('theme-toggle').textContent = dark ? '🌙 Sombre' : '☀️ Clair';
-  localStorage.setItem('serein-theme', dark ? '' : 'dark');
+  localStorage.setItem('serein-theme', dark ? 'light' : 'dark');
 }
 
 function applyTheme() {
@@ -384,14 +383,22 @@ function onDurationChoice(value) {
 function showGuideResult(rec) {
   const res = document.getElementById('guide-result');
   res.style.display = 'block';
+  const titleEsc   = rec.title.replace(/'/g, "\\'");
+  const parcoursEsc = rec.parcours.replace(/'/g, "\\'");
+  const fileEsc    = rec.file.replace(/'/g, "\\'");
   res.innerHTML = `
     <div class="guide-result-card">
       <div class="result-emoji">${rec.emoji}</div>
       <h3>${rec.title}</h3>
       <p class="result-meta">${rec.parcours} · ${rec.duration}</p>
-      <button class="btn btn-primary" style="width:100%" onclick="openVoiceOverlay('guide-rec','${rec.title.replace(/'/g, "\\'")}\'','${rec.parcours}','${rec.duration}','${rec.file.replace(/'/g, "\\'")}\'',false)">▶ Lancer cette séance</button>
+      <button class="btn btn-primary" style="width:100%"
+        onclick='openVoiceOverlay("guide-rec","${titleEsc}","${parcoursEsc}","${rec.duration}","${fileEsc}",false)'>
+        ▶ Lancer cette séance
+      </button>
       <button class="guide-restart" onclick="restartGuide()">↩ Recommencer</button>
     </div>`;
+  res.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
   res.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
