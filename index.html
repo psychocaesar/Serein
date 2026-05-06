@@ -132,7 +132,6 @@
     button[disabled] { opacity: 0.45; cursor: not-allowed; }
     @media (max-width: 480px) { h1 { font-size: 1.5rem; } .card-grid { grid-template-columns: 1fr; } }
     [data-theme="dark"] { --color-bg: #0f1f1b; --color-surface: #1a2e28; --color-primary: #4db896; --color-primary-light: #1e3d33; --color-text: #e0f0eb; --color-muted: #7aada0; --color-border: rgba(255,255,255,.08); }
-
     /* ── GUIDE / CHATBOT ── */
     .guide-wrap { max-width: 480px; margin: 0 auto; }
     .chat-window { display: flex; flex-direction: column; gap: 1rem; margin-top: 1.5rem; min-height: 120px; }
@@ -224,7 +223,6 @@
     <button class="tab" onclick="filterTab(this)">Concentration</button>
   </nav>
   <div class="session-list">
-    <!-- PREMIERS PAS -->
     <article class="card session-card" data-parcours="Premiers pas">
       <div class="session-info"><h3>Première respiration consciente</h3><p>Premiers pas · 5 min</p></div>
       <div class="session-actions">
@@ -256,7 +254,6 @@
     <article class="card session-card" data-parcours="Premiers pas"><div class="session-info"><h3>Revenir à l'instant présent <span class="badge-coming">À venir</span></h3><p>Premiers pas · 7 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
     <article class="card session-card" data-parcours="Premiers pas"><div class="session-info"><h3>La bienveillance envers soi <span class="badge-coming">À venir</span></h3><p>Premiers pas · 10 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
     <article class="card session-card" data-parcours="Premiers pas"><div class="session-info"><h3>Mon ancre personnelle <span class="badge-coming">À venir</span></h3><p>Premiers pas · 10 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
-    <!-- CALME & STRESS -->
     <article class="card session-card" data-parcours="Calme &amp; Stress">
       <div class="session-info"><h3>SOS Stress en 6 minutes</h3><p>Calme &amp; Stress · 6 min</p></div>
       <div class="session-actions">
@@ -275,7 +272,6 @@
     <article class="card session-card" data-parcours="Calme &amp; Stress"><div class="session-info"><h3>Le corps qui tient le stress <span class="badge-coming">À venir</span></h3><p>Calme &amp; Stress · 10 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
     <article class="card session-card" data-parcours="Calme &amp; Stress"><div class="session-info"><h3>Fin de journée — déposer le poids <span class="badge-coming">À venir</span></h3><p>Calme &amp; Stress · 12 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
     <article class="card session-card" data-parcours="Calme &amp; Stress"><div class="session-info"><h3>Transformer le stress en énergie <span class="badge-coming">À venir</span></h3><p>Calme &amp; Stress · 10 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
-    <!-- SOMMEIL -->
     <article class="card session-card" data-parcours="Sommeil">
       <div class="session-info"><h3>Rituel de déconnexion</h3><p>Sommeil · 10 min</p></div>
       <div class="session-actions">
@@ -294,7 +290,6 @@
       </div>
     </article>
     <article class="card session-card" data-parcours="Sommeil"><div class="session-info"><h3>Méditation du matin reposé <span class="badge-coming">À venir</span></h3><p>Sommeil · 7 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
-    <!-- RESPIRER -->
     <article class="card session-card" data-parcours="Respirer"><div class="session-info"><h3>La respiration naturelle <span class="badge-coming">À venir</span></h3><p>Respirer · 5 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
     <article class="card session-card" data-parcours="Respirer">
       <div class="session-info"><h3>Cohérence cardiaque 5 minutes</h3><p>Respirer · 5 min</p></div>
@@ -306,7 +301,6 @@
     <article class="card session-card" data-parcours="Respirer"><div class="session-info"><h3>Respiration 4-7-8 — calme profond <span class="badge-coming">À venir</span></h3><p>Respirer · 7 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
     <article class="card session-card" data-parcours="Respirer"><div class="session-info"><h3>Box breathing <span class="badge-coming">À venir</span></h3><p>Respirer · 8 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
     <article class="card session-card" data-parcours="Respirer"><div class="session-info"><h3>Souffle et énergie — la respiration activante <span class="badge-coming">À venir</span></h3><p>Respirer · 10 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
-    <!-- ANXIETE -->
     <article class="card session-card" data-parcours="Anxiété">
       <div class="session-info"><h3>SOS Anxiété — ancrage immédiat</h3><p>Anxiété · 5 min</p></div>
       <div class="session-actions">
@@ -337,7 +331,6 @@
     </article>
     <article class="card session-card" data-parcours="Anxiété"><div class="session-info"><h3>Mon corps face à la peur <span class="badge-coming">À venir</span></h3><p>Anxiété · 9 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
     <article class="card session-card" data-parcours="Anxiété"><div class="session-info"><h3>Technique 5-4-3-2-1 guidée <span class="badge-coming">À venir</span></h3><p>Anxiété · 7 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
-    <!-- CONCENTRATION -->
     <article class="card session-card" data-parcours="Concentration"><div class="session-info"><h3>Mise en route mentale <span class="badge-coming">À venir</span></h3><p>Concentration · 5 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
     <article class="card session-card" data-parcours="Concentration"><div class="session-info"><h3>Pleine conscience de la tâche <span class="badge-coming">À venir</span></h3><p>Concentration · 7 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
     <article class="card session-card" data-parcours="Concentration"><div class="session-info"><h3>Récupération rapide entre deux efforts <span class="badge-coming">À venir</span></h3><p>Concentration · 5 min</p></div><button class="btn btn-primary" disabled>Bientôt</button></article>
@@ -347,7 +340,6 @@
   <p style="text-align:center;color:var(--color-muted);font-size:.85rem;margin-top:2rem;">De nouvelles séances arriveront au fil du projet.</p>
 </section>
 
-<!-- ══════════════ GUIDE ══════════════ -->
 <section id="guide" class="screen">
   <header>
     <p class="eyebrow">Guide</p>
@@ -356,106 +348,4 @@
   </header>
   <div class="guide-wrap">
     <div class="chat-window" id="chat-window"></div>
-    <div id="guide-result" class="guide-result" style="display:none"></div>
-  </div>
-</section>
-
-<section id="player" class="screen">
-  <header><p class="eyebrow">Lecteur</p><p class="lead">Installe-toi comme tu veux. Tu peux mettre en pause à tout moment.</p></header>
-  <audio id="audio-engine" preload="metadata"></audio>
-  <audio id="ambiance-engine" loop preload="none"></audio>
-  <div class="card player-card">
-    <div class="player-main" id="player-main">
-      <p class="session-meta" id="player-meta">Premiers pas · 5 min</p>
-      <h2 id="player-title">Première respiration consciente</h2>
-      <div id="player-voice-tag" class="player-voice-tag">Voix masculine</div>
-      <p class="audio-loading" id="audio-loading"></p>
-      <div class="progress-wrap">
-        <div class="progress-track" id="progress-track" role="slider" aria-label="Progression" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
-          <div class="progress-track-inner"><div class="progress-fill" id="progress-fill"></div></div>
-          <div class="progress-thumb" id="progress-thumb"></div>
-        </div>
-        <div class="progress-times"><span id="time-current">0:00</span><span id="time-total">--:--</span></div>
-      </div>
-      <div class="player-controls">
-        <button class="btn-skip" id="btn-rewind" aria-label="Reculer de 15 secondes">↺<span>15s</span></button>
-        <button class="btn-play" id="play-btn" onclick="togglePlay()" aria-label="Lecture / Pause">
-          <svg id="icon-play" viewBox="0 0 24 24" width="28" height="28" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-          <svg id="icon-pause" viewBox="0 0 24 24" width="28" height="28" fill="white" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-        </button>
-        <button class="btn-skip" id="btn-forward" aria-label="Avancer de 15 secondes">↻<span>15s</span></button>
-      </div>
-      <div class="volume-wrap">
-        <span>🔈</span><input type="range" class="volume-slider" id="volume-slider" min="0" max="1" step="0.02" value="1" aria-label="Volume voix"><span>🔊</span>
-      </div>
-      <div class="speed-wrap">
-        <span class="speed-label">Vitesse</span>
-        <button class="speed-btn" onclick="setSpeed(0.7)">×0.7</button>
-        <button class="speed-btn" onclick="setSpeed(0.8)">×0.8</button>
-        <button class="speed-btn" onclick="setSpeed(0.9)">×0.9</button>
-        <button class="speed-btn active" onclick="setSpeed(1.0)">×1.0</button>
-      </div>
-      <div class="ambiance-section">
-        <p class="ambiance-label">Son d'ambiance</p>
-        <div class="ambiance-btns">
-          <button class="ambiance-btn active" id="amb-off" onclick="setAmbiance(null)">🔇<span>Aucun</span></button>
-          <button class="ambiance-btn" id="amb-pluie" onclick="setAmbiance('pluie.mp3')">🌧️<span>Pluie</span></button>
-          <button class="ambiance-btn" id="amb-foret" onclick="setAmbiance('foret.mp3')">🌿<span>Forêt</span></button>
-          <button class="ambiance-btn" id="amb-vagues" onclick="setAmbiance('vagues.mp3')">🌊<span>Vagues</span></button>
-          <button class="ambiance-btn" id="amb-feu" onclick="setAmbiance('feu.mp3')">🔥<span>Feu</span></button>
-          <button class="ambiance-btn" id="amb-blanc" onclick="setAmbiance('bruit-blanc.mp3')">〰️<span>Blanc</span></button>
-        </div>
-        <div class="ambiance-volume-wrap" id="ambiance-volume-wrap" style="display:none">
-          <span>🎵</span><input type="range" class="volume-slider" id="ambiance-volume-slider" min="0" max="1" step="0.02" value="0.3" aria-label="Volume ambiance"><span>🔊</span>
-        </div>
-      </div>
-      <p class="player-note">Prends ton temps.</p>
-      <div class="actions" style="justify-content:center;margin-top:1.5rem;">
-        <button class="btn btn-ghost" onclick="stopAndReturn()">← Retour aux séances</button>
-      </div>
-    </div>
-    <div class="complete-screen" id="complete-screen">
-      <div class="complete-icon">🌿</div>
-      <h2>Séance terminée</h2>
-      <p id="complete-title" style="color:var(--color-muted);margin:.5rem 0 1.5rem;"></p>
-      <p style="color:var(--color-muted);font-size:.95rem;line-height:1.6;margin-bottom:1.5rem;">Prends un instant avant de continuer.<br>Comment tu te sens ?</p>
-      <div class="actions" style="justify-content:center;">
-        <button class="btn btn-primary" onclick="showScreen('explore')">Explorer les séances</button>
-        <button class="btn btn-ghost" onclick="replaySession()">↩ Rejouer</button>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="settings" class="screen">
-  <header><p class="eyebrow">Réglages</p><h1>Personnalise l'expérience.</h1><p class="lead">Serein ne demande pas de compte, n'affiche pas de publicité et évite les trackers tiers.</p></header>
-  <div class="settings-list">
-    <article class="card setting-item"><div class="info"><h3>Apparence</h3><p>Basculer entre le mode clair et sombre</p></div><button class="btn btn-ghost" id="theme-toggle" onclick="toggleTheme()" style="padding:.4rem .9rem;font-size:.85rem;">🌙 Sombre</button></article>
-    <article class="card setting-item"><div class="info"><h3>🎵 Sons d'ambiance</h3><p>Pluie, forêt, vagues… Accessible depuis le lecteur</p></div><span class="setting-tag" id="ambiance-settings-tag">Aucun</span></article>
-    <article class="card setting-item"><div class="info"><h3>📥 Hors ligne</h3><p>Appuie sur ⬇ sur une séance pour la mettre en cache</p></div><span class="setting-tag" id="offline-count-tag">0 séance</span></article>
-    <article class="card setting-item"><div class="info"><h3>Accessibilité</h3><p>Taille du texte, contraste, lisibilité</p></div><span class="setting-tag">À venir</span></article>
-    <article class="card setting-item"><div class="info"><h3>Confidentialité</h3><p>Aucune publicité · Aucun tracker · Aucun compte requis</p></div><span class="setting-tag">✓</span></article>
-    <article class="card">
-      <h3>À propos de Serein</h3>
-      <p style="color:var(--color-muted);font-size:.9rem;margin-top:.5rem;line-height:1.6;">Serein est un projet de méditation en français, open source, pensé pour rester simple, compréhensible et respectueux de la vie privée.</p>
-      <p style="color:var(--color-muted);font-size:.8rem;margin-top:.75rem;line-height:1.5;">Les sessions audio sont publiées sous licence CC BY-NC-ND 4.0. Utilisation IA et clonage vocal interdits.</p>
-      <div class="trust" style="margin-top:1rem;"><span class="trust-item">Open source</span><span class="trust-item">AGPL-3.0 / CC BY-NC-ND</span><span class="trust-item">Alpha v0.3</span></div>
-    </article>
-  </div>
-  <article class="card setting-item" style="margin-top:.75rem;">
-    <div class="info" style="flex:1;">
-      <a href="https://www.instagram.com/serein_project/" target="_blank" rel="noopener noreferrer" class="insta-link">
-        <div class="insta-icon"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></div>
-        <div class="insta-text"><div class="insta-title">Suivez-nous sur Instagram</div><div class="insta-handle">@serein_project</div></div>
-      </a>
-    </div>
-    <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--color-muted);fill:none;stroke-width:2;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
-  </article>
-  <p class="footer-note">Serein — méditation en français, sans publicité, sans tracking tiers.</p>
-</section>
-
-<nav class="nav" aria-label="Navigation principale">
-  <button class="nav-btn active" id="nav-home" onclick="showScreen('home')"><svg viewBox="0 0 24 24"><path d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-4h4v4h4a1 1 0 001-1v-9"/></svg>Accueil</button>
-  <button class="nav-btn" id="nav-explore" onclick="showScreen('explore')"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Explorer</button>
-  <button class="nav-btn" id="nav-guide" onclick="showScreen('guide')"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Guide</button>
-  <button class=
+    <div id="guide-result" class="guide-result"
