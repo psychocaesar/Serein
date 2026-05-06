@@ -355,8 +355,8 @@ const GUIDE_MAP = {
   },
   'concentration': {
     'court':  { title: 'Mise en route mentale', parcours: 'Concentration', duration: '7 min', file: 'Mise en route mentale.mp3', emoji: '🎯' },
-    'moyen':  { title: 'Mise en route mentale', parcours: 'Concentration', duration: '7 min', file: 'Mise en route mentale.mp3', emoji: '🎯' },
-    'long':   { title: 'Mise en route mentale', parcours: 'Concentration', duration: '7 min', file: 'Mise en route mentale.mp3', emoji: '🎯' }
+    'moyen':  null,
+    'long':   null
   }
 };
 
@@ -399,7 +399,7 @@ function onDurationChoice(value) {
   addUserBubble({ court: '5 minutes', moyen: '5–10 minutes', long: 'Plus de 10 minutes' }[value]);
   clearChoices();
   const rec = GUIDE_MAP[guideMood] && GUIDE_MAP[guideMood][value];
-  if (!rec) { setTimeout(() => addBotBubble('Désolé, je n\'ai pas trouvé de séance pour ce profil.'), 400); return; }
+  if (!rec) { setTimeout(() => addBotBubble('Pas encore de séance disponible pour ce profil, mais ça arrive bientôt ! En attendant, jette un œil aux séances Concentration.'), 400); return; }
   setTimeout(() => {
     addBotBubble('Voilà ce que je te recommande\u00a0:');
     setTimeout(() => showGuideResult(rec), 400);
