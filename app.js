@@ -399,8 +399,6 @@ function showGuideResult(rec) {
     </div>`;
   res.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
-  res.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-}
 
 function restartGuide() {
   guideInitialized = false;
