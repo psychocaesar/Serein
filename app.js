@@ -7,6 +7,7 @@ function showScreen(id) {
     const btn = document.getElementById('nav-' + s);
     if (btn) btn.classList.toggle('active', s === id);
   });
+  window.scrollTo(0, 0);
   if (id === 'guide') initGuide();
 }
 
@@ -83,7 +84,7 @@ function launchPlayer(id, title, parcours, duration, filename, voice) {
   document.getElementById('time-current').textContent = '0:00';
   document.getElementById('time-total').textContent = '--:--';
   document.getElementById('audio-loading').textContent = 'Chargement…';
-  audio.src = 'assets/audio/masculin/' + filename;
+  audio.src = 'assets/audio/' + (voice === 'feminine' ? 'feminin' : 'masculin') + '/' + encodeURIComponent(filename);
   audio.load();
   audio.play().then(() => {
     document.getElementById('audio-loading').textContent = '';
@@ -170,7 +171,6 @@ function fmt(s) {
 
 function stopAndReturn() {
   audio.pause();
-  audio.src = '';
   showScreen('explore');
 }
 
@@ -221,7 +221,7 @@ async function toggleOfflineCache(btn, filename) {
   btn.classList.add('loading');
   try {
     const cache = await caches.open('serein-audio-v1');
-    const url = 'assets/audio/masculin/' + filename;
+    const url = 'assets/audio/masculin/' + encodeURIComponent(filename);
     const existing = await cache.match(url);
     if (existing) {
       await cache.delete(url);
@@ -250,16 +250,17 @@ async function updateOfflineCount() {
   } catch(e) {}
 }
 
-async function restoreOfflineButtons() {
+async async function restoreOfflineButtons() {
   if (!('caches' in window)) return;
   try {
     const cache = await caches.open('serein-audio-v1');
-    document.querySelectorAll('.btn-offline').forEach(async btn => {
+    const btns  = Array.from(document.querySelectorAll('.btn-offline[data-filename]'));
+    await Promise.all(btns.map(async btn => {
       const fn = btn.dataset.filename;
       if (!fn) return;
-      const match = await cache.match('assets/audio/masculin/' + fn);
+      const match = await cache.match('assets/audio/masculin/' + encodeURIComponent(fn));
       if (match) { btn.classList.add('cached'); btn.textContent = '✓'; }
-    });
+    }));
   } catch(e) {}
 }
 
@@ -274,7 +275,7 @@ function loadStats() {
 function recordCompletion() {
   const s = JSON.parse(localStorage.getItem('serein-stats') || '{"sessions":0,"minutes":0,"lastDate":"","streak":0}');
   s.sessions = (s.sessions || 0) + 1;
-  const dur = currentSession ? parseInt(currentSession.duration) || 0 : 0;
+  const dur = currentSession ? (parseFloat(currentSession.duration) || Math.round((audio.duration || 0) / 60)) : 0;
   s.minutes = (s.minutes || 0) + dur;
   const today = new Date().toISOString().slice(0,10);
   if (s.lastDate === today) {
@@ -309,29 +310,29 @@ function applyTheme() {
 // ── GUIDE CHATBOT ──
 const GUIDE_MAP = {
   'stress': {
-    'court':  { title: 'SOS stress en 6 minutes',        parcours: 'Calme & Stress', duration: '6 min',  file: 'SOS stress en 6 minutes.mp3',          emoji: '😮‍💨' },
-    'moyen':  { title: 'La cohérence cardiaque guidée',   parcours: 'Calme & Stress', duration: '5 min',  file: 'Cohérence cardiaque 5 minutes.mp3',      emoji: '💚' },
-    'long':   { title: 'La cohérence cardiaque guidée',   parcours: 'Calme & Stress', duration: '5 min',  file: 'Cohérence cardiaque 5 minutes.mp3',      emoji: '💚' }
+    'court':  { title: 'SOS Stress en 6 minutes',        parcours: 'Calme & Stress', duration: '6 min',  file: 'SOS Stress en 6 minutes.mp3',          emoji: '😮‍💨' },
+    'moyen':  { title: 'La cohérence cardiaque guidée',   parcours: 'Calme & Stress', duration: '5 min',  file: 'Cohérence cardiaque 5 minutes.mp3',   emoji: '💚' },
+    'long':   { title: 'La cohérence cardiaque guidée',   parcours: 'Calme & Stress', duration: '5 min',  file: 'Cohérence cardiaque 5 minutes.mp3',   emoji: '💚' }
   },
   'anxiete': {
-    'court':  { title: 'SOS anxiété — ancrage immédiat',  parcours: 'Anxiété', duration: '5 min',  file: 'SOS anxiété - ancrage immédiat.mp3',     emoji: '🌀' },
+    'court':  { title: 'SOS Anxiété — ancrage immédiat', parcours: 'Anxiété', duration: '5 min',  file: 'SOS Anxiété ancrage immédiat.mp3',    emoji: '🌀' },
     'moyen':  { title: "Accueillir l'anxiété sans la combattre", parcours: 'Anxiété', duration: '10 min', file: "Accueillir l'anxiété sans la combattre.mp3", emoji: '🤍' },
-    'long':   { title: 'La pensée qui tourne en boucle',  parcours: 'Anxiété', duration: '9 min',  file: 'La pensée qui tourne en boucle.mp3',      emoji: '🧠' }
+    'long':   { title: 'La pensée qui tourne en boucle',  parcours: 'Anxiété', duration: '9 min',  file: 'La pensée qui tourne en boucle.mp3',  emoji: '🧠' }
   },
   'fatigue': {
     'court':  { title: 'Première respiration consciente',  parcours: 'Premiers pas', duration: '5 min',  file: 'Méditation Premiere Respiration Consciente.mp3', emoji: '🌱' },
-    'moyen':  { title: 'Le scan corporel — découvrir ses sensations', parcours: 'Premiers pas', duration: '10 min', file: 'Le scan corporel - découvrir ses sensations.mp3', emoji: '🌿' },
-    'long':   { title: 'Réveils nocturnes — retrouver le calme', parcours: 'Sommeil', duration: '18 min', file: 'Réveils nocturnes-retrouver le calme.mp3', emoji: '🌙' }
+    'moyen':  { title: 'Le scan corporel — découvrir ses sensations', parcours: 'Premiers pas', duration: '10 min', file: 'Le scan corporel.mp3', emoji: '🌿' },
+    'long':   { title: 'Réveils nocturnes — retrouver le calme', parcours: 'Sommeil', duration: '18 min', file: 'Reveils nocturnes.mp3', emoji: '🌙' }
   },
   'brouillard': {
-    'court':  { title: 'Observer ses pensées sans les juger', parcours: 'Premiers pas', duration: '9 min', file: 'Observer ses pensées sans les juger.mp3', emoji: '🧘' },
+    'court':  { title: "S'asseoir, ne rien faire", parcours: 'Premiers pas', duration: '5 min', file: 'Sasseoir ne rien faire.mp3', emoji: '🧘' },
     'moyen':  { title: 'Observer ses pensées sans les juger', parcours: 'Premiers pas', duration: '9 min', file: 'Observer ses pensées sans les juger.mp3', emoji: '👁️' },
     'long':   { title: 'Observer ses pensées sans les juger', parcours: 'Premiers pas', duration: '9 min', file: 'Observer ses pensées sans les juger.mp3', emoji: '👁️' }
   },
   'sommeil': {
-    'court':  { title: 'Réveils nocturnes — retrouver le calme', parcours: 'Sommeil', duration: '18 min', file: 'Réveils nocturnes-retrouver le calme.mp3', emoji: '🌙' },
-    'moyen':  { title: 'Réveils nocturnes — retrouver le calme', parcours: 'Sommeil', duration: '18 min', file: 'Réveils nocturnes-retrouver le calme.mp3', emoji: '🌙' },
-    'long':   { title: 'Réveils nocturnes — retrouver le calme', parcours: 'Sommeil', duration: '18 min', file: 'Réveils nocturnes-retrouver le calme.mp3', emoji: '💤' }
+    'court':  { title: 'Rituel de déconnexion', parcours: 'Sommeil', duration: '10 min', file: 'Rituel de déconnexion.mp3', emoji: '🌙' },
+    'moyen':  { title: 'Rituel de déconnexion', parcours: 'Sommeil', duration: '10 min', file: 'Rituel de déconnexion.mp3', emoji: '🌙' },
+    'long':   { title: 'Réveils nocturnes — retrouver le calme', parcours: 'Sommeil', duration: '18 min', file: 'Reveils nocturnes.mp3', emoji: '💤' }
   }
 };
 
@@ -346,7 +347,7 @@ function initGuide() {
   const win = document.getElementById('chat-window');
   const res = document.getElementById('guide-result');
   win.innerHTML = ''; res.style.display = 'none'; res.innerHTML = '';
-  setTimeout(() => addBotBubble('Bonjour 👋 Comment tu te sens en ce moment ?'), 200);
+  setTimeout(() => addBotBubble('Bonjour 👋 Comment tu te sens en ce moment\u00a0?'), 200);
   setTimeout(() => addChoices([
     { label: '😮‍💨 Stressé(e)', value: 'stress' },
     { label: '😰 Anxieux/se', value: 'anxiete' },
@@ -361,7 +362,7 @@ function onMoodChoice(value) {
   const labels = { stress: 'Stressé(e)', anxiete: 'Anxieux/se', fatigue: 'Fatigué(e)', brouillard: 'Brouillard mental', sommeil: 'Difficultés à dormir' };
   addUserBubble(labels[value] || value);
   clearChoices();
-  setTimeout(() => addBotBubble('Combien de temps as-tu ?'), 400);
+  setTimeout(() => addBotBubble('Combien de temps as-tu\u00a0?'), 400);
   setTimeout(() => addChoices([
     { label: '⚡ 5 minutes', value: 'court' },
     { label: '🌿 5–10 minutes', value: 'moyen' },
@@ -375,7 +376,7 @@ function onDurationChoice(value) {
   const rec = GUIDE_MAP[guideMood] && GUIDE_MAP[guideMood][value];
   if (!rec) { setTimeout(() => addBotBubble('Désolé, je n\'ai pas trouvé de séance pour ce profil.'), 400); return; }
   setTimeout(() => {
-    addBotBubble('Voilà ce que je te recommande :');
+    addBotBubble('Voilà ce que je te recommande\u00a0:');
     setTimeout(() => showGuideResult(rec), 400);
   }, 400);
 }
