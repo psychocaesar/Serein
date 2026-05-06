@@ -152,6 +152,7 @@
 </head>
 <body>
 
+<!-- Voice overlay : affiché uniquement si la session a deux voix -->
 <div class="voice-overlay-backdrop" id="voice-overlay" role="dialog" aria-modal="true" aria-label="Choisir une voix">
   <div class="voice-sheet">
     <p class="voice-sheet-title">Choisir la voix</p>
@@ -500,6 +501,17 @@
 
   function openVoiceOverlay(id, title, parcours, duration, filenameMasc, filenameFem) {
     pendingSession = { id, title, parcours, duration, filenameMasc, filenameFem };
+    // Si pas de voix féminine disponible, on lance directement sans afficher le widget
+    if (!filenameFem) {
+      selectedVoice = 'masculine';
+      closeVoiceOverlay();
+      launchPlayer(id, title, parcours, duration, filenameMasc, 'masculine');
+      return;
+    }
+    // Sinon on affiche le choix
+    selectedVoice = 'masculine';
+    document.querySelectorAll('.voice-option').forEach(o => o.classList.remove('selected'));
+    document.getElementById('vopt-masculine').classList.add('selected');
     document.getElementById('voice-overlay').classList.add('open');
   }
 
@@ -511,7 +523,6 @@
 
   function closeVoiceOverlay() {
     document.getElementById('voice-overlay').classList.remove('open');
-    pendingSession = null;
   }
 
   function confirmVoiceAndLaunch() {
@@ -520,6 +531,7 @@
     const filename = selectedVoice === 'feminine' && s.filenameFem ? s.filenameFem : s.filenameMasc;
     closeVoiceOverlay();
     launchPlayer(s.id, s.title, s.parcours, s.duration, filename, selectedVoice);
+    pendingSession = null;
   }
 
   // ── PLAYER ──
@@ -535,6 +547,10 @@
     document.getElementById('player-voice-tag').textContent = voice === 'feminine' ? 'Voix féminine — Daïdrée' : 'Voix masculine — César';
     document.getElementById('complete-screen').classList.remove('visible');
     document.getElementById('player-main').classList.remove('hidden');
+    document.getElementById('progress-fill').style.width = '0%';
+    document.getElementById('progress-thumb').style.left = '0%';
+    document.getElementById('time-current').textContent = '0:00';
+    document.getElementById('time-total').textContent = '--:--';
     document.getElementById('audio-loading').textContent = 'Chargement…';
     audio.src = 'audio/' + filename;
     audio.load();
@@ -543,10 +559,15 @@
       updatePlayIcon(true);
     }).catch(() => {
       document.getElementById('audio-loading').textContent = 'Appuie sur ▶ pour démarrer';
+      updatePlayIcon(false);
     });
   }
 
   function togglePlay() {
+    if (!audio.src || audio.src === window.location.href) {
+      document.getElementById('audio-loading').textContent = 'Aucune séance sélectionnée';
+      return;
+    }
     if (audio.paused) { audio.play(); updatePlayIcon(true); }
     else { audio.pause(); updatePlayIcon(false); }
   }
@@ -575,6 +596,7 @@
 
   audio.addEventListener('loadedmetadata', () => {
     document.getElementById('time-total').textContent = fmt(audio.duration);
+    document.getElementById('audio-loading').textContent = '';
   });
 
   audio.addEventListener('ended', () => {
@@ -587,6 +609,10 @@
 
   audio.addEventListener('play', () => updatePlayIcon(true));
   audio.addEventListener('pause', () => updatePlayIcon(false));
+  audio.addEventListener('error', () => {
+    document.getElementById('audio-loading').textContent = 'Fichier audio introuvable ou non chargé.';
+    updatePlayIcon(false);
+  });
 
   const track = document.getElementById('progress-track');
   function seekFromEvent(e) {
@@ -640,12 +666,13 @@
     currentAmbiance = file;
     ambianceAudio.src = 'audio/' + file;
     ambianceAudio.volume = parseFloat(document.getElementById('ambiance-volume-slider').value);
-    ambianceAudio.play();
-    const id = 'amb-' + file.replace('.mp3','');
+    ambianceAudio.play().catch(() => {});
+    const id = 'amb-' + file.replace('.mp3','').replace('bruit-blanc','blanc');
     const btn = document.getElementById(id);
     if (btn) btn.classList.add('active');
     document.getElementById('ambiance-volume-wrap').style.display = 'flex';
-    updateAmbianceTag(file.replace('.mp3',''));
+    const label = file.replace('.mp3','').replace('bruit-blanc','Bruit blanc');
+    updateAmbianceTag(label);
   }
 
   document.getElementById('ambiance-volume-slider').addEventListener('input', e => {
@@ -720,7 +747,7 @@
     s.minutes = (s.minutes || 0) + dur;
     const today = new Date().toISOString().slice(0,10);
     if (s.lastDate === today) {
-      // same day, no streak change
+      // same day
     } else if (s.lastDate === new Date(Date.now() - 86400000).toISOString().slice(0,10)) {
       s.streak = (s.streak || 0) + 1;
     } else {
@@ -801,97 +828,4 @@
     ], onMoodChoice), 600);
   }
 
-  function onMoodChoice(value, label) {
-    guideMood = value;
-    addUserBubble(label);
-    clearChoices();
-    setTimeout(() => addBotBubble("Tu as combien de temps devant toi ?"), 400);
-    setTimeout(() => addChoices([
-      { label: '⏱ ~5 minutes', value: 'court' },
-      { label: '🌿 ~10 minutes', value: 'moyen' },
-      { label: '🌊 Plus de 10 minutes', value: 'long' }
-    ], onDurationChoice), 800);
-  }
-
-  function onDurationChoice(value, label) {
-    addUserBubble(label);
-    clearChoices();
-    const session = GUIDE_MAP[guideMood] && GUIDE_MAP[guideMood][value];
-    if (!session) return;
-    setTimeout(() => {
-      addBotBubble("Voilà ce que je te propose ✨");
-      setTimeout(() => showGuideResult(session), 400);
-    }, 400);
-  }
-
-  function showGuideResult(session) {
-    const res = document.getElementById('guide-result');
-    res.style.display = 'block';
-    res.innerHTML = `
-      <div class="guide-result-card">
-        <div class="result-emoji">${session.emoji}</div>
-        <h3>${session.title}</h3>
-        <p class="result-meta">${session.parcours} · ${session.duration}</p>
-        <button class="btn btn-primary" onclick="openVoiceOverlay('guide-rec','${session.title.replace(/'/g,"\\'")}}','${session.parcours}','${session.duration}','${session.file.replace(/'/g,"\\'")}}',false)" style="width:100%">▶ Lancer la séance</button>
-        <button class="guide-restart" onclick="restartGuide()">↺ Recommencer</button>
-      </div>`;
-    res.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }
-
-  function restartGuide() {
-    guideInitialized = false;
-    initGuide();
-    document.getElementById('guide-result').style.display = 'none';
-  }
-
-  function addBotBubble(text) {
-    const win = document.getElementById('chat-window');
-    const el = document.createElement('div');
-    el.className = 'chat-bubble bot';
-    el.textContent = text;
-    win.appendChild(el);
-    win.scrollTop = win.scrollHeight;
-  }
-
-  function addUserBubble(text) {
-    const win = document.getElementById('chat-window');
-    const el = document.createElement('div');
-    el.className = 'chat-bubble user';
-    el.textContent = text;
-    win.appendChild(el);
-    win.scrollTop = win.scrollHeight;
-  }
-
-  function addChoices(choices, cb) {
-    const win = document.getElementById('chat-window');
-    const wrap = document.createElement('div');
-    wrap.className = 'chat-choices';
-    wrap.id = 'current-choices';
-    choices.forEach(c => {
-      const btn = document.createElement('button');
-      btn.className = 'chat-choice';
-      btn.textContent = c.label;
-      btn.onclick = () => cb(c.value, c.label);
-      wrap.appendChild(btn);
-    });
-    win.appendChild(wrap);
-    win.scrollTop = win.scrollHeight;
-  }
-
-  function clearChoices() {
-    const el = document.getElementById('current-choices');
-    if (el) el.remove();
-  }
-
-  // ── INIT ──
-  applyTheme();
-  loadStats();
-  restoreOfflineButtons();
-  updateOfflineCount();
-
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
-  }
-</script>
-</body>
-</html>
+  function onMoodChoice
