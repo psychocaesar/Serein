@@ -404,23 +404,26 @@ function onDurationChoice(value) {
   }, 400);
 }
 
+// Stocke la reco en cours pour que le bouton puisse la lancer sans passer par le HTML
+let pendingGuideRec = null;
+
 function showGuideResult(rec) {
   const res = document.getElementById('guide-result');
   res.style.display = 'block';
-  const titleEsc   = rec.title.replace(/'/g, "\\'");
-  const parcoursEsc = rec.parcours.replace(/'/g, "\\'");
-  const fileEsc    = rec.file.replace(/'/g, "\\'");
-  res.innerHTML = `
-    <div class="guide-result-card">
-      <div class="result-emoji">${rec.emoji}</div>
-      <h3>${rec.title}</h3>
-      <p class="result-meta">${rec.parcours} · ${rec.duration}</p>
-      <button class="btn btn-primary" style="width:100%"
-        onclick='openVoiceOverlay("guide-rec","${titleEsc}","${parcoursEsc}","${rec.duration}","${fileEsc}",false)'>
-        ▶ Lancer cette séance
-      </button>
-      <button class="guide-restart" onclick="restartGuide()">↩ Recommencer</button>
-    </div>`;
+  pendingGuideRec = rec;
+  res.innerHTML = [
+    '<div class="guide-result-card">',
+    '  <div class="result-emoji">' + rec.emoji + '</div>',
+    '  <h3>' + rec.title + '</h3>',
+    '  <p class="result-meta">' + rec.parcours + ' · ' + rec.duration + '</p>',
+    '  <button class="btn btn-primary" style="width:100%" id="guide-launch-btn">▶ Lancer cette séance</button>',
+    '  <button class="guide-restart" onclick="restartGuide()">↩ Recommencer</button>',
+    '</div>'
+  ].join('');
+  document.getElementById('guide-launch-btn').addEventListener('click', () => {
+    if (!pendingGuideRec) return;
+    openVoiceOverlay('guide-rec', pendingGuideRec.title, pendingGuideRec.parcours, pendingGuideRec.duration, pendingGuideRec.file, false);
+  });
   res.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
