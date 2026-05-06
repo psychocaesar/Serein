@@ -335,7 +335,7 @@ const GUIDE_MAP = {
   },
   'anxiete': {
     'court':  { title: 'SOS Anxiété — ancrage immédiat', parcours: 'Anxiété', duration: '5 min',  file: 'SOS Anxiété ancrage immédiat.mp3',    emoji: '🌀' },
-    'moyen':  { title: "Accueillir l'anxiété sans la combattre", parcours: 'Anxiété', duration: '10 min', file: "Accueillir l'anxiété sans la combattre.mp3", emoji: '🤍' },
+    'moyen':  { title: 'Respiration 4-7-8 — calme profond', parcours: 'Respirer', duration: '6 min', file: 'Respiration 4-7-8 — Calme profond.mp3', emoji: '🌬️' },
     'long':   { title: 'La pensée qui tourne en boucle',  parcours: 'Anxiété', duration: '9 min',  file: 'La pensée qui tourne en boucle.mp3',  emoji: '🧠' }
   },
   'fatigue': {
