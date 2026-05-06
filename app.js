@@ -324,13 +324,13 @@ const GUIDE_MAP = {
     'long':   { title: 'Réveils nocturnes — retrouver le calme', parcours: 'Sommeil', duration: '18 min', file: 'Reveils nocturnes.mp3', emoji: '🌙' }
   },
   'brouillard': {
-    'court':  { title: "S'asseoir, ne rien faire", parcours: 'Premiers pas', duration: '5 min', file: 'Sasseoir ne rien faire.mp3', emoji: '🧘' },
+    'court':  { title: "S'asseoir, ne rien faire", parcours: 'Premiers pas', duration: '5 min', file: 'Revenir au souffle.mp3', emoji: '🧘' },
     'moyen':  { title: 'Observer ses pensées sans les juger', parcours: 'Premiers pas', duration: '9 min', file: 'Observer ses pensées sans les juger.mp3', emoji: '👁️' },
     'long':   { title: 'Observer ses pensées sans les juger', parcours: 'Premiers pas', duration: '9 min', file: 'Observer ses pensées sans les juger.mp3', emoji: '👁️' }
   },
   'sommeil': {
-    'court':  { title: 'Rituel de déconnexion', parcours: 'Sommeil', duration: '10 min', file: 'Rituel de déconnexion.mp3', emoji: '🌙' },
-    'moyen':  { title: 'Rituel de déconnexion', parcours: 'Sommeil', duration: '10 min', file: 'Rituel de déconnexion.mp3', emoji: '🌙' },
+    'court':  { title: 'Rituel de déconnexion', parcours: 'Sommeil', duration: '10 min', file: 'Préparer le sommeil.mp3', emoji: '🌙' },
+    'moyen':  { title: 'Rituel de déconnexion', parcours: 'Sommeil', duration: '10 min', file: 'Préparer le sommeil.mp3', emoji: '🌙' },
     'long':   { title: 'Réveils nocturnes — retrouver le calme', parcours: 'Sommeil', duration: '18 min', file: 'Reveils nocturnes.mp3', emoji: '💤' }
   }
 };
