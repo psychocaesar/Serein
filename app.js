@@ -95,12 +95,31 @@ function launchPlayer(id, title, parcours, duration, filename, voice) {
 }
 
 function togglePlay() {
+  // Mode ambiance seule (pas de séance chargée)
   if (!audio.src || audio.src === window.location.href) {
-    document.getElementById('audio-loading').textContent = 'Aucune séance sélectionnée';
+    if (!currentAmbiance) {
+      document.getElementById('audio-loading').textContent = 'Aucune séance sélectionnée';
+      return;
+    }
+    if (ambianceAudio.paused) {
+      ambianceAudio.play().catch(() => {});
+      updatePlayIcon(true);
+    } else {
+      ambianceAudio.pause();
+      updatePlayIcon(false);
+    }
     return;
   }
-  if (audio.paused) { audio.play(); updatePlayIcon(true); }
-  else { audio.pause(); updatePlayIcon(false); }
+  // Mode normal : voix + ambiance synchronisées
+  if (audio.paused) {
+    audio.play();
+    if (currentAmbiance) ambianceAudio.play().catch(() => {});
+    updatePlayIcon(true);
+  } else {
+    audio.pause();
+    ambianceAudio.pause();
+    updatePlayIcon(false);
+  }
 }
 
 function updatePlayIcon(playing) {
@@ -179,6 +198,7 @@ function replaySession() {
   document.getElementById('player-main').classList.remove('hidden');
   audio.currentTime = 0;
   audio.play();
+  if (currentAmbiance) ambianceAudio.play().catch(() => {});
 }
 
 // ── AMBIANCE ──
@@ -191,6 +211,8 @@ function setAmbiance(file) {
     document.getElementById('ambiance-volume-wrap').style.display = 'none';
     currentAmbiance = null;
     updateAmbianceTag('Aucun');
+    // Si pas de séance, repasser l'icône en pause
+    if (!audio.src || audio.src === window.location.href) updatePlayIcon(false);
     return;
   }
   currentAmbiance = file;
@@ -203,6 +225,8 @@ function setAmbiance(file) {
   document.getElementById('ambiance-volume-wrap').style.display = 'flex';
   const label = file.replace('.mp3','').replace('bruit-blanc','Bruit blanc');
   updateAmbianceTag(label);
+  // Si pas de séance chargée, montrer l'icône pause (ambiance joue)
+  if (!audio.src || audio.src === window.location.href) updatePlayIcon(true);
 }
 
 document.getElementById('ambiance-volume-slider').addEventListener('input', e => {
