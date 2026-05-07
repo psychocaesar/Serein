@@ -6,4 +6,10 @@
     <priority>1.0</priority>
     <lastmod>2026-05-07</lastmod>
   </url>
+  <url>
+    <loc>https://www.sereinapp.fr/about</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-05-07</lastmod>
+  </url>
 </urlset>
