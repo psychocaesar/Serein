@@ -7,6 +7,7 @@ function showScreen(id) {
     const btn = document.getElementById('nav-' + s);
     if (btn) btn.classList.toggle('active', s === id);
   });
+  window.scrollTo(0, 0);
   if (id === 'guide') initGuide();
 }
 
@@ -294,11 +295,11 @@ function loadStats() {
 function recordCompletion() {
   const s = JSON.parse(localStorage.getItem('serein-stats') || '{"sessions":0,"minutes":0,"lastDate":"","streak":0}');
   s.sessions = (s.sessions || 0) + 1;
-  const dur = currentSession ? parseInt(currentSession.duration) || 0 : 0;
+  const dur = currentSession ? (parseFloat(currentSession.duration) || Math.round((audio.duration || 0) / 60)) : 0;
   s.minutes = (s.minutes || 0) + dur;
   const today = new Date().toISOString().slice(0,10);
   if (s.lastDate === today) {
-    // same day
+    // même jour
   } else if (s.lastDate === new Date(Date.now() - 86400000).toISOString().slice(0,10)) {
     s.streak = (s.streak || 0) + 1;
   } else {
@@ -330,31 +331,31 @@ function applyTheme() {
 const GUIDE_MAP = {
   'stress': {
     'court':  { title: 'SOS Stress en 6 minutes',        parcours: 'Calme & Stress', duration: '6 min',  file: 'SOS Stress en 6 minutes.mp3',          fileFem: false, emoji: '😮‍💨' },
-    'moyen':  { title: 'La cohérence cardiaque guidée',   parcours: 'Calme & Stress', duration: '5 min',  file: 'Cohérence cardiaque 5 minutes.mp3',   fileFem: false, emoji: '💚' },
-    'long':   { title: 'La cohérence cardiaque guidée',   parcours: 'Calme & Stress', duration: '5 min',  file: 'Cohérence cardiaque 5 minutes.mp3',   fileFem: false, emoji: '💚' }
+    'moyen':  { title: 'La cohérence cardiaque guidée',   parcours: 'Calme & Stress', duration: '5 min',  file: 'Cohérence cardiaque 5 minutes.mp3',    fileFem: false, emoji: '💚' },
+    'long':   { title: 'La cohérence cardiaque guidée',   parcours: 'Calme & Stress', duration: '5 min',  file: 'Cohérence cardiaque 5 minutes.mp3',    fileFem: false, emoji: '💚' }
   },
   'anxiete': {
-    'court':  { title: 'SOS Anxiété — ancrage immédiat', parcours: 'Anxiété', duration: '5 min',  file: 'SOS Anxiété ancrage immédiat.mp3',    fileFem: false, emoji: '🌀' },
+    'court':  { title: 'SOS Anxiété — ancrage immédiat',  parcours: 'Anxiété', duration: '5 min',  file: 'SOS Anxiété ancrage immédiat.mp3',      fileFem: false, emoji: '🌀' },
     'moyen':  { title: 'Respiration 4-7-8 — calme profond', parcours: 'Respirer', duration: '6 min', file: 'Respiration 4-7-8 — Calme profond.mp3', fileFem: false, emoji: '🌬️' },
-    'long':   { title: 'La pensée qui tourne en boucle',  parcours: 'Anxiété', duration: '8 min',  file: 'La pensée qui tourne en boucle.mp3',  fileFem: 'La pensée qui tourne en boucle.mp3', emoji: '🧠' }
+    'long':   { title: 'La pensée qui tourne en boucle',  parcours: 'Anxiété', duration: '8 min',  file: 'La pensée qui tourne en boucle.mp3',    fileFem: 'La pensée qui tourne en boucle.mp3', emoji: '🧠' }
   },
   'fatigue': {
-    'court':  { title: 'Première respiration consciente',  parcours: 'Premiers pas', duration: '5 min',  file: 'Méditation Premiere Respiration Consciente.mp3', fileFem: false, emoji: '🌱' },
-    'moyen':  { title: 'Le scan corporel — découvrir ses sensations', parcours: 'Premiers pas', duration: '9 min', file: 'Le scan corporel.mp3', fileFem: 'Le scan corporel — découvrir ses sensations.mp3', emoji: '🌿' },
+    'court':  { title: 'Première respiration consciente', parcours: 'Premiers pas', duration: '5 min',  file: 'Méditation Premiere Respiration Consciente.mp3', fileFem: false, emoji: '🌱' },
+    'moyen':  { title: 'Le scan corporel — découvrir ses sensations', parcours: 'Premiers pas', duration: '10 min', file: 'Le scan corporel.mp3', fileFem: 'Le scan corporel — découvrir ses sensations.mp3', emoji: '🌿' },
     'long':   { title: 'Réveils nocturnes — retrouver le calme', parcours: 'Sommeil', duration: '18 min', file: 'Reveils nocturnes.mp3', fileFem: false, emoji: '🌙' }
   },
   'brouillard': {
-    'court':  { title: "S'asseoir, ne rien faire", parcours: 'Premiers pas', duration: '5 min', file: 'Revenir au souffle.mp3', fileFem: false, emoji: '🧘' },
-    'moyen':  { title: 'Observer ses pensées sans les juger', parcours: 'Premiers pas', duration: '9 min', file: 'Observer ses pensées sans les juger.mp3', fileFem: false, emoji: '👁️' },
-    'long':   { title: 'Observer ses pensées sans les juger', parcours: 'Premiers pas', duration: '9 min', file: 'Observer ses pensées sans les juger.mp3', fileFem: false, emoji: '👁️' }
+    'court':  { title: "S'asseoir, ne rien faire",        parcours: 'Premiers pas', duration: '5 min',  file: 'Revenir au souffle.mp3', fileFem: false, emoji: '🧘' },
+    'moyen':  { title: 'Observer ses pensées sans les juger', parcours: 'Premiers pas', duration: '9 min', file: 'Observer ses pensées sans les juger.mp3', fileFem: 'Observer ses pensées sans les juger.mp3', emoji: '👁️' },
+    'long':   { title: 'Observer ses pensées sans les juger', parcours: 'Premiers pas', duration: '9 min', file: 'Observer ses pensées sans les juger.mp3', fileFem: 'Observer ses pensées sans les juger.mp3', emoji: '👁️' }
   },
   'sommeil': {
-    'court':  { title: 'Rituel de déconnexion', parcours: 'Sommeil', duration: '10 min', file: 'Préparer le sommeil.mp3', fileFem: false, emoji: '🌙' },
-    'moyen':  { title: 'Rituel de déconnexion', parcours: 'Sommeil', duration: '10 min', file: 'Préparer le sommeil.mp3', fileFem: false, emoji: '🌙' },
+    'court':  { title: 'Rituel de déconnexion',           parcours: 'Sommeil', duration: '10 min', file: 'Préparer le sommeil.mp3', fileFem: false, emoji: '🌙' },
+    'moyen':  { title: 'Rituel de déconnexion',           parcours: 'Sommeil', duration: '10 min', file: 'Préparer le sommeil.mp3', fileFem: false, emoji: '🌙' },
     'long':   { title: 'Réveils nocturnes — retrouver le calme', parcours: 'Sommeil', duration: '18 min', file: 'Reveils nocturnes.mp3', fileFem: false, emoji: '💤' }
   },
   'concentration': {
-    'court':  { title: 'Mise en route mentale', parcours: 'Concentration', duration: '7 min', file: 'Mise en route mentale.mp3', fileFem: false, emoji: '🎯' },
+    'court':  { title: 'Mise en route mentale',           parcours: 'Concentration', duration: '7 min', file: 'Mise en route mentale.mp3', fileFem: false, emoji: '🎯' },
     'moyen':  null,
     'long':   null
   }
