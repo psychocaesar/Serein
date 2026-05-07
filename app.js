@@ -329,32 +329,32 @@ function applyTheme() {
 // ── GUIDE CHATBOT ──
 const GUIDE_MAP = {
   'stress': {
-    'court':  { title: 'SOS Stress en 6 minutes',        parcours: 'Calme & Stress', duration: '6 min',  file: 'SOS Stress en 6 minutes.mp3',          emoji: '😮‍💨' },
-    'moyen':  { title: 'La cohérence cardiaque guidée',   parcours: 'Calme & Stress', duration: '5 min',  file: 'Cohérence cardiaque 5 minutes.mp3',   emoji: '💚' },
-    'long':   { title: 'La cohérence cardiaque guidée',   parcours: 'Calme & Stress', duration: '5 min',  file: 'Cohérence cardiaque 5 minutes.mp3',   emoji: '💚' }
+    'court':  { title: 'SOS Stress en 6 minutes',        parcours: 'Calme & Stress', duration: '6 min',  file: 'SOS Stress en 6 minutes.mp3',          fileFem: false, emoji: '😮‍💨' },
+    'moyen':  { title: 'La cohérence cardiaque guidée',   parcours: 'Calme & Stress', duration: '5 min',  file: 'Cohérence cardiaque 5 minutes.mp3',   fileFem: false, emoji: '💚' },
+    'long':   { title: 'La cohérence cardiaque guidée',   parcours: 'Calme & Stress', duration: '5 min',  file: 'Cohérence cardiaque 5 minutes.mp3',   fileFem: false, emoji: '💚' }
   },
   'anxiete': {
-    'court':  { title: 'SOS Anxiété — ancrage immédiat', parcours: 'Anxiété', duration: '5 min',  file: 'SOS Anxiété ancrage immédiat.mp3',    emoji: '🌀' },
-    'moyen':  { title: 'Respiration 4-7-8 — calme profond', parcours: 'Respirer', duration: '6 min', file: 'Respiration 4-7-8 — Calme profond.mp3', emoji: '🌬️' },
-    'long':   { title: 'La pensée qui tourne en boucle',  parcours: 'Anxiété', duration: '9 min',  file: 'La pensée qui tourne en boucle.mp3',  emoji: '🧠' }
+    'court':  { title: 'SOS Anxiété — ancrage immédiat', parcours: 'Anxiété', duration: '5 min',  file: 'SOS Anxiété ancrage immédiat.mp3',    fileFem: false, emoji: '🌀' },
+    'moyen':  { title: 'Respiration 4-7-8 — calme profond', parcours: 'Respirer', duration: '6 min', file: 'Respiration 4-7-8 — Calme profond.mp3', fileFem: false, emoji: '🌬️' },
+    'long':   { title: 'La pensée qui tourne en boucle',  parcours: 'Anxiété', duration: '8 min',  file: 'La pensée qui tourne en boucle.mp3',  fileFem: 'La pensée qui tourne en boucle.mp3', emoji: '🧠' }
   },
   'fatigue': {
-    'court':  { title: 'Première respiration consciente',  parcours: 'Premiers pas', duration: '5 min',  file: 'Méditation Premiere Respiration Consciente.mp3', emoji: '🌱' },
-    'moyen':  { title: 'Le scan corporel — découvrir ses sensations', parcours: 'Premiers pas', duration: '10 min', file: 'Le scan corporel.mp3', emoji: '🌿' },
-    'long':   { title: 'Réveils nocturnes — retrouver le calme', parcours: 'Sommeil', duration: '18 min', file: 'Reveils nocturnes.mp3', emoji: '🌙' }
+    'court':  { title: 'Première respiration consciente',  parcours: 'Premiers pas', duration: '5 min',  file: 'Méditation Premiere Respiration Consciente.mp3', fileFem: false, emoji: '🌱' },
+    'moyen':  { title: 'Le scan corporel — découvrir ses sensations', parcours: 'Premiers pas', duration: '9 min', file: 'Le scan corporel.mp3', fileFem: 'Le scan corporel — découvrir ses sensations.mp3', emoji: '🌿' },
+    'long':   { title: 'Réveils nocturnes — retrouver le calme', parcours: 'Sommeil', duration: '18 min', file: 'Reveils nocturnes.mp3', fileFem: false, emoji: '🌙' }
   },
   'brouillard': {
-    'court':  { title: "S'asseoir, ne rien faire", parcours: 'Premiers pas', duration: '5 min', file: 'Revenir au souffle.mp3', emoji: '🧘' },
-    'moyen':  { title: 'Observer ses pensées sans les juger', parcours: 'Premiers pas', duration: '9 min', file: 'Observer ses pensées sans les juger.mp3', emoji: '👁️' },
-    'long':   { title: 'Observer ses pensées sans les juger', parcours: 'Premiers pas', duration: '9 min', file: 'Observer ses pensées sans les juger.mp3', emoji: '👁️' }
+    'court':  { title: "S'asseoir, ne rien faire", parcours: 'Premiers pas', duration: '5 min', file: 'Revenir au souffle.mp3', fileFem: false, emoji: '🧘' },
+    'moyen':  { title: 'Observer ses pensées sans les juger', parcours: 'Premiers pas', duration: '9 min', file: 'Observer ses pensées sans les juger.mp3', fileFem: false, emoji: '👁️' },
+    'long':   { title: 'Observer ses pensées sans les juger', parcours: 'Premiers pas', duration: '9 min', file: 'Observer ses pensées sans les juger.mp3', fileFem: false, emoji: '👁️' }
   },
   'sommeil': {
-    'court':  { title: 'Rituel de déconnexion', parcours: 'Sommeil', duration: '10 min', file: 'Préparer le sommeil.mp3', emoji: '🌙' },
-    'moyen':  { title: 'Rituel de déconnexion', parcours: 'Sommeil', duration: '10 min', file: 'Préparer le sommeil.mp3', emoji: '🌙' },
-    'long':   { title: 'Réveils nocturnes — retrouver le calme', parcours: 'Sommeil', duration: '18 min', file: 'Reveils nocturnes.mp3', emoji: '💤' }
+    'court':  { title: 'Rituel de déconnexion', parcours: 'Sommeil', duration: '10 min', file: 'Préparer le sommeil.mp3', fileFem: false, emoji: '🌙' },
+    'moyen':  { title: 'Rituel de déconnexion', parcours: 'Sommeil', duration: '10 min', file: 'Préparer le sommeil.mp3', fileFem: false, emoji: '🌙' },
+    'long':   { title: 'Réveils nocturnes — retrouver le calme', parcours: 'Sommeil', duration: '18 min', file: 'Reveils nocturnes.mp3', fileFem: false, emoji: '💤' }
   },
   'concentration': {
-    'court':  { title: 'Mise en route mentale', parcours: 'Concentration', duration: '7 min', file: 'Mise en route mentale.mp3', emoji: '🎯' },
+    'court':  { title: 'Mise en route mentale', parcours: 'Concentration', duration: '7 min', file: 'Mise en route mentale.mp3', fileFem: false, emoji: '🎯' },
     'moyen':  null,
     'long':   null
   }
@@ -423,7 +423,7 @@ function showGuideResult(rec) {
   ].join('');
   document.getElementById('guide-launch-btn').addEventListener('click', () => {
     if (!pendingGuideRec) return;
-    openVoiceOverlay('guide-rec', pendingGuideRec.title, pendingGuideRec.parcours, pendingGuideRec.duration, pendingGuideRec.file, false);
+    openVoiceOverlay('guide-rec', pendingGuideRec.title, pendingGuideRec.parcours, pendingGuideRec.duration, pendingGuideRec.file, pendingGuideRec.fileFem || false);
   });
   res.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
