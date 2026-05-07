@@ -1,5 +1,4 @@
 # robots.txt — Serein
-# Ce fichier indique aux robots d'indexation ce qu'ils sont autorisés à faire.
 
 # Bots IA généraux — interdiction d'aspirer le contenu
 User-agent: GPTBot
@@ -41,3 +40,6 @@ Disallow: /assets/audio/
 User-agent: Bingbot
 Allow: /
 Disallow: /assets/audio/
+
+# Sitemap
+Sitemap: https://www.sereinapp.fr/sitemap.xml
