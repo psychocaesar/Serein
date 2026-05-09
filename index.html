@@ -293,6 +293,15 @@
     .timer-ring-bg { stroke: rgba(255,255,255,.1); fill: none; }
     .timer-ring-fill { stroke: rgba(255,255,255,.85); fill: none; stroke-linecap: round; transition: stroke-dashoffset .9s linear; transform-origin: center; transform: rotate(-90deg); }
 
+  
+    /* ── WELCOME BLOCK ── */
+    .welcome-block { margin-top: 2rem; margin-bottom: 1.5rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius); padding: 1.25rem; }
+    .welcome-inner { display: flex; align-items: flex-start; gap: .85rem; margin-bottom: 1rem; }
+    .welcome-icon { font-size: 1.75rem; flex-shrink: 0; margin-top: .1rem; }
+    .welcome-title { font-size: 1rem; font-weight: 700; margin-bottom: .2rem; }
+    .welcome-sub { font-size: .875rem; color: var(--color-muted); line-height: 1.5; }
+    .welcome-cta { width: 100%; justify-content: center; }
+
   </style>
 </head>
 <body>
@@ -478,7 +487,20 @@
       <button class="btn btn-ghost" onclick="showScreen('settings')">À propos</button>
     </div>
   </header>
-  <div class="stats-widget">
+  <!-- Message d'accueil (nouveaux utilisateurs) -->
+  <div id="welcome-block" class="welcome-block" style="display:none;">
+    <div class="welcome-inner">
+      <span class="welcome-icon">🌱</span>
+      <div>
+        <p class="welcome-title">Bienvenue sur Serein.</p>
+        <p class="welcome-sub">Ta première séance t'attend. Commence quand tu es prêt(e).</p>
+      </div>
+    </div>
+    <button class="btn btn-primary welcome-cta" onclick="showScreen('explore')">Choisir une séance</button>
+  </div>
+
+  <!-- Stats (utilisateurs avec au moins une séance) -->
+  <div id="stats-block" class="stats-widget" style="display:none;">
     <div class="stat-chip"><span class="stat-value" id="stat-streak">0</span><span class="stat-label">🔥 Jours<br>d'affilée</span></div>
     <div class="stat-chip"><span class="stat-value" id="stat-sessions">0</span><span class="stat-label">▶ Séances<br>terminées</span></div>
     <div class="stat-chip"><span class="stat-value" id="stat-time">0 min</span><span class="stat-label">⏱ Temps<br>total</span></div>
