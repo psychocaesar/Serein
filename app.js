@@ -78,12 +78,31 @@ function openPlayerScreen() {
 }
 
 function closePlayer() {
+  // Stop all audio
   audio.pause();
   ambianceAudio.pause();
+
+  // Clean up timer if active
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; timerRunning = false; }
+
+  // Always restore guided player UI
+  const artworkWrap = document.getElementById('player-artwork-wrap');
+  const timerDisplay = document.getElementById('timer-display');
+  const progress = document.getElementById('player-progress');
+  const voiceTag = document.getElementById('player-voice-tag');
+  const playerMain = document.getElementById('player-main');
+
+  if (artworkWrap) artworkWrap.style.display = '';
+  if (timerDisplay) timerDisplay.style.display = 'none';
+  if (progress) progress.style.display = '';
+  if (voiceTag) voiceTag.style.display = '';
+  if (playerMain) { playerMain.style.display = 'flex'; playerMain.classList.remove('hidden'); }
+  document.getElementById('complete-screen').classList.remove('visible');
+
+  // Close overlays
+  document.getElementById('options-sheet').classList.remove('open');
   document.getElementById('player-screen').classList.remove('open');
   document.body.style.overflow = '';
-  // Fermer le sheet si ouvert
-  document.getElementById('options-sheet').classList.remove('open');
 }
 
 function toggleOptionsSheet() {
@@ -149,6 +168,21 @@ function launchPlayer(id, title, parcours, duration, filename, voice, artwork) {
 }
 
 function togglePlay() {
+  // Timer mode
+  const timerDisplay = document.getElementById('timer-display');
+  if (timerDisplay && timerDisplay.style.display === 'flex') {
+    if (timerRunning) {
+      timerRunning = false;
+      clearInterval(timerInterval);
+      updatePlayIcon(false);
+    } else {
+      timerRunning = true;
+      timerInterval = setInterval(timerTick, 1000);
+      updatePlayIcon(true);
+    }
+    return;
+  }
+  // Guided session mode
   if (!audio.src || audio.src === window.location.href) {
     if (!currentAmbiance) return;
     if (ambianceAudio.paused) { ambianceAudio.play().catch(() => {}); updatePlayIcon(true); }
@@ -661,48 +695,9 @@ function recordTimerCompletion() {
   loadStats();
 }
 
-// Override togglePlay to handle timer pause/resume
-const _origTogglePlay = togglePlay;
-function togglePlay() {
-  if (document.getElementById('timer-display').style.display !== 'none') {
-    // Timer mode
-    if (timerRunning) {
-      timerRunning = false;
-      clearInterval(timerInterval);
-      updatePlayIcon(false);
-    } else {
-      timerRunning = true;
-      timerInterval = setInterval(timerTick, 1000);
-      updatePlayIcon(true);
-    }
-    return;
-  }
-  _origTogglePlay();
-}
+// togglePlay timer handling is inline below
 
-// Override closePlayer to clean up timer
-const _origClosePlayer = closePlayer;
-function closePlayer() {
-  // Clean up timer if active
-  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; timerRunning = false; }
-  // Restore guided player UI unconditionally
-  const artworkWrap = document.getElementById('player-artwork-wrap');
-  const timerDisplay = document.getElementById('timer-display');
-  const progress = document.getElementById('player-progress');
-  const voiceTag = document.getElementById('player-voice-tag');
-  if (artworkWrap) artworkWrap.style.display = '';
-  if (timerDisplay) { timerDisplay.style.display = 'none'; }
-  if (progress) progress.style.display = '';
-  if (voiceTag) voiceTag.style.display = '';
-  // Restore player-main visibility
-  const playerMain = document.getElementById('player-main');
-  if (playerMain) {
-    playerMain.style.display = 'flex';
-    playerMain.classList.remove('hidden');
-  }
-  document.getElementById('complete-screen').classList.remove('visible');
-  _origClosePlayer();
-}
+// closePlayer handles timer cleanup directly — no override needed
 
 
 // ── INIT ──
