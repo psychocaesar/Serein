@@ -86,7 +86,7 @@
     @keyframes fadeInPlayer { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
 
     /* Fond artwork flou */
-    .player-bg { position: absolute; inset: 0; background-size: cover; background-position: center; filter: blur(50px) brightness(.3) saturate(1.6); transform: scale(1.15); z-index: 0; transition: background-image .4s; }
+    .player-bg { position: absolute; inset: 0; background-size: cover; background-position: center top; filter: blur(60px) brightness(.28) saturate(1.8); transform: scale(1.2); z-index: 0; transition: background-image .4s; }
     .player-bg-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,.15) 0%, rgba(0,0,0,.45) 50%, rgba(0,0,0,.88) 100%); z-index: 1; }
 
     /* Contenu */
@@ -241,15 +241,14 @@
     .skip-icon { width: 34px; height: 34px; stroke: rgba(255,255,255,.85); fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
     .skip-label { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -45%); font-size: .65rem; font-weight: 700; color: rgba(255,255,255,.85); line-height: 1; pointer-events: none; margin-top: 1px; }
 
-    /* Colored player backgrounds per parcours */
-    .player-screen[data-parcours="premiers-pas"] .player-bg { background: linear-gradient(135deg, #1a3d20, #2d6a3f, #4a8c5c); }
-    .player-screen[data-parcours="stress"] .player-bg { background: linear-gradient(135deg, #2a3a5c, #3d5a8a, #5a7ab8); }
-    .player-screen[data-parcours="sommeil"] .player-bg { background: linear-gradient(135deg, #0f1535, #1a2560, #2a3d8a); }
-    .player-screen[data-parcours="respirer"] .player-bg { background: linear-gradient(135deg, #0d3040, #1a5a6e, #2a8090); }
-    .player-screen[data-parcours="anxiete"] .player-bg { background: linear-gradient(135deg, #1e2040, #2a306a, #3a4090); }
-    .player-screen[data-parcours="concentration"] .player-bg { background: linear-gradient(135deg, #1a2535, #253a55, #3a5570); }
-    /* Remove blur/image from bg — use color only */
-    .player-bg { background-size: cover; filter: none !important; transform: none !important; }
+    /* Fallback colors per parcours (used when image not loaded) */
+    .player-screen[data-parcours="premiers-pas"] .player-bg { background-color: #1a3d20; }
+    .player-screen[data-parcours="stress"] .player-bg { background-color: #2a3a5c; }
+    .player-screen[data-parcours="sommeil"] .player-bg { background-color: #0f1535; }
+    .player-screen[data-parcours="respirer"] .player-bg { background-color: #0d3040; }
+    .player-screen[data-parcours="anxiete"] .player-bg { background-color: #1e2040; }
+    .player-screen[data-parcours="concentration"] .player-bg { background-color: #1a2535; }
+    .player-screen[data-parcours="timer"] .player-bg { background-color: #0d1f1a; }
 
   
     /* ── MINUTEUR ── */
