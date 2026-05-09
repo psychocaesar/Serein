@@ -1,5 +1,5 @@
 // ── NAVIGATION ──
-const SCREENS = ['home','explore','guide','player','settings'];
+const SCREENS = ['home','explore','guide','settings'];
 
 function showScreen(id) {
   SCREENS.forEach(s => {
@@ -66,14 +66,38 @@ function confirmVoiceAndLaunch() {
   pendingSession = null;
 }
 
-// ── PLAYER ──
+// ── PLAYER (modal) ──
 let currentSession = null;
 const audio = document.getElementById('audio-engine');
 const ambianceAudio = document.getElementById('ambiance-engine');
 
+function openPlayerModal() {
+  document.getElementById('player-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closePlayer() {
+  audio.pause();
+  ambianceAudio.pause();
+  document.getElementById('player-modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// Fermer en cliquant sur le fond
+document.getElementById('player-modal').addEventListener('click', function(e) {
+  if (e.target === this) closePlayer();
+});
+
+function togglePlayerOptions() {
+  const opts = document.getElementById('player-options');
+  const toggle = document.getElementById('options-toggle');
+  const isOpen = opts.classList.toggle('open');
+  toggle.classList.toggle('open', isOpen);
+  toggle.querySelector('span') && (toggle.childNodes[1].textContent = isOpen ? ' Masquer' : ' Options');
+}
+
 function launchPlayer(id, title, parcours, duration, filename, voice) {
   currentSession = { id, title, parcours, duration, filename, voice };
-  showScreen('player');
   document.getElementById('player-title').textContent = title;
   document.getElementById('player-meta').textContent = parcours + ' · ' + duration;
   document.getElementById('player-voice-tag').textContent = voice === 'feminine' ? 'Voix féminine — Daïdrée' : 'Voix masculine — César';
@@ -84,6 +108,10 @@ function launchPlayer(id, title, parcours, duration, filename, voice) {
   document.getElementById('time-current').textContent = '0:00';
   document.getElementById('time-total').textContent = '--:--';
   document.getElementById('audio-loading').textContent = 'Chargement…';
+  // Fermer les options à chaque nouvelle séance
+  document.getElementById('player-options').classList.remove('open');
+  document.getElementById('options-toggle').classList.remove('open');
+  openPlayerModal();
   audio.src = 'assets/audio/' + (voice === 'feminine' ? 'feminin' : 'masculin') + '/' + encodeURIComponent(filename);
   audio.load();
   audio.play().then(() => {
@@ -97,17 +125,9 @@ function launchPlayer(id, title, parcours, duration, filename, voice) {
 
 function togglePlay() {
   if (!audio.src || audio.src === window.location.href) {
-    if (!currentAmbiance) {
-      document.getElementById('audio-loading').textContent = 'Aucune séance sélectionnée';
-      return;
-    }
-    if (ambianceAudio.paused) {
-      ambianceAudio.play().catch(() => {});
-      updatePlayIcon(true);
-    } else {
-      ambianceAudio.pause();
-      updatePlayIcon(false);
-    }
+    if (!currentAmbiance) return;
+    if (ambianceAudio.paused) { ambianceAudio.play().catch(() => {}); updatePlayIcon(true); }
+    else { ambianceAudio.pause(); updatePlayIcon(false); }
     return;
   }
   if (audio.paused) {
@@ -186,11 +206,6 @@ function fmt(s) {
   return m + ':' + String(sec).padStart(2, '0');
 }
 
-function stopAndReturn() {
-  audio.pause();
-  showScreen('explore');
-}
-
 function replaySession() {
   if (!currentSession) return;
   document.getElementById('complete-screen').classList.remove('visible');
@@ -210,7 +225,6 @@ function setAmbiance(file) {
     document.getElementById('ambiance-volume-wrap').style.display = 'none';
     currentAmbiance = null;
     updateAmbianceTag('Aucun');
-    if (!audio.src || audio.src === window.location.href) updatePlayIcon(false);
     return;
   }
   currentAmbiance = file;
@@ -223,7 +237,6 @@ function setAmbiance(file) {
   document.getElementById('ambiance-volume-wrap').style.display = 'flex';
   const label = file.replace('.mp3','').replace('bruit-blanc','Bruit blanc');
   updateAmbianceTag(label);
-  if (!audio.src || audio.src === window.location.href) updatePlayIcon(true);
 }
 
 document.getElementById('ambiance-volume-slider').addEventListener('input', e => {
@@ -299,7 +312,7 @@ function recordCompletion() {
   s.minutes = (s.minutes || 0) + dur;
   const today = new Date().toISOString().slice(0,10);
   if (s.lastDate === today) {
-    // même jour
+    // même jour, pas de changement streak
   } else if (s.lastDate === new Date(Date.now() - 86400000).toISOString().slice(0,10)) {
     s.streak = (s.streak || 0) + 1;
   } else {
@@ -361,14 +374,13 @@ const GUIDE_MAP = {
   }
 };
 
-let guideStep = 0;
 let guideMood = null;
 let guideInitialized = false;
 
 function initGuide() {
   if (guideInitialized) return;
   guideInitialized = true;
-  guideStep = 0; guideMood = null;
+  guideMood = null;
   const win = document.getElementById('chat-window');
   const res = document.getElementById('guide-result');
   win.innerHTML = ''; res.style.display = 'none'; res.innerHTML = '';
@@ -439,16 +451,14 @@ function addBotBubble(text) {
   const win = document.getElementById('chat-window');
   const div = document.createElement('div');
   div.className = 'chat-bubble bot'; div.textContent = text;
-  win.appendChild(div);
-  win.scrollTop = win.scrollHeight;
+  win.appendChild(div); win.scrollTop = win.scrollHeight;
 }
 
 function addUserBubble(text) {
   const win = document.getElementById('chat-window');
   const div = document.createElement('div');
   div.className = 'chat-bubble user'; div.textContent = text;
-  win.appendChild(div);
-  win.scrollTop = win.scrollHeight;
+  win.appendChild(div); win.scrollTop = win.scrollHeight;
 }
 
 function addChoices(choices, cb) {
@@ -461,8 +471,7 @@ function addChoices(choices, cb) {
     btn.onclick = () => cb(c.value);
     wrap.appendChild(btn);
   });
-  win.appendChild(wrap);
-  win.scrollTop = win.scrollHeight;
+  win.appendChild(wrap); win.scrollTop = win.scrollHeight;
 }
 
 function clearChoices() {
