@@ -551,6 +551,150 @@ function clearChoices() {
   if (el) el.remove();
 }
 
+
+// ── MINUTEUR LIBRE ──
+let timerInterval = null;
+let timerSecondsLeft = 0;
+let timerTotalSeconds = 0;
+let timerRunning = false;
+const bell = new Audio('assets/audio/cloche.mp3');
+
+function openTimerSheet() {
+  document.getElementById('timer-sheet-backdrop').classList.add('open');
+}
+
+function closeTimerSheet() {
+  document.getElementById('timer-sheet-backdrop').classList.remove('open');
+}
+
+function startTimer(minutes) {
+  closeTimerSheet();
+  timerTotalSeconds = minutes * 60;
+  timerSecondsLeft = timerTotalSeconds;
+  timerRunning = false;
+
+  // Configure player for timer mode
+  const playerEl = document.getElementById('player-screen');
+  Object.values({a:'premiers-pas',b:'stress',c:'sommeil',d:'respirer',e:'anxiete',f:'concentration'})
+    .forEach(v => playerEl.removeAttribute('data-parcours'));
+  playerEl.setAttribute('data-parcours', 'timer');
+  document.getElementById('player-bg').style.backgroundImage = '';
+
+  // Hide guided player UI, show timer UI
+  document.getElementById('player-artwork-wrap').style.display = 'none';
+  document.getElementById('timer-display').style.display = 'flex';
+  document.getElementById('player-progress').style.display = 'none';
+
+  // Update header info
+  document.getElementById('player-title').textContent = 'Minuteur libre';
+  document.getElementById('player-meta').textContent = minutes + ' min · Méditation silencieuse';
+  document.getElementById('player-voice-tag').style.display = 'none';
+  document.getElementById('audio-loading').textContent = '';
+
+  // Update ring
+  updateTimerDisplay();
+
+  // Reset complete screen
+  document.getElementById('complete-screen').classList.remove('visible');
+  document.getElementById('player-main').classList.remove('hidden');
+  document.getElementById('player-main').style.display = 'flex';
+
+  openPlayerScreen();
+
+  // Ring bell to start, then auto-play
+  bell.currentTime = 0;
+  bell.play().catch(() => {});
+  setTimeout(() => {
+    timerRunning = true;
+    updatePlayIcon(true);
+    timerInterval = setInterval(timerTick, 1000);
+  }, 1500);
+}
+
+function timerTick() {
+  if (!timerRunning) return;
+  timerSecondsLeft--;
+  updateTimerDisplay();
+  if (timerSecondsLeft <= 0) {
+    clearInterval(timerInterval);
+    timerRunning = false;
+    updatePlayIcon(false);
+    // Ring bell to end
+    bell.currentTime = 0;
+    bell.play().catch(() => {});
+    setTimeout(() => {
+      document.getElementById('player-main').style.display = 'none';
+      document.getElementById('player-main').classList.add('hidden');
+      document.getElementById('complete-screen').classList.add('visible');
+      document.getElementById('complete-title').textContent = 'Minuteur libre · ' + (timerTotalSeconds / 60) + ' min';
+      recordTimerCompletion();
+    }, 2500);
+  }
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(timerSecondsLeft / 60);
+  const s = timerSecondsLeft % 60;
+  document.getElementById('timer-countdown').textContent = m + ':' + String(s).padStart(2, '0');
+  document.getElementById('timer-total').textContent = (timerTotalSeconds / 60) + ' min';
+  // Ring progress
+  const circumference = 603;
+  const progress = timerSecondsLeft / timerTotalSeconds;
+  const offset = circumference * (1 - progress);
+  document.getElementById('timer-ring').style.strokeDashoffset = offset;
+}
+
+function recordTimerCompletion() {
+  const s = JSON.parse(localStorage.getItem('serein-stats') || '{"sessions":0,"minutes":0,"lastDate":"","streak":0}');
+  s.sessions = (s.sessions || 0) + 1;
+  s.minutes = (s.minutes || 0) + Math.round(timerTotalSeconds / 60);
+  const today = new Date().toISOString().slice(0,10);
+  if (s.lastDate !== today) {
+    if (s.lastDate === new Date(Date.now() - 86400000).toISOString().slice(0,10)) {
+      s.streak = (s.streak || 0) + 1;
+    } else {
+      s.streak = 1;
+    }
+    s.lastDate = today;
+  }
+  localStorage.setItem('serein-stats', JSON.stringify(s));
+  loadStats();
+}
+
+// Override togglePlay to handle timer pause/resume
+const _origTogglePlay = togglePlay;
+function togglePlay() {
+  if (document.getElementById('timer-display').style.display !== 'none') {
+    // Timer mode
+    if (timerRunning) {
+      timerRunning = false;
+      clearInterval(timerInterval);
+      updatePlayIcon(false);
+    } else {
+      timerRunning = true;
+      timerInterval = setInterval(timerTick, 1000);
+      updatePlayIcon(true);
+    }
+    return;
+  }
+  _origTogglePlay();
+}
+
+// Override closePlayer to clean up timer
+const _origClosePlayer = closePlayer;
+function closePlayer() {
+  // Clean up timer if active
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; timerRunning = false; }
+  // Restore guided player UI
+  document.getElementById('player-artwork-wrap').style.display = '';
+  document.getElementById('timer-display').style.display = 'none';
+  const prog = document.getElementById('player-progress');
+  if (prog) prog.style.display = '';
+  document.getElementById('player-voice-tag').style.display = '';
+  _origClosePlayer();
+}
+
+
 // ── INIT ──
 document.addEventListener('DOMContentLoaded', () => {
   applyTheme();
