@@ -235,6 +235,22 @@
 
     /* Dark mode */
     [data-theme="dark"] { --color-bg:#0f1f1b; --color-surface:#1a2e28; --color-primary:#4db896; --color-primary-light:#1e3d33; --color-text:#e0f0eb; --color-muted:#7aada0; --color-border:rgba(255,255,255,.08); }
+  
+    /* Skip button fix */
+    .btn-skip { position: relative; }
+    .skip-icon { width: 34px; height: 34px; stroke: rgba(255,255,255,.85); fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+    .skip-label { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -45%); font-size: .65rem; font-weight: 700; color: rgba(255,255,255,.85); line-height: 1; pointer-events: none; margin-top: 1px; }
+
+    /* Colored player backgrounds per parcours */
+    .player-screen[data-parcours="premiers-pas"] .player-bg { background: linear-gradient(135deg, #1a3d20, #2d6a3f, #4a8c5c); }
+    .player-screen[data-parcours="stress"] .player-bg { background: linear-gradient(135deg, #2a3a5c, #3d5a8a, #5a7ab8); }
+    .player-screen[data-parcours="sommeil"] .player-bg { background: linear-gradient(135deg, #0f1535, #1a2560, #2a3d8a); }
+    .player-screen[data-parcours="respirer"] .player-bg { background: linear-gradient(135deg, #0d3040, #1a5a6e, #2a8090); }
+    .player-screen[data-parcours="anxiete"] .player-bg { background: linear-gradient(135deg, #1e2040, #2a306a, #3a4090); }
+    .player-screen[data-parcours="concentration"] .player-bg { background: linear-gradient(135deg, #1a2535, #253a55, #3a5570); }
+    /* Remove blur/image from bg — use color only */
+    .player-bg { background-size: cover; filter: none !important; transform: none !important; }
+
   </style>
 </head>
 <body>
@@ -308,14 +324,16 @@
       <!-- Contrôles -->
       <div class="player-controls">
         <button class="btn-skip" id="btn-rewind" aria-label="-15s">
-          <svg viewBox="0 0 24 24"><path d="M2.5 12a9.5 9.5 0 1 0 9.5-9.5"/><polyline points="2.5 3 2.5 8 7.5 8"/><text x="7" y="15" font-size="5" fill="rgba(255,255,255,.8)" font-family="system-ui" font-weight="700">15</text></svg>
+          <svg viewBox="0 0 24 24" class="skip-icon"><path d="M2.5 12a9.5 9.5 0 1 0 9.5-9.5"/><polyline points="2.5 3 2.5 8 7.5 8"/></svg>
+          <span class="skip-label">15</span>
         </button>
         <button class="btn-play" id="play-btn" onclick="togglePlay()" aria-label="Lecture/Pause">
           <svg id="icon-play" viewBox="0 0 24 24" width="30" height="30"><polygon points="6 3 20 12 6 21 6 3" fill="#0a1a15"/></svg>
           <svg id="icon-pause" viewBox="0 0 24 24" width="30" height="30" style="display:none"><rect x="6" y="4" width="4" height="16" fill="#0a1a15"/><rect x="14" y="4" width="4" height="16" fill="#0a1a15"/></svg>
         </button>
         <button class="btn-skip" id="btn-forward" aria-label="+15s">
-          <svg viewBox="0 0 24 24"><path d="M21.5 12a9.5 9.5 0 1 1-9.5-9.5"/><polyline points="21.5 3 21.5 8 16.5 8"/><text x="7" y="15" font-size="5" fill="rgba(255,255,255,.8)" font-family="system-ui" font-weight="700">15</text></svg>
+          <svg viewBox="0 0 24 24" class="skip-icon"><path d="M21.5 12a9.5 9.5 0 1 1-9.5-9.5"/><polyline points="21.5 3 21.5 8 16.5 8"/></svg>
+          <span class="skip-label">15</span>
         </button>
       </div>
 
