@@ -27,7 +27,7 @@
     "@type": "WebApplication",
     "name": "Serein",
     "url": "https://www.sereinapp.fr",
-    "description": "Application de méditation guidée en français, gratuite, open source et sans publicité. Séances pour le stress, l'anxiété, le sommeil et la respiration.",
+    "description": "Application de méditation guidée en français, gratuite, open source et sans publicité.",
     "applicationCategory": "HealthApplication",
     "operatingSystem": "Web, iOS, Android",
     "inLanguage": "fr-FR",
@@ -37,6 +37,7 @@
     "featureList": ["Méditation guidée en français", "Sans publicité", "Sans compte requis", "Lecture hors ligne", "Open source"]
   }
   </script>
+  <link rel="manifest" href="/manifest.json">
   <link rel="icon" type="image/png" href="assets/logo.png">
   <link rel="apple-touch-icon" href="assets/logo.png">
   <style>
@@ -47,10 +48,14 @@
       --color-border: rgba(0,0,0,.08); --radius: 1.25rem; --radius-sm: .75rem;
     }
     body { font-family: system-ui, -apple-system, sans-serif; background: var(--color-bg); color: var(--color-text); min-height: 100vh; padding-bottom: 80px; }
+
+    /* ── NAV (4 onglets, lecteur retiré) ── */
     .nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--color-surface); border-top: 1px solid var(--color-border); display: flex; justify-content: space-around; align-items: center; padding: .75rem 0 1rem; z-index: 100; }
     .nav-btn { background: none; border: none; display: flex; flex-direction: column; align-items: center; gap: .25rem; font-size: .68rem; color: var(--color-muted); cursor: pointer; padding: .25rem .5rem; border-radius: var(--radius-sm); transition: color .2s; }
     .nav-btn.active { color: var(--color-primary); font-weight: 600; }
     .nav-btn svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+    /* ── SCREENS ── */
     .screen { display: none; padding: 2rem 1.25rem 1.5rem; max-width: 760px; margin: 0 auto; }
     .screen.active { display: block; }
     .eyebrow { text-transform: uppercase; letter-spacing: .1em; font-size: .75rem; color: var(--color-muted); margin-bottom: .5rem; }
@@ -68,80 +73,42 @@
     .trust { display: flex; flex-wrap: wrap; gap: .75rem; margin: 1.5rem 0; font-size: .85rem; }
     .trust-item { background: var(--color-primary-light); color: var(--color-primary); border-radius: 999px; padding: .35rem .85rem; }
 
-    /* ── PATH CARDS with illustration ── */
-    .path-card {
-      cursor: pointer;
-      position: relative;
-      overflow: hidden;
-      padding: 0;
-      border: none;
-      border-radius: var(--radius);
-      min-height: 200px;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      transition: transform .2s, box-shadow .2s;
-    }
-    .path-card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 24px rgba(0,0,0,.15);
-    }
-    .path-card .card-illustration {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: center top;
-      display: block;
-    }
-    /* Dark gradient overlay at bottom so text is readable */
-    .path-card::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(to bottom, transparent 30%, rgba(0,0,0,.55) 100%);
-      border-radius: var(--radius);
-      pointer-events: none;
-    }
-    .path-card .card-content {
-      position: relative;
-      z-index: 1;
-      padding: 1rem 1rem .9rem;
-      color: #fff;
-    }
-    .path-card .card-content h3 {
-      font-size: .95rem;
-      font-weight: 700;
-      margin-bottom: .2rem;
-      color: #fff;
-    }
-    .path-card .card-content p {
-      font-size: .78rem;
-      opacity: .88;
-      line-height: 1.4;
-      margin-bottom: .15rem;
-    }
-    .path-card .meta {
-      font-size: .72rem;
-      opacity: .7;
-      margin-top: .2rem;
-    }
+    /* ── PATH CARDS ── */
+    .path-card { cursor: pointer; position: relative; overflow: hidden; padding: 0; border: none; border-radius: var(--radius); min-height: 200px; display: flex; flex-direction: column; justify-content: flex-end; transition: transform .2s, box-shadow .2s; }
+    .path-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,.15); }
+    .path-card .card-illustration { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; display: block; }
+    .path-card::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 30%, rgba(0,0,0,.55) 100%); border-radius: var(--radius); pointer-events: none; }
+    .path-card .card-content { position: relative; z-index: 1; padding: 1rem 1rem .9rem; color: #fff; }
+    .path-card .card-content h3 { font-size: .95rem; font-weight: 700; margin-bottom: .2rem; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,.5); }
+    .path-card .card-content p { font-size: .78rem; opacity: .88; line-height: 1.4; margin-bottom: .15rem; text-shadow: 0 1px 3px rgba(0,0,0,.4); }
+    .path-card .meta { font-size: .72rem; opacity: .7; margin-top: .2rem; }
 
+    /* ── EXPLORE ── */
     .session-card { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
     .session-info p { font-size: .85rem; color: var(--color-muted); margin-top: .2rem; }
     .session-list { display: flex; flex-direction: column; gap: .75rem; margin-top: 1.25rem; }
     .filter-tabs { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; }
     .tab { border: 1px solid var(--color-border); background: var(--color-surface); border-radius: 999px; padding: .4rem .9rem; font-size: .85rem; cursor: pointer; transition: background .2s, color .2s; }
     .tab.active { background: var(--color-primary); color: #fff; border-color: transparent; }
-    .player-card { text-align: center; max-width: 480px; margin: 0 auto; }
-    .player-card .session-meta { font-size: .85rem; color: var(--color-muted); margin-bottom: 1rem; }
-    .player-card h2 { font-size: 1.6rem; margin-bottom: 1.5rem; }
-    .player-controls { display: flex; justify-content: center; align-items: center; gap: 1rem; margin: 1.5rem 0; flex-wrap: wrap; }
-    .btn-play { width: 72px; height: 72px; border-radius: 50%; background: var(--color-primary); color: #fff; border: none; cursor: pointer; transition: transform .15s, opacity .2s; display: flex; align-items: center; justify-content: center; }
-    .btn-play:active { transform: scale(.93); }
-    .btn-skip { width: 44px; height: 44px; border-radius: 50%; font-size: .8rem; font-weight: 700; background: var(--color-primary-light); color: var(--color-primary); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 1px; transition: opacity .2s; }
-    .btn-skip span { font-size: .6rem; line-height: 1; }
+    .session-actions { display: flex; align-items: center; gap: .5rem; flex-shrink: 0; }
+    .btn-offline { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: .9rem; transition: all .2s; flex-shrink: 0; }
+    .btn-offline.cached { background: var(--color-primary-light); border-color: var(--color-primary); color: var(--color-primary); }
+    .btn-offline.loading { opacity: .6; cursor: wait; }
+
+    /* ── PLAYER (modal-style, plein écran depuis le bas) ── */
+    .player-modal { display: none; position: fixed; inset: 0; z-index: 150; align-items: flex-end; justify-content: center; background: rgba(0,0,0,.4); }
+    .player-modal.open { display: flex; animation: fadeInBd .2s ease; }
+    .player-sheet { background: var(--color-surface); border-radius: var(--radius) var(--radius) 0 0; width: 100%; max-width: 560px; padding: 1.25rem 1.5rem 2.5rem; animation: slideUp .3s cubic-bezier(.16,1,.3,1); max-height: 92vh; overflow-y: auto; }
+    .player-drag-handle { width: 40px; height: 4px; background: var(--color-border); border-radius: 999px; margin: 0 auto 1.25rem; }
+
+    /* Infos séance */
+    .player-session-info { text-align: center; margin-bottom: 1.25rem; }
+    .player-session-info .session-meta { font-size: .82rem; color: var(--color-muted); margin-bottom: .3rem; }
+    .player-session-info h2 { font-size: 1.3rem; line-height: 1.3; margin-bottom: .5rem; }
+    .player-voice-tag { display: inline-block; font-size: .72rem; background: var(--color-primary-light); color: var(--color-primary); border-radius: 999px; padding: .2rem .65rem; }
+    .audio-loading { font-size: .8rem; color: var(--color-muted); margin-top: .4rem; min-height: 1.2em; text-align: center; }
+
+    /* Progress */
     .progress-wrap { margin: 1.25rem 0; }
     .progress-track { width: 100%; height: 6px; background: var(--color-primary-light); border-radius: 999px; position: relative; cursor: pointer; padding: 8px 0; margin: -8px 0; box-sizing: content-box; }
     .progress-track-inner { width: 100%; height: 6px; background: var(--color-primary-light); border-radius: 999px; overflow: hidden; }
@@ -149,37 +116,60 @@
     .progress-thumb { position: absolute; top: 50%; width: 14px; height: 14px; border-radius: 50%; background: var(--color-primary); transform: translate(-50%, -50%); left: 0%; opacity: 0; transition: opacity .2s; pointer-events: none; margin-top: -3px; }
     .progress-track:hover .progress-thumb { opacity: 1; }
     .progress-times { display: flex; justify-content: space-between; font-size: .78rem; color: var(--color-muted); margin-top: .4rem; }
-    .volume-wrap { display: flex; align-items: center; gap: .6rem; margin-top: 1rem; justify-content: center; }
-    input[type=range].volume-slider { -webkit-appearance: none; appearance: none; width: 100px; height: 4px; border-radius: 999px; background: var(--color-primary-light); cursor: pointer; outline: none; }
+
+    /* Contrôles principaux */
+    .player-controls { display: flex; justify-content: center; align-items: center; gap: 1.25rem; margin: 1.5rem 0; }
+    .btn-play { width: 72px; height: 72px; border-radius: 50%; background: var(--color-primary); color: #fff; border: none; cursor: pointer; transition: transform .15s, opacity .2s; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .btn-play:active { transform: scale(.93); }
+    .btn-skip { width: 44px; height: 44px; border-radius: 50%; font-size: .8rem; font-weight: 700; background: var(--color-primary-light); color: var(--color-primary); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 1px; transition: opacity .2s; }
+    .btn-skip span { font-size: .6rem; line-height: 1; }
+
+    /* Options avancées (repliées) */
+    .player-options-toggle { display: flex; align-items: center; justify-content: center; gap: .4rem; background: none; border: none; color: var(--color-muted); font-size: .8rem; cursor: pointer; margin: .5rem auto 0; padding: .4rem .75rem; border-radius: 999px; transition: background .18s; }
+    .player-options-toggle:hover { background: var(--color-primary-light); }
+    .player-options-toggle svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; transition: transform .2s; }
+    .player-options-toggle.open svg { transform: rotate(180deg); }
+    .player-options { display: none; border-top: 1px solid var(--color-border); margin-top: 1rem; padding-top: 1rem; }
+    .player-options.open { display: block; }
+
+    /* Volume */
+    .volume-wrap { display: flex; align-items: center; gap: .6rem; margin-bottom: 1rem; justify-content: center; }
+    input[type=range].volume-slider { -webkit-appearance: none; appearance: none; width: 120px; height: 4px; border-radius: 999px; background: var(--color-primary-light); cursor: pointer; outline: none; }
     input[type=range].volume-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--color-primary); cursor: pointer; }
-    .speed-wrap { display: flex; align-items: center; justify-content: center; gap: .4rem; margin-top: .85rem; flex-wrap: wrap; }
+
+    /* Vitesse */
+    .speed-wrap { display: flex; align-items: center; justify-content: center; gap: .4rem; margin-bottom: 1rem; flex-wrap: wrap; }
     .speed-label { font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; color: var(--color-muted); margin-right: .25rem; }
     .speed-btn { background: var(--color-primary-light); color: var(--color-primary); border: 2px solid transparent; border-radius: 999px; padding: .25rem .6rem; font-size: .8rem; font-weight: 600; cursor: pointer; transition: all .18s; }
     .speed-btn.active { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
-    .session-actions { display: flex; align-items: center; gap: .5rem; flex-shrink: 0; }
-    .btn-offline { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: .9rem; transition: all .2s; flex-shrink: 0; }
-    .btn-offline.cached { background: var(--color-primary-light); border-color: var(--color-primary); color: var(--color-primary); }
-    .btn-offline.loading { opacity: .6; cursor: wait; }
-    .complete-screen { display: none; text-align: center; padding: 2rem 0; }
-    .complete-screen.visible { display: block; }
-    .player-main.hidden { display: none; }
-    .complete-icon { font-size: 3.5rem; margin-bottom: 1rem; animation: pop .4s ease; }
-    @keyframes pop { 0%{transform:scale(.5);opacity:0} 80%{transform:scale(1.15)} 100%{transform:scale(1);opacity:1} }
-    .player-note { font-style: italic; color: var(--color-muted); margin-top: 1.25rem; font-size: .95rem; }
-    .audio-loading { font-size: .8rem; color: var(--color-muted); margin-top: .5rem; min-height: 1.2em; }
-    .player-voice-tag { display: inline-block; font-size: .72rem; background: var(--color-primary-light); color: var(--color-primary); border-radius: 999px; padding: .2rem .65rem; margin-bottom: .75rem; }
-    .ambiance-section { margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--color-border); text-align: center; }
+
+    /* Ambiance */
+    .ambiance-section { text-align: center; }
     .ambiance-label { font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; color: var(--color-muted); margin-bottom: .6rem; }
     .ambiance-btns { display: flex; justify-content: center; gap: .4rem; flex-wrap: wrap; margin-bottom: .75rem; }
     .ambiance-btn { display: flex; flex-direction: column; align-items: center; gap: .2rem; background: var(--color-primary-light); border: 2px solid transparent; border-radius: var(--radius-sm); padding: .45rem .6rem; font-size: 1.1rem; cursor: pointer; transition: all .2s; min-width: 52px; color: var(--color-text); }
     .ambiance-btn span { font-size: .62rem; color: var(--color-muted); line-height: 1; }
     .ambiance-btn.active { border-color: var(--color-primary); box-shadow: 0 0 0 2px var(--color-primary); }
     .ambiance-volume-wrap { display: flex; align-items: center; gap: .6rem; justify-content: center; margin-top: .25rem; }
+
+    /* Fin de séance */
+    .complete-screen { display: none; text-align: center; padding: 1.5rem 0; }
+    .complete-screen.visible { display: block; }
+    .player-main.hidden { display: none; }
+    .complete-icon { font-size: 3.5rem; margin-bottom: 1rem; animation: pop .4s ease; }
+    @keyframes pop { 0%{transform:scale(.5);opacity:0} 80%{transform:scale(1.15)} 100%{transform:scale(1);opacity:1} }
+
+    /* Bouton retour en bas du player */
+    .player-back { display: block; width: 100%; text-align: center; margin-top: 1.25rem; font-size: .85rem; color: var(--color-muted); background: none; border: none; cursor: pointer; padding: .4rem; }
+
+    /* Overlays */
+    @keyframes fadeInBd { from{opacity:0} to{opacity:1} }
+    @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+
+    /* Voice overlay */
     .voice-overlay-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 200; align-items: flex-end; justify-content: center; }
     .voice-overlay-backdrop.open { display: flex; animation: fadeInBd .2s ease; }
-    @keyframes fadeInBd { from{opacity:0} to{opacity:1} }
     .voice-sheet { background: var(--color-surface); border-radius: var(--radius) var(--radius) 0 0; padding: 1.5rem 1.5rem 2.5rem; width: 100%; max-width: 480px; animation: slideUp .25s cubic-bezier(.16,1,.3,1); }
-    @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
     .voice-sheet-title { font-size: .75rem; text-transform: uppercase; letter-spacing: .1em; color: var(--color-muted); margin-bottom: 1rem; text-align: center; }
     .voice-sheet-options { display: flex; flex-direction: column; gap: .6rem; margin-bottom: 1.25rem; }
     .voice-option { display: flex; align-items: center; gap: 1rem; padding: .85rem 1rem; border-radius: var(--radius-sm); border: 2px solid var(--color-border); background: var(--color-bg); cursor: pointer; transition: all .18s; text-align: left; width: 100%; }
@@ -193,32 +183,27 @@
     .voice-option.selected .voice-option-check::after { content:''; display:block; width:5px; height:9px; border:2px solid #fff; border-top:none; border-left:none; transform:rotate(45deg) translate(-1px,-1px); }
     .voice-sheet-launch { width: 100%; padding: .95rem; background: var(--color-primary); color: #fff; border: none; border-radius: 999px; font-size: 1rem; font-weight: 600; cursor: pointer; }
     .voice-sheet-cancel { display: block; width: 100%; text-align: center; margin-top: .75rem; font-size: .85rem; color: var(--color-muted); background: none; border: none; cursor: pointer; padding: .4rem; }
+
+    /* Stats */
+    .stats-widget { display: flex; gap: .75rem; margin-top: 2rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .stat-chip { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: .6rem 1rem; display: flex; flex-direction: column; align-items: center; flex: 1; min-width: 80px; }
+    .stat-chip .stat-value { font-size: 1.3rem; font-weight: 700; color: var(--color-primary); }
+    .stat-chip .stat-label { font-size: .7rem; color: var(--color-muted); margin-top: .2rem; text-align: center; }
+
+    /* Settings */
     .settings-list { display: flex; flex-direction: column; gap: .75rem; margin-top: 1.25rem; }
     .setting-item { display: flex; justify-content: space-between; align-items: center; }
     .setting-item p { font-size: .85rem; color: var(--color-muted); margin-top: .2rem; }
     .setting-item .info { flex: 1; }
     .setting-tag { font-size: .8rem; color: var(--color-primary); background: var(--color-primary-light); border-radius: 999px; padding: .25rem .75rem; white-space: nowrap; }
     .footer-note { text-align: center; font-size: .8rem; color: var(--color-muted); padding: 2rem 1rem; }
-    .stats-widget { display: flex; gap: .75rem; margin-top: 2rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
-    .stat-chip { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: .6rem 1rem; display: flex; flex-direction: column; align-items: center; flex: 1; min-width: 80px; }
-    .stat-chip .stat-value { font-size: 1.3rem; font-weight: 700; color: var(--color-primary); }
-    .stat-chip .stat-label { font-size: .7rem; color: var(--color-muted); margin-top: .2rem; text-align: center; }
     .insta-link { display: flex; align-items: center; gap: .75rem; text-decoration: none; color: var(--color-text); width: 100%; }
     .insta-icon { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .insta-icon svg { width: 20px; height: 20px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
     .insta-text .insta-title { font-size: .95rem; font-weight: 600; }
     .insta-text .insta-handle { font-size: .8rem; color: var(--color-muted); }
-    .badge-coming { font-size: .65rem; background: var(--color-muted); color: #fff; border-radius: 4px; padding: 1px 6px; vertical-align: middle; margin-left: 4px; }
-    button[disabled] { opacity: .45; cursor: not-allowed; }
-    @media (max-width:600px) {
-      h1{font-size:1.5rem}
-      .card-grid { grid-template-columns: repeat(2, 1fr); }
-      .path-card { min-height: 160px; }
-    }
-    @media (max-width:380px) {
-      .card-grid { grid-template-columns: 1fr; }
-    }
-    [data-theme="dark"] { --color-bg:#0f1f1b; --color-surface:#1a2e28; --color-primary:#4db896; --color-primary-light:#1e3d33; --color-text:#e0f0eb; --color-muted:#7aada0; --color-border:rgba(255,255,255,.08); }
+
+    /* Guide */
     .guide-wrap { max-width: 480px; margin: 0 auto; }
     .chat-window { display: flex; flex-direction: column; gap: 1rem; margin-top: 1.5rem; min-height: 120px; }
     .chat-bubble { max-width: 85%; padding: .75rem 1rem; border-radius: 1.1rem; font-size: .95rem; line-height: 1.5; animation: bubbleIn .22s ease; }
@@ -234,10 +219,22 @@
     .guide-result-card h3 { font-size: 1.15rem; margin-bottom: .25rem; }
     .guide-result-card .result-meta { font-size: .82rem; color: var(--color-muted); margin-bottom: 1rem; }
     .guide-restart { display: block; width: 100%; text-align: center; margin-top: .9rem; font-size: .85rem; color: var(--color-muted); background: none; border: none; cursor: pointer; padding: .4rem; }
+
+    /* Misc */
+    .badge-coming { font-size: .65rem; background: var(--color-muted); color: #fff; border-radius: 4px; padding: 1px 6px; vertical-align: middle; margin-left: 4px; }
+    button[disabled] { opacity: .45; cursor: not-allowed; }
+
+    /* Responsive */
+    @media (max-width:600px) { h1{font-size:1.5rem} .card-grid{grid-template-columns:repeat(2,1fr)} .path-card{min-height:160px} }
+    @media (max-width:380px) { .card-grid{grid-template-columns:1fr} }
+
+    /* Dark mode */
+    [data-theme="dark"] { --color-bg:#0f1f1b; --color-surface:#1a2e28; --color-primary:#4db896; --color-primary-light:#1e3d33; --color-text:#e0f0eb; --color-muted:#7aada0; --color-border:rgba(255,255,255,.08); }
   </style>
 </head>
 <body>
 
+<!-- ── VOICE OVERLAY ── -->
 <div class="voice-overlay-backdrop" id="voice-overlay" role="dialog" aria-modal="true">
   <div class="voice-sheet">
     <p class="voice-sheet-title">Choisir la voix</p>
@@ -258,6 +255,91 @@
   </div>
 </div>
 
+<!-- ── PLAYER MODAL ── -->
+<div class="player-modal" id="player-modal" role="dialog" aria-modal="true">
+  <div class="player-sheet">
+    <div class="player-drag-handle"></div>
+    <audio id="audio-engine" preload="metadata"></audio>
+    <audio id="ambiance-engine" loop preload="none"></audio>
+
+    <div id="player-main" class="player-main">
+      <div class="player-session-info">
+        <p class="session-meta" id="player-meta">—</p>
+        <h2 id="player-title">Aucune séance sélectionnée</h2>
+        <div id="player-voice-tag" class="player-voice-tag">—</div>
+        <p class="audio-loading" id="audio-loading"></p>
+      </div>
+
+      <div class="progress-wrap">
+        <div class="progress-track" id="progress-track" role="slider" aria-label="Progression" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
+          <div class="progress-track-inner"><div class="progress-fill" id="progress-fill"></div></div>
+          <div class="progress-thumb" id="progress-thumb"></div>
+        </div>
+        <div class="progress-times"><span id="time-current">0:00</span><span id="time-total">--:--</span></div>
+      </div>
+
+      <div class="player-controls">
+        <button class="btn-skip" id="btn-rewind" aria-label="-15s">↺<span>15s</span></button>
+        <button class="btn-play" id="play-btn" onclick="togglePlay()" aria-label="Lecture/Pause">
+          <svg id="icon-play" viewBox="0 0 24 24" width="28" height="28" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          <svg id="icon-pause" viewBox="0 0 24 24" width="28" height="28" fill="white" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+        </button>
+        <button class="btn-skip" id="btn-forward" aria-label="+15s">↻<span>15s</span></button>
+      </div>
+
+      <button class="player-options-toggle" id="options-toggle" onclick="togglePlayerOptions()">
+        <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        Options
+      </button>
+
+      <div class="player-options" id="player-options">
+        <div class="volume-wrap">
+          <span>🔈</span>
+          <input type="range" class="volume-slider" id="volume-slider" min="0" max="1" step="0.02" value="1">
+          <span>🔊</span>
+        </div>
+        <div class="speed-wrap">
+          <span class="speed-label">Vitesse</span>
+          <button class="speed-btn" onclick="setSpeed(0.7)">×0.7</button>
+          <button class="speed-btn" onclick="setSpeed(0.8)">×0.8</button>
+          <button class="speed-btn" onclick="setSpeed(0.9)">×0.9</button>
+          <button class="speed-btn active" onclick="setSpeed(1.0)">×1.0</button>
+        </div>
+        <div class="ambiance-section">
+          <p class="ambiance-label">Son d'ambiance</p>
+          <div class="ambiance-btns">
+            <button class="ambiance-btn active" id="amb-off" onclick="setAmbiance(null)">🔇<span>Aucun</span></button>
+            <button class="ambiance-btn" id="amb-pluie" onclick="setAmbiance('pluie.mp3')">🌧️<span>Pluie</span></button>
+            <button class="ambiance-btn" id="amb-foret" onclick="setAmbiance('foret.mp3')">🌿<span>Forêt</span></button>
+            <button class="ambiance-btn" id="amb-vagues" onclick="setAmbiance('vagues.mp3')">🌊<span>Vagues</span></button>
+            <button class="ambiance-btn" id="amb-feu" onclick="setAmbiance('feu.mp3')">🔥<span>Feu</span></button>
+            <button class="ambiance-btn" id="amb-blanc" onclick="setAmbiance('bruit-blanc.mp3')">〰️<span>Blanc</span></button>
+          </div>
+          <div class="ambiance-volume-wrap" id="ambiance-volume-wrap" style="display:none">
+            <span>🎵</span>
+            <input type="range" class="volume-slider" id="ambiance-volume-slider" min="0" max="1" step="0.02" value="0.3">
+            <span>🔊</span>
+          </div>
+        </div>
+      </div>
+
+      <button class="player-back" onclick="closePlayer()">← Retour aux séances</button>
+    </div>
+
+    <div class="complete-screen" id="complete-screen">
+      <div class="complete-icon">🌿</div>
+      <h2>Séance terminée</h2>
+      <p id="complete-title" style="color:var(--color-muted);margin:.5rem 0 1.5rem;"></p>
+      <p style="color:var(--color-muted);font-size:.95rem;line-height:1.6;margin-bottom:1.5rem;">Prends un instant avant de continuer.<br>Comment tu te sens ?</p>
+      <div class="actions" style="justify-content:center;">
+        <button class="btn btn-primary" onclick="closePlayer()">Explorer les séances</button>
+        <button class="btn btn-ghost" onclick="replaySession()">↩ Rejouer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── ACCUEIL ── -->
 <section id="home" class="screen active">
   <header>
     <p class="eyebrow">Serein</p>
@@ -282,65 +364,35 @@
   <section>
     <h2>Parcours</h2>
     <div class="card-grid">
-
       <article class="card path-card" onclick="filterParcours('Premiers pas')">
         <img class="card-illustration" src="assets/illustrations/Illustrations site-01.webp" alt="" aria-hidden="true">
-        <div class="card-content">
-          <h3>Premiers pas</h3>
-          <p>Pour entrer doucement dans la pratique.</p>
-          <p class="meta">7 séances</p>
-        </div>
+        <div class="card-content"><h3>Premiers pas</h3><p>Pour entrer doucement dans la pratique.</p><p class="meta">7 séances</p></div>
       </article>
-
       <article class="card path-card" onclick="filterParcours('Calme &amp; Stress')">
         <img class="card-illustration" src="assets/illustrations/Illustrations site-02.webp" alt="" aria-hidden="true">
-        <div class="card-content">
-          <h3>Calme &amp; Stress</h3>
-          <p>Pour relâcher la pression au quotidien.</p>
-          <p class="meta">6 séances</p>
-        </div>
+        <div class="card-content"><h3>Calme &amp; Stress</h3><p>Pour relâcher la pression au quotidien.</p><p class="meta">6 séances</p></div>
       </article>
-
       <article class="card path-card" onclick="filterParcours('Sommeil')">
         <img class="card-illustration" src="assets/illustrations/Illustrations site-03.webp" alt="" aria-hidden="true">
-        <div class="card-content">
-          <h3>Sommeil</h3>
-          <p>Pour préparer le coucher et bien dormir.</p>
-          <p class="meta">6 séances</p>
-        </div>
+        <div class="card-content"><h3>Sommeil</h3><p>Pour préparer le coucher et bien dormir.</p><p class="meta">6 séances</p></div>
       </article>
-
       <article class="card path-card" onclick="filterParcours('Respirer')">
         <img class="card-illustration" src="assets/illustrations/Illustrations site-04.webp" alt="" aria-hidden="true">
-        <div class="card-content">
-          <h3>Respirer</h3>
-          <p>Pour explorer les techniques de respiration.</p>
-          <p class="meta">5 séances</p>
-        </div>
+        <div class="card-content"><h3>Respirer</h3><p>Pour explorer les techniques de respiration.</p><p class="meta">5 séances</p></div>
       </article>
-
       <article class="card path-card" onclick="filterParcours('Anxiété')">
         <img class="card-illustration" src="assets/illustrations/Illustrations site-05.webp" alt="" aria-hidden="true">
-        <div class="card-content">
-          <h3>Anxiété</h3>
-          <p>Pour apaiser l'agitation mentale.</p>
-          <p class="meta">6 séances</p>
-        </div>
+        <div class="card-content"><h3>Anxiété</h3><p>Pour apaiser l'agitation mentale.</p><p class="meta">6 séances</p></div>
       </article>
-
       <article class="card path-card" onclick="filterParcours('Concentration')">
         <img class="card-illustration" src="assets/illustrations/Illustrations site-06.webp" alt="" aria-hidden="true">
-        <div class="card-content">
-          <h3>Concentration</h3>
-          <p>Pour clarifier l'esprit et entrer dans la zone.</p>
-          <p class="meta">5 séances</p>
-        </div>
+        <div class="card-content"><h3>Concentration</h3><p>Pour clarifier l'esprit et entrer dans la zone.</p><p class="meta">5 séances</p></div>
       </article>
-
     </div>
   </section>
 </section>
 
+<!-- ── EXPLORER ── -->
 <section id="explore" class="screen">
   <header>
     <p class="eyebrow">Explorer</p>
@@ -402,6 +454,7 @@
   <p style="text-align:center;color:var(--color-muted);font-size:.85rem;margin-top:2rem;">De nouvelles séances arriveront au fil du projet.</p>
 </section>
 
+<!-- ── GUIDE ── -->
 <section id="guide" class="screen">
   <header><p class="eyebrow">Guide</p><h1>On trouve ensemble.</h1><p class="lead">Réponds à deux questions et je te propose la séance qui colle le mieux à ce que tu ressens maintenant.</p></header>
   <div class="guide-wrap">
@@ -410,73 +463,7 @@
   </div>
 </section>
 
-<section id="player" class="screen">
-  <header><p class="eyebrow">Lecteur</p><p class="lead">Installe-toi comme tu veux. Tu peux mettre en pause à tout moment.</p></header>
-  <audio id="audio-engine" preload="metadata"></audio>
-  <audio id="ambiance-engine" loop preload="none"></audio>
-  <div class="card player-card">
-    <div class="player-main" id="player-main">
-      <p class="session-meta" id="player-meta">—</p>
-      <h2 id="player-title">Aucune séance sélectionnée</h2>
-      <div id="player-voice-tag" class="player-voice-tag">—</div>
-      <p class="audio-loading" id="audio-loading"></p>
-      <div class="progress-wrap">
-        <div class="progress-track" id="progress-track" role="slider" aria-label="Progression" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
-          <div class="progress-track-inner"><div class="progress-fill" id="progress-fill"></div></div>
-          <div class="progress-thumb" id="progress-thumb"></div>
-        </div>
-        <div class="progress-times"><span id="time-current">0:00</span><span id="time-total">--:--</span></div>
-      </div>
-      <div class="player-controls">
-        <button class="btn-skip" id="btn-rewind" aria-label="-15s">↺<span>15s</span></button>
-        <button class="btn-play" id="play-btn" onclick="togglePlay()" aria-label="Lecture/Pause">
-          <svg id="icon-play" viewBox="0 0 24 24" width="28" height="28" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-          <svg id="icon-pause" viewBox="0 0 24 24" width="28" height="28" fill="white" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-        </button>
-        <button class="btn-skip" id="btn-forward" aria-label="+15s">↻<span>15s</span></button>
-      </div>
-      <div class="volume-wrap">
-        <span>🔈</span><input type="range" class="volume-slider" id="volume-slider" min="0" max="1" step="0.02" value="1"><span>🔊</span>
-      </div>
-      <div class="speed-wrap">
-        <span class="speed-label">Vitesse</span>
-        <button class="speed-btn" onclick="setSpeed(0.7)">×0.7</button>
-        <button class="speed-btn" onclick="setSpeed(0.8)">×0.8</button>
-        <button class="speed-btn" onclick="setSpeed(0.9)">×0.9</button>
-        <button class="speed-btn active" onclick="setSpeed(1.0)">×1.0</button>
-      </div>
-      <div class="ambiance-section">
-        <p class="ambiance-label">Son d'ambiance</p>
-        <div class="ambiance-btns">
-          <button class="ambiance-btn active" id="amb-off" onclick="setAmbiance(null)">🔇<span>Aucun</span></button>
-          <button class="ambiance-btn" id="amb-pluie" onclick="setAmbiance('pluie.mp3')">🌧️<span>Pluie</span></button>
-          <button class="ambiance-btn" id="amb-foret" onclick="setAmbiance('foret.mp3')">🌿<span>Forêt</span></button>
-          <button class="ambiance-btn" id="amb-vagues" onclick="setAmbiance('vagues.mp3')">🌊<span>Vagues</span></button>
-          <button class="ambiance-btn" id="amb-feu" onclick="setAmbiance('feu.mp3')">🔥<span>Feu</span></button>
-          <button class="ambiance-btn" id="amb-blanc" onclick="setAmbiance('bruit-blanc.mp3')">〰️<span>Blanc</span></button>
-        </div>
-        <div class="ambiance-volume-wrap" id="ambiance-volume-wrap" style="display:none">
-          <span>🎵</span><input type="range" class="volume-slider" id="ambiance-volume-slider" min="0" max="1" step="0.02" value="0.3"><span>🔊</span>
-        </div>
-      </div>
-      <p class="player-note">Prends ton temps.</p>
-      <div class="actions" style="justify-content:center;margin-top:1.5rem;">
-        <button class="btn btn-ghost" onclick="stopAndReturn()">← Retour aux séances</button>
-      </div>
-    </div>
-    <div class="complete-screen" id="complete-screen">
-      <div class="complete-icon">🌿</div>
-      <h2>Séance terminée</h2>
-      <p id="complete-title" style="color:var(--color-muted);margin:.5rem 0 1.5rem;"></p>
-      <p style="color:var(--color-muted);font-size:.95rem;line-height:1.6;margin-bottom:1.5rem;">Prends un instant avant de continuer.<br>Comment tu te sens ?</p>
-      <div class="actions" style="justify-content:center;">
-        <button class="btn btn-primary" onclick="showScreen('explore')">Explorer les séances</button>
-        <button class="btn btn-ghost" onclick="replaySession()">↩ Rejouer</button>
-      </div>
-    </div>
-  </div>
-</section>
-
+<!-- ── RÉGLAGES ── -->
 <section id="settings" class="screen">
   <header><p class="eyebrow">Réglages</p><h1>Personnalise l'expérience.</h1><p class="lead">Serein ne demande pas de compte, n'affiche pas de publicité et évite les trackers tiers.</p></header>
   <div class="settings-list">
@@ -499,12 +486,20 @@
   <p class="footer-note">Serein — méditation en français, sans publicité, sans tracking tiers.</p>
 </section>
 
+<!-- ── NAV (4 onglets) ── -->
 <nav class="nav">
-  <button class="nav-btn active" id="nav-home" onclick="showScreen('home')"><svg viewBox="0 0 24 24"><path d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-4h4v4h4a1 1 0 001-1v-9"/></svg>Accueil</button>
-  <button class="nav-btn" id="nav-explore" onclick="showScreen('explore')"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Explorer</button>
-  <button class="nav-btn" id="nav-guide" onclick="showScreen('guide')"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Guide</button>
-  <button class="nav-btn" id="nav-player" onclick="showScreen('player')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>Lecteur</button>
-  <button class="nav-btn" id="nav-settings" onclick="showScreen('settings')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Réglages</button>
+  <button class="nav-btn active" id="nav-home" onclick="showScreen('home')">
+    <svg viewBox="0 0 24 24"><path d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-4h4v4h4a1 1 0 001-1v-9"/></svg>Accueil
+  </button>
+  <button class="nav-btn" id="nav-explore" onclick="showScreen('explore')">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Explorer
+  </button>
+  <button class="nav-btn" id="nav-guide" onclick="showScreen('guide')">
+    <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Guide
+  </button>
+  <button class="nav-btn" id="nav-settings" onclick="showScreen('settings')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Réglages
+  </button>
 </nav>
 
 <script src="app.js"></script>
