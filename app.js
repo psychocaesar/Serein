@@ -685,12 +685,22 @@ const _origClosePlayer = closePlayer;
 function closePlayer() {
   // Clean up timer if active
   if (timerInterval) { clearInterval(timerInterval); timerInterval = null; timerRunning = false; }
-  // Restore guided player UI
-  document.getElementById('player-artwork-wrap').style.display = '';
-  document.getElementById('timer-display').style.display = 'none';
-  const prog = document.getElementById('player-progress');
-  if (prog) prog.style.display = '';
-  document.getElementById('player-voice-tag').style.display = '';
+  // Restore guided player UI unconditionally
+  const artworkWrap = document.getElementById('player-artwork-wrap');
+  const timerDisplay = document.getElementById('timer-display');
+  const progress = document.getElementById('player-progress');
+  const voiceTag = document.getElementById('player-voice-tag');
+  if (artworkWrap) artworkWrap.style.display = '';
+  if (timerDisplay) { timerDisplay.style.display = 'none'; }
+  if (progress) progress.style.display = '';
+  if (voiceTag) voiceTag.style.display = '';
+  // Restore player-main visibility
+  const playerMain = document.getElementById('player-main');
+  if (playerMain) {
+    playerMain.style.display = 'flex';
+    playerMain.classList.remove('hidden');
+  }
+  document.getElementById('complete-screen').classList.remove('visible');
   _origClosePlayer();
 }
 
