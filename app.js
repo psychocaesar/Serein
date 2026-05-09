@@ -34,11 +34,11 @@ function filterParcours(label) {
 let pendingSession = null;
 let selectedVoice = 'masculine';
 
-function openVoiceOverlay(id, title, parcours, duration, filenameMasc, filenameFem) {
-  pendingSession = { id, title, parcours, duration, filenameMasc, filenameFem };
+function openVoiceOverlay(id, title, parcours, duration, filenameMasc, filenameFem, artwork) {
+  pendingSession = { id, title, parcours, duration, filenameMasc, filenameFem, artwork };
   if (!filenameFem) {
     selectedVoice = 'masculine';
-    launchPlayer(id, title, parcours, duration, filenameMasc, 'masculine');
+    launchPlayer(id, title, parcours, duration, filenameMasc, 'masculine', artwork);
     return;
   }
   selectedVoice = 'masculine';
@@ -62,56 +62,64 @@ function confirmVoiceAndLaunch() {
   const s = pendingSession;
   const filename = selectedVoice === 'feminine' && s.filenameFem ? s.filenameFem : s.filenameMasc;
   closeVoiceOverlay();
-  launchPlayer(s.id, s.title, s.parcours, s.duration, filename, selectedVoice);
+  launchPlayer(s.id, s.title, s.parcours, s.duration, filename, selectedVoice, s.artwork);
   pendingSession = null;
 }
 
-// ── PLAYER (modal) ──
+// ── PLAYER IMMERSIF ──
 let currentSession = null;
 const audio = document.getElementById('audio-engine');
 const ambianceAudio = document.getElementById('ambiance-engine');
+let currentOfflineFilename = null;
 
-function openPlayerModal() {
-  document.getElementById('player-modal').classList.add('open');
+function openPlayerScreen() {
+  document.getElementById('player-screen').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
 
 function closePlayer() {
   audio.pause();
   ambianceAudio.pause();
-  document.getElementById('player-modal').classList.remove('open');
+  document.getElementById('player-screen').classList.remove('open');
   document.body.style.overflow = '';
+  // Fermer le sheet si ouvert
+  document.getElementById('options-sheet').classList.remove('open');
 }
 
-// Fermer en cliquant sur le fond
-document.getElementById('player-modal').addEventListener('click', function(e) {
-  if (e.target === this) closePlayer();
-});
-
-function togglePlayerOptions() {
-  const opts = document.getElementById('player-options');
-  const toggle = document.getElementById('options-toggle');
-  const isOpen = opts.classList.toggle('open');
-  toggle.classList.toggle('open', isOpen);
-  toggle.querySelector('span') && (toggle.childNodes[1].textContent = isOpen ? ' Masquer' : ' Options');
+function toggleOptionsSheet() {
+  document.getElementById('options-sheet').classList.toggle('open');
 }
 
-function launchPlayer(id, title, parcours, duration, filename, voice) {
-  currentSession = { id, title, parcours, duration, filename, voice };
+function launchPlayer(id, title, parcours, duration, filename, voice, artwork) {
+  currentSession = { id, title, parcours, duration, filename, voice, artwork };
+  currentOfflineFilename = filename;
+
+  // Artwork + fond flou
+  const img = artwork || 'assets/logo.png';
+  document.getElementById('player-artwork-img').src = img;
+  document.getElementById('player-bg').style.backgroundImage = 'url(' + img + ')';
+
+  // Infos
   document.getElementById('player-title').textContent = title;
   document.getElementById('player-meta').textContent = parcours + ' · ' + duration;
   document.getElementById('player-voice-tag').textContent = voice === 'feminine' ? 'Voix féminine — Daïdrée' : 'Voix masculine — César';
+
+  // Reset UI
   document.getElementById('complete-screen').classList.remove('visible');
   document.getElementById('player-main').classList.remove('hidden');
+  document.getElementById('player-main').style.display = 'flex';
   document.getElementById('progress-fill').style.width = '0%';
   document.getElementById('progress-thumb').style.left = '0%';
   document.getElementById('time-current').textContent = '0:00';
   document.getElementById('time-total').textContent = '--:--';
   document.getElementById('audio-loading').textContent = 'Chargement…';
-  // Fermer les options à chaque nouvelle séance
-  document.getElementById('player-options').classList.remove('open');
-  document.getElementById('options-toggle').classList.remove('open');
-  openPlayerModal();
+  document.getElementById('options-sheet').classList.remove('open');
+
+  // Restore offline button state
+  updateOfflineBtnState();
+
+  openPlayerScreen();
+
   audio.src = 'assets/audio/' + (voice === 'feminine' ? 'feminin' : 'masculin') + '/' + encodeURIComponent(filename);
   audio.load();
   audio.play().then(() => {
@@ -146,9 +154,24 @@ function updatePlayIcon(playing) {
   document.getElementById('icon-pause').style.display = playing ? '' : 'none';
 }
 
+// Vitesse avec cycle depuis toolbar
+const SPEEDS = [0.7, 0.8, 0.9, 1.0];
+let currentSpeedIdx = 3;
+
+function cycleSpeed() {
+  currentSpeedIdx = (currentSpeedIdx + 1) % SPEEDS.length;
+  setSpeed(SPEEDS[currentSpeedIdx]);
+}
+
 function setSpeed(s) {
   audio.playbackRate = s;
-  document.querySelectorAll('.speed-btn').forEach(b => b.classList.toggle('active', parseFloat(b.textContent.replace('×','')) === s));
+  currentSpeedIdx = SPEEDS.indexOf(s);
+  if (currentSpeedIdx === -1) currentSpeedIdx = 3;
+  const label = s === 1.0 ? '1×' : s + '×';
+  document.getElementById('speed-display').textContent = label;
+  document.querySelectorAll('.speed-btn').forEach(b => {
+    b.classList.toggle('active', parseFloat(b.textContent.replace('×','')) === s);
+  });
 }
 
 document.getElementById('btn-rewind').onclick = () => { audio.currentTime = Math.max(0, audio.currentTime - 15); };
@@ -170,6 +193,7 @@ audio.addEventListener('loadedmetadata', () => {
 
 audio.addEventListener('ended', () => {
   updatePlayIcon(false);
+  document.getElementById('player-main').style.display = 'none';
   document.getElementById('player-main').classList.add('hidden');
   document.getElementById('complete-screen').classList.add('visible');
   if (currentSession) document.getElementById('complete-title').textContent = currentSession.title;
@@ -207,12 +231,43 @@ function fmt(s) {
 }
 
 function replaySession() {
-  if (!currentSession) return;
   document.getElementById('complete-screen').classList.remove('visible');
   document.getElementById('player-main').classList.remove('hidden');
+  document.getElementById('player-main').style.display = 'flex';
   audio.currentTime = 0;
   audio.play();
   if (currentAmbiance) ambianceAudio.play().catch(() => {});
+}
+
+// ── OFFLINE depuis le player ──
+async function toolbarOffline() {
+  if (!currentOfflineFilename) return;
+  const btn = document.getElementById('toolbar-offline-btn');
+  if (!('caches' in window)) { alert('Cache non disponible sur ce navigateur.'); return; }
+  try {
+    const cache = await caches.open('serein-audio-v1');
+    const url = 'assets/audio/masculin/' + encodeURIComponent(currentOfflineFilename);
+    const existing = await cache.match(url);
+    if (existing) {
+      await cache.delete(url);
+      btn.classList.remove('active');
+    } else {
+      await cache.add(url);
+      btn.classList.add('active');
+    }
+    updateOfflineCount();
+  } catch(e) {}
+}
+
+async function updateOfflineBtnState() {
+  if (!currentOfflineFilename || !('caches' in window)) return;
+  try {
+    const cache = await caches.open('serein-audio-v1');
+    const url = 'assets/audio/masculin/' + encodeURIComponent(currentOfflineFilename);
+    const existing = await cache.match(url);
+    const btn = document.getElementById('toolbar-offline-btn');
+    btn.classList.toggle('active', !!existing);
+  } catch(e) {}
 }
 
 // ── AMBIANCE ──
@@ -248,7 +303,7 @@ function updateAmbianceTag(label) {
   if (tag) tag.textContent = label.charAt(0).toUpperCase() + label.slice(1);
 }
 
-// ── OFFLINE CACHE ──
+// ── OFFLINE CACHE (liste explore) ──
 async function toggleOfflineCache(btn, filename) {
   if (!('caches' in window)) { alert('Cache non disponible sur ce navigateur.'); return; }
   btn.classList.add('loading');
@@ -312,7 +367,7 @@ function recordCompletion() {
   s.minutes = (s.minutes || 0) + dur;
   const today = new Date().toISOString().slice(0,10);
   if (s.lastDate === today) {
-    // même jour, pas de changement streak
+    // même jour
   } else if (s.lastDate === new Date(Date.now() - 86400000).toISOString().slice(0,10)) {
     s.streak = (s.streak || 0) + 1;
   } else {
@@ -343,32 +398,32 @@ function applyTheme() {
 // ── GUIDE CHATBOT ──
 const GUIDE_MAP = {
   'stress': {
-    'court':  { title: 'SOS Stress en 6 minutes',        parcours: 'Calme & Stress', duration: '6 min',  file: 'SOS Stress en 6 minutes.mp3',          fileFem: false, emoji: '😮‍💨' },
-    'moyen':  { title: 'La cohérence cardiaque guidée',   parcours: 'Calme & Stress', duration: '5 min',  file: 'Cohérence cardiaque 5 minutes.mp3',    fileFem: false, emoji: '💚' },
-    'long':   { title: 'La cohérence cardiaque guidée',   parcours: 'Calme & Stress', duration: '5 min',  file: 'Cohérence cardiaque 5 minutes.mp3',    fileFem: false, emoji: '💚' }
+    'court':  { title: 'SOS Stress en 6 minutes', parcours: 'Calme & Stress', duration: '6 min', file: 'SOS Stress en 6 minutes.mp3', fileFem: false, emoji: '😮‍💨', artwork: 'assets/illustrations/Illustrations site-02.webp' },
+    'moyen':  { title: 'La cohérence cardiaque guidée', parcours: 'Calme & Stress', duration: '5 min', file: 'Cohérence cardiaque 5 minutes.mp3', fileFem: false, emoji: '💚', artwork: 'assets/illustrations/Illustrations site-02.webp' },
+    'long':   { title: 'La cohérence cardiaque guidée', parcours: 'Calme & Stress', duration: '5 min', file: 'Cohérence cardiaque 5 minutes.mp3', fileFem: false, emoji: '💚', artwork: 'assets/illustrations/Illustrations site-02.webp' }
   },
   'anxiete': {
-    'court':  { title: 'SOS Anxiété — ancrage immédiat',  parcours: 'Anxiété', duration: '5 min',  file: 'SOS Anxiété ancrage immédiat.mp3',      fileFem: false, emoji: '🌀' },
-    'moyen':  { title: 'Respiration 4-7-8 — calme profond', parcours: 'Respirer', duration: '6 min', file: 'Respiration 4-7-8 — Calme profond.mp3', fileFem: false, emoji: '🌬️' },
-    'long':   { title: 'La pensée qui tourne en boucle',  parcours: 'Anxiété', duration: '8 min',  file: 'La pensée qui tourne en boucle.mp3',    fileFem: 'La pensée qui tourne en boucle.mp3', emoji: '🧠' }
+    'court':  { title: 'SOS Anxiété — ancrage immédiat', parcours: 'Anxiété', duration: '5 min', file: 'SOS Anxiété ancrage immédiat.mp3', fileFem: false, emoji: '🌀', artwork: 'assets/illustrations/Illustrations site-05.webp' },
+    'moyen':  { title: 'Respiration 4-7-8 — calme profond', parcours: 'Respirer', duration: '6 min', file: 'Respiration 4-7-8 — Calme profond.mp3', fileFem: false, emoji: '🌬️', artwork: 'assets/illustrations/Illustrations site-04.webp' },
+    'long':   { title: 'La pensée qui tourne en boucle', parcours: 'Anxiété', duration: '8 min', file: 'La pensée qui tourne en boucle.mp3', fileFem: 'La pensée qui tourne en boucle.mp3', emoji: '🧠', artwork: 'assets/illustrations/Illustrations site-05.webp' }
   },
   'fatigue': {
-    'court':  { title: 'Première respiration consciente', parcours: 'Premiers pas', duration: '5 min',  file: 'Méditation Premiere Respiration Consciente.mp3', fileFem: false, emoji: '🌱' },
-    'moyen':  { title: 'Le scan corporel — découvrir ses sensations', parcours: 'Premiers pas', duration: '10 min', file: 'Le scan corporel.mp3', fileFem: 'Le scan corporel — découvrir ses sensations.mp3', emoji: '🌿' },
-    'long':   { title: 'Réveils nocturnes — retrouver le calme', parcours: 'Sommeil', duration: '18 min', file: 'Reveils nocturnes.mp3', fileFem: false, emoji: '🌙' }
+    'court':  { title: 'Première respiration consciente', parcours: 'Premiers pas', duration: '5 min', file: 'Méditation Premiere Respiration Consciente.mp3', fileFem: false, emoji: '🌱', artwork: 'assets/illustrations/Illustrations site-01.webp' },
+    'moyen':  { title: 'Le scan corporel — découvrir ses sensations', parcours: 'Premiers pas', duration: '10 min', file: 'Le scan corporel.mp3', fileFem: 'Le scan corporel — découvrir ses sensations.mp3', emoji: '🌿', artwork: 'assets/illustrations/Illustrations site-01.webp' },
+    'long':   { title: 'Réveils nocturnes — retrouver le calme', parcours: 'Sommeil', duration: '18 min', file: 'Reveils nocturnes.mp3', fileFem: false, emoji: '🌙', artwork: 'assets/illustrations/Illustrations site-03.webp' }
   },
   'brouillard': {
-    'court':  { title: "S'asseoir, ne rien faire",        parcours: 'Premiers pas', duration: '5 min',  file: 'Revenir au souffle.mp3', fileFem: false, emoji: '🧘' },
-    'moyen':  { title: 'Observer ses pensées sans les juger', parcours: 'Premiers pas', duration: '9 min', file: 'Observer ses pensées sans les juger.mp3', fileFem: 'Observer ses pensées sans les juger.mp3', emoji: '👁️' },
-    'long':   { title: 'Observer ses pensées sans les juger', parcours: 'Premiers pas', duration: '9 min', file: 'Observer ses pensées sans les juger.mp3', fileFem: 'Observer ses pensées sans les juger.mp3', emoji: '👁️' }
+    'court':  { title: "S'asseoir, ne rien faire", parcours: 'Premiers pas', duration: '5 min', file: 'Revenir au souffle.mp3', fileFem: false, emoji: '🧘', artwork: 'assets/illustrations/Illustrations site-01.webp' },
+    'moyen':  { title: 'Observer ses pensées sans les juger', parcours: 'Premiers pas', duration: '9 min', file: 'Observer ses pensées sans les juger.mp3', fileFem: 'Observer ses pensées sans les juger.mp3', emoji: '👁️', artwork: 'assets/illustrations/Illustrations site-01.webp' },
+    'long':   { title: 'Observer ses pensées sans les juger', parcours: 'Premiers pas', duration: '9 min', file: 'Observer ses pensées sans les juger.mp3', fileFem: 'Observer ses pensées sans les juger.mp3', emoji: '👁️', artwork: 'assets/illustrations/Illustrations site-01.webp' }
   },
   'sommeil': {
-    'court':  { title: 'Rituel de déconnexion',           parcours: 'Sommeil', duration: '10 min', file: 'Préparer le sommeil.mp3', fileFem: false, emoji: '🌙' },
-    'moyen':  { title: 'Rituel de déconnexion',           parcours: 'Sommeil', duration: '10 min', file: 'Préparer le sommeil.mp3', fileFem: false, emoji: '🌙' },
-    'long':   { title: 'Réveils nocturnes — retrouver le calme', parcours: 'Sommeil', duration: '18 min', file: 'Reveils nocturnes.mp3', fileFem: false, emoji: '💤' }
+    'court':  { title: 'Rituel de déconnexion', parcours: 'Sommeil', duration: '10 min', file: 'Préparer le sommeil.mp3', fileFem: false, emoji: '🌙', artwork: 'assets/illustrations/Illustrations site-03.webp' },
+    'moyen':  { title: 'Rituel de déconnexion', parcours: 'Sommeil', duration: '10 min', file: 'Préparer le sommeil.mp3', fileFem: false, emoji: '🌙', artwork: 'assets/illustrations/Illustrations site-03.webp' },
+    'long':   { title: 'Réveils nocturnes — retrouver le calme', parcours: 'Sommeil', duration: '18 min', file: 'Reveils nocturnes.mp3', fileFem: false, emoji: '💤', artwork: 'assets/illustrations/Illustrations site-03.webp' }
   },
   'concentration': {
-    'court':  { title: 'Mise en route mentale',           parcours: 'Concentration', duration: '7 min', file: 'Mise en route mentale.mp3', fileFem: false, emoji: '🎯' },
+    'court':  { title: 'Mise en route mentale', parcours: 'Concentration', duration: '7 min', file: 'Mise en route mentale.mp3', fileFem: false, emoji: '🎯', artwork: 'assets/illustrations/Illustrations site-06.webp' },
     'moyen':  null,
     'long':   null
   }
@@ -412,7 +467,7 @@ function onDurationChoice(value) {
   addUserBubble({ court: '5 minutes', moyen: '5–10 minutes', long: 'Plus de 10 minutes' }[value]);
   clearChoices();
   const rec = GUIDE_MAP[guideMood] && GUIDE_MAP[guideMood][value];
-  if (!rec) { setTimeout(() => addBotBubble('Pas encore de séance disponible pour ce profil, mais ça arrive bientôt ! En attendant, jette un œil aux séances Concentration.'), 400); return; }
+  if (!rec) { setTimeout(() => addBotBubble('Pas encore de séance disponible pour ce profil, mais ça arrive bientôt !'), 400); return; }
   setTimeout(() => {
     addBotBubble('Voilà ce que je te recommande\u00a0:');
     setTimeout(() => showGuideResult(rec), 400);
@@ -436,7 +491,7 @@ function showGuideResult(rec) {
   ].join('');
   document.getElementById('guide-launch-btn').addEventListener('click', () => {
     if (!pendingGuideRec) return;
-    openVoiceOverlay('guide-rec', pendingGuideRec.title, pendingGuideRec.parcours, pendingGuideRec.duration, pendingGuideRec.file, pendingGuideRec.fileFem || false);
+    openVoiceOverlay('guide-rec', pendingGuideRec.title, pendingGuideRec.parcours, pendingGuideRec.duration, pendingGuideRec.file, pendingGuideRec.fileFem || false, pendingGuideRec.artwork);
   });
   res.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
