@@ -151,8 +151,8 @@ function launchPlayer(id, title, parcours, duration, filename, voice, artwork) {
   Object.values(parcoursMap).forEach(v => playerEl.removeAttribute('data-parcours') );
   const pKey = parcoursMap[parcours] || 'premiers-pas';
   playerEl.setAttribute('data-parcours', pKey);
-  // Also clear bg image since we use CSS gradients now
-  document.getElementById('player-bg').style.backgroundImage = '';
+  // Set artwork as blurred background
+  document.getElementById('player-bg').style.backgroundImage = artwork ? 'url(' + artwork + ')' : '';
 
   openPlayerScreen();
 
