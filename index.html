@@ -251,6 +251,48 @@
     /* Remove blur/image from bg — use color only */
     .player-bg { background-size: cover; filter: none !important; transform: none !important; }
 
+  
+    /* ── MINUTEUR ── */
+    .timer-card {
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      padding: 0;
+      border: none;
+      border-radius: var(--radius);
+      min-height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #1a3d32, #2f6f5e);
+      transition: transform .2s, box-shadow .2s;
+      grid-column: 1 / -1;
+    }
+    .timer-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.15); }
+    .timer-card-inner { text-align: center; color: #fff; padding: 1.25rem; }
+    .timer-card-icon { font-size: 2rem; margin-bottom: .4rem; }
+    .timer-card-inner h3 { font-size: 1.05rem; font-weight: 700; color: #fff; margin-bottom: .2rem; }
+    .timer-card-inner p { font-size: .8rem; opacity: .75; }
+
+    /* Timer sheet */
+    .timer-sheet-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 200; align-items: flex-end; justify-content: center; }
+    .timer-sheet-backdrop.open { display: flex; animation: fadeInBd .2s ease; }
+    .timer-sheet { background: var(--color-surface); border-radius: var(--radius) var(--radius) 0 0; padding: 1.5rem 1.5rem 2.5rem; width: 100%; max-width: 480px; animation: slideUp .25s cubic-bezier(.16,1,.3,1); }
+    .timer-sheet-title { font-size: .75rem; text-transform: uppercase; letter-spacing: .1em; color: var(--color-muted); margin-bottom: 1.25rem; text-align: center; }
+    .timer-durations { display: grid; grid-template-columns: repeat(2, 1fr); gap: .75rem; margin-bottom: 1.25rem; }
+    .timer-duration-btn { background: var(--color-primary-light); border: 2px solid transparent; border-radius: var(--radius-sm); padding: 1.1rem; text-align: center; cursor: pointer; transition: all .18s; color: var(--color-primary); font-weight: 700; font-size: 1.1rem; }
+    .timer-duration-btn:hover { border-color: var(--color-primary); background: var(--color-primary-light); }
+    .timer-duration-btn span { display: block; font-size: .7rem; font-weight: 400; opacity: .7; margin-top: .15rem; }
+    .timer-sheet-cancel { display: block; width: 100%; text-align: center; font-size: .85rem; color: var(--color-muted); background: none; border: none; cursor: pointer; padding: .4rem; }
+
+    /* Timer player overrides */
+    .player-screen[data-parcours="timer"] .player-bg { background: linear-gradient(135deg, #0d1f1a, #1a3d32, #2a5a48) !important; }
+    .timer-countdown { font-size: 4rem; font-weight: 200; color: #fff; letter-spacing: .05em; text-align: center; font-variant-numeric: tabular-nums; }
+    .timer-total { font-size: .85rem; color: rgba(255,255,255,.4); text-align: center; margin-top: .35rem; }
+    .timer-progress-ring { margin: 1.5rem auto; display: block; }
+    .timer-ring-bg { stroke: rgba(255,255,255,.1); fill: none; }
+    .timer-ring-fill { stroke: rgba(255,255,255,.85); fill: none; stroke-linecap: round; transition: stroke-dashoffset .9s linear; transform-origin: center; transform: rotate(-90deg); }
+
   </style>
 </head>
 <body>
@@ -276,6 +318,21 @@
   </div>
 </div>
 
+
+<!-- TIMER SHEET -->
+<div class="timer-sheet-backdrop" id="timer-sheet-backdrop">
+  <div class="timer-sheet">
+    <p class="timer-sheet-title">Choisir la durée</p>
+    <div class="timer-durations">
+      <button class="timer-duration-btn" onclick="startTimer(5)">5 min<span>Courte pratique</span></button>
+      <button class="timer-duration-btn" onclick="startTimer(10)">10 min<span>Pratique standard</span></button>
+      <button class="timer-duration-btn" onclick="startTimer(15)">15 min<span>Pratique approfondie</span></button>
+      <button class="timer-duration-btn" onclick="startTimer(20)">20 min<span>Pratique longue</span></button>
+    </div>
+    <button class="timer-sheet-cancel" onclick="closeTimerSheet()">Annuler</button>
+  </div>
+</div>
+
 <!-- PLAYER IMMERSIF PLEIN ÉCRAN -->
 <div class="player-screen" id="player-screen" role="dialog" aria-modal="true">
   <div class="player-bg" id="player-bg"></div>
@@ -296,7 +353,7 @@
     <!-- Contenu principal (séance) -->
     <div id="player-main" class="player-main" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
       <!-- Artwork -->
-      <div class="player-artwork-wrap">
+      <div class="player-artwork-wrap" id="player-artwork-wrap">
         <div class="player-artwork">
           <img id="player-artwork-img" src="" alt="">
         </div>
@@ -311,7 +368,7 @@
       </div>
 
       <!-- Progress -->
-      <div class="player-progress">
+      <div class="player-progress" id="player-progress">
         <div class="progress-track" id="progress-track" role="slider" aria-label="Progression" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
           <div class="progress-track-inner"><div class="progress-fill" id="progress-fill"></div></div>
           <div class="progress-thumb" id="progress-thumb"></div>
@@ -350,6 +407,18 @@
           Vitesse
         </button>
       </div>
+    </div>
+
+
+    <!-- Timer display (shown instead of artwork in timer mode) -->
+    <div id="timer-display" style="display:none; flex-direction:column; align-items:center; justify-content:center; flex:1;">
+      <svg class="timer-progress-ring" width="220" height="220" viewBox="0 0 220 220">
+        <circle class="timer-ring-bg" cx="110" cy="110" r="96" stroke-width="6"/>
+        <circle class="timer-ring-fill" id="timer-ring" cx="110" cy="110" r="96" stroke-width="6"
+          stroke-dasharray="603" stroke-dashoffset="0"/>
+      </svg>
+      <div class="timer-countdown" id="timer-countdown" style="margin-top:-160px; position:relative; z-index:1;">0:00</div>
+      <div class="timer-total" id="timer-total"></div>
     </div>
 
     <!-- Écran de fin -->
@@ -423,6 +492,14 @@
   <section>
     <h2>Parcours</h2>
     <div class="card-grid">
+      <article class="card timer-card" onclick="openTimerSheet()">
+        <div class="timer-card-inner">
+          <div class="timer-card-icon">🔔</div>
+          <h3>Minuteur libre</h3>
+          <p>Méditez à votre rythme · 5, 10, 15 ou 20 min</p>
+        </div>
+      </article>
+
       <article class="card path-card" onclick="filterParcours('Premiers pas')">
         <img class="card-illustration" src="assets/illustrations/Illustrations site-01.webp" alt="" aria-hidden="true">
         <div class="card-content"><h3>Premiers pas</h3><p>Pour entrer doucement dans la pratique.</p><p class="meta">7 séances</p></div>
