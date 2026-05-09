@@ -406,6 +406,11 @@ async function restoreOfflineButtons() {
 // ── STATS ──
 function loadStats() {
   const s = JSON.parse(localStorage.getItem('serein-stats') || '{"sessions":0,"minutes":0,"lastDate":"","streak":0}');
+  const hasSession = (s.sessions || 0) > 0;
+  const welcomeBlock = document.getElementById('welcome-block');
+  const statsBlock = document.getElementById('stats-block');
+  if (welcomeBlock) welcomeBlock.style.display = hasSession ? 'none' : 'block';
+  if (statsBlock) statsBlock.style.display = hasSession ? 'flex' : 'none';
   document.getElementById('stat-sessions').textContent = s.sessions || 0;
   document.getElementById('stat-time').textContent = (s.minutes || 0) + ' min';
   document.getElementById('stat-streak').textContent = s.streak || 0;
