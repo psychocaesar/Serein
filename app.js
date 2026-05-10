@@ -1,3 +1,9 @@
+// ── GLOBALS ──
+let timerInterval = null;
+let timerSecondsLeft = 0;
+let timerTotalSeconds = 0;
+let timerRunning = false;
+
 // ── NAVIGATION ──
 const SCREENS = ['home','explore','guide','settings'];
 
