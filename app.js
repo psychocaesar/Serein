@@ -720,6 +720,104 @@ function clearChoices() {
   if (el) el.remove();
 }
 
+
+// ── MINUTEUR LIBRE ──
+const bell = new Audio('assets/audio/cloche.mp3');
+
+function openTimerSheet() {
+  document.getElementById('timer-sheet-backdrop').classList.add('open');
+}
+
+function closeTimerSheet() {
+  document.getElementById('timer-sheet-backdrop').classList.remove('open');
+}
+
+function startTimer(minutes) {
+  closeTimerSheet();
+  timerTotalSeconds = minutes * 60;
+  timerSecondsLeft = timerTotalSeconds;
+  timerRunning = false;
+
+  const playerEl = document.getElementById('player-screen');
+  ['premiers-pas','stress','sommeil','respirer','anxiete','concentration'].forEach(v => playerEl.removeAttribute('data-parcours'));
+  playerEl.setAttribute('data-parcours', 'timer');
+  document.getElementById('player-bg').style.backgroundImage = '';
+
+  document.getElementById('player-artwork-wrap').style.display = 'none';
+  document.getElementById('timer-display').style.display = 'flex';
+  document.getElementById('player-progress').style.display = 'none';
+
+  document.getElementById('player-title').textContent = 'Minuteur libre';
+  document.getElementById('player-meta').textContent = minutes + ' min · Méditation silencieuse';
+  document.getElementById('player-voice-tag').style.display = 'none';
+  document.getElementById('audio-loading').textContent = '';
+
+  updateTimerDisplay();
+
+  document.getElementById('complete-screen').classList.remove('visible');
+  document.getElementById('player-main').classList.remove('hidden');
+  document.getElementById('player-main').style.display = 'flex';
+
+  openPlayerScreen();
+
+  bell.currentTime = 0;
+  bell.play().catch(() => {});
+  setTimeout(() => {
+    timerRunning = true;
+    updatePlayIcon(true);
+    timerInterval = setInterval(timerTick, 1000);
+  }, 1500);
+}
+
+function timerTick() {
+  if (!timerRunning) return;
+  timerSecondsLeft--;
+  updateTimerDisplay();
+  if (timerSecondsLeft <= 0) {
+    clearInterval(timerInterval);
+    timerRunning = false;
+    updatePlayIcon(false);
+    bell.currentTime = 0;
+    bell.play().catch(() => {});
+    setTimeout(() => {
+      document.getElementById('player-main').style.display = 'none';
+      document.getElementById('player-main').classList.add('hidden');
+      document.getElementById('complete-screen').classList.add('visible');
+      document.getElementById('complete-title').textContent = 'Minuteur libre · ' + (timerTotalSeconds / 60) + ' min';
+      recordTimerCompletion();
+    }, 2500);
+  }
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(timerSecondsLeft / 60);
+  const s = timerSecondsLeft % 60;
+  document.getElementById('timer-countdown').textContent = m + ':' + String(s).padStart(2, '0');
+  document.getElementById('timer-total').textContent = (timerTotalSeconds / 60) + ' min';
+  const circumference = 603;
+  const progress = timerSecondsLeft / timerTotalSeconds;
+  const offset = circumference * (1 - progress);
+  document.getElementById('timer-ring').style.strokeDashoffset = offset;
+}
+
+function recordTimerCompletion() {
+  const s = JSON.parse(localStorage.getItem('serein-stats') || '{"sessions":0,"minutes":0,"lastDate":"","streak":0}');
+  s.sessions = (s.sessions || 0) + 1;
+  s.minutes = (s.minutes || 0) + Math.round(timerTotalSeconds / 60);
+  const today = new Date().toISOString().slice(0,10);
+  if (s.lastDate !== today) {
+    if (s.lastDate === new Date(Date.now() - 86400000).toISOString().slice(0,10)) {
+      s.streak = (s.streak || 0) + 1;
+    } else {
+      s.streak = 1;
+    }
+    s.lastDate = today;
+  }
+  localStorage.setItem('serein-stats', JSON.stringify(s));
+  loadStats();
+}
+
+
 // ── INIT ──
 document.addEventListener('DOMContentLoaded', () => {
   applyTheme();
