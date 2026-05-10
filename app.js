@@ -459,7 +459,7 @@ const GUIDE_MAP = {
     'court': {
       main: { title: 'SOS Stress en 6 minutes', parcours: 'Calme & Stress', duration: '6 min', file: 'SOS Stress en 6 minutes.mp3', fileFem: false, emoji: '😮‍💨', artwork: 'assets/illustrations/Illustrations site-02.webp', reason: 'Rapide et ciblé pour couper le stress net' },
       alts: [
-        { title: 'Revenir à l'instant présent', parcours: 'Premiers pas', duration: '5 min', file: 'Revenir à l'instant présent.mp3', fileFem: false, emoji: '🌿', artwork: 'assets/illustrations/Illustrations site-01.webp', reason: 'Pour ancrer l'attention ici et maintenant' }
+        { title: 'Revenir à l\'instant présent', parcours: 'Premiers pas', duration: '5 min', file: 'Revenir à l\'instant présent.mp3', fileFem: false, emoji: '🌿', artwork: 'assets/illustrations/Illustrations site-01.webp', reason: 'Pour ancrer l'attention ici et maintenant' }
       ]
     },
     'moyen': {
@@ -479,7 +479,7 @@ const GUIDE_MAP = {
     'court': {
       main: { title: 'SOS Anxiété — ancrage immédiat', parcours: 'Anxiété', duration: '5 min', file: 'SOS Anxiété ancrage immédiat.mp3', fileFem: false, emoji: '🌀', artwork: 'assets/illustrations/Illustrations site-05.webp', reason: 'Technique d'ancrage pour calmer l'agitation vite' },
       alts: [
-        { title: 'Revenir à l'instant présent', parcours: 'Premiers pas', duration: '5 min', file: 'Revenir à l'instant présent.mp3', fileFem: false, emoji: '🌿', artwork: 'assets/illustrations/Illustrations site-01.webp', reason: 'Pour sortir du flot de pensées anxieuses' }
+        { title: 'Revenir à l\'instant présent', parcours: 'Premiers pas', duration: '5 min', file: 'Revenir à l\'instant présent.mp3', fileFem: false, emoji: '🌿', artwork: 'assets/illustrations/Illustrations site-01.webp', reason: 'Pour sortir du flot de pensées anxieuses' }
       ]
     },
     'moyen': {
@@ -497,7 +497,7 @@ const GUIDE_MAP = {
   },
   'fatigue': {
     'court': {
-      main: { title: 'Revenir à l'instant présent', parcours: 'Premiers pas', duration: '5 min', file: 'Revenir à l'instant présent.mp3', fileFem: false, emoji: '🌿', artwork: 'assets/illustrations/Illustrations site-01.webp', reason: 'Court et doux pour recharger sans effort' },
+      main: { title: 'Revenir à l\'instant présent', parcours: 'Premiers pas', duration: '5 min', file: 'Revenir à l\'instant présent.mp3', fileFem: false, emoji: '🌿', artwork: 'assets/illustrations/Illustrations site-01.webp', reason: 'Court et doux pour recharger sans effort' },
       alts: [
         { title: 'Première respiration consciente', parcours: 'Premiers pas', duration: '5 min', file: 'Méditation Premiere Respiration Consciente.mp3', fileFem: false, emoji: '🌱', artwork: 'assets/illustrations/Illustrations site-01.webp', reason: 'Idéal pour une première pause dans la journée' }
       ]
@@ -519,7 +519,7 @@ const GUIDE_MAP = {
     'court': {
       main: { title: "S'asseoir, ne rien faire", parcours: 'Premiers pas', duration: '5 min', file: 'Revenir au souffle.mp3', fileFem: false, emoji: '🧘', artwork: 'assets/illustrations/Illustrations site-01.webp', reason: 'Parfois s'arrêter suffit à y voir plus clair' },
       alts: [
-        { title: 'Revenir à l'instant présent', parcours: 'Premiers pas', duration: '5 min', file: 'Revenir à l'instant présent.mp3', fileFem: false, emoji: '🌿', artwork: 'assets/illustrations/Illustrations site-01.webp', reason: 'Pour sortir du flou en se recentrant sur le souffle' }
+        { title: 'Revenir à l\'instant présent', parcours: 'Premiers pas', duration: '5 min', file: 'Revenir à l\'instant présent.mp3', fileFem: false, emoji: '🌿', artwork: 'assets/illustrations/Illustrations site-01.webp', reason: 'Pour sortir du flou en se recentrant sur le souffle' }
       ]
     },
     'moyen': {
@@ -559,7 +559,7 @@ const GUIDE_MAP = {
     'court': {
       main: { title: 'Mise en route mentale', parcours: 'Concentration', duration: '7 min', file: 'Mise en route mentale.mp3', fileFem: false, emoji: '🎯', artwork: 'assets/illustrations/Illustrations site-06.webp', reason: 'Clarifie l'esprit avant une tâche importante' },
       alts: [
-        { title: 'Revenir à l'instant présent', parcours: 'Premiers pas', duration: '5 min', file: 'Revenir à l'instant présent.mp3', fileFem: false, emoji: '🌿', artwork: 'assets/illustrations/Illustrations site-01.webp', reason: 'Plus court, pour une mise en route rapide' }
+        { title: 'Revenir à l\'instant présent', parcours: 'Premiers pas', duration: '5 min', file: 'Revenir à l\'instant présent.mp3', fileFem: false, emoji: '🌿', artwork: 'assets/illustrations/Illustrations site-01.webp', reason: 'Plus court, pour une mise en route rapide' }
       ]
     },
     'moyen': {
