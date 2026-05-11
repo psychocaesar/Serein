@@ -818,6 +818,62 @@ function recordTimerCompletion() {
 }
 
 
+
+// ── REPORT ──
+function openReportSheet() {
+  const title = currentSession ? currentSession.title : 'cette séance';
+  document.getElementById('report-sheet-sub').textContent = `Signaler un problème avec "${title}"`;
+  document.getElementById('report-sheet-backdrop').classList.add('open');
+}
+
+function closeReportSheet() {
+  document.getElementById('report-sheet-backdrop').classList.remove('open');
+}
+
+function sendReport(type) {
+  closeReportSheet();
+  const title = currentSession ? currentSession.title : 'séance inconnue';
+  const parcours = currentSession ? currentSession.parcours : '';
+
+  let subject, body;
+
+  if (type === 'track') {
+    subject = `[Serein] Problème signalé — ${title}`;
+    body = `Bonjour,
+
+Je souhaite signaler un problème sur la séance suivante :
+
+Séance : ${title}
+Parcours : ${parcours}
+
+Description du problème :
+[merci de décrire ici ce que vous avez constaté]
+
+---
+Envoyé depuis sereinapp.fr`;
+  } else {
+    const currentTime = audio.currentTime ? fmt(audio.currentTime) : '0:00';
+    subject = `[Serein] Problème signalé à ${currentTime} — ${title}`;
+    body = `Bonjour,
+
+Je souhaite signaler un problème à un moment précis de la séance suivante :
+
+Séance : ${title}
+Parcours : ${parcours}
+Timestamp : ${currentTime}
+
+Description du problème :
+[merci de décrire ici ce que vous avez constaté]
+
+---
+Envoyé depuis sereinapp.fr`;
+  }
+
+  const mailto = `mailto:serein@cesarbroche.fr?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  window.location.href = mailto;
+}
+
+
 // ── INIT ──
 document.addEventListener('DOMContentLoaded', () => {
   applyTheme();
