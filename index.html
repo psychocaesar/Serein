@@ -336,6 +336,16 @@
     .report-option-btn.secondary { background: transparent; color: var(--color-text); border: 1.5px solid var(--color-border); font-weight: 400; }
     .report-cancel { display: block; width: 100%; text-align: center; font-size: .85rem; color: var(--color-muted); background: none; border: none; cursor: pointer; padding: .5rem; margin-top: .25rem; }
 
+  
+    /* ── INTRO AUDIO CARD ── */
+    .intro-audio-card { display: flex; align-items: center; justify-content: space-between; background: var(--color-primary-light); border: 1.5px solid var(--color-primary); border-radius: var(--radius-sm); padding: .9rem 1rem; margin: .85rem 0; cursor: pointer; transition: opacity .2s; gap: .75rem; }
+    .intro-audio-card:hover { opacity: .88; }
+    .intro-audio-left { display: flex; align-items: center; gap: .75rem; flex: 1; }
+    .intro-audio-play { width: 36px; height: 36px; border-radius: 50%; background: var(--color-primary); color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .intro-audio-title { font-size: .9rem; font-weight: 600; color: var(--color-text); margin-bottom: .1rem; }
+    .intro-audio-meta { font-size: .75rem; color: var(--color-muted); }
+    .intro-audio-badge { font-size: .65rem; background: var(--color-primary); color: #fff; border-radius: 4px; padding: .2rem .5rem; white-space: nowrap; flex-shrink: 0; }
+
   </style>
 </head>
 <body>
@@ -531,8 +541,20 @@
       <span class="welcome-icon">🌱</span>
       <div>
         <p class="welcome-title">Bienvenue sur Serein.</p>
-        <p class="welcome-sub">Ta première séance t'attend. Commence quand tu es prêt(e).</p>
+        <p class="welcome-sub">Des séances guidées en français, sans compte, sans publicité.</p>
       </div>
+    </div>
+    <div class="intro-audio-card" onclick="launchIntroAudio()">
+      <div class="intro-audio-left">
+        <div class="intro-audio-play">
+          <svg viewBox="0 0 24 24" width="20" height="20"><polygon points="6 3 20 12 6 21 6 3" fill="currentColor"/></svg>
+        </div>
+        <div>
+          <p class="intro-audio-title">C'est quoi la pleine conscience ?</p>
+          <p class="intro-audio-meta">Introduction · 3 min</p>
+        </div>
+      </div>
+      <span class="intro-audio-badge">Nouveau</span>
     </div>
     <button class="btn btn-primary welcome-cta" onclick="showScreen('explore')">Choisir une séance</button>
   </div>

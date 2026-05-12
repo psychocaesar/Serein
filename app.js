@@ -819,6 +819,21 @@ function recordTimerCompletion() {
 
 
 
+
+// ── INTRO AUDIO ──
+function launchIntroAudio() {
+  launchPlayer(
+    'intro',
+    "Qu'est-ce que la pleine conscience ?",
+    'Introduction',
+    '3 min',
+    "Qu'est ce que la pleine conscience.mp3",
+    'masculine',
+    'assets/illustrations/player-01.jpg'
+  );
+}
+
+
 // ── REPORT ──
 function openReportSheet() {
   const title = currentSession ? currentSession.title : 'cette séance';
