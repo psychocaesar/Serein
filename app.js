@@ -827,7 +827,7 @@ function launchIntroAudio() {
     "Qu'est-ce que la pleine conscience ?",
     'Introduction',
     '3 min',
-    "Qu'est ce que la pleine conscience.mp3",
+    'Qu-est-ce que la pleine conscience.mp3',
     'masculine',
     'assets/illustrations/player-01.jpg'
   );
