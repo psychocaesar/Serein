@@ -18,19 +18,77 @@ function showScreen(id) {
 }
 
 function filterTab(btn) {
-  document.querySelectorAll('.filter-tabs .tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.filter-tabs:not(.duration) .tab').forEach(t => {
+    t.classList.remove('active');
+    t.setAttribute('aria-selected', 'false');
+  });
   btn.classList.add('active');
-  const label = btn.textContent.trim();
+  btn.setAttribute('aria-selected', 'true');
+  applyExploreFilters();
+}
+
+function filterDuration(btn) {
+  document.querySelectorAll('.filter-tabs.duration .tab').forEach(t => {
+    t.classList.remove('active');
+    t.setAttribute('aria-selected', 'false');
+  });
+  btn.classList.add('active');
+  btn.setAttribute('aria-selected', 'true');
+  applyExploreFilters();
+}
+
+function applyExploreFilters() {
+  const themeBtn = document.querySelector('.filter-tabs:not(.duration) .tab.active');
+  const durBtn = document.querySelector('.filter-tabs.duration .tab.active');
+  const theme = themeBtn ? themeBtn.textContent.trim() : 'Toutes';
+  const dur = durBtn ? (durBtn.dataset.duration || 'all') : 'all';
+
+  let visibleCount = 0;
   document.querySelectorAll('.session-list .session-card').forEach(card => {
     const p = card.dataset.parcours || '';
-    card.style.display = (label === 'Toutes' || p === label) ? '' : 'none';
+    const d = card.dataset.duration || '';
+    const matchTheme = (theme === 'Toutes' || p === theme);
+    const matchDur = (dur === 'all' || d === dur);
+    const show = matchTheme && matchDur;
+    card.style.display = show ? '' : 'none';
+    if (show) visibleCount++;
   });
+
+  // Headers visibles uniquement si filtre thème = "Toutes" et groupe non vide
+  document.querySelectorAll('.group-header').forEach(header => {
+    if (theme !== 'Toutes') {
+      header.classList.remove('visible');
+      return;
+    }
+    const headerParcours = header.dataset.parcours || '';
+    const cardsOfParcours = document.querySelectorAll(
+      '.session-card[data-parcours="' + headerParcours + '"]'
+    );
+    let anyVisible = false;
+    cardsOfParcours.forEach(c => {
+      if (c.style.display !== 'none') anyVisible = true;
+    });
+    header.classList.toggle('visible', anyVisible);
+  });
+
+  // Compteur
+  const count = document.getElementById('filter-count');
+  if (count) {
+    if (theme === 'Toutes' && dur === 'all') {
+      count.textContent = visibleCount + ' séances disponibles';
+    } else {
+      const themeLabel = theme === 'Toutes' ? '' : ' · ' + theme;
+      const durLabels = { short: '≤ 5 min', medium: '5–10 min', long: '10 min +' };
+      const durLabel = dur === 'all' ? '' : ' · ' + durLabels[dur];
+      count.textContent = visibleCount + ' séance' + (visibleCount > 1 ? 's' : '') + themeLabel + durLabel;
+    }
+  }
 }
 
 function filterParcours(label) {
   showScreen('explore');
   setTimeout(() => {
-    document.querySelectorAll('.filter-tabs .tab').forEach(t => {
+    document.querySelectorAll('.filter-tabs:not(.duration) .tab').forEach(t => {
       if (t.textContent.trim() === label) t.click();
     });
   }, 50);
@@ -471,7 +529,7 @@ const GUIDE_MAP = {
     'moyen': {
       main: { title: 'La cohérence cardiaque guidée', parcours: 'Calme & Stress', duration: '5 min', file: 'Cohérence cardiaque 5 minutes.mp3', fileFem: false, emoji: '💚', artwork: 'assets/illustrations/player-02.jpg', reason: `Régule le système nerveux en quelques minutes` },
       alts: [
-        { title: "Lâcher prise sur l'urgence", parcours: 'Calme & Stress', duration: '7 min', file: 'Lacher prise sur lurgence.mp3', fileFem: false, emoji: '⏳', artwork: 'assets/illustrations/player-02.jpg', reason: `Pour sortir du mode urgence et retrouver du recul` }
+        { title: 'SOS Stress en 6 minutes', parcours: 'Calme & Stress', duration: '6 min', file: 'SOS Stress en 6 minutes.mp3', fileFem: false, emoji: '😮‍💨', artwork: 'assets/illustrations/player-02.jpg', reason: `Plus guidé, idéal si le mental s"emballe` }
       ]
     },
     'long': {
@@ -895,4 +953,6 @@ document.addEventListener('DOMContentLoaded', () => {
   loadStats();
   restoreOfflineButtons();
   updateOfflineCount();
+  // Initialiser l'affichage des group-headers et du compteur de l'Explorer
+  if (typeof applyExploreFilters === 'function') applyExploreFilters();
 });
