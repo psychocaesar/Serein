@@ -355,30 +355,40 @@ function replaySession() {
 }
 
 // ── OFFLINE depuis le player ──
+
+// Retourne le chemin audio correct selon la voix du currentSession
+function _getAudioPath(filename) {
+  const voice = (currentSession && currentSession.voice === 'feminine') ? 'feminin' : 'masculin';
+  return 'assets/audio/' + voice + '/' + encodeURIComponent(filename);
+}
+
 async function toolbarOffline() {
   if (!currentOfflineFilename) return;
   const btn = document.getElementById('toolbar-offline-btn');
   if (!('caches' in window)) { alert('Cache non disponible sur ce navigateur.'); return; }
   try {
     const cache = await caches.open('serein-audio-v1');
-    const url = 'assets/audio/masculin/' + encodeURIComponent(currentOfflineFilename);
+    const url = _getAudioPath(currentOfflineFilename);
     const existing = await cache.match(url);
     if (existing) {
       await cache.delete(url);
       btn.classList.remove('active');
     } else {
+      btn.textContent = '…';
       await cache.add(url);
       btn.classList.add('active');
     }
     updateOfflineCount();
-  } catch(e) {}
+  } catch(e) {
+    console.warn('Erreur cache offline:', e);
+  }
 }
 
 async function updateOfflineBtnState() {
   if (!currentOfflineFilename || !('caches' in window)) return;
   try {
     const cache = await caches.open('serein-audio-v1');
-    const url = 'assets/audio/masculin/' + encodeURIComponent(currentOfflineFilename);
+    const url = _getAudioPath(currentOfflineFilename);
     const existing = await cache.match(url);
     const btn = document.getElementById('toolbar-offline-btn');
     btn.classList.toggle('active', !!existing);
@@ -461,8 +471,12 @@ async function restoreOfflineButtons() {
     await Promise.all(btns.map(async btn => {
       const fn = btn.dataset.filename;
       if (!fn) return;
-      const match = await cache.match('assets/audio/masculin/' + encodeURIComponent(fn));
-      if (match) { btn.classList.add('cached'); btn.textContent = '✓'; }
+      // Chercher dans les deux dossiers voix
+      const urlMasc = 'assets/audio/masculin/' + encodeURIComponent(fn);
+      const urlFem  = 'assets/audio/feminin/'  + encodeURIComponent(fn);
+      const matchMasc = await cache.match(urlMasc);
+      const matchFem  = await cache.match(urlFem);
+      if (matchMasc || matchFem) { btn.classList.add('cached'); btn.textContent = '✓'; }
     }));
   } catch(e) {}
 }
@@ -820,11 +834,28 @@ function startTimer(minutes) {
 
   bell.currentTime = 0;
   bell.play().catch(() => {});
-  setTimeout(() => {
+
+  // Bouton Annuler temporaire pendant les 1.5s avant démarrage
+  const cancelBtn = document.createElement('button');
+  cancelBtn.className = 'btn btn-outline-white timer-cancel-btn';
+  cancelBtn.textContent = 'Annuler';
+  cancelBtn.style.cssText = 'position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);z-index:10;';
+  const playerMain = document.getElementById('player-main');
+  playerMain.style.position = 'relative';
+  playerMain.appendChild(cancelBtn);
+
+  const startTimeout = setTimeout(() => {
+    cancelBtn.remove();
     timerRunning = true;
     updatePlayIcon(true);
     timerInterval = setInterval(timerTick, 1000);
   }, 1500);
+
+  cancelBtn.addEventListener('click', () => {
+    clearTimeout(startTimeout);
+    cancelBtn.remove();
+    closePlayer();
+  });
 }
 
 function timerTick() {
@@ -948,11 +979,28 @@ Envoyé depuis sereinapp.fr`;
 
 
 // ── INIT ──
+function disableSoonSessions() {
+  document.querySelectorAll('.session-card').forEach(card => {
+    const comingBadge = card.querySelector('.badge-coming');
+    if (!comingBadge) return;
+    // Désactiver tous les boutons dans la carte
+    card.querySelectorAll('button').forEach(btn => {
+      btn.disabled = true;
+      btn.setAttribute('aria-disabled', 'true');
+      btn.setAttribute('tabindex', '-1');
+    });
+    // Marquer la carte elle-même comme non interactive
+    card.style.pointerEvents = 'none';
+    card.setAttribute('aria-disabled', 'true');
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   applyTheme();
   loadStats();
   restoreOfflineButtons();
   updateOfflineCount();
+  disableSoonSessions();
   // Initialiser l'affichage des group-headers et du compteur de l'Explorer
   if (typeof applyExploreFilters === 'function') applyExploreFilters();
 });
