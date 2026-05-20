@@ -25,6 +25,16 @@
   <link rel="manifest" href="/manifest.json">
   <link rel="icon" type="image/png" href="assets/logo.png">
   <link rel="apple-touch-icon" href="assets/logo.png">
+  <script>
+    // Anti-flash pour les utilisateurs qui ont déjà des sessions :
+    // cache le welcome-block avant le paint si stats > 0
+    try {
+      var s = JSON.parse(localStorage.getItem('serein-stats') || '{}');
+      if ((s.sessions || 0) > 0) {
+        document.write('<style>#welcome-block{display:none}</style>');
+      }
+    } catch(e) {}
+  </script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -559,107 +569,6 @@
     .intro-audio-meta { font-size: .75rem; color: var(--color-muted); }
     .intro-audio-badge { font-size: .65rem; background: var(--color-primary); color: #fff; border-radius: 4px; padding: .2rem .5rem; white-space: nowrap; flex-shrink: 0; }
 
-
-    /* ── État initial : JS est le seul contrôleur ── */
-    #welcome-block { display: block; }
-    #stats-block   { display: none; }
-
-    /* ── Welcome block (selon maquette audit) ── */
-    .welcome-block {
-      background: var(--surface-2, #f0f4f2);
-      border-radius: var(--radius, 1rem);
-      padding: 1rem;
-      margin-bottom: var(--space-3, 1rem);
-    }
-    .welcome-block .w-head {
-      display: flex;
-      gap: .6rem;
-      align-items: flex-start;
-      margin-bottom: .75rem;
-    }
-    .welcome-block .w-icon { font-size: 1.4rem; line-height: 1; }
-    .welcome-block .w-title { font-size: .875rem; font-weight: 700; color: var(--text, #1a2e28); }
-    .welcome-block .w-sub   { font-size: .78rem; color: var(--text-muted, #5a7a72); margin-top: .15rem; }
-
-    /* Audio card dans le welcome-block */
-    .audio-card {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: .5rem;
-      background: linear-gradient(135deg, #1a3a32 0%, #2a5a48 100%);
-      color: #fff;
-      border-radius: .85rem;
-      padding: .7rem .85rem;
-      cursor: pointer;
-    }
-    .audio-card:hover { opacity: .92; }
-    .audio-left { display: flex; gap: .65rem; align-items: center; }
-    .audio-play {
-      width: 36px; height: 36px;
-      background: rgba(255,255,255,.18);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-    }
-    .audio-title { font-size: .82rem; font-weight: 600; }
-    .audio-meta  { font-size: .7rem; color: rgba(255,255,255,.75); margin-top: .1rem; }
-    .audio-badge {
-      font-size: .65rem;
-      font-weight: 700;
-      background: rgba(255,255,255,.22);
-      border: 1px solid rgba(255,255,255,.3);
-      border-radius: 999px;
-      padding: .2rem .55rem;
-      white-space: nowrap;
-      text-transform: uppercase;
-      letter-spacing: .04em;
-    }
-
-    /* ── Stats block ── */
-    .stats-block {
-      display: flex;
-      gap: .5rem;
-      margin-bottom: var(--space-3, 1rem);
-    }
-    .stat-item {
-      flex: 1;
-      background: var(--surface-2, #f0f4f2);
-      border-radius: var(--radius, 1rem);
-      padding: .75rem .5rem;
-      text-align: center;
-    }
-    .stat-value { display: block; font-size: 1.1rem; font-weight: 700; color: var(--primary, #2f6f5e); }
-    .stat-label { display: block; font-size: .65rem; color: var(--text-muted, #5a7a72); margin-top: .15rem; }
-
-    /* ── Section title ── */
-    .section-title {
-      font-size: .8rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: .06em;
-      color: var(--text-muted, #5a7a72);
-      margin-bottom: .75rem;
-    }
-
-    /* ── Card grid : 2 colonnes sur l'accueil ── */
-    .card-grid {
-      grid-template-columns: repeat(2, 1fr) !important;
-    }
-
-    /* ── Affordance chevron sur path-cards ── */
-    .card-nav-hint {
-      display: inline-flex;
-      align-items: center;
-      gap: .25rem;
-      font-size: .65rem;
-      color: rgba(255,255,255,.8);
-      background: rgba(255,255,255,.15);
-      border-radius: 999px;
-      padding: .18rem .5rem;
-      margin-top: .4rem;
-    }
-
   </style>
 </head>
 <body>
@@ -843,72 +752,74 @@
   <header>
     <p class="eyebrow">Serein</p>
     <h1>Respirer, s'apaiser, se recentrer.</h1>
-    <p class="lead">Des séances guidées en français, sans pub, sans tracking.</p>
+    <p class="lead">Des séances guidées en français pour t'aider à retrouver un peu d'espace, sans publicité, sans paywall agressif et sans tracking tiers.</p>
+    <div class="actions">
+      <button class="btn btn-primary" onclick="showScreen('explore')">Commencer</button>
+      <a href="/about" class="btn btn-ghost">À propos</a>
+    </div>
   </header>
-
-  <!-- Bloc bienvenue : visible par défaut, caché par JS après 1ère séance -->
+  <!-- Message d'accueil (visible par défaut, caché par JS si l'utilisateur a déjà des séances) -->
   <div id="welcome-block" class="welcome-block">
-    <div class="w-head">
-      <div class="w-icon">🌱</div>
+    <div class="welcome-inner">
+      <span class="welcome-icon">🌱</span>
       <div>
-        <div class="w-title">Bienvenue sur Serein.</div>
-        <div class="w-sub">Commence par cette courte introduction.</div>
+        <p class="welcome-title">Bienvenue sur Serein.</p>
+        <p class="welcome-sub">Des séances guidées en français, sans compte, sans publicité.</p>
       </div>
     </div>
-    <div class="audio-card" onclick="launchIntroAudio()" role="button" tabindex="0" aria-label="Écouter l'introduction – C'est quoi la pleine conscience ? 3 min">
-      <div class="audio-left">
-        <div class="audio-play" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="18" height="18"><polygon points="6 3 20 12 6 21 6 3" fill="currentColor"/></svg>
+    <div class="intro-audio-card" onclick="launchIntroAudio()">
+      <div class="intro-audio-left">
+        <div class="intro-audio-play">
+          <svg viewBox="0 0 24 24" width="20" height="20"><polygon points="6 3 20 12 6 21 6 3" fill="currentColor"/></svg>
         </div>
         <div>
-          <div class="audio-title">C'est quoi la pleine conscience ?</div>
-          <div class="audio-meta">Introduction · 3 min</div>
+          <p class="intro-audio-title">C'est quoi la pleine conscience ?</p>
+          <p class="intro-audio-meta">Introduction · 3 min</p>
         </div>
       </div>
-      <div class="audio-badge">Nouveau</div>
+      <span class="intro-audio-badge">Nouveau</span>
     </div>
+    <button class="btn btn-primary welcome-cta" onclick="showScreen('explore')">Choisir une séance</button>
   </div>
 
-  <!-- Stats : cachées par défaut, JS les affiche après 1ère séance -->
-  <div id="stats-block" class="stats-block">
-    <div class="stat-item"><span class="stat-value" id="stat-streak">0</span><span class="stat-label">🔥 Jours d'affilée</span></div>
-    <div class="stat-item"><span class="stat-value" id="stat-sessions">0</span><span class="stat-label">▶ Séances</span></div>
-    <div class="stat-item"><span class="stat-value" id="stat-time">0 min</span><span class="stat-label">⏱ Temps total</span></div>
+  <!-- Stats (utilisateurs avec au moins une séance) -->
+  <div id="stats-block" class="stats-widget" style="display:none;">
+    <div class="stat-chip"><span class="stat-value" id="stat-streak">0</span><span class="stat-label">🔥 Jours<br>d'affilée</span></div>
+    <div class="stat-chip"><span class="stat-value" id="stat-sessions">0</span><span class="stat-label">▶ Séances<br>terminées</span></div>
+    <div class="stat-chip"><span class="stat-value" id="stat-time">0 min</span><span class="stat-label">⏱ Temps<br>total</span></div>
   </div>
-
   <div class="trust">
     <span class="trust-item">✓ Aucun compte requis</span>
     <span class="trust-item">✓ Lecture hors ligne</span>
     <span class="trust-item">✓ Sans publicité</span>
     <span class="trust-item">✓ Open source</span>
   </div>
-
   <section>
-    <h2 class="section-title">Ou choisis un parcours</h2>
+    <h2>Parcours</h2>
     <div class="card-grid">
       <article class="card path-card" onclick="filterParcours('Premiers pas')">
         <img class="card-illustration" src="assets/illustrations/Illustrations site-01.webp" alt="" aria-hidden="true">
-        <div class="card-content"><h3>Premiers pas</h3><p>Pour entrer doucement dans la pratique.</p><p class="meta">7 séances</p><span class="card-nav-hint"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>Voir les séances</span></div>
+        <div class="card-content"><h3>Premiers pas</h3><p>Pour entrer doucement dans la pratique.</p><p class="meta">7 séances</p></div>
       </article>
       <article class="card path-card" onclick="filterParcours('Calme &amp; Stress')">
         <img class="card-illustration" src="assets/illustrations/Illustrations site-02.webp" alt="" aria-hidden="true">
-        <div class="card-content"><h3>Calme &amp; Stress</h3><p>Pour relâcher la pression au quotidien.</p><p class="meta">6 séances</p><span class="card-nav-hint"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>Voir les séances</span></div>
+        <div class="card-content"><h3>Calme &amp; Stress</h3><p>Pour relâcher la pression au quotidien.</p><p class="meta">6 séances</p></div>
       </article>
       <article class="card path-card" onclick="filterParcours('Sommeil')">
         <img class="card-illustration" src="assets/illustrations/Illustrations site-03.webp" alt="" aria-hidden="true">
-        <div class="card-content"><h3>Sommeil</h3><p>Pour préparer le coucher et bien dormir.</p><p class="meta">6 séances</p><span class="card-nav-hint"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>Voir les séances</span></div>
+        <div class="card-content"><h3>Sommeil</h3><p>Pour préparer le coucher et bien dormir.</p><p class="meta">6 séances</p></div>
       </article>
       <article class="card path-card" onclick="filterParcours('Respirer')">
         <img class="card-illustration" src="assets/illustrations/Illustrations site-04.webp" alt="" aria-hidden="true">
-        <div class="card-content"><h3>Respirer</h3><p>Pour explorer les techniques de respiration.</p><p class="meta">5 séances</p><span class="card-nav-hint"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>Voir les séances</span></div>
+        <div class="card-content"><h3>Respirer</h3><p>Pour explorer les techniques de respiration.</p><p class="meta">5 séances</p></div>
       </article>
       <article class="card path-card" onclick="filterParcours('Anxiété')">
         <img class="card-illustration" src="assets/illustrations/Illustrations site-05.webp" alt="" aria-hidden="true">
-        <div class="card-content"><h3>Anxiété</h3><p>Pour apaiser l'agitation mentale.</p><p class="meta">6 séances</p><span class="card-nav-hint"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>Voir les séances</span></div>
+        <div class="card-content"><h3>Anxiété</h3><p>Pour apaiser l'agitation mentale.</p><p class="meta">6 séances</p></div>
       </article>
       <article class="card path-card" onclick="filterParcours('Concentration')">
         <img class="card-illustration" src="assets/illustrations/Illustrations site-06.webp" alt="" aria-hidden="true">
-        <div class="card-content"><h3>Concentration</h3><p>Pour clarifier l'esprit et entrer dans la zone.</p><p class="meta">5 séances</p><span class="card-nav-hint"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>Voir les séances</span></div>
+        <div class="card-content"><h3>Concentration</h3><p>Pour clarifier l'esprit et entrer dans la zone.</p><p class="meta">5 séances</p></div>
       </article>
     </div>
   </section>
@@ -926,7 +837,6 @@
       <span class="timer-cta">▶ Démarrer</span>
     </article>
   </section>
-
 </section>
 
 <!-- EXPLORER -->
@@ -1037,10 +947,22 @@
       <button class="btn btn-ghost" id="theme-toggle" onclick="toggleTheme()" style="padding:.4rem .9rem;font-size:.85rem;">🌙 Sombre</button>
     </article>
     <article class="card setting-item">
+      <div class="info"><h3>Sons d'ambiance</h3><p>Pluie, forêt, vagues… Accessible depuis le lecteur</p></div>
+      <span class="setting-tag" id="ambiance-settings-tag">Aucun</span>
+    </article>
+    <article class="card setting-item">
       <div class="info"><h3>Hors ligne</h3><p>Appuie sur l'icône de téléchargement sur une séance pour la mettre en cache</p></div>
       <span class="setting-tag" id="offline-count-tag">0 séance</span>
     </article>
-	
+    <article class="card setting-item">
+      <div class="info"><h3>Accessibilité</h3><p>Taille du texte, contraste, lisibilité</p></div>
+      <span class="setting-tag">À venir</span>
+    </article>
+    <article class="card setting-item">
+      <div class="info"><h3>Confidentialité</h3><p>Aucune publicité · Aucun tracker · Aucun compte requis</p></div>
+      <span class="setting-tag">✓</span>
+    </article>
+
     <!-- À propos enrichi -->
     <article class="card about-card">
       <h3>À propos de Serein</h3>
@@ -1103,7 +1025,7 @@
     <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--color-muted);fill:none;stroke-width:2;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
   </article>
 
-  <p class="footer-note">Serein - méditation en français, sans publicité, sans tracking tiers.</p>
+  <p class="footer-note">Serein — méditation en français, sans publicité, sans tracking tiers.</p>
 </section>
 
 <!-- NAV -->
