@@ -4,6 +4,9 @@ let timerSecondsLeft = 0;
 let timerTotalSeconds = 0;
 let timerRunning = false;
 let timerEndTime = null;
+// Audio silencieux pour le timer (résiste au verrouillage écran)
+const timerAudio = new Audio();
+timerAudio.loop = false;
 
 // ── NAVIGATION ──
 const SCREENS = ['home','explore','guide','settings'];
@@ -146,6 +149,8 @@ function closePlayer() {
   // Stop all audio
   audio.pause();
   ambianceAudio.pause();
+  timerAudio.pause();
+  timerAudio.src = '';
 
   // Clean up timer if active
   if (timerInterval) { clearInterval(timerInterval); timerInterval = null; timerRunning = false; }
@@ -239,10 +244,12 @@ function togglePlay() {
     if (timerRunning) {
       timerRunning = false;
       clearInterval(timerInterval);
+      timerAudio.pause();
       updatePlayIcon(false);
     } else {
       timerRunning = true;
       timerEndTime = Date.now() + (timerSecondsLeft * 1000);
+      timerAudio.play().catch(() => {});
       timerInterval = setInterval(timerTick, 1000);
       updatePlayIcon(true);
     }
@@ -806,6 +813,22 @@ function closeTimerSheet() {
   document.getElementById('timer-sheet-backdrop').classList.remove('open');
 }
 
+function timerFinished() {
+  if (!timerRunning) return;
+  timerRunning = false;
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  updatePlayIcon(false);
+  bell.currentTime = 0;
+  bell.play().catch(() => {});
+  setTimeout(() => {
+    document.getElementById('player-main').style.display = 'none';
+    document.getElementById('player-main').classList.add('hidden');
+    document.getElementById('complete-screen').classList.add('visible');
+    document.getElementById('complete-title').textContent = 'Minuteur libre · ' + (timerTotalSeconds / 60) + ' min';
+    recordTimerCompletion();
+  }, 2500);
+}
+
 function startTimer(minutes) {
   closeTimerSheet();
   timerTotalSeconds = minutes * 60;
@@ -834,8 +857,11 @@ function startTimer(minutes) {
 
   openPlayerScreen();
 
-  bell.currentTime = 0;
-  bell.play().catch(() => {});
+  // Charger l'audio silencieux de la bonne durée
+  timerAudio.src = 'assets/audio/timer-' + minutes + 'min.mp3';
+  timerAudio.load();
+  // Quand l'audio silencieux se termine → fin du timer (fonctionne écran verrouillé)
+  timerAudio.onended = timerFinished;
 
   // Bouton Annuler temporaire pendant les 1.5s avant démarrage
   const cancelBtn = document.createElement('button');
@@ -851,36 +877,30 @@ function startTimer(minutes) {
     timerRunning = true;
     timerEndTime = Date.now() + (timerTotalSeconds * 1000);
     updatePlayIcon(true);
+    // Lancer l'audio silencieux (maintient le contexte audio même écran verrouillé)
+    timerAudio.play().catch(() => {});
+    // setInterval pour mettre à jour l'affichage (peut se figer mais l'audio continue)
     timerInterval = setInterval(timerTick, 1000);
   }, 1500);
 
   cancelBtn.addEventListener('click', () => {
     clearTimeout(startTimeout);
     cancelBtn.remove();
+    timerAudio.pause();
+    timerAudio.src = '';
     closePlayer();
   });
 }
 
 function timerTick() {
   if (!timerRunning) return;
-  // Calcul basé sur l'heure réelle pour résister au verrouillage écran
-  const now = Date.now();
-  timerSecondsLeft = Math.max(0, Math.round((timerEndTime - now) / 1000));
-  updateTimerDisplay();
-  if (timerSecondsLeft <= 0) {
-    clearInterval(timerInterval);
-    timerRunning = false;
-    updatePlayIcon(false);
-    bell.currentTime = 0;
-    bell.play().catch(() => {});
-    setTimeout(() => {
-      document.getElementById('player-main').style.display = 'none';
-      document.getElementById('player-main').classList.add('hidden');
-      document.getElementById('complete-screen').classList.add('visible');
-      document.getElementById('complete-title').textContent = 'Minuteur libre · ' + (timerTotalSeconds / 60) + ' min';
-      recordTimerCompletion();
-    }, 2500);
+  // Calcul basé sur la position réelle de l'audio silencieux
+  if (!timerAudio.paused && timerAudio.duration) {
+    timerSecondsLeft = Math.max(0, Math.round(timerAudio.duration - timerAudio.currentTime));
+  } else {
+    timerSecondsLeft = Math.max(0, Math.round((timerEndTime - Date.now()) / 1000));
   }
+  updateTimerDisplay();
 }
 
 function updateTimerDisplay() {
