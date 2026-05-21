@@ -185,7 +185,7 @@ function launchPlayer(id, title, parcours, duration, filename, voice, artwork) {
   // Infos
   document.getElementById('player-title').textContent = title;
   document.getElementById('player-meta').textContent = parcours + ' · ' + duration;
-  document.getElementById('player-voice-tag').textContent = voice === 'feminine' ? 'Voix féminine - Daïdrée' : 'Voix masculine - César';
+  document.getElementById('player-voice-tag').textContent = voice === 'feminine' ? 'Voix féminine — Daïdrée' : 'Voix masculine — César';
 
   // Reset UI
   document.getElementById('complete-screen').classList.remove('visible');
@@ -215,7 +215,7 @@ function launchPlayer(id, title, parcours, duration, filename, voice, artwork) {
   Object.values(parcoursMap).forEach(v => playerEl.removeAttribute('data-parcours') );
   const pKey = parcoursMap[parcours] || 'premiers-pas';
   playerEl.setAttribute('data-parcours', pKey);
-  // Background is handled by CSS gradients per parcours - clear any leftover image
+  // Background is handled by CSS gradients per parcours — clear any leftover image
   document.getElementById('player-bg').style.backgroundImage = '';
 
   openPlayerScreen();
@@ -555,7 +555,7 @@ const GUIDE_MAP = {
   },
   'anxiete': {
     'court': {
-      main: { title: 'SOS Anxiété — ancrage immédiat', parcours: 'Anxiété', duration: '5 min', file: 'SOS Anxiété ancrage immédiat.mp3', fileFem: 'Sos anxiété - ancrage immédiat.mp3', emoji: '🌀', artwork: 'assets/illustrations/player-05.jpg', reason: `Technique d"ancrage pour calmer l'agitation vite` },
+      main: { title: 'SOS Anxiété — ancrage immédiat', parcours: 'Anxiété', duration: '5 min', file: 'SOS Anxiété ancrage immédiat.mp3', fileFem: false, emoji: '🌀', artwork: 'assets/illustrations/player-05.jpg', reason: `Technique d"ancrage pour calmer l'agitation vite` },
       alts: [
         { title: "Revenir à l'instant présent", parcours: 'Premiers pas', duration: '5 min', file: "Revenir à l'instant présent.mp3", fileFem: false, emoji: '🌿', artwork: 'assets/illustrations/player-01.jpg', reason: `Pour sortir du flot de pensées anxieuses` }
       ]
@@ -569,7 +569,7 @@ const GUIDE_MAP = {
     'long': {
       main: { title: 'La pensée qui tourne en boucle', parcours: 'Anxiété', duration: '8 min', file: 'La pensée qui tourne en boucle.mp3', fileFem: 'La pensée qui tourne en boucle.mp3', emoji: '🧠', artwork: 'assets/illustrations/player-05.jpg', reason: `Pour travailler directement sur les ruminations` },
       alts: [
-        { title: "Accueillir l'anxiété sans la combattre", parcours: 'Anxiété', duration: '10 min', file: "Accueillir l'anxiété sans la combattre.mp3", fileFem: 'Accueillir l-anxiété sans la combattre.mp3', emoji: '🤍', artwork: 'assets/illustrations/player-05.jpg', reason: `Approche douce — laisser passer plutôt que résister` }
+        { title: "Accueillir l'anxiété sans la combattre", parcours: 'Anxiété', duration: '10 min', file: "Accueillir l'anxiété sans la combattre.mp3", fileFem: false, emoji: '🤍', artwork: 'assets/illustrations/player-05.jpg', reason: `Approche douce — laisser passer plutôt que résister` }
       ]
     }
   },
@@ -641,15 +641,15 @@ const GUIDE_MAP = {
       ]
     },
     'moyen': {
-      main: { title: 'Mise en route mentale', parcours: 'Concentration', duration: '7 min', file: 'Mise en route mentale.mp3', fileFem: false, emoji: '🎯', artwork: 'assets/illustrations/player-06.jpg', reason: `Prépare le mental à entrer dans la zone` },
+      main: { title: 'Clarté mentale - faire le vide', parcours: 'Concentration', duration: '9 min', file: 'Clarté mentale - faire le vide.mp3', fileFem: false, emoji: '🧹', artwork: 'assets/illustrations/player-06.jpg', reason: `Vide le mental pour retrouver un focus net` },
       alts: [
-        { title: 'Observer ses pensées sans les juger', parcours: 'Premiers pas', duration: '9 min', file: 'Observer ses pensées sans les juger.mp3', fileFem: 'Observer ses pensées sans les juger.mp3', emoji: '👁️', artwork: 'assets/illustrations/player-01.jpg', reason: `Pour vider le mental avant de se concentrer` }
+        { title: 'Mise en route mentale', parcours: 'Concentration', duration: '7 min', file: 'Mise en route mentale.mp3', fileFem: false, emoji: '🎯', artwork: 'assets/illustrations/player-06.jpg', reason: `Pour préparer le mental à entrer dans la zone` }
       ]
     },
     'long': {
-      main: { title: 'Mise en route mentale', parcours: 'Concentration', duration: '7 min', file: 'Mise en route mentale.mp3', fileFem: false, emoji: '🎯', artwork: 'assets/illustrations/player-06.jpg', reason: `Prépare en profondeur une session de travail` },
+      main: { title: 'Flow - entrer dans la zone', parcours: 'Concentration', duration: '10 min', file: 'Flow - entrer dans la zone.mp3', fileFem: false, emoji: '🌊', artwork: 'assets/illustrations/player-06.jpg', reason: `Pour atteindre un état de concentration profonde` },
       alts: [
-        { title: 'Mon ancre personnelle', parcours: 'Premiers pas', duration: '6 min', file: 'Mon ancre personnelle.mp3', fileFem: false, emoji: '⚓', artwork: 'assets/illustrations/player-01.jpg', reason: `Construit un ancrage mental stable pour le focus` }
+        { title: 'Clarté mentale - faire le vide', parcours: 'Concentration', duration: '9 min', file: 'Clarté mentale - faire le vide.mp3', fileFem: false, emoji: '🧹', artwork: 'assets/illustrations/player-06.jpg', reason: `Prépare l"esprit avant une session de travail intense` }
       ]
     }
   }
@@ -942,7 +942,7 @@ function sendReport(type) {
   let subject, body;
 
   if (type === 'track') {
-    subject = `[Serein] Problème signalé - ${title}`;
+    subject = `[Serein] Problème signalé — ${title}`;
     body = `Bonjour,
 
 Je souhaite signaler un problème sur la séance suivante :
@@ -957,7 +957,7 @@ Description du problème :
 Envoyé depuis sereinapp.fr`;
   } else {
     const currentTime = audio.currentTime ? fmt(audio.currentTime) : '0:00';
-    subject = `[Serein] Problème signalé à ${currentTime} - ${title}`;
+    subject = `[Serein] Problème signalé à ${currentTime} — ${title}`;
     body = `Bonjour,
 
 Je souhaite signaler un problème à un moment précis de la séance suivante :
