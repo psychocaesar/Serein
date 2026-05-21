@@ -185,7 +185,7 @@ function launchPlayer(id, title, parcours, duration, filename, voice, artwork) {
   // Infos
   document.getElementById('player-title').textContent = title;
   document.getElementById('player-meta').textContent = parcours + ' · ' + duration;
-  document.getElementById('player-voice-tag').textContent = voice === 'feminine' ? 'Voix féminine — Daïdrée' : 'Voix masculine — César';
+  document.getElementById('player-voice-tag').textContent = voice === 'feminine' ? 'Voix féminine - Daïdrée' : 'Voix masculine - César';
 
   // Reset UI
   document.getElementById('complete-screen').classList.remove('visible');
@@ -215,7 +215,7 @@ function launchPlayer(id, title, parcours, duration, filename, voice, artwork) {
   Object.values(parcoursMap).forEach(v => playerEl.removeAttribute('data-parcours') );
   const pKey = parcoursMap[parcours] || 'premiers-pas';
   playerEl.setAttribute('data-parcours', pKey);
-  // Background is handled by CSS gradients per parcours — clear any leftover image
+  // Background is handled by CSS gradients per parcours - clear any leftover image
   document.getElementById('player-bg').style.backgroundImage = '';
 
   openPlayerScreen();
@@ -942,7 +942,7 @@ function sendReport(type) {
   let subject, body;
 
   if (type === 'track') {
-    subject = `[Serein] Problème signalé — ${title}`;
+    subject = `[Serein] Problème signalé - ${title}`;
     body = `Bonjour,
 
 Je souhaite signaler un problème sur la séance suivante :
@@ -957,7 +957,7 @@ Description du problème :
 Envoyé depuis sereinapp.fr`;
   } else {
     const currentTime = audio.currentTime ? fmt(audio.currentTime) : '0:00';
-    subject = `[Serein] Problème signalé à ${currentTime} — ${title}`;
+    subject = `[Serein] Problème signalé à ${currentTime} - ${title}`;
     body = `Bonjour,
 
 Je souhaite signaler un problème à un moment précis de la séance suivante :
