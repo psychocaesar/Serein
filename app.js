@@ -3,6 +3,7 @@ let timerInterval = null;
 let timerSecondsLeft = 0;
 let timerTotalSeconds = 0;
 let timerRunning = false;
+let timerEndTime = null;
 
 // ── NAVIGATION ──
 const SCREENS = ['home','explore','guide','settings'];
@@ -241,6 +242,7 @@ function togglePlay() {
       updatePlayIcon(false);
     } else {
       timerRunning = true;
+      timerEndTime = Date.now() + (timerSecondsLeft * 1000);
       timerInterval = setInterval(timerTick, 1000);
       updatePlayIcon(true);
     }
@@ -847,6 +849,7 @@ function startTimer(minutes) {
   const startTimeout = setTimeout(() => {
     cancelBtn.remove();
     timerRunning = true;
+    timerEndTime = Date.now() + (timerTotalSeconds * 1000);
     updatePlayIcon(true);
     timerInterval = setInterval(timerTick, 1000);
   }, 1500);
@@ -860,7 +863,9 @@ function startTimer(minutes) {
 
 function timerTick() {
   if (!timerRunning) return;
-  timerSecondsLeft--;
+  // Calcul basé sur l'heure réelle pour résister au verrouillage écran
+  const now = Date.now();
+  timerSecondsLeft = Math.max(0, Math.round((timerEndTime - now) / 1000));
   updateTimerDisplay();
   if (timerSecondsLeft <= 0) {
     clearInterval(timerInterval);
