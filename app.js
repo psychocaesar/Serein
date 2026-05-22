@@ -698,6 +698,100 @@ function restartGuide() {
 // Stocke le feedback intensité par profil humeur+durée+contexte
 // Influence la prochaine recommandation via applyFeedbackToEntry()
 
+
+// ── Filtrage horaire ──
+function getCurrentHour() {
+  return new Date().getHours();
+}
+
+function isConcentrationBlocked() {
+  const h = getCurrentHour();
+  return h >= 22 || h < 6;
+}
+
+// ── Historique local (15 jours) ──
+function getRecentHistory() {
+  try {
+    const raw = localStorage.getItem('serein-history');
+    if (!raw) return [];
+    const all = JSON.parse(raw);
+    const cutoff = Date.now() - 15 * 24 * 60 * 60 * 1000;
+    return all.filter(e => e.ts > cutoff);
+  } catch(e) { return []; }
+}
+
+function recordGuidePlay(title) {
+  try {
+    const history = getRecentHistory();
+    history.push({ title, ts: Date.now() });
+    localStorage.setItem('serein-history', JSON.stringify(history));
+  } catch(e) {}
+}
+
+function wasRecentlyPlayed(title) {
+  return getRecentHistory().some(e => e.title === title);
+}
+
+function applyHistoryToEntry(entry) {
+  if (!entry) return entry;
+  const result = { main: entry.main, alts: [...(entry.alts || [])] };
+  if (wasRecentlyPlayed(result.main.title) && result.alts.length > 0) {
+    const freshAltIdx = result.alts.findIndex(a => !wasRecentlyPlayed(a.title));
+    if (freshAltIdx !== -1) {
+      const fresh = result.alts[freshAltIdx];
+      result.alts[freshAltIdx] = { ...result.main, reason: result.main.reason + ' (déjà écoutée récemment)' };
+      result.main = fresh;
+    }
+  }
+  return result;
+}
+
+// ── Q3 : questions contextuelles ──
+const CONTEXT_QUESTIONS = {
+  stress: {
+    question: "Où tu le ressens le plus ?",
+    choices: [
+      { label: '💪 Dans le corps (tensions, mâchoire, épaules)', value: 'corps' },
+      { label: '🧠 Dans la tête (pensées, ruminations)', value: 'tete' }
+    ]
+  },
+  anxiete: {
+    question: "C'est plutôt…",
+    choices: [
+      { label: '⚡ Une agitation soudaine', value: 'soudaine' },
+      { label: '🌫 Un fond d\'inquiétude persistant', value: 'fond' }
+    ]
+  },
+  sommeil: {
+    question: 'Tu te prépares à dormir ou tu viens de te réveiller ?',
+    choices: [
+      { label: '🌙 Je me prépare à dormir', value: 'precoucher' },
+      { label: '😳 Je viens de me réveiller', value: 'reveil' }
+    ]
+  }
+};
+
+function onContextChoice(value) {
+  const contextLabels = {
+    corps: 'Dans le corps', tete: 'Dans la tête',
+    soudaine: 'Agitation soudaine', fond: "Fond d'inquiétude persistant",
+    precoucher: 'Je me prépare à dormir', reveil: 'Je viens de me réveiller'
+  };
+  guideContext = value;
+  addUserBubble(contextLabels[value] || value);
+  clearChoices();
+  askDuration();
+}
+
+function askDuration() {
+  setTimeout(() => addBotBubble('Combien de temps as-tu ?'), 400);
+  setTimeout(() => addChoices([
+    { label: '⚡ 5 minutes', value: 'court' },
+    { label: '🌿 5–10 minutes', value: 'moyen' },
+    { label: '🌊 Plus de 10 minutes', value: 'long' }
+  ], onDurationChoice), 800);
+}
+
 function saveFeedback(mood, duration, context, sessionTitle, rating) {
   // rating : 'intense' | 'ok' | 'doux'
   try {
