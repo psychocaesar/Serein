@@ -6,7 +6,8 @@ const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/app.js',
-  '/assets/logo.png'
+  '/assets/logo.png',
+  '/assets/audio/cloche.mp3'
 ];
 
 self.addEventListener('install', event => {

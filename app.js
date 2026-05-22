@@ -3,10 +3,7 @@ let timerInterval = null;
 let timerSecondsLeft = 0;
 let timerTotalSeconds = 0;
 let timerRunning = false;
-let timerEndTime = null;
-// Audio silencieux pour le timer (résiste au verrouillage écran)
-const timerAudio = new Audio();
-timerAudio.loop = false;
+let currentAmbiance = null;
 
 // ── NAVIGATION ──
 const SCREENS = ['home','explore','guide','settings'];
@@ -22,77 +19,19 @@ function showScreen(id) {
 }
 
 function filterTab(btn) {
-  document.querySelectorAll('.filter-tabs:not(.duration) .tab').forEach(t => {
-    t.classList.remove('active');
-    t.setAttribute('aria-selected', 'false');
-  });
+  document.querySelectorAll('.filter-tabs .tab').forEach(t => t.classList.remove('active'));
   btn.classList.add('active');
-  btn.setAttribute('aria-selected', 'true');
-  applyExploreFilters();
-}
-
-function filterDuration(btn) {
-  document.querySelectorAll('.filter-tabs.duration .tab').forEach(t => {
-    t.classList.remove('active');
-    t.setAttribute('aria-selected', 'false');
-  });
-  btn.classList.add('active');
-  btn.setAttribute('aria-selected', 'true');
-  applyExploreFilters();
-}
-
-function applyExploreFilters() {
-  const themeBtn = document.querySelector('.filter-tabs:not(.duration) .tab.active');
-  const durBtn = document.querySelector('.filter-tabs.duration .tab.active');
-  const theme = themeBtn ? themeBtn.textContent.trim() : 'Toutes';
-  const dur = durBtn ? (durBtn.dataset.duration || 'all') : 'all';
-
-  let visibleCount = 0;
+  const label = btn.textContent.trim();
   document.querySelectorAll('.session-list .session-card').forEach(card => {
     const p = card.dataset.parcours || '';
-    const d = card.dataset.duration || '';
-    const matchTheme = (theme === 'Toutes' || p === theme);
-    const matchDur = (dur === 'all' || d === dur);
-    const show = matchTheme && matchDur;
-    card.style.display = show ? '' : 'none';
-    if (show) visibleCount++;
+    card.style.display = (label === 'Toutes' || p === label) ? '' : 'none';
   });
-
-  // Headers visibles uniquement si filtre thème = "Toutes" et groupe non vide
-  document.querySelectorAll('.group-header').forEach(header => {
-    if (theme !== 'Toutes') {
-      header.classList.remove('visible');
-      return;
-    }
-    const headerParcours = header.dataset.parcours || '';
-    const cardsOfParcours = document.querySelectorAll(
-      '.session-card[data-parcours="' + headerParcours + '"]'
-    );
-    let anyVisible = false;
-    cardsOfParcours.forEach(c => {
-      if (c.style.display !== 'none') anyVisible = true;
-    });
-    header.classList.toggle('visible', anyVisible);
-  });
-
-  // Compteur
-  const count = document.getElementById('filter-count');
-  if (count) {
-    if (theme === 'Toutes' && dur === 'all') {
-      count.textContent = visibleCount + ' séances disponibles';
-    } else {
-      const themeLabel = theme === 'Toutes' ? '' : ' · ' + theme;
-      const durLabels = { short: '≤ 5 min', medium: '5–10 min', long: '10 min +' };
-      const durLabel = dur === 'all' ? '' : ' · ' + durLabels[dur];
-      count.textContent = visibleCount + ' séance' + (visibleCount > 1 ? 's' : '') + themeLabel + durLabel;
-    }
-  }
 }
 
 function filterParcours(label) {
   showScreen('explore');
   setTimeout(() => {
-    document.querySelectorAll('.filter-tabs:not(.duration) .tab').forEach(t => {
+    document.querySelectorAll('.filter-tabs .tab').forEach(t => {
       if (t.textContent.trim() === label) t.click();
     });
   }, 50);
@@ -149,8 +88,6 @@ function closePlayer() {
   // Stop all audio
   audio.pause();
   ambianceAudio.pause();
-  timerAudio.pause();
-  timerAudio.src = '';
 
   // Clean up timer if active
   if (timerInterval) { clearInterval(timerInterval); timerInterval = null; timerRunning = false; }
@@ -244,12 +181,9 @@ function togglePlay() {
     if (timerRunning) {
       timerRunning = false;
       clearInterval(timerInterval);
-      timerAudio.pause();
       updatePlayIcon(false);
     } else {
       timerRunning = true;
-      timerEndTime = Date.now() + (timerSecondsLeft * 1000);
-      timerAudio.play().catch(() => {});
       timerInterval = setInterval(timerTick, 1000);
       updatePlayIcon(true);
     }
@@ -364,48 +298,37 @@ function replaySession() {
 }
 
 // ── OFFLINE depuis le player ──
-
-// Retourne le chemin audio correct selon la voix du currentSession
-function _getAudioPath(filename) {
-  const voice = (currentSession && currentSession.voice === 'feminine') ? 'feminin' : 'masculin';
-  return 'assets/audio/' + voice + '/' + encodeURIComponent(filename);
-}
-
 async function toolbarOffline() {
   if (!currentOfflineFilename) return;
   const btn = document.getElementById('toolbar-offline-btn');
   if (!('caches' in window)) { alert('Cache non disponible sur ce navigateur.'); return; }
   try {
-    const cache = await caches.open('serein-audio-v1');
-    const url = _getAudioPath(currentOfflineFilename);
+    const cache = await caches.open('serein-v2-audio');
+    const url = 'assets/audio/masculin/' + encodeURIComponent(currentOfflineFilename);
     const existing = await cache.match(url);
     if (existing) {
       await cache.delete(url);
       btn.classList.remove('active');
     } else {
-      btn.textContent = '…';
       await cache.add(url);
       btn.classList.add('active');
     }
     updateOfflineCount();
-  } catch(e) {
-    console.warn('Erreur cache offline:', e);
-  }
+  } catch(e) { console.warn('[Serein cache]', e); }
 }
 
 async function updateOfflineBtnState() {
   if (!currentOfflineFilename || !('caches' in window)) return;
   try {
-    const cache = await caches.open('serein-audio-v1');
-    const url = _getAudioPath(currentOfflineFilename);
+    const cache = await caches.open('serein-v2-audio');
+    const url = 'assets/audio/masculin/' + encodeURIComponent(currentOfflineFilename);
     const existing = await cache.match(url);
     const btn = document.getElementById('toolbar-offline-btn');
     btn.classList.toggle('active', !!existing);
-  } catch(e) {}
+  } catch(e) { console.warn('[Serein cache]', e); }
 }
 
 // ── AMBIANCE ──
-let currentAmbiance = null;
 function setAmbiance(file) {
   document.querySelectorAll('.ambiance-btn').forEach(b => b.classList.remove('active'));
   if (!file) {
@@ -442,7 +365,7 @@ async function toggleOfflineCache(btn, filename) {
   if (!('caches' in window)) { alert('Cache non disponible sur ce navigateur.'); return; }
   btn.classList.add('loading');
   try {
-    const cache = await caches.open('serein-audio-v1');
+    const cache = await caches.open('serein-v2-audio');
     const url = 'assets/audio/masculin/' + encodeURIComponent(filename);
     const existing = await cache.match(url);
     if (existing) {
@@ -458,36 +381,33 @@ async function toggleOfflineCache(btn, filename) {
     updateOfflineCount();
   } catch(e) {
     btn.classList.remove('loading');
-    alert('Erreur lors de la mise en cache.');
+    console.warn('[Serein cache]', e);
+    alert('Erreur lors de la mise en cache. Vérifiez l\'espace disponible.');
   }
 }
 
 async function updateOfflineCount() {
   if (!('caches' in window)) return;
   try {
-    const cache = await caches.open('serein-audio-v1');
+    const cache = await caches.open('serein-v2-audio');
     const keys = await cache.keys();
     const tag = document.getElementById('offline-count-tag');
     if (tag) tag.textContent = keys.length + ' séance' + (keys.length > 1 ? 's' : '');
-  } catch(e) {}
+  } catch(e) { console.warn('[Serein cache]', e); }
 }
 
 async function restoreOfflineButtons() {
   if (!('caches' in window)) return;
   try {
-    const cache = await caches.open('serein-audio-v1');
+    const cache = await caches.open('serein-v2-audio');
     const btns = Array.from(document.querySelectorAll('.btn-offline[data-filename]'));
     await Promise.all(btns.map(async btn => {
       const fn = btn.dataset.filename;
       if (!fn) return;
-      // Chercher dans les deux dossiers voix
-      const urlMasc = 'assets/audio/masculin/' + encodeURIComponent(fn);
-      const urlFem  = 'assets/audio/feminin/'  + encodeURIComponent(fn);
-      const matchMasc = await cache.match(urlMasc);
-      const matchFem  = await cache.match(urlFem);
-      if (matchMasc || matchFem) { btn.classList.add('cached'); btn.textContent = '✓'; }
+      const match = await cache.match('assets/audio/masculin/' + encodeURIComponent(fn));
+      if (match) { btn.classList.add('cached'); btn.textContent = '✓'; }
     }));
-  } catch(e) {}
+  } catch(e) { console.warn('[Serein cache]', e); }
 }
 
 // ── STATS ──
@@ -508,10 +428,10 @@ function recordCompletion() {
   s.sessions = (s.sessions || 0) + 1;
   const dur = currentSession ? (parseFloat(currentSession.duration) || Math.round((audio.duration || 0) / 60)) : 0;
   s.minutes = (s.minutes || 0) + dur;
-  const today = new Date().toISOString().slice(0,10);
+  const today = new Date().toLocaleDateString('fr-CA');
   if (s.lastDate === today) {
     // même jour
-  } else if (s.lastDate === new Date(Date.now() - 86400000).toISOString().slice(0,10)) {
+  } else if (s.lastDate === new Date(Date.now() - 86400000).toLocaleDateString('fr-CA')) {
     s.streak = (s.streak || 0) + 1;
   } else {
     s.streak = 1;
@@ -552,7 +472,7 @@ const GUIDE_MAP = {
     'moyen': {
       main: { title: 'La cohérence cardiaque guidée', parcours: 'Calme & Stress', duration: '5 min', file: 'Cohérence cardiaque 5 minutes.mp3', fileFem: false, emoji: '💚', artwork: 'assets/illustrations/player-02.jpg', reason: `Régule le système nerveux en quelques minutes` },
       alts: [
-        { title: 'SOS Stress en 6 minutes', parcours: 'Calme & Stress', duration: '6 min', file: 'SOS Stress en 6 minutes.mp3', fileFem: false, emoji: '😮‍💨', artwork: 'assets/illustrations/player-02.jpg', reason: `Plus guidé, idéal si le mental s"emballe` }
+        { title: "Lâcher prise sur l'urgence", parcours: 'Calme & Stress', duration: '7 min', file: 'Lacher prise sur lurgence.mp3', fileFem: false, emoji: '⏳', artwork: 'assets/illustrations/player-02.jpg', reason: `Pour sortir du mode urgence et retrouver du recul` }
       ]
     },
     'long': {
@@ -650,15 +570,15 @@ const GUIDE_MAP = {
       ]
     },
     'moyen': {
-      main: { title: 'Clarté mentale - faire le vide', parcours: 'Concentration', duration: '9 min', file: 'Clarté mentale - faire le vide.mp3', fileFem: false, emoji: '🧹', artwork: 'assets/illustrations/player-06.jpg', reason: `Vide le mental pour retrouver un focus net` },
+      main: { title: 'Mise en route mentale', parcours: 'Concentration', duration: '7 min', file: 'Mise en route mentale.mp3', fileFem: false, emoji: '🎯', artwork: 'assets/illustrations/player-06.jpg', reason: `Prépare le mental à entrer dans la zone` },
       alts: [
-        { title: 'Mise en route mentale', parcours: 'Concentration', duration: '7 min', file: 'Mise en route mentale.mp3', fileFem: false, emoji: '🎯', artwork: 'assets/illustrations/player-06.jpg', reason: `Pour préparer le mental à entrer dans la zone` }
+        { title: 'Observer ses pensées sans les juger', parcours: 'Premiers pas', duration: '9 min', file: 'Observer ses pensées sans les juger.mp3', fileFem: 'Observer ses pensées sans les juger.mp3', emoji: '👁️', artwork: 'assets/illustrations/player-01.jpg', reason: `Pour vider le mental avant de se concentrer` }
       ]
     },
     'long': {
-      main: { title: 'Flow - entrer dans la zone', parcours: 'Concentration', duration: '10 min', file: 'Flow - entrer dans la zone.mp3', fileFem: false, emoji: '🌊', artwork: 'assets/illustrations/player-06.jpg', reason: `Pour atteindre un état de concentration profonde` },
+      main: { title: 'Mise en route mentale', parcours: 'Concentration', duration: '7 min', file: 'Mise en route mentale.mp3', fileFem: false, emoji: '🎯', artwork: 'assets/illustrations/player-06.jpg', reason: `Prépare en profondeur une session de travail` },
       alts: [
-        { title: 'Clarté mentale - faire le vide', parcours: 'Concentration', duration: '9 min', file: 'Clarté mentale - faire le vide.mp3', fileFem: false, emoji: '🧹', artwork: 'assets/illustrations/player-06.jpg', reason: `Prépare l"esprit avant une session de travail intense` }
+        { title: 'Mon ancre personnelle', parcours: 'Premiers pas', duration: '6 min', file: 'Mon ancre personnelle.mp3', fileFem: false, emoji: '⚓', artwork: 'assets/illustrations/player-01.jpg', reason: `Construit un ancrage mental stable pour le focus` }
       ]
     }
   }
@@ -721,44 +641,77 @@ function showGuideResult(entry) {
 
   function makeCard(rec, isMain) {
     const id = isMain ? 'guide-launch-main' : 'guide-launch-alt-' + rec.title.replace(/\s/g,'');
-    return [
-      '<div class="guide-rec-card' + (isMain ? ' guide-rec-main' : ' guide-rec-alt') + '">',
-      '  <div class="guide-rec-header">',
-      '    <span class="guide-rec-emoji">' + rec.emoji + '</span>',
-      '    <div class="guide-rec-info">',
-      '      <div class="guide-rec-title">' + rec.title + '</div>',
-      '      <div class="guide-rec-meta">' + rec.parcours + ' · ' + rec.duration + '</div>',
-      '    </div>',
-      '  </div>',
-      '  <p class="guide-rec-reason">' + rec.reason + '</p>',
-      '  <button class="btn ' + (isMain ? 'btn-primary' : 'btn-ghost') + ' guide-rec-btn" data-id="' + id + '" style="width:100%">▶ Lancer</button>',
-      '</div>'
-    ].join('');
-  }
+    const card = document.createElement('div');
+    card.className = 'guide-rec-card' + (isMain ? ' guide-rec-main' : ' guide-rec-alt');
 
-  let html = '<div class="guide-result-wrap">';
-  html += '<p class="guide-result-label">Notre suggestion</p>';
-  html += makeCard(entry.main, true);
-  if (entry.alts && entry.alts.length > 0) {
-    html += '<p class="guide-result-label" style="margin-top:.9rem;">Aussi adapté</p>';
-    entry.alts.forEach(alt => { html += makeCard(alt, false); });
-  }
-  html += '<button class="guide-restart" onclick="restartGuide()">↩ Recommencer</button>';
-  html += '</div>';
+    const header = document.createElement('div');
+    header.className = 'guide-rec-header';
 
-  res.innerHTML = html;
+    const emoji = document.createElement('span');
+    emoji.className = 'guide-rec-emoji';
+    emoji.textContent = rec.emoji;
 
-  // Bind launch buttons
-  function bindLaunch(rec, id) {
-    const btn = res.querySelector('[data-id="' + id + '"]');
-    if (btn) btn.addEventListener('click', () => {
+    const info = document.createElement('div');
+    info.className = 'guide-rec-info';
+
+    const title = document.createElement('div');
+    title.className = 'guide-rec-title';
+    title.textContent = rec.title;
+
+    const meta = document.createElement('div');
+    meta.className = 'guide-rec-meta';
+    meta.textContent = rec.parcours + ' · ' + rec.duration;
+
+    info.appendChild(title);
+    info.appendChild(meta);
+    header.appendChild(emoji);
+    header.appendChild(info);
+
+    const reason = document.createElement('p');
+    reason.className = 'guide-rec-reason';
+    reason.textContent = rec.reason;
+
+    const btn = document.createElement('button');
+    btn.className = 'btn ' + (isMain ? 'btn-primary' : 'btn-ghost') + ' guide-rec-btn';
+    btn.dataset.id = id;
+    btn.style.width = '100%';
+    btn.textContent = '▶ Lancer';
+    btn.addEventListener('click', () => {
       openVoiceOverlay('guide-rec', rec.title, rec.parcours, rec.duration, rec.file, rec.fileFem || false, rec.artwork);
     });
+
+    card.appendChild(header);
+    card.appendChild(reason);
+    card.appendChild(btn);
+    return card;
   }
-  bindLaunch(entry.main, 'guide-launch-main');
-  if (entry.alts) entry.alts.forEach(alt => {
-    bindLaunch(alt, 'guide-launch-alt-' + alt.title.replace(/\s/g,''));
-  });
+
+  res.innerHTML = '';
+  const wrap = document.createElement('div');
+  wrap.className = 'guide-result-wrap';
+
+  const labelMain = document.createElement('p');
+  labelMain.className = 'guide-result-label';
+  labelMain.textContent = 'Notre suggestion';
+  wrap.appendChild(labelMain);
+  wrap.appendChild(makeCard(entry.main, true));
+
+  if (entry.alts && entry.alts.length > 0) {
+    const labelAlt = document.createElement('p');
+    labelAlt.className = 'guide-result-label';
+    labelAlt.style.marginTop = '.9rem';
+    labelAlt.textContent = 'Aussi adapté';
+    wrap.appendChild(labelAlt);
+    entry.alts.forEach(alt => wrap.appendChild(makeCard(alt, false)));
+  }
+
+  const restartBtn = document.createElement('button');
+  restartBtn.className = 'guide-restart';
+  restartBtn.textContent = '↩ Recommencer';
+  restartBtn.addEventListener('click', restartGuide);
+  wrap.appendChild(restartBtn);
+
+  res.appendChild(wrap);
 
   res.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
@@ -813,22 +766,6 @@ function closeTimerSheet() {
   document.getElementById('timer-sheet-backdrop').classList.remove('open');
 }
 
-function timerFinished() {
-  if (!timerRunning) return;
-  timerRunning = false;
-  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-  updatePlayIcon(false);
-  bell.currentTime = 0;
-  bell.play().catch(() => {});
-  setTimeout(() => {
-    document.getElementById('player-main').style.display = 'none';
-    document.getElementById('player-main').classList.add('hidden');
-    document.getElementById('complete-screen').classList.add('visible');
-    document.getElementById('complete-title').textContent = 'Minuteur libre · ' + (timerTotalSeconds / 60) + ' min';
-    recordTimerCompletion();
-  }, 2500);
-}
-
 function startTimer(minutes) {
   closeTimerSheet();
   timerTotalSeconds = minutes * 60;
@@ -857,50 +794,33 @@ function startTimer(minutes) {
 
   openPlayerScreen();
 
-  // Charger l'audio silencieux de la bonne durée
-  timerAudio.src = 'assets/audio/timer-' + minutes + 'min.mp3';
-  timerAudio.load();
-  // Quand l'audio silencieux se termine → fin du timer (fonctionne écran verrouillé)
-  timerAudio.onended = timerFinished;
-
-  // Bouton Annuler temporaire pendant les 1.5s avant démarrage
-  const cancelBtn = document.createElement('button');
-  cancelBtn.className = 'btn btn-outline-white timer-cancel-btn';
-  cancelBtn.textContent = 'Annuler';
-  cancelBtn.style.cssText = 'position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);z-index:10;';
-  const playerMain = document.getElementById('player-main');
-  playerMain.style.position = 'relative';
-  playerMain.appendChild(cancelBtn);
-
-  const startTimeout = setTimeout(() => {
-    cancelBtn.remove();
+  bell.currentTime = 0;
+  bell.play().catch(() => {});
+  setTimeout(() => {
     timerRunning = true;
-    timerEndTime = Date.now() + (timerTotalSeconds * 1000);
     updatePlayIcon(true);
-    // Lancer l'audio silencieux (maintient le contexte audio même écran verrouillé)
-    timerAudio.play().catch(() => {});
-    // setInterval pour mettre à jour l'affichage (peut se figer mais l'audio continue)
     timerInterval = setInterval(timerTick, 1000);
   }, 1500);
-
-  cancelBtn.addEventListener('click', () => {
-    clearTimeout(startTimeout);
-    cancelBtn.remove();
-    timerAudio.pause();
-    timerAudio.src = '';
-    closePlayer();
-  });
 }
 
 function timerTick() {
   if (!timerRunning) return;
-  // Calcul basé sur la position réelle de l'audio silencieux
-  if (!timerAudio.paused && timerAudio.duration) {
-    timerSecondsLeft = Math.max(0, Math.round(timerAudio.duration - timerAudio.currentTime));
-  } else {
-    timerSecondsLeft = Math.max(0, Math.round((timerEndTime - Date.now()) / 1000));
-  }
+  timerSecondsLeft--;
   updateTimerDisplay();
+  if (timerSecondsLeft <= 0) {
+    clearInterval(timerInterval);
+    timerRunning = false;
+    updatePlayIcon(false);
+    bell.currentTime = 0;
+    bell.play().catch(() => {});
+    setTimeout(() => {
+      document.getElementById('player-main').style.display = 'none';
+      document.getElementById('player-main').classList.add('hidden');
+      document.getElementById('complete-screen').classList.add('visible');
+      document.getElementById('complete-title').textContent = 'Minuteur libre · ' + (timerTotalSeconds / 60) + ' min';
+      recordTimerCompletion();
+    }, 2500);
+  }
 }
 
 function updateTimerDisplay() {
@@ -918,9 +838,9 @@ function recordTimerCompletion() {
   const s = JSON.parse(localStorage.getItem('serein-stats') || '{"sessions":0,"minutes":0,"lastDate":"","streak":0}');
   s.sessions = (s.sessions || 0) + 1;
   s.minutes = (s.minutes || 0) + Math.round(timerTotalSeconds / 60);
-  const today = new Date().toISOString().slice(0,10);
+  const today = new Date().toLocaleDateString('fr-CA');
   if (s.lastDate !== today) {
-    if (s.lastDate === new Date(Date.now() - 86400000).toISOString().slice(0,10)) {
+    if (s.lastDate === new Date(Date.now() - 86400000).toLocaleDateString('fr-CA')) {
       s.streak = (s.streak || 0) + 1;
     } else {
       s.streak = 1;
@@ -1004,28 +924,9 @@ Envoyé depuis sereinapp.fr`;
 
 
 // ── INIT ──
-function disableSoonSessions() {
-  document.querySelectorAll('.session-card').forEach(card => {
-    const comingBadge = card.querySelector('.badge-coming');
-    if (!comingBadge) return;
-    // Désactiver tous les boutons dans la carte
-    card.querySelectorAll('button').forEach(btn => {
-      btn.disabled = true;
-      btn.setAttribute('aria-disabled', 'true');
-      btn.setAttribute('tabindex', '-1');
-    });
-    // Marquer la carte elle-même comme non interactive
-    card.style.pointerEvents = 'none';
-    card.setAttribute('aria-disabled', 'true');
-  });
-}
-
 document.addEventListener('DOMContentLoaded', () => {
   applyTheme();
   loadStats();
   restoreOfflineButtons();
   updateOfflineCount();
-  disableSoonSessions();
-  // Initialiser l'affichage des group-headers et du compteur de l'Explorer
-  if (typeof applyExploreFilters === 'function') applyExploreFilters();
 });
