@@ -1000,30 +1000,44 @@ function launchObservationSession(cb) {
     'assets/illustrations/player-01.jpg'
   );
 
-  // Quand la séance se termine, afficher 4 boutons de résultat d'observation
+  // Flag pour bloquer showGuideFeedback sur cette séance spéciale
+  const prevMood = guideMood;
+  guideMood = null;
+
   const onEnded = () => {
     audio.removeEventListener('ended', onEnded);
-    // Fermer le player et reprendre le guide
+    guideMood = prevMood; // restaurer pour ne pas bloquer showGuideFeedback si besoin
+
     setTimeout(() => {
       closePlayer();
       setTimeout(() => {
-        addBotBubble('Comment tu te sens après cette minute ?');
+        addBotBubble('Comment tu te sens après cette pause ?');
         setTimeout(() => addChoices([
-          { label: '💪 Corps tendu, besoin de relâcher', value: 'stress_corps'      },
-          { label: '🧠 Tête agitée, pensées qui tournent', value: 'stress_tete'    },
-          { label: '😴 Fatigué(e), besoin de repos',       value: 'fatigue'        },
-          { label: '🌫 Toujours dans le flou',              value: 'brouillard'    },
+          { label: '💪 Corps tendu, besoin de relâcher',   value: 'stress_corps' },
+          { label: '🧠 Tête agitée, pensées qui tournent', value: 'stress_tete'  },
+          { label: '😴 Fatigué(e), besoin de repos',       value: 'fatigue'      },
+          { label: '🌫 Toujours dans le flou',             value: 'brouillard'   },
+          { label: '🌿 Ça va, je n\'ai plus besoin',       value: 'done'         },
         ], (v) => {
-          // Mapper vers humeur + contexte
+          clearChoices();
+
+          if (v === 'done') {
+            addUserBubble("Ça va, merci");
+            setTimeout(() => addBotBubble('Parfait. Prends soin de toi 🌿'), 400);
+            guideInitialized = false; // permet de relancer le guide proprement
+            return;
+          }
+
           const mapping = {
-            stress_corps: { mood: 'stress',     context: 'corps'  },
-            stress_tete:  { mood: 'stress',     context: 'tete'   },
-            fatigue:      { mood: 'fatigue',    context: null      },
-            brouillard:   { mood: 'brouillard', context: null      },
+            stress_corps: { mood: 'stress',     context: 'corps' },
+            stress_tete:  { mood: 'stress',     context: 'tete'  },
+            fatigue:      { mood: 'fatigue',    context: null     },
+            brouillard:   { mood: 'brouillard', context: null     },
           };
           const { mood, context } = mapping[v];
           guideMood = mood;
           guideContext = context;
+
           const labels = {
             stress_corps: 'Corps tendu',
             stress_tete:  'Tête agitée',
@@ -1031,7 +1045,6 @@ function launchObservationSession(cb) {
             brouillard:   'Toujours dans le flou',
           };
           addUserBubble(labels[v]);
-          clearChoices();
           askDuration();
         }), 600);
       }, 400);
@@ -1066,80 +1079,7 @@ function initGuide() {
   setTimeout(() => addBotBubble(greeting + ' 👋 Comment tu te sens en ce moment ?'), 200);
 
   setTimeout(() => {
-    // Champ texte libre
-    const inputWrap = document.createElement('div');
-    inputWrap.style.cssText = 'display:flex;gap:.5rem;margin-top:.25rem;';
-
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.placeholder = 'Décris en quelques mots…';
-    input.style.cssText = [
-      'flex:1', 'padding:.65rem 1rem', 'border-radius:var(--radius-sm)',
-      'border:1.5px solid var(--color-border)', 'background:var(--color-surface)',
-      'color:var(--color-text)', 'font-size:.9rem', 'outline:none',
-    ].join(';');
-
-    const sendBtn = document.createElement('button');
-    sendBtn.textContent = '→';
-    sendBtn.style.cssText = [
-      'padding:.65rem 1rem', 'border-radius:var(--radius-sm)',
-      'background:var(--color-primary)', 'color:#fff',
-      'border:none', 'cursor:pointer', 'font-size:1rem',
-    ].join(';');
-
-    const handleFreeText = () => {
-      const val = input.value.trim();
-      if (!val) return;
-      const detected = detectMoodFromText(val);
-      addUserBubble(val);
-      inputWrap.remove();
-      clearChoices();
-      if (detected) {
-        guideMood = detected;
-        const moodLabels = {
-          stress: 'du stress', anxiete: "de l'anxiété",
-          fatigue: 'de la fatigue', brouillard: 'du brouillard mental',
-          sommeil: 'des difficultés à dormir', concentration: 'un besoin de concentration'
-        };
-        setTimeout(() => {
-          addBotBubble("Je détecte " + moodLabels[detected] + ". On part là-dessus ?");
-          setTimeout(() => addChoices([
-            { label: '✓ Oui', value: 'confirm' },
-            { label: '↩ Voir toutes les options', value: 'back' }
-          ], (v) => {
-            clearChoices();
-            if (v === 'confirm') {
-              if (CONTEXT_QUESTIONS[guideMood]) {
-                setTimeout(() => addBotBubble(CONTEXT_QUESTIONS[guideMood].question), 400);
-                setTimeout(() => addChoices(CONTEXT_QUESTIONS[guideMood].choices, onContextChoice), 800);
-              } else {
-                askDuration();
-              }
-            } else {
-              guideInitialized = false;
-              initGuide();
-            }
-          }), 600);
-        }, 400);
-      } else {
-        setTimeout(() => {
-          addBotBubble("Je n'ai pas bien saisi. Choisis parmi ces options :");
-          showMoodChoices();
-        }, 400);
-      }
-    };
-
-    sendBtn.addEventListener('click', handleFreeText);
-    input.addEventListener('keydown', e => { if (e.key === 'Enter') handleFreeText(); });
-
-    inputWrap.appendChild(input);
-    inputWrap.appendChild(sendBtn);
-
-    const win = document.getElementById('chat-window');
-    win.appendChild(inputWrap);
-    win.scrollTop = win.scrollHeight;
-
-    // Boutons humeur (sous le champ texte)
+    // Boutons humeur
     showMoodChoices();
   }, 600);
 }
