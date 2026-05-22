@@ -110,6 +110,14 @@ function closePlayer() {
   document.getElementById('options-sheet').classList.remove('open');
   document.getElementById('player-screen').classList.remove('open');
   document.body.style.overflow = '';
+
+  // Si une séance d'observation était en cours, débloquer le guide
+  if (typeof guideInitialized !== 'undefined') {
+    guideInitialized = false;
+    guideMood = null;
+    guideDuration = null;
+    guideContext = null;
+  }
 }
 
 function toggleOptionsSheet() {
@@ -1016,7 +1024,6 @@ function launchObservationSession(cb) {
           { label: '💪 Corps tendu, besoin de relâcher',   value: 'stress_corps' },
           { label: '🧠 Tête agitée, pensées qui tournent', value: 'stress_tete'  },
           { label: '😴 Fatigué(e), besoin de repos',       value: 'fatigue'      },
-          { label: '🌫 Toujours dans le flou',             value: 'brouillard'   },
           { label: '🌿 Ça va, je n\'ai plus besoin',       value: 'done'         },
         ], (v) => {
           clearChoices();
@@ -1032,7 +1039,6 @@ function launchObservationSession(cb) {
             stress_corps: { mood: 'stress',     context: 'corps' },
             stress_tete:  { mood: 'stress',     context: 'tete'  },
             fatigue:      { mood: 'fatigue',    context: null     },
-            brouillard:   { mood: 'brouillard', context: null     },
           };
           const { mood, context } = mapping[v];
           guideMood = mood;
@@ -1042,7 +1048,6 @@ function launchObservationSession(cb) {
             stress_corps: 'Corps tendu',
             stress_tete:  'Tête agitée',
             fatigue:      'Fatigué(e)',
-            brouillard:   'Toujours dans le flou',
           };
           addUserBubble(labels[v]);
           askDuration();
