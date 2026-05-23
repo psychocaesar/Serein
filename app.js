@@ -760,6 +760,9 @@ function showGuideResult(entry) {
 
 function restartGuide() {
   guideInitialized = false;
+  guideMood = null;
+  guideDuration = null;
+  guideContext = null;
   initGuide();
   document.getElementById('guide-result').style.display = 'none';
 }
