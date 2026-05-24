@@ -1,4 +1,4 @@
-﻿// ── GLOBALS ──
+// ── GLOBALS ──
 let timerInterval = null;
 let timerSecondsLeft = 0;
 let timerTotalSeconds = 0;
