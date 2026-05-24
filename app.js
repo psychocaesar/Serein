@@ -1,4 +1,4 @@
-// ── GLOBALS ──
+﻿// ── GLOBALS ──
 let timerInterval = null;
 let timerSecondsLeft = 0;
 let timerTotalSeconds = 0;
@@ -110,6 +110,11 @@ function closePlayer() {
   document.getElementById('options-sheet').classList.remove('open');
   document.getElementById('player-screen').classList.remove('open');
   document.body.style.overflow = '';
+
+  guideInitialized = false;
+  guideMood = null;
+  guideDuration = null;
+  guideContext = null;
 }
 
 function toggleOptionsSheet() {
@@ -256,6 +261,7 @@ audio.addEventListener('ended', () => {
   document.getElementById('complete-screen').classList.add('visible');
   if (currentSession) document.getElementById('complete-title').textContent = currentSession.title;
   recordCompletion();
+  if (guideMood) showGuideFeedback();
 });
 
 audio.addEventListener('play', () => updatePlayIcon(true));
@@ -464,173 +470,203 @@ function applyTheme() {
 const GUIDE_MAP = {
   'stress': {
     'court': {
-      main: { title: 'SOS Stress en 6 minutes', parcours: 'Calme & Stress', duration: '6 min', file: 'SOS Stress en 6 minutes.mp3', fileFem: false, emoji: '😮‍💨', artwork: 'assets/illustrations/player-02.jpg', reason: `Rapide et ciblé pour couper le stress net` },
-      alts: [
-        { title: "Revenir à l'instant présent", parcours: 'Premiers pas', duration: '5 min', file: "Revenir à l'instant présent.mp3", fileFem: false, emoji: '🌿', artwork: 'assets/illustrations/player-01.jpg', reason: `Pour ancrer l"attention ici et maintenant` }
-      ]
+      'corps': {
+        main: { title: 'La cohérence cardiaque guidée', parcours: 'Calme & Stress', duration: '5 min', file: 'Cohérence cardiaque 5 minutes.mp3', fileFem: false, emoji: '💚', artwork: 'assets/illustrations/player-02.jpg', reason: "Régule le système nerveux en quelques respirations" },
+        alts: [{ title: 'SOS Stress en 6 minutes', parcours: 'Calme & Stress', duration: '6 min', file: 'SOS Stress en 6 minutes.mp3', fileFem: false, emoji: '😮‍💨', artwork: 'assets/illustrations/player-02.jpg', reason: 'Court et ciblé pour couper la tension physique' }]
+      },
+      'tete': {
+        main: { title: 'SOS Stress en 6 minutes', parcours: 'Calme & Stress', duration: '6 min', file: 'SOS Stress en 6 minutes.mp3', fileFem: false, emoji: '😮‍💨', artwork: 'assets/illustrations/player-02.jpg', reason: "Rapide et ciblé pour couper le mental net" },
+        alts: [{ title: "Revenir à l'instant présent", parcours: 'Premiers pas', duration: '5 min', file: "Revenir à l'instant présent.mp3", fileFem: false, emoji: '🌿', artwork: 'assets/illustrations/player-01.jpg', reason: "Pour ancrer l'attention ici et maintenant" }]
+      },
+      'default': {
+        main: { title: 'SOS Stress en 6 minutes', parcours: 'Calme & Stress', duration: '6 min', file: 'SOS Stress en 6 minutes.mp3', fileFem: false, emoji: '😮‍💨', artwork: 'assets/illustrations/player-02.jpg', reason: 'Rapide et ciblé pour couper le stress net' },
+        alts: [{ title: "Revenir à l'instant présent", parcours: 'Premiers pas', duration: '5 min', file: "Revenir à l'instant présent.mp3", fileFem: false, emoji: '🌿', artwork: 'assets/illustrations/player-01.jpg', reason: "Pour ancrer l'attention ici et maintenant" }]
+      }
     },
     'moyen': {
-      main: { title: 'La cohérence cardiaque guidée', parcours: 'Calme & Stress', duration: '5 min', file: 'Cohérence cardiaque 5 minutes.mp3', fileFem: false, emoji: '💚', artwork: 'assets/illustrations/player-02.jpg', reason: `Régule le système nerveux en quelques minutes` },
-      alts: [
-        { title: "Lâcher prise sur l'urgence", parcours: 'Calme & Stress', duration: '7 min', file: 'Lacher prise sur lurgence.mp3', fileFem: false, emoji: '⏳', artwork: 'assets/illustrations/player-02.jpg', reason: `Pour sortir du mode urgence et retrouver du recul` }
-      ]
+      'corps': {
+        main: { title: 'Le scan corporel — découvrir ses sensations', parcours: 'Premiers pas', duration: '10 min', file: 'Le scan corporel.mp3', fileFem: 'Le scan corporel — découvrir ses sensations.mp3', emoji: '🌿', artwork: 'assets/illustrations/player-01.jpg', reason: "Relâche les tensions physiques stockées dans le corps" },
+        alts: [{ title: 'La cohérence cardiaque guidée', parcours: 'Calme & Stress', duration: '5 min', file: 'Cohérence cardiaque 5 minutes.mp3', fileFem: false, emoji: '💚', artwork: 'assets/illustrations/player-02.jpg', reason: "Régule le système nerveux rapidement" }]
+      },
+      'tete': {
+        main: { title: 'La cohérence cardiaque guidée', parcours: 'Calme & Stress', duration: '5 min', file: 'Cohérence cardiaque 5 minutes.mp3', fileFem: false, emoji: '💚', artwork: 'assets/illustrations/player-02.jpg', reason: 'Régule le système nerveux en quelques minutes' },
+        alts: [{ title: "Lâcher prise sur l'urgence", parcours: 'Calme & Stress', duration: '7 min', file: 'Lacher prise sur lurgence.mp3', fileFem: false, emoji: '⏳', artwork: 'assets/illustrations/player-02.jpg', reason: "Pour sortir du mode urgence mental" }]
+      },
+      'default': {
+        main: { title: 'La cohérence cardiaque guidée', parcours: 'Calme & Stress', duration: '5 min', file: 'Cohérence cardiaque 5 minutes.mp3', fileFem: false, emoji: '💚', artwork: 'assets/illustrations/player-02.jpg', reason: 'Régule le système nerveux en quelques minutes' },
+        alts: [{ title: "Lâcher prise sur l'urgence", parcours: 'Calme & Stress', duration: '7 min', file: 'Lacher prise sur lurgence.mp3', fileFem: false, emoji: '⏳', artwork: 'assets/illustrations/player-02.jpg', reason: "Pour sortir du mode urgence" }]
+      }
     },
     'long': {
-      main: { title: 'La cohérence cardiaque guidée', parcours: 'Calme & Stress', duration: '5 min', file: 'Cohérence cardiaque 5 minutes.mp3', fileFem: false, emoji: '💚', artwork: 'assets/illustrations/player-02.jpg', reason: `Régule le système nerveux en profondeur` },
-      alts: [
-        { title: 'Le scan corporel — découvrir ses sensations', parcours: 'Premiers pas', duration: '10 min', file: 'Le scan corporel.mp3', fileFem: 'Le scan corporel — découvrir ses sensations.mp3', emoji: '🌿', artwork: 'assets/illustrations/player-01.jpg', reason: `Pour relâcher les tensions physiques du stress` }
-      ]
+      'corps': {
+        main: { title: 'Le scan corporel — découvrir ses sensations', parcours: 'Premiers pas', duration: '10 min', file: 'Le scan corporel.mp3', fileFem: 'Le scan corporel — découvrir ses sensations.mp3', emoji: '🌿', artwork: 'assets/illustrations/player-01.jpg', reason: "Pour relâcher en profondeur les tensions physiques" },
+        alts: [{ title: 'Le corps qui tient le stress', parcours: 'Calme & Stress', duration: '10 min', file: 'Le corps qui tient le stress.mp3', fileFem: false, emoji: '💆', artwork: 'assets/illustrations/player-02.jpg', reason: "Travaille directement sur les tensions corporelles du stress" }]
+      },
+      'tete': {
+        main: { title: "Lâcher prise sur l'urgence", parcours: 'Calme & Stress', duration: '7 min', file: 'Lacher prise sur lurgence.mp3', fileFem: false, emoji: '⏳', artwork: 'assets/illustrations/player-02.jpg', reason: "Pour déposer le mental en mode urgence" },
+        alts: [{ title: 'Le scan corporel — découvrir ses sensations', parcours: 'Premiers pas', duration: '10 min', file: 'Le scan corporel.mp3', fileFem: 'Le scan corporel — découvrir ses sensations.mp3', emoji: '🌿', artwork: 'assets/illustrations/player-01.jpg', reason: "Redescendre dans le corps pour sortir du mental" }]
+      },
+      'default': {
+        main: { title: 'La cohérence cardiaque guidée', parcours: 'Calme & Stress', duration: '5 min', file: 'Cohérence cardiaque 5 minutes.mp3', fileFem: false, emoji: '💚', artwork: 'assets/illustrations/player-02.jpg', reason: 'Régule le système nerveux en profondeur' },
+        alts: [{ title: 'Le scan corporel — découvrir ses sensations', parcours: 'Premiers pas', duration: '10 min', file: 'Le scan corporel.mp3', fileFem: 'Le scan corporel — découvrir ses sensations.mp3', emoji: '🌿', artwork: 'assets/illustrations/player-01.jpg', reason: 'Pour relâcher les tensions physiques du stress' }]
+      }
     }
   },
   'anxiete': {
     'court': {
-      main: { title: 'SOS Anxiété — ancrage immédiat', parcours: 'Anxiété', duration: '5 min', file: 'SOS Anxiété ancrage immédiat.mp3', fileFem: false, emoji: '🌀', artwork: 'assets/illustrations/player-05.jpg', reason: `Technique d"ancrage pour calmer l'agitation vite` },
-      alts: [
-        { title: "Revenir à l'instant présent", parcours: 'Premiers pas', duration: '5 min', file: "Revenir à l'instant présent.mp3", fileFem: false, emoji: '🌿', artwork: 'assets/illustrations/player-01.jpg', reason: `Pour sortir du flot de pensées anxieuses` }
-      ]
+      'soudaine': {
+        main: { title: 'SOS Anxiété — ancrage immédiat', parcours: 'Anxiété', duration: '5 min', file: 'SOS Anxiété ancrage immédiat.mp3', fileFem: false, emoji: '🌀', artwork: 'assets/illustrations/player-05.jpg', reason: "Technique d'ancrage pour calmer l'agitation vite" },
+        alts: [{ title: 'Respiration 4-7-8 — calme profond', parcours: 'Respirer', duration: '6 min', file: 'Respiration 4-7-8 — Calme profond.mp3', fileFem: false, emoji: '🌬️', artwork: 'assets/illustrations/player-04.jpg', reason: "Active le système parasympathique rapidement" }]
+      },
+      'fond': {
+        main: { title: "Revenir à l'instant présent", parcours: 'Premiers pas', duration: '5 min', file: "Revenir à l'instant présent.mp3", fileFem: false, emoji: '🌿', artwork: 'assets/illustrations/player-01.jpg', reason: "Pour sortir du flot de pensées anxieuses de fond" },
+        alts: [{ title: 'SOS Anxiété — ancrage immédiat', parcours: 'Anxiété', duration: '5 min', file: 'SOS Anxiété ancrage immédiat.mp3', fileFem: false, emoji: '🌀', artwork: 'assets/illustrations/player-05.jpg', reason: "Ancrage sensoriel pour calmer le fond d'inquiétude" }]
+      },
+      'default': {
+        main: { title: 'SOS Anxiété — ancrage immédiat', parcours: 'Anxiété', duration: '5 min', file: 'SOS Anxiété ancrage immédiat.mp3', fileFem: false, emoji: '🌀', artwork: 'assets/illustrations/player-05.jpg', reason: "Technique d'ancrage pour calmer l'agitation vite" },
+        alts: [{ title: "Revenir à l'instant présent", parcours: 'Premiers pas', duration: '5 min', file: "Revenir à l'instant présent.mp3", fileFem: false, emoji: '🌿', artwork: 'assets/illustrations/player-01.jpg', reason: 'Pour sortir du flot de pensées anxieuses' }]
+      }
     },
     'moyen': {
-      main: { title: 'Respiration 4-7-8 — calme profond', parcours: 'Respirer', duration: '6 min', file: 'Respiration 4-7-8 — Calme profond.mp3', fileFem: false, emoji: '🌬️', artwork: 'assets/illustrations/player-04.jpg', reason: `La respiration 4-7-8 active le système parasympathique` },
-      alts: [
-        { title: 'Les sons autour de toi', parcours: 'Anxiété', duration: '7 min', file: 'Les sons autour de toi.mp3', fileFem: 'Les sons autour de toi.mp3', emoji: '👂', artwork: 'assets/illustrations/player-05.jpg', reason: `Recentre l"attention sur le présent par les sens` }
-      ]
+      'soudaine': {
+        main: { title: 'Respiration 4-7-8 — calme profond', parcours: 'Respirer', duration: '6 min', file: 'Respiration 4-7-8 — Calme profond.mp3', fileFem: false, emoji: '🌬️', artwork: 'assets/illustrations/player-04.jpg', reason: "La respiration 4-7-8 active le système parasympathique" },
+        alts: [{ title: 'Les sons autour de toi', parcours: 'Anxiété', duration: '7 min', file: 'Les sons autour de toi.mp3', fileFem: 'Les sons autour de toi.mp3', emoji: '👂', artwork: 'assets/illustrations/player-05.jpg', reason: "Recentre l'attention sur le présent par les sens" }]
+      },
+      'fond': {
+        main: { title: 'Les sons autour de toi', parcours: 'Anxiété', duration: '7 min', file: 'Les sons autour de toi.mp3', fileFem: 'Les sons autour de toi.mp3', emoji: '👂', artwork: 'assets/illustrations/player-05.jpg', reason: "Ancrage sensoriel pour sortir du fond d'inquiétude" },
+        alts: [{ title: 'Respiration 4-7-8 — calme profond', parcours: 'Respirer', duration: '6 min', file: 'Respiration 4-7-8 — Calme profond.mp3', fileFem: false, emoji: '🌬️', artwork: 'assets/illustrations/player-04.jpg', reason: "Régule le souffle pour apaiser l'inquiétude chronique" }]
+      },
+      'default': {
+        main: { title: 'Respiration 4-7-8 — calme profond', parcours: 'Respirer', duration: '6 min', file: 'Respiration 4-7-8 — Calme profond.mp3', fileFem: false, emoji: '🌬️', artwork: 'assets/illustrations/player-04.jpg', reason: "La respiration 4-7-8 active le système parasympathique" },
+        alts: [{ title: 'Les sons autour de toi', parcours: 'Anxiété', duration: '7 min', file: 'Les sons autour de toi.mp3', fileFem: 'Les sons autour de toi.mp3', emoji: '👂', artwork: 'assets/illustrations/player-05.jpg', reason: "Recentre l'attention sur le présent par les sens" }]
+      }
     },
     'long': {
-      main: { title: 'La pensée qui tourne en boucle', parcours: 'Anxiété', duration: '8 min', file: 'La pensée qui tourne en boucle.mp3', fileFem: 'La pensée qui tourne en boucle.mp3', emoji: '🧠', artwork: 'assets/illustrations/player-05.jpg', reason: `Pour travailler directement sur les ruminations` },
-      alts: [
-        { title: "Accueillir l'anxiété sans la combattre", parcours: 'Anxiété', duration: '10 min', file: "Accueillir l'anxiété sans la combattre.mp3", fileFem: false, emoji: '🤍', artwork: 'assets/illustrations/player-05.jpg', reason: `Approche douce — laisser passer plutôt que résister` }
-      ]
-    }
-  },
-  'fatigue': {
-    'court': {
-      main: { title: "Revenir à l'instant présent", parcours: 'Premiers pas', duration: '5 min', file: "Revenir à l'instant présent.mp3", fileFem: false, emoji: '🌿', artwork: 'assets/illustrations/player-01.jpg', reason: `Court et doux pour recharger sans effort` },
-      alts: [
-        { title: 'Première respiration consciente', parcours: 'Premiers pas', duration: '5 min', file: 'Méditation Premiere Respiration Consciente.mp3', fileFem: false, emoji: '🌱', artwork: 'assets/illustrations/player-01.jpg', reason: `Idéal pour une première pause dans la journée` }
-      ]
-    },
-    'moyen': {
-      main: { title: 'La bienveillance envers soi', parcours: 'Premiers pas', duration: '5 min', file: 'La bienveillance envers soi.mp3', fileFem: false, emoji: '💚', artwork: 'assets/illustrations/player-01.jpg', reason: `Pour se recharger en douceur sans se juger` },
-      alts: [
-        { title: 'Le scan corporel — découvrir ses sensations', parcours: 'Premiers pas', duration: '10 min', file: 'Le scan corporel.mp3', fileFem: 'Le scan corporel — découvrir ses sensations.mp3', emoji: '🌿', artwork: 'assets/illustrations/player-01.jpg', reason: `Relâche les tensions physiques accumulées` }
-      ]
-    },
-    'long': {
-      main: { title: 'Réveils nocturnes — retrouver le calme', parcours: 'Sommeil', duration: '18 min', file: 'Reveils nocturnes.mp3', fileFem: false, emoji: '🌙', artwork: 'assets/illustrations/player-03.jpg', reason: `Si la fatigue vient d"un sommeil perturbé` },
-      alts: [
-        { title: 'Mon ancre personnelle', parcours: 'Premiers pas', duration: '6 min', file: 'Mon ancre personnelle.mp3', fileFem: false, emoji: '⚓', artwork: 'assets/illustrations/player-01.jpg', reason: `Pour trouver un point de stabilité dans la journée` }
-      ]
-    }
-  },
-  'brouillard': {
-    'court': {
-      main: { title: "S'asseoir, ne rien faire", parcours: 'Premiers pas', duration: '5 min', file: 'Revenir au souffle.mp3', fileFem: false, emoji: '🧘', artwork: 'assets/illustrations/player-01.jpg', reason: `Parfois s"arrêter suffit à y voir plus clair` },
-      alts: [
-        { title: "Revenir à l'instant présent", parcours: 'Premiers pas', duration: '5 min', file: "Revenir à l'instant présent.mp3", fileFem: false, emoji: '🌿', artwork: 'assets/illustrations/player-01.jpg', reason: `Pour sortir du flou en se recentrant sur le souffle` }
-      ]
-    },
-    'moyen': {
-      main: { title: 'Observer ses pensées sans les juger', parcours: 'Premiers pas', duration: '9 min', file: 'Observer ses pensées sans les juger.mp3', fileFem: 'Observer ses pensées sans les juger.mp3', emoji: '👁️', artwork: 'assets/illustrations/player-01.jpg', reason: `Prendre du recul sur le flux mental` },
-      alts: [
-        { title: 'Mise en route mentale', parcours: 'Concentration', duration: '7 min', file: 'Mise en route mentale.mp3', fileFem: false, emoji: '🎯', artwork: 'assets/illustrations/player-06.jpg', reason: `Pour clarifier l"esprit et retrouver le focus` }
-      ]
-    },
-    'long': {
-      main: { title: 'Mon ancre personnelle', parcours: 'Premiers pas', duration: '6 min', file: 'Mon ancre personnelle.mp3', fileFem: false, emoji: '⚓', artwork: 'assets/illustrations/player-01.jpg', reason: `Construire un point de stabilité mental durable` },
-      alts: [
-        { title: 'Observer ses pensées sans les juger', parcours: 'Premiers pas', duration: '9 min', file: 'Observer ses pensées sans les juger.mp3', fileFem: 'Observer ses pensées sans les juger.mp3', emoji: '👁️', artwork: 'assets/illustrations/player-01.jpg', reason: `Pour observer le brouillard sans s"y perdre` }
-      ]
+      'soudaine': {
+        main: { title: 'Mon corps face à la peur', parcours: 'Anxiété', duration: '5 min', file: 'Mon corps face à la peur.mp3', fileFem: false, emoji: '🤍', artwork: 'assets/illustrations/player-05.jpg', reason: "Travailler directement la réaction physique à l'anxiété soudaine" },
+        alts: [{ title: 'La pensée qui tourne en boucle', parcours: 'Anxiété', duration: '8 min', file: 'La pensée qui tourne en boucle.mp3', fileFem: 'La pensée qui tourne en boucle.mp3', emoji: '🧠', artwork: 'assets/illustrations/player-05.jpg', reason: "Pour travailler sur les ruminations qui alimentent l'anxiété" }]
+      },
+      'fond': {
+        main: { title: 'La pensée qui tourne en boucle', parcours: 'Anxiété', duration: '8 min', file: 'La pensée qui tourne en boucle.mp3', fileFem: 'La pensée qui tourne en boucle.mp3', emoji: '🧠', artwork: 'assets/illustrations/player-05.jpg', reason: 'Pour travailler directement sur les ruminations de fond' },
+        alts: [{ title: "Accueillir l'anxiété sans la combattre", parcours: 'Anxiété', duration: '10 min', file: "Accueillir l'anxiété sans la combattre.mp3", fileFem: false, emoji: '🤍', artwork: 'assets/illustrations/player-05.jpg', reason: 'Approche douce — laisser passer plutôt que résister' }]
+      },
+      'default': {
+        main: { title: 'La pensée qui tourne en boucle', parcours: 'Anxiété', duration: '8 min', file: 'La pensée qui tourne en boucle.mp3', fileFem: 'La pensée qui tourne en boucle.mp3', emoji: '🧠', artwork: 'assets/illustrations/player-05.jpg', reason: 'Pour travailler directement sur les ruminations' },
+        alts: [{ title: "Accueillir l'anxiété sans la combattre", parcours: 'Anxiété', duration: '10 min', file: "Accueillir l'anxiété sans la combattre.mp3", fileFem: false, emoji: '🤍', artwork: 'assets/illustrations/player-05.jpg', reason: 'Approche douce — laisser passer plutôt que résister' }]
+      }
     }
   },
   'sommeil': {
     'court': {
-      main: { title: 'Rituel de déconnexion', parcours: 'Sommeil', duration: '10 min', file: 'Préparer le sommeil.mp3', fileFem: false, emoji: '🌙', artwork: 'assets/illustrations/player-03.jpg', reason: `Prépare le corps et l"esprit au coucher` },
-      alts: [
-        { title: 'La cohérence cardiaque guidée', parcours: 'Calme & Stress', duration: '5 min', file: 'Cohérence cardiaque 5 minutes.mp3', fileFem: false, emoji: '💚', artwork: 'assets/illustrations/player-02.jpg', reason: `Pour calmer le système nerveux avant de dormir` }
-      ]
+      'precoucher': {
+        main: { title: 'Rituel de déconnexion', parcours: 'Sommeil', duration: '10 min', file: 'Préparer le sommeil.mp3', fileFem: false, emoji: '🌙', artwork: 'assets/illustrations/player-03.jpg', reason: "Prépare le corps et l'esprit au coucher" },
+        alts: [{ title: 'La cohérence cardiaque guidée', parcours: 'Calme & Stress', duration: '5 min', file: 'Cohérence cardiaque 5 minutes.mp3', fileFem: false, emoji: '💚', artwork: 'assets/illustrations/player-02.jpg', reason: "Pour calmer le système nerveux avant de dormir" }]
+      },
+      'reveil': {
+        main: { title: 'Réveils nocturnes — retrouver le calme', parcours: 'Sommeil', duration: '18 min', file: 'Reveils nocturnes.mp3', fileFem: false, emoji: '💤', artwork: 'assets/illustrations/player-03.jpg', reason: "Spécialement conçu pour les réveils en pleine nuit" },
+        alts: [{ title: 'Respiration 4-7-8 — calme profond', parcours: 'Respirer', duration: '6 min', file: 'Respiration 4-7-8 — Calme profond.mp3', fileFem: false, emoji: '🌬️', artwork: 'assets/illustrations/player-04.jpg', reason: 'Technique reconnue pour se rendormir rapidement' }]
+      },
+      'default': {
+        main: { title: 'Rituel de déconnexion', parcours: 'Sommeil', duration: '10 min', file: 'Préparer le sommeil.mp3', fileFem: false, emoji: '🌙', artwork: 'assets/illustrations/player-03.jpg', reason: "Prépare le corps et l'esprit au coucher" },
+        alts: [{ title: 'La cohérence cardiaque guidée', parcours: 'Calme & Stress', duration: '5 min', file: 'Cohérence cardiaque 5 minutes.mp3', fileFem: false, emoji: '💚', artwork: 'assets/illustrations/player-02.jpg', reason: "Pour calmer le système nerveux avant de dormir" }]
+      }
     },
     'moyen': {
-      main: { title: 'Rituel de déconnexion', parcours: 'Sommeil', duration: '10 min', file: 'Préparer le sommeil.mp3', fileFem: false, emoji: '🌙', artwork: 'assets/illustrations/player-03.jpg', reason: `Coupe le flux mental de la journée` },
-      alts: [
-        { title: 'Respiration 4-7-8 — calme profond', parcours: 'Respirer', duration: '6 min', file: 'Respiration 4-7-8 — Calme profond.mp3', fileFem: false, emoji: '🌬️', artwork: 'assets/illustrations/player-04.jpg', reason: `Technique reconnue pour faciliter l"endormissement` }
-      ]
+      'precoucher': {
+        main: { title: 'Rituel de déconnexion', parcours: 'Sommeil', duration: '10 min', file: 'Préparer le sommeil.mp3', fileFem: false, emoji: '🌙', artwork: 'assets/illustrations/player-03.jpg', reason: "Coupe le flux mental de la journée" },
+        alts: [{ title: 'Relâcher le corps, couche après couche', parcours: 'Sommeil', duration: '8 min', file: 'Relâcher le corps, couche après couche.mp3', fileFem: false, emoji: '😴', artwork: 'assets/illustrations/player-03.jpg', reason: "Relaxation progressive pour glisser vers le sommeil" }]
+      },
+      'reveil': {
+        main: { title: 'Réveils nocturnes — retrouver le calme', parcours: 'Sommeil', duration: '18 min', file: 'Reveils nocturnes.mp3', fileFem: false, emoji: '💤', artwork: 'assets/illustrations/player-03.jpg', reason: "Spécialement conçu pour les réveils à 3h du matin" },
+        alts: [{ title: 'Rituel de déconnexion', parcours: 'Sommeil', duration: '10 min', file: 'Préparer le sommeil.mp3', fileFem: false, emoji: '🌙', artwork: 'assets/illustrations/player-03.jpg', reason: "Pour se recoucher sereinement" }]
+      },
+      'default': {
+        main: { title: 'Rituel de déconnexion', parcours: 'Sommeil', duration: '10 min', file: 'Préparer le sommeil.mp3', fileFem: false, emoji: '🌙', artwork: 'assets/illustrations/player-03.jpg', reason: "Coupe le flux mental de la journée" },
+        alts: [{ title: 'Respiration 4-7-8 — calme profond', parcours: 'Respirer', duration: '6 min', file: 'Respiration 4-7-8 — Calme profond.mp3', fileFem: false, emoji: '🌬️', artwork: 'assets/illustrations/player-04.jpg', reason: "Technique reconnue pour faciliter l'endormissement" }]
+      }
     },
     'long': {
-      main: { title: 'Réveils nocturnes — retrouver le calme', parcours: 'Sommeil', duration: '18 min', file: 'Reveils nocturnes.mp3', fileFem: false, emoji: '💤', artwork: 'assets/illustrations/player-03.jpg', reason: `Pour les nuits agitées et les réveils à 3h` },
-      alts: [
-        { title: 'Rituel de déconnexion', parcours: 'Sommeil', duration: '10 min', file: 'Préparer le sommeil.mp3', fileFem: false, emoji: '🌙', artwork: 'assets/illustrations/player-03.jpg', reason: `Prépare en douceur un endormissement profond` }
-      ]
+      'precoucher': {
+        main: { title: 'Sons & silence — endormissement profond', parcours: 'Sommeil', duration: '12 min', file: 'Sons & silence - endormissement profond.mp3', fileFem: false, emoji: '🌌', artwork: 'assets/illustrations/player-03.jpg', reason: "Accompagne doucement vers un endormissement profond" },
+        alts: [{ title: 'Réveils nocturnes — retrouver le calme', parcours: 'Sommeil', duration: '18 min', file: 'Reveils nocturnes.mp3', fileFem: false, emoji: '💤', artwork: 'assets/illustrations/player-03.jpg', reason: "Pour une nuit complète apaisée" }]
+      },
+      'reveil': {
+        main: { title: 'Réveils nocturnes — retrouver le calme', parcours: 'Sommeil', duration: '18 min', file: 'Reveils nocturnes.mp3', fileFem: false, emoji: '💤', artwork: 'assets/illustrations/player-03.jpg', reason: 'Pour les nuits agitées et les réveils à 3h' },
+        alts: [{ title: 'Rituel de déconnexion', parcours: 'Sommeil', duration: '10 min', file: 'Préparer le sommeil.mp3', fileFem: false, emoji: '🌙', artwork: 'assets/illustrations/player-03.jpg', reason: 'Prépare en douceur un endormissement profond' }]
+      },
+      'default': {
+        main: { title: 'Réveils nocturnes — retrouver le calme', parcours: 'Sommeil', duration: '18 min', file: 'Reveils nocturnes.mp3', fileFem: false, emoji: '💤', artwork: 'assets/illustrations/player-03.jpg', reason: 'Pour les nuits agitées et les réveils à 3h' },
+        alts: [{ title: 'Rituel de déconnexion', parcours: 'Sommeil', duration: '10 min', file: 'Préparer le sommeil.mp3', fileFem: false, emoji: '🌙', artwork: 'assets/illustrations/player-03.jpg', reason: 'Prépare en douceur un endormissement profond' }]
+      }
+    }
+  },
+  // Humeurs sans Q3 — structure plate conservée
+  'fatigue': {
+    'court': {
+      'default': {
+        main: { title: "Revenir à l'instant présent", parcours: 'Premiers pas', duration: '5 min', file: "Revenir à l'instant présent.mp3", fileFem: false, emoji: '🌿', artwork: 'assets/illustrations/player-01.jpg', reason: 'Court et doux pour recharger sans effort' },
+        alts: [{ title: 'Première respiration consciente', parcours: 'Premiers pas', duration: '5 min', file: 'Méditation Premiere Respiration Consciente.mp3', fileFem: false, emoji: '🌱', artwork: 'assets/illustrations/player-01.jpg', reason: 'Idéal pour une première pause dans la journée' }]
+      }
+    },
+    'moyen': {
+      'default': {
+        main: { title: 'La bienveillance envers soi', parcours: 'Premiers pas', duration: '5 min', file: 'La bienveillance envers soi.mp3', fileFem: false, emoji: '💚', artwork: 'assets/illustrations/player-01.jpg', reason: 'Pour se recharger en douceur sans se juger' },
+        alts: [{ title: 'Le scan corporel — découvrir ses sensations', parcours: 'Premiers pas', duration: '10 min', file: 'Le scan corporel.mp3', fileFem: 'Le scan corporel — découvrir ses sensations.mp3', emoji: '🌿', artwork: 'assets/illustrations/player-01.jpg', reason: 'Relâche les tensions physiques accumulées' }]
+      }
+    },
+    'long': {
+      'default': {
+        main: { title: 'Réveils nocturnes — retrouver le calme', parcours: 'Sommeil', duration: '18 min', file: 'Reveils nocturnes.mp3', fileFem: false, emoji: '🌙', artwork: 'assets/illustrations/player-03.jpg', reason: "Si la fatigue vient d'un sommeil perturbé" },
+        alts: [{ title: 'Mon ancre personnelle', parcours: 'Premiers pas', duration: '6 min', file: 'Mon ancre personnelle.mp3', fileFem: false, emoji: '⚓', artwork: 'assets/illustrations/player-01.jpg', reason: 'Pour trouver un point de stabilité dans la journée' }]
+      }
+    }
+  },
+  'brouillard': {
+    'court': {
+      'default': {
+        main: { title: "S'asseoir, ne rien faire", parcours: 'Premiers pas', duration: '5 min', file: 'Revenir au souffle.mp3', fileFem: false, emoji: '🧘', artwork: 'assets/illustrations/player-01.jpg', reason: "Parfois s'arrêter suffit à y voir plus clair" },
+        alts: [{ title: "Revenir à l'instant présent", parcours: 'Premiers pas', duration: '5 min', file: "Revenir à l'instant présent.mp3", fileFem: false, emoji: '🌿', artwork: 'assets/illustrations/player-01.jpg', reason: "Pour sortir du flou en se recentrant sur le souffle" }]
+      }
+    },
+    'moyen': {
+      'default': {
+        main: { title: 'Observer ses pensées sans les juger', parcours: 'Premiers pas', duration: '9 min', file: 'Observer ses pensées sans les juger.mp3', fileFem: 'Observer ses pensées sans les juger.mp3', emoji: '👁️', artwork: 'assets/illustrations/player-01.jpg', reason: "Prendre du recul sur le flux mental" },
+        alts: [{ title: 'Mise en route mentale', parcours: 'Concentration', duration: '7 min', file: 'Mise en route mentale.mp3', fileFem: false, emoji: '🎯', artwork: 'assets/illustrations/player-06.jpg', reason: "Pour clarifier l'esprit et retrouver le focus" }]
+      }
+    },
+    'long': {
+      'default': {
+        main: { title: 'Mon ancre personnelle', parcours: 'Premiers pas', duration: '6 min', file: 'Mon ancre personnelle.mp3', fileFem: false, emoji: '⚓', artwork: 'assets/illustrations/player-01.jpg', reason: "Construire un point de stabilité mental durable" },
+        alts: [{ title: 'Observer ses pensées sans les juger', parcours: 'Premiers pas', duration: '9 min', file: 'Observer ses pensées sans les juger.mp3', fileFem: 'Observer ses pensées sans les juger.mp3', emoji: '👁️', artwork: 'assets/illustrations/player-01.jpg', reason: "Pour observer le brouillard sans s'y perdre" }]
+      }
     }
   },
   'concentration': {
     'court': {
-      main: { title: 'Mise en route mentale', parcours: 'Concentration', duration: '7 min', file: 'Mise en route mentale.mp3', fileFem: false, emoji: '🎯', artwork: 'assets/illustrations/player-06.jpg', reason: `Clarifie l"esprit avant une tâche importante` },
-      alts: [
-        { title: "Revenir à l'instant présent", parcours: 'Premiers pas', duration: '5 min', file: "Revenir à l'instant présent.mp3", fileFem: false, emoji: '🌿', artwork: 'assets/illustrations/player-01.jpg', reason: `Plus court, pour une mise en route rapide` }
-      ]
+      'default': {
+        main: { title: 'Mise en route mentale', parcours: 'Concentration', duration: '7 min', file: 'Mise en route mentale.mp3', fileFem: false, emoji: '🎯', artwork: 'assets/illustrations/player-06.jpg', reason: "Clarifie l'esprit avant une tâche importante" },
+        alts: [{ title: "Revenir à l'instant présent", parcours: 'Premiers pas', duration: '5 min', file: "Revenir à l'instant présent.mp3", fileFem: false, emoji: '🌿', artwork: 'assets/illustrations/player-01.jpg', reason: 'Plus court, pour une mise en route rapide' }]
+      }
     },
     'moyen': {
-      main: { title: 'Mise en route mentale', parcours: 'Concentration', duration: '7 min', file: 'Mise en route mentale.mp3', fileFem: false, emoji: '🎯', artwork: 'assets/illustrations/player-06.jpg', reason: `Prépare le mental à entrer dans la zone` },
-      alts: [
-        { title: 'Observer ses pensées sans les juger', parcours: 'Premiers pas', duration: '9 min', file: 'Observer ses pensées sans les juger.mp3', fileFem: 'Observer ses pensées sans les juger.mp3', emoji: '👁️', artwork: 'assets/illustrations/player-01.jpg', reason: `Pour vider le mental avant de se concentrer` }
-      ]
+      'default': {
+        main: { title: 'Mise en route mentale', parcours: 'Concentration', duration: '7 min', file: 'Mise en route mentale.mp3', fileFem: false, emoji: '🎯', artwork: 'assets/illustrations/player-06.jpg', reason: "Prépare le mental à entrer dans la zone" },
+        alts: [{ title: 'Observer ses pensées sans les juger', parcours: 'Premiers pas', duration: '9 min', file: 'Observer ses pensées sans les juger.mp3', fileFem: 'Observer ses pensées sans les juger.mp3', emoji: '👁️', artwork: 'assets/illustrations/player-01.jpg', reason: "Pour vider le mental avant de se concentrer" }]
+      }
     },
     'long': {
-      main: { title: 'Mise en route mentale', parcours: 'Concentration', duration: '7 min', file: 'Mise en route mentale.mp3', fileFem: false, emoji: '🎯', artwork: 'assets/illustrations/player-06.jpg', reason: `Prépare en profondeur une session de travail` },
-      alts: [
-        { title: 'Mon ancre personnelle', parcours: 'Premiers pas', duration: '6 min', file: 'Mon ancre personnelle.mp3', fileFem: false, emoji: '⚓', artwork: 'assets/illustrations/player-01.jpg', reason: `Construit un ancrage mental stable pour le focus` }
-      ]
+      'default': {
+        main: { title: 'Flow - entrer dans la zone', parcours: 'Concentration', duration: '10 min', file: 'Flow - entrer dans la zone.mp3', fileFem: false, emoji: '🌊', artwork: 'assets/illustrations/player-06.jpg', reason: 'Pour atteindre un état de concentration profonde' },
+        alts: [{ title: 'Clarté mentale - faire le vide', parcours: 'Concentration', duration: '9 min', file: 'Clarté mentale - faire le vide.mp3', fileFem: false, emoji: '🧹', artwork: 'assets/illustrations/player-06.jpg', reason: "Prépare l'esprit avant une session de travail intense" }]
+      }
     }
   }
 };
 
 let guideMood = null;
+let guideDuration = null;
+let guideContext = null;
 let guideInitialized = false;
-
-function initGuide() {
-  if (guideInitialized) return;
-  guideInitialized = true;
-  guideMood = null;
-  const win = document.getElementById('chat-window');
-  const res = document.getElementById('guide-result');
-  win.innerHTML = ''; res.style.display = 'none'; res.innerHTML = '';
-  setTimeout(() => addBotBubble('Bonjour 👋 Comment tu te sens en ce moment ?'), 200);
-  setTimeout(() => addChoices([
-    { label: '😮‍💨 Stressé(e)', value: 'stress' },
-    { label: '😰 Anxieux/se', value: 'anxiete' },
-    { label: '😴 Fatigué(e)', value: 'fatigue' },
-    { label: '😶 Brouillard mental', value: 'brouillard' },
-    { label: '🌙 Difficultés à dormir', value: 'sommeil' },
-    { label: '🎯 Besoin de concentration', value: 'concentration' }
-  ], onMoodChoice), 600);
-}
-
-function onMoodChoice(value) {
-  guideMood = value;
-  const labels = { stress: 'Stressé(e)', anxiete: 'Anxieux/se', fatigue: 'Fatigué(e)', brouillard: 'Brouillard mental', sommeil: 'Difficultés à dormir', concentration: 'Besoin de concentration' };
-  addUserBubble(labels[value] || value);
-  clearChoices();
-  setTimeout(() => addBotBubble('Combien de temps as-tu ?'), 400);
-  setTimeout(() => addChoices([
-    { label: '⚡ 5 minutes', value: 'court' },
-    { label: '🌿 5–10 minutes', value: 'moyen' },
-    { label: '🌊 Plus de 10 minutes', value: 'long' }
-  ], onDurationChoice), 800);
-}
-
-function onDurationChoice(value) {
-  addUserBubble({ court: '5 minutes', moyen: '5–10 minutes', long: 'Plus de 10 minutes' }[value]);
-  clearChoices();
-  const entry = GUIDE_MAP[guideMood] && GUIDE_MAP[guideMood][value];
-  if (!entry) {
-    setTimeout(() => addBotBubble('Pas encore de séance disponible pour ce profil, mais ça arrive bientôt !'), 400);
-    return;
-  }
-  setTimeout(() => {
-    addBotBubble('Voilà ce que je te recommande :');
-    setTimeout(() => showGuideResult(entry), 400);
-  }, 400);
-}
 
 let pendingGuideRec = null;
 
@@ -718,9 +754,430 @@ function showGuideResult(entry) {
 
 function restartGuide() {
   guideInitialized = false;
+  guideMood = null;
+  guideDuration = null;
+  guideContext = null;
   initGuide();
   document.getElementById('guide-result').style.display = 'none';
 }
+
+// ── Filtrage horaire ──
+function getCurrentHour() {
+  return new Date().getHours();
+}
+
+function isConcentrationBlocked() {
+  const h = getCurrentHour();
+  return h >= 22 || h < 6;
+}
+
+const HISTORY_KEY = 'serein-history';
+const FEEDBACK_KEY = 'serein-feedback';
+
+function getRecentHistory() {
+  try {
+    const raw = localStorage.getItem(HISTORY_KEY);
+    if (!raw) return [];
+    const all = JSON.parse(raw);
+    const cutoff = Date.now() - 15 * 24 * 60 * 60 * 1000;
+    return all.filter(e => e.ts > cutoff);
+  } catch(e) { return []; }
+}
+
+function recordGuidePlay(title) {
+  try {
+    const history = getRecentHistory();
+    history.push({ title, ts: Date.now() });
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+  } catch(e) {}
+}
+
+function applyHistoryToEntry(entry) {
+  if (!entry) return entry;
+  const history = getRecentHistory();
+  const played = new Set(history.map(e => e.title));
+  const result = { main: entry.main, alts: [...(entry.alts || [])] };
+  if (played.has(result.main.title) && result.alts.length > 0) {
+    const freshAltIdx = result.alts.findIndex(a => !played.has(a.title));
+    if (freshAltIdx !== -1) {
+      const fresh = result.alts[freshAltIdx];
+      result.alts[freshAltIdx] = { ...result.main, reason: result.main.reason + ' (déjà écoutée récemment)' };
+      result.main = fresh;
+    }
+  }
+  return result;
+}
+
+// ── Q3 : questions contextuelles ──
+const CONTEXT_QUESTIONS = {
+  stress: {
+    question: "Où tu le ressens le plus ?",
+    choices: [
+      { label: '💪 Dans le corps (tensions, mâchoire, épaules)', value: 'corps' },
+      { label: '🧠 Dans la tête (pensées, ruminations)', value: 'tete' }
+    ]
+  },
+  anxiete: {
+    question: "C'est plutôt…",
+    choices: [
+      { label: '⚡ Une agitation soudaine', value: 'soudaine' },
+      { label: '🌫 Un fond d\'inquiétude persistant', value: 'fond' }
+    ]
+  },
+  sommeil: {
+    question: 'Tu te prépares à dormir ou tu viens de te réveiller ?',
+    choices: [
+      { label: '🌙 Je me prépare à dormir', value: 'precoucher' },
+      { label: '😳 Je viens de me réveiller', value: 'reveil' }
+    ]
+  }
+};
+
+function onContextChoice(value) {
+  const contextLabels = {
+    corps: 'Dans le corps', tete: 'Dans la tête',
+    soudaine: 'Agitation soudaine', fond: "Fond d'inquiétude persistant",
+    precoucher: 'Je me prépare à dormir', reveil: 'Je viens de me réveiller'
+  };
+  guideContext = value;
+  addUserBubble(contextLabels[value] || value);
+  clearChoices();
+  askDuration();
+}
+
+function askDuration() {
+  setTimeout(() => addBotBubble('Combien de temps as-tu ?'), 400);
+  setTimeout(() => addChoices([
+    { label: '⚡ 5 minutes', value: 'court' },
+    { label: '🌿 5–10 minutes', value: 'moyen' },
+    { label: '🌊 Plus de 10 minutes', value: 'long' }
+  ], onDurationChoice), 800);
+}
+
+function saveFeedback(mood, duration, context, sessionTitle, rating) {
+  try {
+    const raw = localStorage.getItem(FEEDBACK_KEY);
+    const all = raw ? JSON.parse(raw) : [];
+    all.push({ mood, duration, context, title: sessionTitle, rating, ts: Date.now() });
+    localStorage.setItem(FEEDBACK_KEY, JSON.stringify(all.slice(-60)));
+  } catch(e) {}
+}
+
+function getIntensityBias(mood, duration, context) {
+  try {
+    const raw = localStorage.getItem(FEEDBACK_KEY);
+    if (!raw) return null;
+    const all = JSON.parse(raw);
+    const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
+    const relevant = all.filter(e =>
+      e.mood === mood &&
+      e.duration === duration &&
+      (e.context === context || !context) &&
+      e.ts > cutoff
+    );
+    if (relevant.length < 2) return null;
+
+    let intense = 0, doux = 0;
+    for (const e of relevant) {
+      if (e.rating === 'intense') intense++;
+      else if (e.rating === 'doux') doux++;
+    }
+    const total = relevant.length;
+    if (intense / total >= 0.5) return 'softer';
+    if (doux / total >= 0.5) return 'harder';
+    return null;
+  } catch(e) { return null; }
+}
+
+// Applique le biais d'intensité : si trop intense → propose l'alt en main
+function applyFeedbackToEntry(entry, mood, duration, context) {
+  if (!entry) return entry;
+  const bias = getIntensityBias(mood, duration, context);
+  if (!bias || !entry.alts || entry.alts.length === 0) return entry;
+
+  const result = { main: entry.main, alts: [...entry.alts] };
+
+  if (bias === 'softer') {
+    // Chercher un alt plus doux (durée plus courte ou parcours différent)
+    const softerAlt = result.alts.find(a =>
+      parseInt(a.duration) <= parseInt(result.main.duration)
+    );
+    if (softerAlt) {
+      const idx = result.alts.indexOf(softerAlt);
+      result.alts[idx] = { ...result.main, reason: result.main.reason + ' (ajusté selon vos retours)' };
+      result.main = { ...softerAlt, reason: softerAlt.reason + ' — plus doux selon vos préférences' };
+    }
+  }
+  return result;
+}
+
+function showGuideFeedback() {
+  const completeScreen = document.getElementById('complete-screen');
+  if (!completeScreen || !guideMood) return;
+
+  // Supprimer un feedback existant si déjà affiché
+  const existing = document.getElementById('guide-feedback-wrap');
+  if (existing) existing.remove();
+
+  const wrap = document.createElement('div');
+  wrap.id = 'guide-feedback-wrap';
+  wrap.style.cssText = 'margin-top:1.25rem;display:flex;flex-direction:column;align-items:center;gap:.6rem;width:100%;';
+
+  const label = document.createElement('p');
+  label.textContent = 'Cette séance était…';
+  label.style.cssText = 'font-size:.75rem;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.08em;';
+  wrap.appendChild(label);
+
+  const btns = document.createElement('div');
+  btns.style.cssText = 'display:flex;gap:.6rem;';
+
+  const feedbacks = [
+    { label: '😮 Trop intense', value: 'intense' },
+    { label: '✓ C\'était bien',  value: 'ok'      },
+    { label: '🌿 Trop doux',    value: 'doux'     },
+  ];
+
+  feedbacks.forEach(f => {
+    const btn = document.createElement('button');
+    btn.textContent = f.label;
+    btn.style.cssText = [
+      'background:rgba(255,255,255,.1)',
+      'border:1px solid rgba(255,255,255,.2)',
+      'border-radius:999px',
+      'color:rgba(255,255,255,.85)',
+      'padding:.4rem .85rem',
+      'font-size:.78rem',
+      'cursor:pointer',
+      'transition:all .18s',
+    ].join(';');
+    btn.addEventListener('click', () => {
+      if (currentSession) {
+        saveFeedback(guideMood, guideDuration, guideContext, currentSession.title, f.value);
+        recordGuidePlay(currentSession.title);
+      }
+      // Remplacer les boutons par un message de confirmation discret
+      wrap.innerHTML = '';
+      const thanks = document.createElement('p');
+      thanks.textContent = 'Merci, j\'en tiens compte pour la prochaine fois.';
+      thanks.style.cssText = 'font-size:.78rem;color:rgba(255,255,255,.4);font-style:italic;';
+      wrap.appendChild(thanks);
+    });
+    btns.appendChild(btn);
+  });
+
+  wrap.appendChild(btns);
+
+  // Insérer avant les boutons d'action existants
+  const completeActions = completeScreen.querySelector('.complete-actions');
+  if (completeActions) {
+    completeScreen.insertBefore(wrap, completeActions);
+  } else {
+    completeScreen.appendChild(wrap);
+  }
+}
+
+
+function launchObservationSession(cb) {
+  // Lance la mini séance d'observation
+  launchPlayer(
+    'observation',
+    "Prendre un instant pour s'observer",
+    'Premiers pas',
+    '2 min',
+    "Prendre un instant pour s-observer.mp3",
+    'masculine',
+    'assets/illustrations/player-01.jpg'
+  );
+
+  // Flag pour bloquer showGuideFeedback sur cette séance spéciale
+  const prevMood = guideMood;
+  guideMood = null;
+
+  const onEnded = () => {
+    audio.removeEventListener('ended', onEnded);
+    guideMood = prevMood; // restaurer pour ne pas bloquer showGuideFeedback si besoin
+
+    setTimeout(() => {
+      closePlayer();
+      setTimeout(() => {
+        addBotBubble('Comment tu te sens après cette pause ?');
+        setTimeout(() => addChoices([
+          { label: '💪 Corps tendu, besoin de relâcher',   value: 'stress_corps' },
+          { label: '🧠 Tête agitée, pensées qui tournent', value: 'stress_tete'  },
+          { label: '😴 Fatigué(e), besoin de repos',       value: 'fatigue'      },
+          { label: '🌿 Ça va, je n\'ai plus besoin',       value: 'done'         },
+        ], (v) => {
+          clearChoices();
+
+          if (v === 'done') {
+            addUserBubble("Ça va, merci");
+            setTimeout(() => addBotBubble('Parfait. Prends soin de toi 🌿'), 400);
+            guideInitialized = false; // permet de relancer le guide proprement
+            return;
+          }
+
+          const mapping = {
+            stress_corps: { mood: 'stress',     context: 'corps' },
+            stress_tete:  { mood: 'stress',     context: 'tete'  },
+            fatigue:      { mood: 'fatigue',    context: null     },
+          };
+          const { mood, context } = mapping[v];
+          guideMood = mood;
+          guideContext = context;
+
+          const labels = {
+            stress_corps: 'Corps tendu',
+            stress_tete:  'Tête agitée',
+            fatigue:      'Fatigué(e)',
+          };
+          addUserBubble(labels[v]);
+          askDuration();
+        }), 600);
+      }, 400);
+    }, 800);
+  };
+
+  audio.addEventListener('ended', onEnded);
+}
+
+function initGuide() {
+  if (guideInitialized) return;
+  guideInitialized = true;
+  guideMood = null;
+  guideDuration = null;
+  guideContext = null;
+
+  const win = document.getElementById('chat-window');
+  const res = document.getElementById('guide-result');
+  win.innerHTML = '';
+  res.style.display = 'none';
+  res.innerHTML = '';
+
+  const hour = getCurrentHour();
+  const greeting = (hour >= 6 && hour < 12) ? 'Bonjour'
+    : (hour >= 12 && hour < 18) ? 'Bon après-midi'
+    : 'Bonsoir';
+
+  setTimeout(() => addBotBubble(greeting + ' 👋 Comment tu te sens en ce moment ?'), 200);
+
+  setTimeout(() => {
+    // Boutons humeur
+    showMoodChoices();
+  }, 600);
+}
+
+function showMoodChoices() {
+  const choices = [
+    { label: '😮‍💨 Stressé(e)',              value: 'stress'        },
+    { label: '😰 Anxieux/se',               value: 'anxiete'       },
+    { label: '😴 Fatigué(e)',               value: 'fatigue'       },
+    { label: '😶 Brouillard mental',         value: 'brouillard'    },
+    { label: '🌙 Difficultés à dormir',      value: 'sommeil'       },
+    { label: '🎯 Besoin de concentration',   value: 'concentration' },
+    { label: '🤷 Je ne sais pas vraiment',   value: 'unknown'       },
+  ];
+
+  if (isConcentrationBlocked()) {
+    choices.find(c => c.value === 'concentration').disabled = true;
+  }
+
+  addChoices(choices, onMoodChoice);
+}
+
+
+function onMoodChoice(value) {
+  const labels = {
+    stress: 'Stressé(e)', anxiete: 'Anxieux/se', fatigue: 'Fatigué(e)',
+    brouillard: 'Brouillard mental', sommeil: 'Difficultés à dormir',
+    concentration: 'Besoin de concentration', unknown: 'Je ne sais pas vraiment'
+  };
+  addUserBubble(labels[value] || value);
+  clearChoices();
+
+  // Mode "Je ne sais pas"
+  if (value === 'unknown') {
+    setTimeout(() => {
+      addBotBubble("Pas de problème. Je te propose une petite pause de 2 minutes pour t'observer, puis on reprend ensemble.");
+      setTimeout(() => addChoices([
+        { label: '▶ Lancer la pause', value: 'launch_obs' },
+        { label: '↩ Choisir quand même', value: 'back'   }
+      ], (v) => {
+        clearChoices();
+        if (v === 'launch_obs') {
+          launchObservationSession();
+        } else {
+          guideInitialized = false;
+          initGuide();
+        }
+      }), 600);
+    }, 400);
+    return;
+  }
+
+  guideMood = value;
+
+  // Bloquer Concentration après 22h
+  if (value === 'concentration' && isConcentrationBlocked()) {
+    setTimeout(() => addBotBubble("À cette heure-ci, une séance de concentration risque de te tenir éveillé(e). Tu ne veux pas plutôt essayer quelque chose de plus doux ?"), 400);
+    setTimeout(() => addChoices([
+      { label: '🌙 Plutôt du sommeil',                            value: 'sommeil'              },
+      { label: '😮‍💨 Me détendre',                                  value: 'stress'               },
+      { label: '🎯 Non, je veux quand même concentration',         value: 'concentration_force'  }
+    ], (v) => {
+      if (v === 'concentration_force') {
+        guideMood = 'concentration';
+        addUserBubble('Je veux quand même concentration');
+        clearChoices();
+        askDuration();
+      } else {
+        onMoodChoice(v);
+      }
+    }), 800);
+    return;
+  }
+
+  // Q3 contextuelle si applicable
+  if (CONTEXT_QUESTIONS[value]) {
+    setTimeout(() => addBotBubble(CONTEXT_QUESTIONS[value].question), 400);
+    setTimeout(() => addChoices(CONTEXT_QUESTIONS[value].choices, onContextChoice), 800);
+  } else {
+    askDuration();
+  }
+}
+
+
+function showRestartError() {
+  setTimeout(() => {
+    addBotBubble("Quelque chose s'est mal passé. On recommence ?");
+    setTimeout(() => addChoices([{ label: '↩ Recommencer', value: 'restart' }], () => { restartGuide(); }), 400);
+  }, 400);
+}
+
+function onDurationChoice(value) {
+  guideDuration = value;
+  addUserBubble({ court: '5 minutes', moyen: '5–10 minutes', long: 'Plus de 10 minutes' }[value]);
+  clearChoices();
+
+  const moodMap = GUIDE_MAP[guideMood];
+  if (!moodMap) { showRestartError(); return; }
+  const durationMap = moodMap[value];
+  if (!durationMap) { showRestartError(); return; }
+
+  const contextKey = guideContext && durationMap[guideContext] ? guideContext : 'default';
+  const rawEntry = durationMap[contextKey];
+  if (!rawEntry) { showRestartError(); return; }
+
+  // Appliquer historique PUIS feedback
+  let entry = applyHistoryToEntry(rawEntry);
+  entry = applyFeedbackToEntry(entry, guideMood, guideDuration, guideContext);
+
+  setTimeout(() => {
+    addBotBubble('Voilà ce que je te recommande :');
+    setTimeout(() => showGuideResult(entry), 400);
+  }, 400);
+}
+
+
 
 function addBotBubble(text) {
   const win = document.getElementById('chat-window');
