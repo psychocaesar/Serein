@@ -111,6 +111,8 @@ function closePlayer() {
 
   // Clean up timer if active
   if (timerInterval) { clearInterval(timerInterval); timerInterval = null; timerRunning = false; }
+  const timerEngine = document.getElementById('timer-engine');
+  if (timerEngine) { timerEngine.pause(); timerEngine.src = ''; }
   stopSilentSession();
 
   // Always restore guided player UI
@@ -204,15 +206,18 @@ function togglePlay() {
   // Timer mode
   const timerDisplay = document.getElementById('timer-display');
   if (timerDisplay && timerDisplay.style.display === 'flex') {
+    const timerEngine = document.getElementById('timer-engine');
     if (timerRunning) {
       timerRunning = false;
       clearInterval(timerInterval);
       timerElapsedBeforePause += Date.now() - timerStartTimestamp;
+      timerEngine.pause();
       if (timerAudioCtx) timerAudioCtx.suspend().catch(() => {});
       updatePlayIcon(false);
     } else {
       timerRunning = true;
       timerStartTimestamp = Date.now();
+      timerEngine.play().catch(() => {});
       if (timerAudioCtx) timerAudioCtx.resume().catch(() => {});
       timerInterval = setInterval(timerTick, 1000);
       updatePlayIcon(true);
@@ -1277,10 +1282,18 @@ function startTimer(minutes) {
   openPlayerScreen();
 
   timerElapsedBeforePause = 0;
-  startSilentSession();
 
-  bell.currentTime = 0;
-  bell.play().catch(() => {});
+  const timerEngine = document.getElementById('timer-engine');
+  timerEngine.src = 'assets/audio/timer-' + minutes + 'min.mp3';
+  timerEngine.load();
+  // Le MP3 démarre avec la cloche intégrée — pas de bell.play() séparé.
+  // Si le fichier est absent on replie sur AudioContext + cloche seule.
+  timerEngine.play().catch(() => {
+    bell.currentTime = 0;
+    bell.play().catch(() => {});
+    startSilentSession();
+  });
+
   setTimeout(() => {
     timerRunning = true;
     timerStartTimestamp = Date.now();
