@@ -325,6 +325,12 @@ function fmt(s) {
 }
 
 function replaySession() {
+  // Mode timer libre : relancer le chronomètre avec la même durée
+  if (timerTotalSeconds > 0) {
+    startTimer(timerTotalSeconds / 60);
+    return;
+  }
+  // Mode session guidée
   document.getElementById('complete-screen').classList.remove('visible');
   document.getElementById('player-main').classList.remove('hidden');
   document.getElementById('player-main').style.display = 'flex';
