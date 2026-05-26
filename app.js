@@ -91,6 +91,8 @@ function closePlayer() {
 
   // Clean up timer if active
   if (timerInterval) { clearInterval(timerInterval); timerInterval = null; timerRunning = false; }
+  const timerEngine = document.getElementById('timer-engine');
+  if (timerEngine) { timerEngine.pause(); timerEngine.src = ''; }
 
   // Always restore guided player UI
   const artworkWrap = document.getElementById('player-artwork-wrap');
@@ -183,12 +185,15 @@ function togglePlay() {
   // Timer mode
   const timerDisplay = document.getElementById('timer-display');
   if (timerDisplay && timerDisplay.style.display === 'flex') {
+    const timerEngine = document.getElementById('timer-engine');
     if (timerRunning) {
       timerRunning = false;
       clearInterval(timerInterval);
+      timerEngine.pause();
       updatePlayIcon(false);
     } else {
       timerRunning = true;
+      timerEngine.play().catch(() => {});
       timerInterval = setInterval(timerTick, 1000);
       updatePlayIcon(true);
     }
@@ -1251,18 +1256,28 @@ function startTimer(minutes) {
 
   openPlayerScreen();
 
+  const timerEngine = document.getElementById('timer-engine');
+  timerEngine.src = 'assets/audio/timer-' + minutes + 'min.mp3';
+  timerEngine.load();
+
   bell.currentTime = 0;
   bell.play().catch(() => {});
   setTimeout(() => {
     timerRunning = true;
     updatePlayIcon(true);
+    timerEngine.play().catch(() => {});
     timerInterval = setInterval(timerTick, 1000);
   }, 1500);
 }
 
 function timerTick() {
   if (!timerRunning) return;
-  timerSecondsLeft--;
+  const te = document.getElementById('timer-engine');
+  if (te.readyState >= 2 && !te.paused) {
+    timerSecondsLeft = Math.max(0, Math.round(timerTotalSeconds - te.currentTime));
+  } else {
+    timerSecondsLeft = Math.max(0, timerSecondsLeft - 1);
+  }
   updateTimerDisplay();
   if (timerSecondsLeft <= 0) {
     clearInterval(timerInterval);
