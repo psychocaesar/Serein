@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  AndroidManifest.xml — Serein
+  Emplacement dans le projet : android/app/src/main/AndroidManifest.xml
+
+  Philosophie :
+  - Permissions minimales (privacy-first)
+  - Pas de notifications push
+  - Lecture audio en arrière-plan (écran verrouillé)
+  - Compatible Android 8+ (API 26)
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="fr.sereinapp.app">
+
+    <!-- ══════════════════════════════════════════════════
+         PERMISSIONS
+         Uniquement celles strictement nécessaires.
+    ══════════════════════════════════════════════════ -->
+
+    <!-- Accès réseau pour charger les audios non encore mis en cache -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Vérifier la connectivité avant de tenter un téléchargement -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- Lecture audio en arrière-plan / écran verrouillé.
+         Requiert un ForegroundService déclaré ci-dessous. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+
+    <!-- Empêche Android d'endormir le CPU pendant la lecture audio.
+         Utilisé par Capacitor WebView automatiquement. -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <!-- Écriture dans le stockage interne pour le cache audio hors ligne.
+         Requis par @capacitor/filesystem sur API < 29. -->
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+
+    <!-- ══════════════════════════════════════════════════
+         DÉCLARATION DE L'APPLICATION
+    ══════════════════════════════════════════════════ -->
+    <application
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme"
+        android:usesCleartextTraffic="false"
+        android:networkSecurityConfig="@xml/network_security_config">
+
+        <!--
+            allowBackup="false" : les données locales (stats, préférences) ne
+            sont pas sauvegardées sur les serveurs Google. Cohérent avec la
+            politique de confidentialité de Serein.
+
+            usesCleartextTraffic="false" : force HTTPS sur toutes les
+            connexions réseau (complète androidScheme: "https" de Capacitor).
+        -->
+
+        <!-- ── Activité principale (WebView Capacitor) ── -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode"
+            android:windowSoftInputMode="adjustResize">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+        </activity>
+
+        <!-- ── Service de lecture audio en arrière-plan ──
+             Permet la lecture quand l'écran est verrouillé.
+             Le type "mediaPlayback" est requis depuis Android 10 (API 29)
+             pour ce cas d'usage précis.
+        -->
+        <service
+            android:name=".AudioPlaybackService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback" />
+
+        <!-- ── Provider Capacitor FileSystem ──
+             Requis par @capacitor/filesystem pour partager des fichiers
+             entre l'app et d'autres composants Android.
+             authorities doit correspondre à votre appId.
+        -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+    </application>
+
+    <!-- ══════════════════════════════════════════════════
+         COMPATIBILITÉ ANDROID
+         minSdk 26 = Android 8.0 (~98% des appareils actifs)
+         targetSdk 34 = Android 14 (requis par le Play Store en 2024-2025)
+    ══════════════════════════════════════════════════ -->
+    <uses-sdk
+        android:minSdkVersion="26"
+        android:targetSdkVersion="34" />
+
+</manifest>

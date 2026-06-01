@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "serein",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "www", "-p", "3456", "--no-clipboard"],
+      "port": 3456
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "appId": "fr.sereinapp.app",
+  "appName": "SereinApp Méditation",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  }
+}

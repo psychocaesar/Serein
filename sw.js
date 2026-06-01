@@ -1,6 +1,6 @@
-const CACHE_VERSION = 'serein-v2';
+const CACHE_VERSION = 'serein-v3';
 const STATIC_CACHE  = CACHE_VERSION + '-static';
-const AUDIO_CACHE   = CACHE_VERSION + '-audio';
+const AUDIO_CACHE   = 'serein-audio'; // non versionné — survit aux mises à jour
 
 const STATIC_ASSETS = [
   '/',
@@ -10,17 +10,34 @@ const STATIC_ASSETS = [
   '/assets/audio/cloche.mp3'
 ];
 
+const OPTIONAL_ASSETS = [
+  '/assets/illustrations/player-01.jpg',
+  '/assets/illustrations/player-02.jpg',
+  '/assets/illustrations/player-03.jpg',
+  '/assets/illustrations/player-04.jpg',
+  '/assets/illustrations/player-05.jpg',
+  '/assets/illustrations/player-06.jpg'
+];
+
 self.addEventListener('install', event => {
   self.skipWaiting();
   event.waitUntil(
-    caches.open(STATIC_CACHE).then(cache => cache.addAll(STATIC_ASSETS))
+    caches.open(STATIC_CACHE).then(cache =>
+      cache.addAll(STATIC_ASSETS).then(() =>
+        Promise.allSettled(OPTIONAL_ASSETS.map(url => cache.add(url)))
+      )
+    )
   );
 });
 
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== STATIC_CACHE && k !== AUDIO_CACHE).map(k => caches.delete(k)))
+      Promise.all(
+        keys
+          .filter(k => k !== STATIC_CACHE && k !== AUDIO_CACHE)
+          .map(k => caches.delete(k))
+      )
     ).then(() => self.clients.claim())
   );
 });
