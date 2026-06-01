@@ -1,0 +1,16 @@
+{
+  "images": [
+    { "filename": "Default-568h@2x.png",    "idiom": "iphone", "scale": "2x", "minimum-system-version": "7.0", "subtype": "retina4"       },
+    { "filename": "Default-667h@2x.png",    "idiom": "iphone", "scale": "2x", "minimum-system-version": "8.0", "subtype": "667h"          },
+    { "filename": "Default-736h@3x.png",    "idiom": "iphone", "scale": "3x", "minimum-system-version": "8.0", "subtype": "736h"          },
+    { "filename": "Default-812h@3x.png",    "idiom": "iphone", "scale": "3x", "minimum-system-version": "11.0","subtype": "2436h"         },
+    { "filename": "Default-896h@2x.png",    "idiom": "iphone", "scale": "2x", "minimum-system-version": "12.0","subtype": "1792h"         },
+    { "filename": "Default-896h@3x.png",    "idiom": "iphone", "scale": "3x", "minimum-system-version": "12.0","subtype": "2688h"         },
+    { "filename": "Default@2x~iphone.png",  "idiom": "iphone", "scale": "2x"                                                              },
+    { "filename": "Default@3x~iphone.png",  "idiom": "iphone", "scale": "3x"                                                              },
+    { "filename": "Default~ipad.png",       "idiom": "ipad",   "scale": "1x"                                                              },
+    { "filename": "Default@2x~ipad.png",    "idiom": "ipad",   "scale": "2x"                                                              },
+    { "filename": "Default-1366@2x~ipad.png","idiom": "ipad",  "scale": "2x", "subtype": "2732h"                                          }
+  ],
+  "info": { "author": "xcode", "version": 1 }
+}
