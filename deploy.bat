@@ -51,14 +51,10 @@ echo.
 
 :sync_only
 
-:: ── ETAPE 3/5 : Copie sw.js et manifest vers www/ ──
-echo [2/5] Copie sw.js / manifest vers www/...
-if not exist www mkdir www
-copy sw.js www\sw.js /Y >nul
-copy manifest.json www\manifest.json /Y >nul 2>nul
-:: NB : app.js et index.html sont edites directement dans www/ — ne pas ecraser
-if not exist www\app.js (
-  echo [ERREUR] www\app.js manquant.
+:: ── ETAPE 3/5 : Verifier que app/pwa est intact ──
+echo [2/5] Verification app/pwa...
+if not exist app\pwa\app.js (
+  echo [ERREUR] app\pwa\app.js manquant.
   pause
   exit /b 1
 )
@@ -67,7 +63,7 @@ echo.
 
 :: ── ETAPE 4/5 : Capacitor sync Android ──
 echo [3/5] Synchronisation Android (cap sync)...
-call npx cap sync android
+call npx cap sync
 if !errorlevel! neq 0 (
   echo [ATTENTION] cap sync a renvoye une erreur, mais on continue.
 )
@@ -85,15 +81,15 @@ if !errorlevel! neq 0 (
 )
 echo.
 
-:: ── ETAPE 5.5 : Sync audio vers Pi via scp ──
+:: ── ETAPE 5.5 : Sync audio vers Pi via rsync ──
 echo [4.5/5] Synchronisation audio vers le Pi...
-scp -r "www\assets\audio\masculin" pi-serein:/home/pi/sereinapp/www/assets/audio/
+rsync -avz --checksum "app/pwa/assets/audio/masculin/" pi-serein:/home/pi/sereinapp/www/assets/audio/masculin/
 if !errorlevel! neq 0 (
-  echo [ATTENTION] scp masculin a echoue.
+  echo [ATTENTION] rsync masculin a echoue.
 )
-scp -r "www\assets\audio\feminin" pi-serein:/home/pi/sereinapp/www/assets/audio/
+rsync -avz --checksum "app/pwa/assets/audio/feminin/" pi-serein:/home/pi/sereinapp/www/assets/audio/feminin/
 if !errorlevel! neq 0 (
-  echo [ATTENTION] scp feminin a echoue.
+  echo [ATTENTION] rsync feminin a echoue.
 )
 echo       OK
 echo.
