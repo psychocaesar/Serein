@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+
+  <!-- Serein ne collecte aucune donnée utilisateur -->
+  <key>NSPrivacyCollectedDataTypes</key>
+  <array/>
+
+  <!-- Serein ne fait aucun tracking publicitaire -->
+  <key>NSPrivacyTracking</key>
+  <false/>
+
+  <!-- APIs système utilisées par Capacitor/WebKit -->
+  <key>NSPrivacyAccessedAPITypes</key>
+  <array>
+
+    <!-- UserDefaults : utilisé par Capacitor pour les préférences locales
+         Raison : stocker les préférences utilisateur (thème, stats) -->
+    <dict>
+      <key>NSPrivacyAccessedAPIType</key>
+      <string>NSPrivacyAccessedAPICategoryUserDefaults</string>
+      <key>NSPrivacyAccessedAPITypeReasons</key>
+      <array>
+        <string>CA92.1</string>
+      </array>
+    </dict>
+
+    <!-- FileTimestamp : accès aux dates de fichiers pour le cache audio
+         Raison : fonctionnement normal du cache hors ligne -->
+    <dict>
+      <key>NSPrivacyAccessedAPIType</key>
+      <string>NSPrivacyAccessedAPICategoryFileTimestamp</string>
+      <key>NSPrivacyAccessedAPITypeReasons</key>
+      <array>
+        <string>C617.1</string>
+      </array>
+    </dict>
+
+  </array>
+
+</dict>
+</plist>

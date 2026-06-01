@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+
+  <!-- ═══════════════════════════════════════
+       CAPACITOR — NE PAS SUPPRIMER
+  ═══════════════════════════════════════ -->
+  <key>CAPACITOR_DEBUG</key>
+  <string>$(CAPACITOR_DEBUG)</string>
+
+  <!-- ═══════════════════════════════════════
+       IDENTITÉ DE L'APPLICATION
+  ═══════════════════════════════════════ -->
+  <key>CFBundleDevelopmentRegion</key>
+  <string>fr</string>
+
+  <key>CFBundleDisplayName</key>
+  <string>Serein</string>
+
+  <key>CFBundleExecutable</key>
+  <string>$(EXECUTABLE_NAME)</string>
+
+  <key>CFBundleIdentifier</key>
+  <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+
+  <key>CFBundleInfoDictionaryVersion</key>
+  <string>6.0</string>
+
+  <key>CFBundleName</key>
+  <string>$(PRODUCT_NAME)</string>
+
+  <key>CFBundlePackageType</key>
+  <string>APPL</string>
+
+  <key>CFBundleShortVersionString</key>
+  <string>$(MARKETING_VERSION)</string>
+
+  <key>CFBundleVersion</key>
+  <string>$(CURRENT_PROJECT_VERSION)</string>
+
+  <!-- AJOUTÉ : icônes déclarées pour iOS 15+ -->
+  <key>CFBundleIcons</key>
+  <dict>
+    <key>CFBundlePrimaryIcon</key>
+    <dict>
+      <key>CFBundleIconFiles</key>
+      <array>
+        <string>AppIcon</string>
+      </array>
+      <key>UIPrerenderedIcon</key>
+      <false/>
+    </dict>
+  </dict>
+
+  <key>LSRequiresIPhoneOS</key>
+  <true/>
+
+  <!-- ═══════════════════════════════════════
+       INTERFACE & ORIENTATION
+  ═══════════════════════════════════════ -->
+  <key>UILaunchStoryboardName</key>
+  <string>LaunchScreen</string>
+
+  <key>UIMainStoryboardFile</key>
+  <string>Main</string>
+
+  <!-- CORRIGÉ : arm64 remplace armv7 (armv7 = iPhone 5 et avant, obsolète)
+       Capacitor 8 requiert iOS 14+ donc arm64 minimum -->
+  <key>UIRequiredDeviceCapabilities</key>
+  <array>
+    <string>arm64</string>
+  </array>
+
+  <key>UISupportedInterfaceOrientations</key>
+  <array>
+    <string>UIInterfaceOrientationPortrait</string>
+  </array>
+
+  <key>UISupportedInterfaceOrientations~ipad</key>
+  <array>
+    <string>UIInterfaceOrientationPortrait</string>
+    <string>UIInterfaceOrientationPortraitUpsideDown</string>
+  </array>
+
+  <key>UIViewControllerBasedStatusBarAppearance</key>
+  <true/>
+
+  <key>UIStatusBarStyle</key>
+  <string>UIStatusBarStyleLightContent</string>
+
+  <!-- AJOUTÉ : cache le status bar sur le splash screen -->
+  <key>UIStatusBarHidden</key>
+  <false/>
+
+  <!-- AJOUTÉ : couleur de fond pendant le chargement (évite le flash blanc) -->
+  <key>UILaunchScreen</key>
+  <dict>
+    <key>UIColorName</key>
+    <string>LaunchScreenBackground</string>
+  </dict>
+
+  <!-- ═══════════════════════════════════════
+       AUDIO EN ARRIÈRE-PLAN
+       Indispensable pour la lecture écran verrouillé
+  ═══════════════════════════════════════ -->
+  <key>UIBackgroundModes</key>
+  <array>
+    <string>audio</string>
+  </array>
+
+  <!-- ═══════════════════════════════════════
+       NOTIFICATIONS LOCALES
+       SUPPRIMÉ : vous avez décidé de ne pas
+       intégrer les notifications pour l'instant.
+       À réactiver si besoin futur.
+  ═══════════════════════════════════════ -->
+  <!-- <key>NSUserNotificationUsageDescription</key> -->
+
+  <!-- ═══════════════════════════════════════
+       SÉCURITÉ RÉSEAU (ATS)
+       Force HTTPS, bloque les connexions non sécurisées
+  ═══════════════════════════════════════ -->
+  <key>NSAppTransportSecurity</key>
+  <dict>
+    <key>NSAllowsArbitraryLoads</key>
+    <false/>
+    <key>NSAllowsLocalNetworking</key>
+    <true/>
+  </dict>
+
+  <!-- ═══════════════════════════════════════
+       CAPACITOR WEBVIEW — DOMAINES AUTORISÉS
+       Restreint la navigation au domaine sereinapp.fr
+  ═══════════════════════════════════════ -->
+  <key>WKAppBoundDomains</key>
+  <array>
+    <string>sereinapp.fr</string>
+    <string>www.sereinapp.fr</string>
+  </array>
+
+  <!-- ═══════════════════════════════════════
+       APP STORE — CHIFFREMENT & DONNÉES
+       Déclare l'absence de collecte et de chiffrement
+  ═══════════════════════════════════════ -->
+  <key>NSPrivacyCollectedDataTypes</key>
+  <array/>
+
+  <key>ITSAppUsesNonExemptEncryption</key>
+  <false/>
+
+  <!-- AJOUTÉ : requis par Apple depuis 2024
+       Déclare que l'app ne fait pas de tracking publicitaire -->
+  <key>NSPrivacyTrackingEnabled</key>
+  <false/>
+
+  <!-- AJOUTÉ : URL du fichier de confidentialité Apple (PrivacyInfo.xcprivacy)
+       Obligatoire depuis le SDK iOS 17 pour certaines APIs système -->
+  <key>NSPrivacyAccessedAPITypes</key>
+  <array/>
+
+</dict>
+</plist>
