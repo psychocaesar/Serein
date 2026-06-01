@@ -279,7 +279,7 @@ function launchPlayer(id, title, parcours, duration, filename, voice, artwork) {
 
   openPlayerScreen();
 
-  audio.src = 'assets/audio/' + (voice === 'feminine' ? 'feminin' : 'masculin') + '/' + encodeURIComponent(filename);
+  audio.src = 'assets/audio/' + voiceFolder(voice) + '/' + encodeURIComponent(filename);
   audio.load();
   audio.play().then(() => {
     document.getElementById('audio-loading').textContent = '';
@@ -436,8 +436,14 @@ function replaySession() {
 }
 
 // ── OFFLINE depuis le player ──
+const AUDIO_CACHE = 'serein-audio';
+
+function voiceFolder(voice) {
+  return voice === 'feminine' ? 'feminin' : 'masculin';
+}
+
 function currentAudioFolder() {
-  return currentSession && currentSession.voice === 'feminine' ? 'feminin' : 'masculin';
+  return voiceFolder(currentSession && currentSession.voice);
 }
 
 async function toolbarOffline() {
@@ -445,7 +451,7 @@ async function toolbarOffline() {
   const btn = document.getElementById('toolbar-offline-btn');
   if (!('caches' in window)) { alert('Cache non disponible sur ce navigateur.'); return; }
   try {
-    const cache = await caches.open('serein-audio');
+    const cache = await caches.open(AUDIO_CACHE);
     const url = 'assets/audio/' + currentAudioFolder() + '/' + encodeURIComponent(currentOfflineFilename);
     const existing = await cache.match(url);
     if (existing) {
@@ -462,7 +468,7 @@ async function toolbarOffline() {
 async function updateOfflineBtnState() {
   if (!currentOfflineFilename || !('caches' in window)) return;
   try {
-    const cache = await caches.open('serein-audio');
+    const cache = await caches.open(AUDIO_CACHE);
     const url = 'assets/audio/' + currentAudioFolder() + '/' + encodeURIComponent(currentOfflineFilename);
     const existing = await cache.match(url);
     const btn = document.getElementById('toolbar-offline-btn');
@@ -507,8 +513,8 @@ async function toggleOfflineCache(btn, filename) {
   if (!('caches' in window)) { alert('Cache non disponible sur ce navigateur.'); return; }
   btn.classList.add('loading');
   try {
-    const cache = await caches.open('serein-audio');
-    const url = 'assets/audio/masculin/' + encodeURIComponent(filename);
+    const cache = await caches.open(AUDIO_CACHE);
+    const url = 'assets/audio/' + voiceFolder(btn.dataset.voice) + '/' + encodeURIComponent(filename);
     const existing = await cache.match(url);
     if (existing) {
       await cache.delete(url);
@@ -531,7 +537,7 @@ async function toggleOfflineCache(btn, filename) {
 async function updateOfflineCount() {
   if (!('caches' in window)) return;
   try {
-    const cache = await caches.open('serein-audio');
+    const cache = await caches.open(AUDIO_CACHE);
     const keys = await cache.keys();
     const tag = document.getElementById('offline-count-tag');
     if (tag) tag.textContent = keys.length + ' séance' + (keys.length > 1 ? 's' : '');
@@ -541,13 +547,12 @@ async function updateOfflineCount() {
 async function restoreOfflineButtons() {
   if (!('caches' in window)) return;
   try {
-    const cache = await caches.open('serein-audio');
+    const cache = await caches.open(AUDIO_CACHE);
     const btns = Array.from(document.querySelectorAll('.btn-offline[data-filename]'));
     await Promise.all(btns.map(async btn => {
       const fn = btn.dataset.filename;
       if (!fn) return;
-      const voice = btn.dataset.voice === 'feminine' ? 'feminin' : 'masculin';
-      const match = await cache.match('assets/audio/' + voice + '/' + encodeURIComponent(fn));
+      const match = await cache.match('assets/audio/' + voiceFolder(btn.dataset.voice) + '/' + encodeURIComponent(fn));
       if (match) { btn.classList.add('cached'); btn.textContent = '✓'; }
     }));
   } catch(e) { console.warn('[Serein cache]', e); }
@@ -1523,8 +1528,7 @@ function startTimer(minutes) {
   timerRunning = false;
 
   const playerEl = document.getElementById('player-screen');
-  playerEl.removeAttribute('data-parcours');
-  playerEl.setAttribute('data-parcours', 'timer');
+  playerEl.dataset.parcours = 'timer';
   document.getElementById('player-bg').style.backgroundImage = '';
 
   document.getElementById('player-artwork-wrap').style.display = 'none';
