@@ -51,13 +51,12 @@ echo.
 
 :sync_only
 
-:: ── ETAPE 3/5 : Copie vers www/ ──
-echo [2/5] Copie des fichiers web vers www/...
+:: ── ETAPE 3/5 : Copie sw.js et manifest vers www/ ──
+echo [2/5] Copie sw.js / manifest vers www/...
 if not exist www mkdir www
-copy app.js www\app.js /Y >nul
-copy index.html www\index.html /Y >nul
 copy sw.js www\sw.js /Y >nul
 copy manifest.json www\manifest.json /Y >nul 2>nul
+:: NB : app.js et index.html sont edites directement dans www/ — ne pas ecraser
 if not exist www\app.js (
   echo [ERREUR] www\app.js manquant.
   pause

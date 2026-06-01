@@ -38,23 +38,57 @@ function showScreen(id) {
   if (id === 'guide') initGuide();
 }
 
-function filterTab(btn) {
-  document.querySelectorAll('.filter-tabs .tab').forEach(t => t.classList.remove('active'));
-  btn.classList.add('active');
-  const label = btn.textContent.trim();
+let activeThemeFilter = 'Toutes';
+let activeDurationFilter = 'all';
+
+function applyFilters() {
   document.querySelectorAll('.session-list .session-card').forEach(card => {
     const p = card.dataset.parcours || '';
-    card.style.display = (label === 'Toutes' || p === label) ? '' : 'none';
+    const d = card.dataset.duration || '';
+    const themeMatch = (activeThemeFilter === 'Toutes' || p === activeThemeFilter);
+    const durationMatch = (activeDurationFilter === 'all' || d === activeDurationFilter);
+    card.style.display = (themeMatch && durationMatch) ? '' : 'none';
   });
+  const showEmotionSubs = (activeThemeFilter === 'Émotions');
+  document.querySelectorAll('.emotion-subgroup').forEach(el => {
+    el.style.display = showEmotionSubs ? 'block' : 'none';
+  });
+  document.querySelectorAll('.emotion-disclaimer, .emotion-top-disclaimer, .emotion-ressources').forEach(el => {
+    el.style.display = showEmotionSubs ? 'block' : 'none';
+  });
+  updateFilterCount();
+}
+
+function filterTab(btn) {
+  document.querySelectorAll('.filter-tabs:not(.duration) .tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  activeThemeFilter = btn.textContent.trim();
+  applyFilters();
+}
+
+function filterDuration(btn) {
+  document.querySelectorAll('.filter-tabs.duration .tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  activeDurationFilter = btn.dataset.duration;
+  applyFilters();
+}
+
+function updateFilterCount() {
+  let count = 0;
+  document.querySelectorAll('.session-list .session-card').forEach(card => {
+    if (card.style.display !== 'none') count++;
+  });
+  const el = document.getElementById('filter-count');
+  if (el) el.textContent = count === 0 ? 'Aucune séance trouvée' : count + ' séance' + (count > 1 ? 's' : '');
 }
 
 function filterParcours(label) {
   showScreen('explore');
-  setTimeout(() => {
+  requestAnimationFrame(() => {
     document.querySelectorAll('.filter-tabs .tab').forEach(t => {
       if (t.textContent.trim() === label) t.click();
     });
-  }, 50);
+  });
 }
 
 // ── VOICE OVERLAY ──
@@ -105,6 +139,12 @@ function openPlayerScreen() {
 }
 
 function closePlayer() {
+  // Capturer avant effacement : si session guidée interrompue manuellement, proposer feedback
+  const interrupted = guideMood && currentSession && !audio.ended && audio.currentTime > 5;
+  const interruptedSnapshot = interrupted
+    ? { mood: guideMood, duration: guideDuration, context: guideContext, title: currentSession.title }
+    : null;
+
   // Stop all audio
   audio.pause();
   ambianceAudio.pause();
@@ -138,6 +178,54 @@ function closePlayer() {
   guideMood = null;
   guideDuration = null;
   guideContext = null;
+
+  if (interruptedSnapshot) showInterruptedFeedbackToast(interruptedSnapshot);
+}
+
+function showInterruptedFeedbackToast(snap) {
+  const existing = document.getElementById('interrupted-feedback-toast');
+  if (existing) existing.remove();
+
+  const toast = document.createElement('div');
+  toast.id = 'interrupted-feedback-toast';
+  toast.style.cssText = [
+    'position:fixed', 'bottom:80px', 'left:50%', 'transform:translateX(-50%)',
+    'background:var(--card-bg, #1e1e2e)', 'border:1px solid rgba(255,255,255,.12)',
+    'border-radius:16px', 'padding:.85rem 1.1rem', 'z-index:9999',
+    'display:flex', 'flex-direction:column', 'align-items:center', 'gap:.55rem',
+    'box-shadow:0 8px 32px rgba(0,0,0,.35)', 'max-width:320px', 'width:90%',
+    'animation:fadeInUp .25s ease'
+  ].join(';');
+
+  const label = document.createElement('p');
+  label.textContent = 'Comment était cette séance ?';
+  label.style.cssText = 'font-size:.78rem;color:rgba(255,255,255,.55);margin:0;text-align:center;';
+  toast.appendChild(label);
+
+  const btns = document.createElement('div');
+  btns.style.cssText = 'display:flex;gap:.5rem;';
+
+  [{ label: '😮 Trop intense', value: 'intense' }, { label: '✓ Bien', value: 'ok' }, { label: '🌿 Trop doux', value: 'doux' }, { label: '✕', value: 'dismiss' }].forEach(f => {
+    const btn = document.createElement('button');
+    btn.textContent = f.label;
+    btn.style.cssText = [
+      'background:rgba(255,255,255,.08)', 'border:1px solid rgba(255,255,255,.15)',
+      'border-radius:999px', 'color:rgba(255,255,255,.8)',
+      'padding:.35rem .75rem', 'font-size:.75rem', 'cursor:pointer'
+    ].join(';');
+    btn.addEventListener('click', () => {
+      if (f.value !== 'dismiss') {
+        saveFeedback(snap.mood, snap.duration, snap.context, snap.title, f.value);
+        recordGuidePlay(snap.title);
+      }
+      toast.remove();
+    });
+    btns.appendChild(btn);
+  });
+
+  toast.appendChild(btns);
+  document.body.appendChild(toast);
+  setTimeout(() => { if (toast.parentNode) toast.remove(); }, 12000);
 }
 
 function toggleOptionsSheet() {
@@ -179,11 +267,11 @@ function launchPlayer(id, title, parcours, duration, filename, voice, artwork) {
     'Sommeil': 'sommeil',
     'Respirer': 'respirer',
     'Anxiété': 'anxiete',
-    'Concentration': 'concentration'
+    'Concentration': 'concentration',
+    'Émotions': 'emotions'
   };
   const playerEl = document.getElementById('player-screen');
-  // Remove previous parcours attrs
-  Object.values(parcoursMap).forEach(v => playerEl.removeAttribute('data-parcours') );
+  playerEl.removeAttribute('data-parcours');
   const pKey = parcoursMap[parcours] || 'premiers-pas';
   playerEl.setAttribute('data-parcours', pKey);
   // Background is handled by CSS gradients per parcours — clear any leftover image
@@ -265,6 +353,14 @@ function setSpeed(s) {
   document.querySelectorAll('.speed-btn').forEach(b => {
     b.classList.toggle('active', parseFloat(b.textContent.replace('×','')) === s);
   });
+  try { localStorage.setItem('serein-speed', String(s)); } catch(e) {}
+}
+
+function loadSpeed() {
+  try {
+    const saved = parseFloat(localStorage.getItem('serein-speed'));
+    if (SPEEDS.includes(saved)) setSpeed(saved);
+  } catch(e) {}
 }
 
 document.getElementById('btn-rewind').onclick = () => { audio.currentTime = Math.max(0, audio.currentTime - 15); };
@@ -340,13 +436,17 @@ function replaySession() {
 }
 
 // ── OFFLINE depuis le player ──
+function currentAudioFolder() {
+  return currentSession && currentSession.voice === 'feminine' ? 'feminin' : 'masculin';
+}
+
 async function toolbarOffline() {
   if (!currentOfflineFilename) return;
   const btn = document.getElementById('toolbar-offline-btn');
   if (!('caches' in window)) { alert('Cache non disponible sur ce navigateur.'); return; }
   try {
     const cache = await caches.open('serein-v2-audio');
-    const url = 'assets/audio/masculin/' + encodeURIComponent(currentOfflineFilename);
+    const url = 'assets/audio/' + currentAudioFolder() + '/' + encodeURIComponent(currentOfflineFilename);
     const existing = await cache.match(url);
     if (existing) {
       await cache.delete(url);
@@ -363,7 +463,7 @@ async function updateOfflineBtnState() {
   if (!currentOfflineFilename || !('caches' in window)) return;
   try {
     const cache = await caches.open('serein-v2-audio');
-    const url = 'assets/audio/masculin/' + encodeURIComponent(currentOfflineFilename);
+    const url = 'assets/audio/' + currentAudioFolder() + '/' + encodeURIComponent(currentOfflineFilename);
     const existing = await cache.match(url);
     const btn = document.getElementById('toolbar-offline-btn');
     btn.classList.toggle('active', !!existing);
@@ -453,8 +553,21 @@ async function restoreOfflineButtons() {
 }
 
 // ── STATS ──
+function isYesterday(dateStr) {
+  if (!dateStr) return false;
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  return dateStr === yesterday.toLocaleDateString('fr-CA');
+}
+
+function getStats() {
+  try {
+    return JSON.parse(localStorage.getItem('serein-stats') || '{}');
+  } catch(e) { return {}; }
+}
+
 function loadStats() {
-  const s = JSON.parse(localStorage.getItem('serein-stats') || '{"sessions":0,"minutes":0,"lastDate":"","streak":0}');
+  const s = getStats();
   const hasSession = (s.sessions || 0) > 0;
   const welcomeBlock = document.getElementById('welcome-block');
   const statsBlock = document.getElementById('stats-block');
@@ -466,21 +579,19 @@ function loadStats() {
 }
 
 function recordCompletion() {
-  const s = JSON.parse(localStorage.getItem('serein-stats') || '{"sessions":0,"minutes":0,"lastDate":"","streak":0}');
-  s.sessions = (s.sessions || 0) + 1;
-  const dur = currentSession ? (parseFloat(currentSession.duration) || Math.round((audio.duration || 0) / 60)) : 0;
-  s.minutes = (s.minutes || 0) + dur;
-  const today = new Date().toLocaleDateString('fr-CA');
-  if (s.lastDate === today) {
-    // même jour
-  } else if (s.lastDate === new Date(Date.now() - 86400000).toLocaleDateString('fr-CA')) {
-    s.streak = (s.streak || 0) + 1;
-  } else {
-    s.streak = 1;
-  }
-  s.lastDate = today;
-  localStorage.setItem('serein-stats', JSON.stringify(s));
-  loadStats();
+  try {
+    const s = getStats();
+    s.sessions = (s.sessions || 0) + 1;
+    const dur = currentSession ? (parseFloat(currentSession.duration) || Math.round((audio.duration || 0) / 60)) : 0;
+    s.minutes = (s.minutes || 0) + dur;
+    const today = new Date().toLocaleDateString('fr-CA');
+    if (s.lastDate !== today) {
+      s.streak = isYesterday(s.lastDate) ? (s.streak || 0) + 1 : 1;
+    }
+    s.lastDate = today;
+    localStorage.setItem('serein-stats', JSON.stringify(s));
+    loadStats();
+  } catch(e) { console.warn('[Serein stats]', e); }
 }
 
 // ── THÈME ──
@@ -647,13 +758,13 @@ const GUIDE_MAP = {
     'moyen': {
       'default': {
         main: { title: 'La bienveillance envers soi', parcours: 'Premiers pas', duration: '5 min', file: 'La bienveillance envers soi.mp3', fileFem: false, emoji: '💚', artwork: 'assets/illustrations/player-01.jpg', reason: 'Pour se recharger en douceur sans se juger' },
-        alts: [{ title: 'Le scan corporel — découvrir ses sensations', parcours: 'Premiers pas', duration: '10 min', file: 'Le scan corporel.mp3', fileFem: 'Le scan corporel — découvrir ses sensations.mp3', emoji: '🌿', artwork: 'assets/illustrations/player-01.jpg', reason: 'Relâche les tensions physiques accumulées' }]
+        alts: [{ title: 'Le scan corporel — découvrir ses sensations', parcours: 'Premiers pas', duration: '10 min', file: 'Le scan corporel.mp3', fileFem: 'Le scan corporel — découvrir ses sensations.mp3', emoji: '🌿', artwork: 'assets/illustrations/player-01.jpg', reason: 'Relâche les tensions physiques accumulées' }, { title: 'Retrouver le goût des choses', parcours: 'Émotions', duration: '8 min', file: 'Retrouver le gout des choses.mp3', fileFem: false, emoji: '🌱', artwork: 'assets/illustrations/player-02.jpg', reason: "Quand la fatigue vient d'une perte d'élan intérieur" }]
       }
     },
     'long': {
       'default': {
         main: { title: 'Réveils nocturnes — retrouver le calme', parcours: 'Sommeil', duration: '18 min', file: 'Reveils nocturnes.mp3', fileFem: false, emoji: '🌙', artwork: 'assets/illustrations/player-03.jpg', reason: "Si la fatigue vient d'un sommeil perturbé" },
-        alts: [{ title: 'Mon ancre personnelle', parcours: 'Premiers pas', duration: '6 min', file: 'Mon ancre personnelle.mp3', fileFem: false, emoji: '⚓', artwork: 'assets/illustrations/player-01.jpg', reason: 'Pour trouver un point de stabilité dans la journée' }]
+        alts: [{ title: 'Mon ancre personnelle', parcours: 'Premiers pas', duration: '6 min', file: 'Mon ancre personnelle.mp3', fileFem: false, emoji: '⚓', artwork: 'assets/illustrations/player-01.jpg', reason: 'Pour trouver un point de stabilité dans la journée' }, { title: 'Retrouver le goût des choses', parcours: 'Émotions', duration: '8 min', file: 'Retrouver le gout des choses.mp3', fileFem: false, emoji: '🌱', artwork: 'assets/illustrations/player-02.jpg', reason: "Quand la fatigue cache une perte de sens ou d'envie" }]
       }
     }
   },
@@ -667,7 +778,7 @@ const GUIDE_MAP = {
     'moyen': {
       'default': {
         main: { title: 'Observer ses pensées sans les juger', parcours: 'Premiers pas', duration: '9 min', file: 'Observer ses pensées sans les juger.mp3', fileFem: 'Observer ses pensées sans les juger.mp3', emoji: '👁️', artwork: 'assets/illustrations/player-01.jpg', reason: "Prendre du recul sur le flux mental" },
-        alts: [{ title: 'Mise en route mentale', parcours: 'Concentration', duration: '7 min', file: 'Mise en route mentale.mp3', fileFem: false, emoji: '🎯', artwork: 'assets/illustrations/player-06.jpg', reason: "Pour clarifier l'esprit et retrouver le focus" }]
+        alts: [{ title: 'Mise en route mentale', parcours: 'Concentration', duration: '7 min', file: 'Mise en route mentale.mp3', fileFem: false, emoji: '🎯', artwork: 'assets/illustrations/player-06.jpg', reason: "Pour clarifier l'esprit et retrouver le focus" }, { title: 'Retrouver le goût des choses', parcours: 'Émotions', duration: '8 min', file: 'Retrouver le gout des choses.mp3', fileFem: false, emoji: '🌱', artwork: 'assets/illustrations/player-02.jpg', reason: "Quand le brouillard cache une perte d'envie ou d'élan" }]
       }
     },
     'long': {
@@ -696,6 +807,46 @@ const GUIDE_MAP = {
         alts: [{ title: 'Clarté mentale - faire le vide', parcours: 'Concentration', duration: '9 min', file: 'Clarté mentale - faire le vide.mp3', fileFem: false, emoji: '🧹', artwork: 'assets/illustrations/player-06.jpg', reason: "Prépare l'esprit avant une session de travail intense" }]
       }
     }
+  },
+  'colere': {
+    'court': {
+      'default': {
+        main: { title: 'SOS Colère - décharger sans exploser', parcours: 'Émotions', duration: '5 min', file: 'SOS Colère.mp3', fileFem: false, emoji: '😤', artwork: 'assets/illustrations/player-02.jpg', reason: "Décharger l'énergie de la colère immédiatement, sans l'alimenter" },
+        alts: [{ title: "Traverser l'irritabilité", parcours: 'Émotions', duration: '9 min', file: 'Traverser l-irritabilité.mp3', fileFem: false, emoji: '🌊', artwork: 'assets/illustrations/player-02.jpg', reason: "Quand l'irritation couve plutôt qu'elle n'éclate" }]
+      }
+    },
+    'moyen': {
+      'default': {
+        main: { title: "Traverser l'irritabilité", parcours: 'Émotions', duration: '9 min', file: 'Traverser l-irritabilité.mp3', fileFem: false, emoji: '🌊', artwork: 'assets/illustrations/player-02.jpg', reason: "Pour traverser l'irritation et revenir au calme" },
+        alts: [{ title: 'SOS Colère - décharger sans exploser', parcours: 'Émotions', duration: '5 min', file: 'SOS Colère.mp3', fileFem: false, emoji: '😤', artwork: 'assets/illustrations/player-02.jpg', reason: "Pour une décharge rapide si la colère remonte" }]
+      }
+    },
+    'long': {
+      'default': {
+        main: { title: "Traverser l'irritabilité", parcours: 'Émotions', duration: '9 min', file: 'Traverser l-irritabilité.mp3', fileFem: false, emoji: '🌊', artwork: 'assets/illustrations/player-02.jpg', reason: "Pour aller en profondeur dans ce que l'irritabilité exprime" },
+        alts: [{ title: 'Fin de journée - déposer le poids', parcours: 'Émotions', duration: '10 min', file: 'Fin de journee - deposer le poids.mp3', fileFem: false, emoji: '🌙', artwork: 'assets/illustrations/player-02.jpg', reason: "Déposer la tension et la colère accumulées sur la journée" }]
+      }
+    }
+  },
+  'tristesse': {
+    'court': {
+      'default': {
+        main: { title: 'Tristesse & mauvaise humeur', parcours: 'Émotions', duration: '8 min', file: 'Tristesse et Mauvaise humeur.mp3', fileFem: false, emoji: '☁️', artwork: 'assets/illustrations/player-02.jpg', reason: "Accueillir l'humeur difficile sans la combattre" },
+        alts: [{ title: 'La bienveillance envers soi', parcours: 'Premiers pas', duration: '5 min', file: 'La bienveillance envers soi.mp3', fileFem: false, emoji: '💚', artwork: 'assets/illustrations/player-01.jpg', reason: "Pour s'accompagner avec douceur dans les moments durs" }]
+      }
+    },
+    'moyen': {
+      'default': {
+        main: { title: 'Tristesse & mauvaise humeur', parcours: 'Émotions', duration: '8 min', file: 'Tristesse et Mauvaise humeur.mp3', fileFem: false, emoji: '☁️', artwork: 'assets/illustrations/player-02.jpg', reason: "Traverser la tristesse ou la mauvaise humeur avec douceur" },
+        alts: [{ title: 'Retrouver le goût des choses', parcours: 'Émotions', duration: '8 min', file: 'Retrouver le gout des choses.mp3', fileFem: false, emoji: '🌱', artwork: 'assets/illustrations/player-02.jpg', reason: "Réamorcer l'élan quand tout semble terne" }]
+      }
+    },
+    'long': {
+      'default': {
+        main: { title: 'Retrouver le goût des choses', parcours: 'Émotions', duration: '8 min', file: 'Retrouver le gout des choses.mp3', fileFem: false, emoji: '🌱', artwork: 'assets/illustrations/player-02.jpg', reason: "Réamorcer l'élan quand la tristesse ou le vide s'installe" },
+        alts: [{ title: 'Tristesse & mauvaise humeur', parcours: 'Émotions', duration: '8 min', file: 'Tristesse et Mauvaise humeur.mp3', fileFem: false, emoji: '☁️', artwork: 'assets/illustrations/player-02.jpg', reason: "Pour traverser une tristesse de fond avec douceur" }]
+      }
+    }
   }
 };
 
@@ -704,7 +855,59 @@ let guideDuration = null;
 let guideContext = null;
 let guideInitialized = false;
 
+// Vérifie que toutes les combinaisons mood × duration sont bien couvertes
+if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+  (function validateGuideMap() {
+    const durations = ['court', 'moyen', 'long'];
+    const warnings = [];
+    for (const mood of Object.keys(GUIDE_MAP)) {
+      for (const dur of durations) {
+        if (!GUIDE_MAP[mood][dur]) {
+          warnings.push(`GUIDE_MAP: combinaison manquante → ${mood} / ${dur}`);
+          continue;
+        }
+        const entries = GUIDE_MAP[mood][dur];
+        if (!entries.default && Object.keys(entries).length === 0) {
+          warnings.push(`GUIDE_MAP: aucune entrée pour ${mood} / ${dur}`);
+        }
+        for (const ctxKey of Object.keys(entries)) {
+          const e = entries[ctxKey];
+          if (!e.main) warnings.push(`GUIDE_MAP: pas de 'main' pour ${mood}/${dur}/${ctxKey}`);
+          if (!e.alts)  warnings.push(`GUIDE_MAP: pas de 'alts' pour ${mood}/${dur}/${ctxKey}`);
+        }
+      }
+    }
+    if (warnings.length) console.warn('[Serein] GUIDE_MAP validation:\n' + warnings.join('\n'));
+    else console.info('[Serein] GUIDE_MAP OK');
+  })();
+}
+
 let pendingGuideRec = null;
+
+const GUIDE_SESSION_KEY = 'serein-guide-session';
+
+function saveSessionSnapshot() {
+  try {
+    sessionStorage.setItem(GUIDE_SESSION_KEY, JSON.stringify({
+      mood: guideMood, duration: guideDuration, context: guideContext,
+      ts: Date.now()
+    }));
+  } catch(e) {}
+}
+
+function clearSessionSnapshot() {
+  try { sessionStorage.removeItem(GUIDE_SESSION_KEY); } catch(e) {}
+}
+
+function getSessionSnapshot() {
+  try {
+    const raw = sessionStorage.getItem(GUIDE_SESSION_KEY);
+    if (!raw) return null;
+    const snap = JSON.parse(raw);
+    if (Date.now() - snap.ts > 5 * 60 * 1000) { clearSessionSnapshot(); return null; }
+    return snap;
+  } catch(e) { return null; }
+}
 
 function showGuideResult(entry) {
   const res = document.getElementById('guide-result');
@@ -793,8 +996,9 @@ function restartGuide() {
   guideMood = null;
   guideDuration = null;
   guideContext = null;
-  initGuide();
+  clearSessionSnapshot();
   document.getElementById('guide-result').style.display = 'none';
+  initGuide();
 }
 
 // ── Filtrage horaire ──
@@ -876,18 +1080,21 @@ function onContextChoice(value) {
     precoucher: 'Je me prépare à dormir', reveil: 'Je viens de me réveiller'
   };
   guideContext = value;
+  saveSessionSnapshot();
   addUserBubble(contextLabels[value] || value);
   clearChoices();
   askDuration();
 }
 
-function askDuration() {
-  setTimeout(() => addBotBubble('Combien de temps as-tu ?'), 400);
-  setTimeout(() => addChoices([
+async function askDuration() {
+  await delay(400);
+  addBotBubble('Combien de temps as-tu ?');
+  await delay(400);
+  addChoices([
     { label: '⚡ 5 minutes', value: 'court' },
     { label: '🌿 5–10 minutes', value: 'moyen' },
     { label: '🌊 Plus de 10 minutes', value: 'long' }
-  ], onDurationChoice), 800);
+  ], onDurationChoice);
 }
 
 function saveFeedback(mood, duration, context, sessionTitle, rating) {
@@ -895,7 +1102,8 @@ function saveFeedback(mood, duration, context, sessionTitle, rating) {
     const raw = localStorage.getItem(FEEDBACK_KEY);
     const all = raw ? JSON.parse(raw) : [];
     all.push({ mood, duration, context, title: sessionTitle, rating, ts: Date.now() });
-    localStorage.setItem(FEEDBACK_KEY, JSON.stringify(all.slice(-60)));
+    const cutoff = Date.now() - 60 * 24 * 60 * 60 * 1000;
+    localStorage.setItem(FEEDBACK_KEY, JSON.stringify(all.filter(e => e.ts > cutoff)));
   } catch(e) {}
 }
 
@@ -1029,59 +1237,56 @@ function launchObservationSession(cb) {
   const prevMood = guideMood;
   guideMood = null;
 
-  const onEnded = () => {
+  const onEnded = async () => {
     audio.removeEventListener('ended', onEnded);
     guideMood = prevMood; // restaurer pour ne pas bloquer showGuideFeedback si besoin
 
-    setTimeout(() => {
-      closePlayer();
-      setTimeout(() => {
-        addBotBubble('Comment tu te sens après cette pause ?');
-        setTimeout(() => addChoices([
-          { label: '💪 Corps tendu, besoin de relâcher',   value: 'stress_corps' },
-          { label: '🧠 Tête agitée, pensées qui tournent', value: 'stress_tete'  },
-          { label: '😴 Fatigué(e), besoin de repos',       value: 'fatigue'      },
-          { label: '🌿 Ça va, je n\'ai plus besoin',       value: 'done'         },
-        ], (v) => {
-          clearChoices();
+    await delay(800);
+    closePlayer();
+    await delay(400);
+    addBotBubble('Comment tu te sens après cette pause ?');
+    await delay(600);
+    addChoices([
+      { label: '💪 Corps tendu, besoin de relâcher',   value: 'stress_corps' },
+      { label: '🧠 Tête agitée, pensées qui tournent', value: 'stress_tete'  },
+      { label: '😴 Fatigué(e), besoin de repos',       value: 'fatigue'      },
+      { label: '🌿 Ça va, je n\'ai plus besoin',       value: 'done'         },
+    ], async (v) => {
+      clearChoices();
 
-          if (v === 'done') {
-            addUserBubble("Ça va, merci");
-            setTimeout(() => addBotBubble('Parfait. Prends soin de toi 🌿'), 400);
-            guideInitialized = false; // permet de relancer le guide proprement
-            return;
-          }
+      if (v === 'done') {
+        addUserBubble("Ça va, merci");
+        await delay(400);
+        addBotBubble('Parfait. Prends soin de toi 🌿');
+        guideInitialized = false; // permet de relancer le guide proprement
+        return;
+      }
 
-          const mapping = {
-            stress_corps: { mood: 'stress',     context: 'corps' },
-            stress_tete:  { mood: 'stress',     context: 'tete'  },
-            fatigue:      { mood: 'fatigue',    context: null     },
-          };
-          const { mood, context } = mapping[v];
-          guideMood = mood;
-          guideContext = context;
+      const mapping = {
+        stress_corps: { mood: 'stress',  context: 'corps' },
+        stress_tete:  { mood: 'stress',  context: 'tete'  },
+        fatigue:      { mood: 'fatigue', context: null     },
+      };
+      const { mood, context } = mapping[v];
+      guideMood = mood;
+      guideContext = context;
 
-          const labels = {
-            stress_corps: 'Corps tendu',
-            stress_tete:  'Tête agitée',
-            fatigue:      'Fatigué(e)',
-          };
-          addUserBubble(labels[v]);
-          askDuration();
-        }), 600);
-      }, 400);
-    }, 800);
+      const labels = {
+        stress_corps: 'Corps tendu',
+        stress_tete:  'Tête agitée',
+        fatigue:      'Fatigué(e)',
+      };
+      addUserBubble(labels[v]);
+      askDuration();
+    });
   };
 
   audio.addEventListener('ended', onEnded);
 }
 
-function initGuide() {
+async function initGuide() {
   if (guideInitialized) return;
   guideInitialized = true;
-  guideMood = null;
-  guideDuration = null;
-  guideContext = null;
 
   const win = document.getElementById('chat-window');
   const res = document.getElementById('guide-result');
@@ -1089,28 +1294,65 @@ function initGuide() {
   res.style.display = 'none';
   res.innerHTML = '';
 
+  // Reprendre une session interrompue (< 5 min) si elle existe
+  const snap = getSessionSnapshot();
+  if (snap && snap.mood) {
+    guideMood = snap.mood;
+    guideDuration = snap.duration;
+    guideContext = snap.context;
+
+    await delay(200);
+    addBotBubble('On reprend là où on s\'était arrêtés 👋');
+    await delay(400);
+    addChoices([
+      { label: '✓ Oui, continue', value: 'resume' },
+      { label: '↩ Recommencer', value: 'restart'  }
+    ], async (v) => {
+      clearChoices();
+      if (v === 'resume') {
+        addUserBubble('Oui, continue');
+        askDuration();
+      } else {
+        addUserBubble('Recommencer');
+        guideMood = null; guideDuration = null; guideContext = null;
+        clearSessionSnapshot();
+        await delay(400);
+        startFreshGuide();
+      }
+    });
+    return;
+  }
+
+  guideMood = null;
+  guideDuration = null;
+  guideContext = null;
+  clearSessionSnapshot();
+  startFreshGuide();
+}
+
+async function startFreshGuide() {
   const hour = getCurrentHour();
   const greeting = (hour >= 6 && hour < 12) ? 'Bonjour'
     : (hour >= 12 && hour < 18) ? 'Bon après-midi'
     : 'Bonsoir';
 
-  setTimeout(() => addBotBubble(greeting + ' 👋 Comment tu te sens en ce moment ?'), 200);
-
-  setTimeout(() => {
-    // Boutons humeur
-    showMoodChoices();
-  }, 600);
+  await delay(200);
+  addBotBubble(greeting + ' 👋 Comment tu te sens en ce moment ?');
+  await delay(400);
+  showMoodChoices();
 }
 
 function showMoodChoices() {
   const choices = [
-    { label: '😮‍💨 Stressé(e)',              value: 'stress'        },
-    { label: '😰 Anxieux/se',               value: 'anxiete'       },
-    { label: '😴 Fatigué(e)',               value: 'fatigue'       },
-    { label: '😶 Brouillard mental',         value: 'brouillard'    },
-    { label: '🌙 Difficultés à dormir',      value: 'sommeil'       },
-    { label: '🎯 Besoin de concentration',   value: 'concentration' },
-    { label: '🤷 Je ne sais pas vraiment',   value: 'unknown'       },
+    { label: '😮‍💨 Stressé(e)',                value: 'stress'        },
+    { label: '😰 Anxieux/se',                 value: 'anxiete'       },
+    { label: '😤 En colère / irritable',       value: 'colere'        },
+    { label: '😔 Mauvaise humeur / tristesse', value: 'tristesse'     },
+    { label: '😴 Fatigué(e)',                 value: 'fatigue'       },
+    { label: '😶 Brouillard mental',           value: 'brouillard'    },
+    { label: '🌙 Difficultés à dormir',        value: 'sommeil'       },
+    { label: '🎯 Besoin de concentration',     value: 'concentration' },
+    { label: '🤷 Je ne sais pas vraiment',     value: 'unknown'       },
   ];
 
   if (isConcentrationBlocked()) {
@@ -1121,41 +1363,45 @@ function showMoodChoices() {
 }
 
 
-function onMoodChoice(value) {
+async function onMoodChoice(value) {
   const labels = {
     stress: 'Stressé(e)', anxiete: 'Anxieux/se', fatigue: 'Fatigué(e)',
     brouillard: 'Brouillard mental', sommeil: 'Difficultés à dormir',
-    concentration: 'Besoin de concentration', unknown: 'Je ne sais pas vraiment'
+    concentration: 'Besoin de concentration', unknown: 'Je ne sais pas vraiment',
+    colere: 'En colère / irritable', tristesse: 'Mauvaise humeur / tristesse'
   };
   addUserBubble(labels[value] || value);
   clearChoices();
 
   // Mode "Je ne sais pas"
   if (value === 'unknown') {
-    setTimeout(() => {
-      addBotBubble("Pas de problème. Je te propose une petite pause de 2 minutes pour t'observer, puis on reprend ensemble.");
-      setTimeout(() => addChoices([
-        { label: '▶ Lancer la pause', value: 'launch_obs' },
-        { label: '↩ Choisir quand même', value: 'back'   }
-      ], (v) => {
-        clearChoices();
-        if (v === 'launch_obs') {
-          launchObservationSession();
-        } else {
-          guideInitialized = false;
-          initGuide();
-        }
-      }), 600);
-    }, 400);
+    await delay(400);
+    addBotBubble("Pas de problème. Je te propose une petite pause de 2 minutes pour t'observer, puis on reprend ensemble.");
+    await delay(600);
+    addChoices([
+      { label: '▶ Lancer la pause', value: 'launch_obs' },
+      { label: '↩ Choisir quand même', value: 'back'   }
+    ], (v) => {
+      clearChoices();
+      if (v === 'launch_obs') {
+        launchObservationSession();
+      } else {
+        guideInitialized = false;
+        initGuide();
+      }
+    });
     return;
   }
 
   guideMood = value;
+  saveSessionSnapshot();
 
   // Bloquer Concentration après 22h
   if (value === 'concentration' && isConcentrationBlocked()) {
-    setTimeout(() => addBotBubble("À cette heure-ci, une séance de concentration risque de te tenir éveillé(e). Tu ne veux pas plutôt essayer quelque chose de plus doux ?"), 400);
-    setTimeout(() => addChoices([
+    await delay(400);
+    addBotBubble("À cette heure-ci, une séance de concentration risque de te tenir éveillé(e). Tu ne veux pas plutôt essayer quelque chose de plus doux ?");
+    await delay(400);
+    addChoices([
       { label: '🌙 Plutôt du sommeil',                            value: 'sommeil'              },
       { label: '😮‍💨 Me détendre',                                  value: 'stress'               },
       { label: '🎯 Non, je veux quand même concentration',         value: 'concentration_force'  }
@@ -1168,28 +1414,32 @@ function onMoodChoice(value) {
       } else {
         onMoodChoice(v);
       }
-    }), 800);
+    });
     return;
   }
 
-  // Q3 contextuelle si applicable
+  // Q2 contextuelle uniquement pour stress/anxiete/sommeil — les autres moods
+  // n'ont pas de sous-question car leur recommandation est uniforme quelle que
+  // soit la nuance (ex: fatigue, brouillard, concentration, colere, tristesse).
   if (CONTEXT_QUESTIONS[value]) {
-    setTimeout(() => addBotBubble(CONTEXT_QUESTIONS[value].question), 400);
-    setTimeout(() => addChoices(CONTEXT_QUESTIONS[value].choices, onContextChoice), 800);
+    await delay(400);
+    addBotBubble(CONTEXT_QUESTIONS[value].question);
+    await delay(400);
+    addChoices(CONTEXT_QUESTIONS[value].choices, onContextChoice);
   } else {
     askDuration();
   }
 }
 
 
-function showRestartError() {
-  setTimeout(() => {
-    addBotBubble("Quelque chose s'est mal passé. On recommence ?");
-    setTimeout(() => addChoices([{ label: '↩ Recommencer', value: 'restart' }], () => { restartGuide(); }), 400);
-  }, 400);
+async function showRestartError() {
+  await delay(400);
+  addBotBubble("Quelque chose s'est mal passé. On recommence ?");
+  await delay(400);
+  addChoices([{ label: '↩ Recommencer', value: 'restart' }], () => { restartGuide(); });
 }
 
-function onDurationChoice(value) {
+async function onDurationChoice(value) {
   guideDuration = value;
   addUserBubble({ court: '5 minutes', moyen: '5–10 minutes', long: 'Plus de 10 minutes' }[value]);
   clearChoices();
@@ -1207,13 +1457,15 @@ function onDurationChoice(value) {
   let entry = applyHistoryToEntry(rawEntry);
   entry = applyFeedbackToEntry(entry, guideMood, guideDuration, guideContext);
 
-  setTimeout(() => {
-    addBotBubble('Voilà ce que je te recommande :');
-    setTimeout(() => showGuideResult(entry), 400);
-  }, 400);
+  await delay(400);
+  addBotBubble('Voilà ce que je te recommande :');
+  await delay(400);
+  showGuideResult(entry);
 }
 
 
+
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 function addBotBubble(text) {
   const win = document.getElementById('chat-window');
@@ -1236,7 +1488,11 @@ function addChoices(choices, cb) {
   choices.forEach(c => {
     const btn = document.createElement('button');
     btn.className = 'chat-choice'; btn.textContent = c.label;
-    btn.onclick = () => cb(c.value);
+    if (c.disabled) btn.disabled = true;
+    btn.onclick = () => {
+      wrap.querySelectorAll('.chat-choice').forEach(b => { b.disabled = true; });
+      cb(c.value);
+    };
     wrap.appendChild(btn);
   });
   win.appendChild(wrap); win.scrollTop = win.scrollHeight;
@@ -1341,20 +1597,18 @@ function updateTimerDisplay() {
 }
 
 function recordTimerCompletion() {
-  const s = JSON.parse(localStorage.getItem('serein-stats') || '{"sessions":0,"minutes":0,"lastDate":"","streak":0}');
-  s.sessions = (s.sessions || 0) + 1;
-  s.minutes = (s.minutes || 0) + Math.round(timerTotalSeconds / 60);
-  const today = new Date().toLocaleDateString('fr-CA');
-  if (s.lastDate !== today) {
-    if (s.lastDate === new Date(Date.now() - 86400000).toLocaleDateString('fr-CA')) {
-      s.streak = (s.streak || 0) + 1;
-    } else {
-      s.streak = 1;
+  try {
+    const s = getStats();
+    s.sessions = (s.sessions || 0) + 1;
+    s.minutes = (s.minutes || 0) + Math.round(timerTotalSeconds / 60);
+    const today = new Date().toLocaleDateString('fr-CA');
+    if (s.lastDate !== today) {
+      s.streak = isYesterday(s.lastDate) ? (s.streak || 0) + 1 : 1;
+      s.lastDate = today;
     }
-    s.lastDate = today;
-  }
-  localStorage.setItem('serein-stats', JSON.stringify(s));
-  loadStats();
+    localStorage.setItem('serein-stats', JSON.stringify(s));
+    loadStats();
+  } catch(e) { console.warn('[Serein stats]', e); }
 }
 
 
@@ -1432,6 +1686,7 @@ Envoyé depuis sereinapp.fr`;
 // ── INIT ──
 document.addEventListener('DOMContentLoaded', () => {
   applyTheme();
+  loadSpeed();
   loadStats();
   restoreOfflineButtons();
   updateOfflineCount();
