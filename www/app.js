@@ -445,7 +445,7 @@ async function toolbarOffline() {
   const btn = document.getElementById('toolbar-offline-btn');
   if (!('caches' in window)) { alert('Cache non disponible sur ce navigateur.'); return; }
   try {
-    const cache = await caches.open('serein-v2-audio');
+    const cache = await caches.open('serein-audio');
     const url = 'assets/audio/' + currentAudioFolder() + '/' + encodeURIComponent(currentOfflineFilename);
     const existing = await cache.match(url);
     if (existing) {
@@ -462,7 +462,7 @@ async function toolbarOffline() {
 async function updateOfflineBtnState() {
   if (!currentOfflineFilename || !('caches' in window)) return;
   try {
-    const cache = await caches.open('serein-v2-audio');
+    const cache = await caches.open('serein-audio');
     const url = 'assets/audio/' + currentAudioFolder() + '/' + encodeURIComponent(currentOfflineFilename);
     const existing = await cache.match(url);
     const btn = document.getElementById('toolbar-offline-btn');
@@ -507,7 +507,7 @@ async function toggleOfflineCache(btn, filename) {
   if (!('caches' in window)) { alert('Cache non disponible sur ce navigateur.'); return; }
   btn.classList.add('loading');
   try {
-    const cache = await caches.open('serein-v2-audio');
+    const cache = await caches.open('serein-audio');
     const url = 'assets/audio/masculin/' + encodeURIComponent(filename);
     const existing = await cache.match(url);
     if (existing) {
@@ -531,7 +531,7 @@ async function toggleOfflineCache(btn, filename) {
 async function updateOfflineCount() {
   if (!('caches' in window)) return;
   try {
-    const cache = await caches.open('serein-v2-audio');
+    const cache = await caches.open('serein-audio');
     const keys = await cache.keys();
     const tag = document.getElementById('offline-count-tag');
     if (tag) tag.textContent = keys.length + ' séance' + (keys.length > 1 ? 's' : '');
@@ -541,12 +541,13 @@ async function updateOfflineCount() {
 async function restoreOfflineButtons() {
   if (!('caches' in window)) return;
   try {
-    const cache = await caches.open('serein-v2-audio');
+    const cache = await caches.open('serein-audio');
     const btns = Array.from(document.querySelectorAll('.btn-offline[data-filename]'));
     await Promise.all(btns.map(async btn => {
       const fn = btn.dataset.filename;
       if (!fn) return;
-      const match = await cache.match('assets/audio/masculin/' + encodeURIComponent(fn));
+      const voice = btn.dataset.voice === 'feminine' ? 'feminin' : 'masculin';
+      const match = await cache.match('assets/audio/' + voice + '/' + encodeURIComponent(fn));
       if (match) { btn.classList.add('cached'); btn.textContent = '✓'; }
     }));
   } catch(e) { console.warn('[Serein cache]', e); }
@@ -1522,7 +1523,7 @@ function startTimer(minutes) {
   timerRunning = false;
 
   const playerEl = document.getElementById('player-screen');
-  ['premiers-pas','stress','sommeil','respirer','anxiete','concentration'].forEach(v => playerEl.removeAttribute('data-parcours'));
+  playerEl.removeAttribute('data-parcours');
   playerEl.setAttribute('data-parcours', 'timer');
   document.getElementById('player-bg').style.backgroundImage = '';
 
@@ -1679,7 +1680,7 @@ Envoyé depuis sereinapp.fr`;
   }
 
   const mailto = `mailto:serein@cesarbroche.fr?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  window.location.href = mailto;
+  window.open(mailto, '_blank');
 }
 
 
