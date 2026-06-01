@@ -5,10 +5,10 @@ setlocal enabledelayedexpansion
 :: SEREIN — DEPLOY ALL
 :: Tout en une seule commande :
 ::   1. Git add + commit + push  → GitHub
-::   2. Copie vers www/           → Android
-::   3. Copie vers iOS            → quand vous serez sur Mac
-::   4. Cap sync Android
-::   5. Notification Pi via SSH   → App web
+::   2. Verification app/pwa
+::   3. Cap sync Android + iOS
+::   4. Notification Pi via SSH   → App web
+::   5. (optionnel) Upload audio  → deploy.bat "msg" audio
 :: ═══════════════════════════════════════════════════════
 
 :: Message de commit en argument, ou demandé sinon
@@ -81,26 +81,37 @@ if !errorlevel! neq 0 (
 )
 echo.
 
-:: ── ETAPE 5.5 : Sync audio vers Pi via rsync ──
-echo [4.5/5] Synchronisation audio vers le Pi...
-scp -r "app/pwa/assets/audio/masculin" pi-serein:/home/pi/sereinapp/app/pwa/assets/audio/
-if !errorlevel! neq 0 (
-  echo [ATTENTION] scp masculin a echoue.
+:: ── ETAPE 5.5 : Sync audio vers Pi (optionnel — deploy.bat "msg" audio) ──
+if /i "%~2"=="audio" (
+  echo [4.5/5] Synchronisation audio vers le Pi...
+  scp -r "app/pwa/assets/audio/masculin" pi-serein:/home/pi/sereinapp/app/pwa/assets/audio/
+  if !errorlevel! neq 0 (
+    echo [ATTENTION] scp masculin a echoue.
+  )
+  scp -r "app/pwa/assets/audio/feminin" pi-serein:/home/pi/sereinapp/app/pwa/assets/audio/
+  if !errorlevel! neq 0 (
+    echo [ATTENTION] scp feminin a echoue.
+  )
+  echo       OK
+  echo.
+) else (
+  echo [4.5/5] Audio ignoree ^(ajouter "audio" pour uploader^).
+  echo.
 )
-scp -r "app/pwa/assets/audio/feminin" pi-serein:/home/pi/sereinapp/app/pwa/assets/audio/
-if !errorlevel! neq 0 (
-  echo [ATTENTION] scp feminin a echoue.
-)
-echo       OK
-echo.
 
 :: ── ETAPE 6/5 : Recap ──
 echo [5/5] Deploiement termine !
 echo.
 echo   GitHub  : pushed
 echo   Android : sync
-echo   Pi web  : update-serein + audio sync
+echo   Pi web  : update-serein
 echo.
-echo   iOS     : a faire manuellement sur Mac (copier app.js dans le dossier iOS)
+if /i "%~2"=="audio" (
+  echo   Audio   : uploade vers le Pi
+) else (
+  echo   Audio   : non uploade  ^<-- deploy.bat "msg" audio pour uploader
+)
+echo.
+echo   iOS     : a faire manuellement sur Mac
 echo.
 pause
