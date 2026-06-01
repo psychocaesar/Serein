@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  network_security_config.xml — Serein
+  Emplacement : android/app/src/main/res/xml/network_security_config.xml
+
+  Politique réseau de l'application :
+  - HTTPS uniquement, aucun trafic HTTP en clair autorisé
+  - Pas d'exception de domaine (cohérent avec usesCleartextTraffic="false")
+  - Le certificat CA système est suffisant (pas de certificate pinning
+    pour l'instant — à envisager si un backend Serein voit le jour)
+-->
+<network-security-config>
+
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <!-- On fait confiance uniquement aux autorités de certification
+                 installées par le système (pas aux certificats utilisateur).
+                 Cela protège contre les attaques man-in-the-middle via un
+                 certificat installé manuellement sur l'appareil. -->
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+
+</network-security-config>
