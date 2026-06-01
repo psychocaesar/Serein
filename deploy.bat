@@ -83,13 +83,13 @@ echo.
 
 :: ── ETAPE 5.5 : Sync audio vers Pi via rsync ──
 echo [4.5/5] Synchronisation audio vers le Pi...
-rsync -avz --checksum "app/pwa/assets/audio/masculin/" pi-serein:/home/pi/sereinapp/www/assets/audio/masculin/
+scp -r "app/pwa/assets/audio/masculin" pi-serein:/home/pi/sereinapp/app/pwa/assets/audio/
 if !errorlevel! neq 0 (
-  echo [ATTENTION] rsync masculin a echoue.
+  echo [ATTENTION] scp masculin a echoue.
 )
-rsync -avz --checksum "app/pwa/assets/audio/feminin/" pi-serein:/home/pi/sereinapp/www/assets/audio/feminin/
+scp -r "app/pwa/assets/audio/feminin" pi-serein:/home/pi/sereinapp/app/pwa/assets/audio/
 if !errorlevel! neq 0 (
-  echo [ATTENTION] rsync feminin a echoue.
+  echo [ATTENTION] scp feminin a echoue.
 )
 echo       OK
 echo.
