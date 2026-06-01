@@ -1,0 +1,9 @@
+services:
+  sereinapp:
+    image: nginx:latest
+    container_name: sereinapp
+    volumes:
+      - /home/pi/sereinapp/app/pwa:/usr/share/nginx/html:ro
+    ports:
+      - '127.0.0.1:3001:80'
+    restart: always
