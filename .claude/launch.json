@@ -4,7 +4,7 @@
     {
       "name": "serein",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["serve", "www", "-p", "3456", "--no-clipboard"],
+      "runtimeArgs": ["serve", "app/pwa", "-p", "3456", "--no-clipboard"],
       "port": 3456
     }
   ]

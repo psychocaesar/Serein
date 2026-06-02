@@ -35,7 +35,7 @@ function showScreen(id) {
     if (btn) btn.classList.toggle('active', s === id);
   });
   window.scrollTo(0, 0);
-  if (id === 'guide') initGuide();
+  if (id === 'guide') showGuideView('hub');
 }
 
 let activeThemeFilter = 'Toutes';
@@ -284,6 +284,7 @@ function launchPlayer(id, title, parcours, duration, filename, voice, artwork) {
   audio.play().then(() => {
     document.getElementById('audio-loading').textContent = '';
     updatePlayIcon(true);
+    playBell();
   }).catch(() => {
     document.getElementById('audio-loading').textContent = 'Appuie sur ▶ pour démarrer';
     updatePlayIcon(false);
@@ -382,6 +383,7 @@ audio.addEventListener('loadedmetadata', () => {
 
 audio.addEventListener('ended', () => {
   updatePlayIcon(false);
+  playBell();
   document.getElementById('player-main').style.display = 'none';
   document.getElementById('player-main').classList.add('hidden');
   document.getElementById('complete-screen').classList.add('visible');
@@ -601,20 +603,290 @@ function recordCompletion() {
 }
 
 // ── THÈME ──
-function toggleTheme() {
-  const dark = document.documentElement.getAttribute('data-theme') === 'dark';
-  document.documentElement.setAttribute('data-theme', dark ? 'light' : 'dark');
-  document.getElementById('theme-toggle').textContent = dark ? '🌙 Sombre' : '☀️ Clair';
-  localStorage.setItem('serein-theme', dark ? 'light' : 'dark');
+function setThemeMode(mode) {
+  if (mode === 'light') {
+    document.documentElement.setAttribute('data-theme', 'light');
+    localStorage.setItem('serein-theme', 'light');
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+    localStorage.setItem('serein-theme', 'dark');
+  }
+  updateThemeSegButtons();
 }
+
+function updateThemeSegButtons() {
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+  const segLight = document.getElementById('seg-light');
+  const segDark = document.getElementById('seg-dark');
+  if (segLight) segLight.classList.toggle('active', isLight);
+  if (segDark) segDark.classList.toggle('active', !isLight);
+}
+
+function toggleTheme() { setThemeMode(document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light'); }
 
 function applyTheme() {
   const t = localStorage.getItem('serein-theme');
-  if (t === 'dark') {
-    document.documentElement.setAttribute('data-theme', 'dark');
-    const btn = document.getElementById('theme-toggle');
-    if (btn) btn.textContent = '☀️ Clair';
+  if (t === 'light') document.documentElement.setAttribute('data-theme', 'light');
+  updateThemeSegButtons();
+}
+
+const AMBIANCE_LABELS = { '': 'Aucun', 'pluie.mp3': 'Pluie', 'foret.mp3': 'Forêt', 'vagues.mp3': 'Vagues', 'feu.mp3': 'Feu', 'bruit-blanc.mp3': 'Blanc' };
+
+function openAmbianceSettings() {
+  const saved = localStorage.getItem('serein-ambiance-default') || '';
+  document.querySelectorAll('.ambiance-settings-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.value === saved);
+  });
+  document.getElementById('ambiance-settings-backdrop').classList.add('open');
+}
+
+function selectAmbianceDefault(btn) {
+  document.querySelectorAll('.ambiance-settings-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const val = btn.dataset.value;
+  localStorage.setItem('serein-ambiance-default', val);
+  const label = document.getElementById('ambiance-default-label');
+  if (label) label.textContent = (AMBIANCE_LABELS[val] || 'Aucun') + ' ›';
+  setTimeout(() => document.getElementById('ambiance-settings-backdrop').classList.remove('open'), 300);
+}
+
+function savePref(key, value) {
+  try { localStorage.setItem(key, JSON.stringify(value)); } catch(e) {}
+}
+
+function loadPrefs() {
+  try {
+    const bells = document.getElementById('bells-toggle');
+    if (bells) bells.checked = localStorage.getItem('serein-bells') === 'true';
+    const wifi = document.getElementById('wifi-toggle');
+    if (wifi) wifi.checked = localStorage.getItem('serein-wifi-only') === 'true';
+    const ambianceVal = localStorage.getItem('serein-ambiance-default') || '';
+    const ambianceLabel = document.getElementById('ambiance-default-label');
+    if (ambianceLabel) ambianceLabel.textContent = (AMBIANCE_LABELS[ambianceVal] || 'Aucun') + ' ›';
+  } catch(e) {}
+}
+
+function showGuideView(view) {
+  const hub = document.getElementById('guide-hub');
+  const comprendre = document.getElementById('guide-comprendre');
+  const chat = document.getElementById('guide-chat');
+  const article = document.getElementById('guide-article');
+  if (!hub) return;
+  hub.style.display = view === 'hub' ? '' : 'none';
+  comprendre.style.display = view === 'comprendre' ? '' : 'none';
+  chat.style.display = view === 'chat' ? '' : 'none';
+  if (article) article.style.display = view === 'article' ? '' : 'none';
+  if (view === 'chat') initGuide();
+  window.scrollTo(0, 0);
+}
+
+// ── ARTICLES ──
+function mdInline(t) {
+  return t.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+}
+
+function mdToHTML(md) {
+  const lines = md.split('\n');
+  let html = '', inUl = false, inOl = false;
+  const closeList = () => {
+    if (inUl) { html += '</ul>'; inUl = false; }
+    if (inOl) { html += '</ol>'; inOl = false; }
+  };
+  for (let i = 0; i < lines.length; i++) {
+    const raw = lines[i];
+    const line = raw.trim();
+    if (!line) {
+      // blank line inside a list: peek ahead to continue list if next non-empty line is still a list item
+      let j = i + 1;
+      while (j < lines.length && !lines[j].trim()) j++;
+      const next = lines[j] ? lines[j].trim() : '';
+      if ((inUl && next.startsWith('- ')) || (inOl && /^\d+\./.test(next))) { i = j - 1; continue; }
+      closeList(); continue;
+    }
+    if (line.startsWith('### ')) {
+      closeList();
+      html += `<h3>${mdInline(line.slice(4))}</h3>`;
+    } else if (line.startsWith('- ')) {
+      if (inOl) { html += '</ol>'; inOl = false; }
+      if (!inUl) { html += '<ul>'; inUl = true; }
+      html += `<li>${mdInline(line.slice(2))}</li>`;
+    } else if (/^\d+\.\s/.test(line)) {
+      if (inUl) { html += '</ul>'; inUl = false; }
+      if (!inOl) { html += '<ol>'; inOl = true; }
+      html += `<li>${mdInline(line.replace(/^\d+\.\s+/, ''))}</li>`;
+    } else {
+      closeList();
+      html += `<p>${mdInline(line)}</p>`;
+    }
   }
+  closeList();
+  return html;
+}
+
+const ARTICLES = {
+  'pleine-conscience': {
+    title: 'La pleine conscience, en quelques respirations',
+    meta: 'Les bases · 4 min de lecture',
+    md: `La pleine conscience n'est ni une évasion, ni une technique de relaxation mystique. En psychologie, elle se définit simplement comme le fait de porter son attention, de manière intentionnelle et sans jugement, sur l'instant présent.
+
+La majeure partie de notre temps est passée en "pilote automatique". L'esprit vagabonde : il anticipe les problèmes de demain ou rumine les événements d'hier. La pleine conscience permet de ramener l'attention sur l'ici et maintenant, rompant ainsi ce cycle de vagabondage mental.
+
+### Comment ça fonctionne ?
+
+En termes cognitifs, méditer est un entraînement de l'attention. Il s'agit de choisir un point d'ancrage (comme la respiration) et d'y maintenir sa concentration.
+
+Le processus se déroule toujours en trois étapes :
+
+1. **L'ancrage :** L'attention est posée sur le souffle.
+
+2. **La distraction :** Naturellement, l'esprit s'évade vers une pensée, un souvenir ou un son.
+
+3. **Le retour :** On prend conscience de cette distraction et on choisit, délibérément, de ramener l'attention sur l'ancrage.
+
+C'est précisément ce mouvement de retour qui constitue la musculation de l'esprit. Chaque fois que l'on ramène son attention, on renforce les circuits neuronaux liés à la régulation émotionnelle et à la concentration.
+
+### L'exercice de base
+
+Pour commencer, il n'est pas nécessaire de s'isoler pendant des heures. Une minute suffit. Laissez votre respiration suivre son rythme naturel. Observez l'air entrer et sortir. Si une pensée surgit, notez simplement sa présence, puis revenez à la sensation physique de l'air. C'est le premier pas vers une meilleure flexibilité psychologique.`
+  },
+
+  'pourquoi-mediter': {
+    title: 'Pourquoi méditer ?',
+    meta: 'L\'essentiel en 3 minutes',
+    md: `Les bénéfices de la méditation de pleine conscience font aujourd'hui l'objet d'un large consensus scientifique. Loin d'être une solution miracle qui effacerait les problèmes, elle agit comme un régulateur du système nerveux et cognitif.
+
+### Développer la flexibilité psychologique
+
+Face à un événement stressant, notre cerveau a tendance à réagir de manière automatique et impulsive. La méditation permet de créer un espace entre le stimulus (ce qui se passe) et la réponse (comment on réagit). Cette capacité à faire une pause permet de choisir une action adaptée plutôt que de subir une réaction automatique.
+
+### Réduire la rumination
+
+Les TCC montrent que la souffrance psychologique est souvent maintenue par la rumination (le fait de tourner en boucle sur des pensées négatives). Méditer entraîne l'esprit à observer ces pensées comme de simples événements mentaux passagers, et non comme des vérités absolues. On apprend ainsi à désamorcer les spirales de stress.
+
+### Les effets sur le corps et l'esprit
+
+Une pratique régulière démontre plusieurs effets mesurables :
+
+- **Baisse de la réactivité au stress :** Diminution de l'activation de l'amygdale (la zone du cerveau gérant la peur).
+
+- **Meilleure régulation émotionnelle :** Capacité accrue à traverser les émotions inconfortables sans s'y noyer.
+
+- **Amélioration de la concentration :** L'entraînement de l'attention limite la fatigue mentale liée au multitâche.
+
+Méditer, c'est finalement s'entraîner sur un coussin à développer des compétences que l'on utilisera ensuite dans la vie de tous les jours.`
+  },
+
+  'posture': {
+    title: 'Trouver sa posture',
+    meta: 'Assis, allongé, en marchant · 2 min de lecture',
+    md: `L'image de la personne méditant en position du lotus, d'une souplesse absolue, est un mythe tenace. En réalité, la posture physique sert un seul objectif : soutenir l'état mental. Le corps et l'esprit étant liés, une posture adéquate favorise la clarté et l'attention.
+
+### Le principe : l'équilibre entre détente et vigilance
+
+Une bonne posture de méditation repose sur un équilibre subtil. Si le corps est trop relâché (par exemple, allongé dans un lit), le cerveau associe cette position au sommeil, favorisant la somnolence. À l'inverse, si le corps est trop rigide, la douleur et la tension deviennent des distractions majeures.
+
+L'objectif est de trouver une position digne, droite et alerte, sans effort excessif.
+
+### Les points de repère pour s'installer
+
+Que l'on choisisse une chaise, un coussin ou un banc de méditation, quelques principes ergonomiques s'appliquent :
+
+- **L'ancrage :** Les pieds sont bien à plat sur le sol (ou les genoux reposent sur le coussin), offrant une base stable.
+
+- **Le dos droit :** La colonne vertébrale s'érige naturellement, respectant sa courbure. Imaginez un fil invisible qui tire doucement le sommet du crâne vers le plafond.
+
+- **Les épaules relâchées :** Elles s'abaissent loin des oreilles, libérant la cage thoracique pour faciliter la respiration.
+
+- **Les mains au repos :** Simplement posées à plat sur les cuisses ou réunies au centre des genoux.
+
+L'immobilité n'est pas une règle absolue. Si une douleur aiguë apparaît, l'ajustement de la posture, fait en pleine conscience, fait partie intégrante de la pratique.`
+  },
+
+  'pensees': {
+    title: 'Que faire des pensées ?',
+    meta: 'Les laisser passer · 3 min de lecture',
+    md: `C'est l'idée reçue la plus fréquente et la plus décourageante : "Je n'arrive pas à méditer, je n'arrive pas à faire le vide dans ma tête."
+
+Soyons clairs : le cerveau est conçu pour produire des pensées. Essayer d'arrêter de penser est aussi impossible que d'essayer d'arrêter son cœur de battre par la seule force de la volonté. L'objectif de la pleine conscience n'est pas de supprimer les pensées, mais de changer la relation que l'on entretient avec elles.
+
+### La défusion cognitive : vous n'êtes pas vos pensées
+
+En TCC, on utilise le concept de "défusion cognitive". Habituellement, nous sommes "fusionnés" avec nos pensées : si l'esprit dit "je n'y arriverai pas", on le croit immédiatement.
+
+La méditation permet de faire un pas de recul. Elle nous apprend à regarder **nos** pensées, plutôt qu'à regarder le monde **à travers** nos pensées. Une pensée devient un simple événement mental, comme un son ou une sensation physique. Elle apparaît, existe un instant, puis disparaît, si on ne l'alimente pas.
+
+### La technique de l'étiquetage
+
+Quand une pensée surgit pendant la pratique et détourne l'attention, voici l'approche à adopter :
+
+1. **L'accueillir :** Ne luttez pas contre la distraction. Remarquez simplement que l'esprit s'est égaré.
+
+2. **L'étiqueter :** Posez un mot mental neutre sur ce qui vous a distrait ("pensée", "souvenir", "planification"). Cela crée instantanément une distance.
+
+3. **Laisser passer :** Ramenez doucement, mais fermement, votre attention vers votre point d'ancrage (la respiration ou le corps).
+
+Le succès de la méditation ne se mesure pas à l'absence de pensées, mais à la capacité de s'en rendre compte de plus en plus vite pour revenir à l'instant présent.`
+  },
+
+  'quotidien': {
+    title: 'Méditer au quotidien',
+    meta: 'Créer une habitude douce · 2 min de lecture',
+    md: `Intégrer la méditation dans une vie déjà bien remplie peut sembler complexe. Pourtant, les sciences du comportement sont formelles : la régularité prime de loin sur la durée. Il est psychologiquement et neurologiquement plus efficace de méditer 5 minutes par jour que 45 minutes une fois par mois.
+
+### Créer une micro-habitude
+
+Pour qu'un nouveau comportement s'installe, il doit être facile à déclencher. L'astuce consiste à associer la méditation à une habitude déjà existante.
+
+- Méditer 3 minutes juste après s'être brossé les dents.
+
+- Lancer une séance courte une fois installé dans les transports en commun.
+
+- S'accorder 5 minutes de respiration avant de démarrer l'ordinateur au travail.
+
+### La pratique informelle
+
+La pleine conscience ne se limite pas aux séances formelles, les yeux fermés. Elle peut s'inviter dans les gestes les plus banals. La pratique informelle consiste à porter une attention totale à une action habituelle :
+
+- **Prendre une douche :** Se concentrer uniquement sur la température de l'eau, le bruit des gouttes et l'odeur du savon, au lieu de planifier sa journée.
+
+- **Marcher :** Sentir le contact des pieds avec le sol à chaque pas.
+
+- **Écouter :** Être pleinement présent lors d'une conversation, sans préparer mentalement sa prochaine réponse.
+
+Chaque instant de la journée offre une opportunité de s'entraîner. Même en cas de baisse de motivation, s'asseoir et ne prendre que trois grandes respirations conscientes est déjà une victoire sur le pilote automatique.`
+  }
+};
+
+function openArticle(slug) {
+  const art = ARTICLES[slug];
+  if (!art) return;
+  document.getElementById('article-title').textContent = art.title;
+  document.getElementById('article-meta').textContent = art.meta;
+  document.getElementById('article-body').innerHTML = mdToHTML(art.md);
+  showGuideView('article');
+}
+
+function toggleFaq(item) {
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(i => {
+    i.classList.remove('open');
+    i.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
+  });
+  if (!isOpen) {
+    item.classList.add('open');
+    item.querySelector('.faq-question').setAttribute('aria-expanded', 'true');
+  }
+}
+
+function confirmResetProgress() {
+  if (!confirm('Réinitialiser toute ta progression ?\n\nCette action supprimera tes statistiques et ton historique de séances. Elle est irréversible.')) return;
+  try {
+    localStorage.removeItem('serein-stats');
+    localStorage.removeItem('serein-history');
+    localStorage.removeItem('serein-feedback');
+    document.documentElement.classList.remove('has-sessions');
+    loadStats();
+  } catch(e) {}
 }
 
 // ── GUIDE CHATBOT ──
@@ -1475,9 +1747,18 @@ function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 function addBotBubble(text) {
   const win = document.getElementById('chat-window');
+  const row = document.createElement('div');
+  row.className = 'chat-bot-row';
+  const avatar = document.createElement('div');
+  avatar.className = 'chat-bot-avatar';
+  avatar.textContent = '🌿';
   const div = document.createElement('div');
-  div.className = 'chat-bubble bot'; div.textContent = text;
-  win.appendChild(div); win.scrollTop = win.scrollHeight;
+  div.className = 'chat-bubble bot';
+  div.textContent = text;
+  row.appendChild(avatar);
+  row.appendChild(div);
+  win.appendChild(row);
+  win.scrollTop = win.scrollHeight;
 }
 
 function addUserBubble(text) {
@@ -1512,6 +1793,12 @@ function clearChoices() {
 
 // ── MINUTEUR LIBRE ──
 const bell = new Audio('assets/audio/cloche.mp3');
+
+function playBell() {
+  if (localStorage.getItem('serein-bells') !== 'true') return;
+  bell.currentTime = 0;
+  bell.play().catch(() => {});
+}
 
 function openTimerSheet() {
   document.getElementById('timer-sheet-backdrop').classList.add('open');
@@ -1693,6 +1980,7 @@ document.addEventListener('DOMContentLoaded', () => {
   applyTheme();
   loadSpeed();
   loadStats();
+  loadPrefs();
   restoreOfflineButtons();
   updateOfflineCount();
 });
