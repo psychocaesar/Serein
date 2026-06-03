@@ -5,7 +5,7 @@
 
   Philosophie :
   - Permissions minimales (privacy-first)
-  - Pas de notifications push
+  - Notifications locales (rappel quotidien uniquement — pas de push serveur)
   - Lecture audio en arrière-plan (écran verrouillé)
   - Compatible Android 8+ (API 26)
 -->
@@ -31,6 +31,14 @@
     <!-- Empêche Android d'endormir le CPU pendant la lecture audio.
          Utilisé par Capacitor WebView automatiquement. -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <!-- Notifications locales (rappel quotidien) -->
+    <!-- POST_NOTIFICATIONS requis sur Android 13+ (API 33+) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Permet de reprogrammer le rappel après un redémarrage de l'appareil -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- Alarmes exactes pour déclencher le rappel à l'heure précise -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 
     <!-- Écriture dans le stockage interne pour le cache audio hors ligne.
          Requis par @capacitor/filesystem sur API < 29. -->
@@ -87,6 +95,15 @@
             android:name=".AudioPlaybackService"
             android:exported="false"
             android:foregroundServiceType="mediaPlayback" />
+
+        <!-- ── Receiver pour reprogrammer les alarmes après redémarrage ── -->
+        <receiver
+            android:name="com.capacitorjs.plugins.localnotifications.LocalNotificationRestoreReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
 
         <!-- ── Provider Capacitor FileSystem ──
              Requis par @capacitor/filesystem pour partager des fichiers

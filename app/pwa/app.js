@@ -663,6 +663,102 @@ function loadPrefs() {
     const ambianceVal = localStorage.getItem('serein-ambiance-default') || '';
     const ambianceLabel = document.getElementById('ambiance-default-label');
     if (ambianceLabel) ambianceLabel.textContent = (AMBIANCE_LABELS[ambianceVal] || 'Aucun') + ' ›';
+    loadReminderPrefs();
+  } catch(e) {}
+}
+
+// ── RAPPEL QUOTIDIEN ──
+
+const REMINDER_MESSAGES = [
+  'C\'est le moment de ta pause méditation 🌿',
+  'Une minute pour toi. Serein t\'attend.',
+  'Prends une grande inspiration. C\'est l\'heure de méditer.',
+  'Ta pratique quotidienne t\'attend 🌙',
+  'Un instant de calme, rien que pour toi.',
+];
+
+function loadReminderPrefs() {
+  const enabled = localStorage.getItem('serein-reminder-enabled') === 'true';
+  const time = localStorage.getItem('serein-reminder-time') || '21:00';
+  const toggle = document.getElementById('reminder-toggle');
+  const btn = document.getElementById('reminder-time-btn');
+  const input = document.getElementById('reminder-time-input');
+  if (toggle) toggle.checked = enabled;
+  if (btn) { btn.textContent = time + ' ›'; btn.style.display = enabled ? '' : 'none'; }
+  if (input) input.value = time;
+}
+
+function openReminderTimePicker() {
+  const input = document.getElementById('reminder-time-input');
+  if (!input) return;
+  input.style.pointerEvents = 'auto';
+  input.focus();
+  input.click();
+  setTimeout(() => { input.style.pointerEvents = 'none'; }, 500);
+}
+
+function onReminderTimeChange(val) {
+  if (!val) return;
+  localStorage.setItem('serein-reminder-time', val);
+  const btn = document.getElementById('reminder-time-btn');
+  if (btn) btn.textContent = val + ' ›';
+  const [h, m] = val.split(':').map(Number);
+  scheduleReminder(h, m);
+}
+
+async function onReminderToggle(enabled) {
+  localStorage.setItem('serein-reminder-enabled', enabled);
+  const btn = document.getElementById('reminder-time-btn');
+  if (btn) btn.style.display = enabled ? '' : 'none';
+  if (enabled) {
+    const time = localStorage.getItem('serein-reminder-time') || '21:00';
+    const [h, m] = time.split(':').map(Number);
+    const ok = await scheduleReminder(h, m);
+    if (!ok) {
+      // Permission refusée — on remet le toggle à off
+      localStorage.setItem('serein-reminder-enabled', 'false');
+      const toggle = document.getElementById('reminder-toggle');
+      if (toggle) toggle.checked = false;
+      if (btn) btn.style.display = 'none';
+    }
+  } else {
+    cancelReminder();
+  }
+}
+
+async function scheduleReminder(hour, minute) {
+  try {
+    const LC = window.Capacitor?.Plugins?.LocalNotifications;
+    if (!LC) return false;
+
+    const perm = await LC.requestPermissions();
+    if (perm.display !== 'granted') return false;
+
+    // Annuler l'éventuel rappel existant
+    await LC.cancel({ notifications: [{ id: 1001 }] }).catch(() => {});
+
+    const msg = REMINDER_MESSAGES[Math.floor(Math.random() * REMINDER_MESSAGES.length)];
+    await LC.schedule({
+      notifications: [{
+        id: 1001,
+        title: 'Serein',
+        body: msg,
+        schedule: { on: { hour, minute }, repeats: true },
+        smallIcon: 'ic_notification',
+        iconColor: '#2e7d52',
+      }]
+    });
+    return true;
+  } catch(e) {
+    return false;
+  }
+}
+
+async function cancelReminder() {
+  try {
+    const LC = window.Capacitor?.Plugins?.LocalNotifications;
+    if (!LC) return;
+    await LC.cancel({ notifications: [{ id: 1001 }] });
   } catch(e) {}
 }
 
