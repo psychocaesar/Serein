@@ -5,9 +5,6 @@ workflows:
     instance_type: mac_mini_m2
 
     environment:
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: fr.sereinapp.app
       vars:
         XCODE_PROJECT: "app/ios/App/App.xcodeproj"
         XCODE_SCHEME: "App"
@@ -28,12 +25,15 @@ workflows:
           cd app/ios/App
           pod install
 
-      - name: Build iOS IPA
+      - name: Build iOS (sans signature - vérification compilation)
         script: |
-          xcode-project use-profiles
-          xcode-project build-ipa \
-            --project "$XCODE_PROJECT" \
-            --scheme "$XCODE_SCHEME"
+          xcodebuild \
+            -project "$XCODE_PROJECT" \
+            -scheme "$XCODE_SCHEME" \
+            -configuration Release \
+            -sdk iphonesimulator \
+            CODE_SIGNING_ALLOWED=NO \
+            build
 
     artifacts:
       - build/ios/ipa/*.ipa
