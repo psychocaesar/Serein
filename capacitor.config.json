@@ -2,6 +2,12 @@
   "appId": "fr.sereinapp.app",
   "appName": "SereinApp Méditation",
   "webDir": "app/pwa",
+  "android": {
+    "path": "app/android"
+  },
+  "ios": {
+    "path": "app/ios"
+  },
   "server": {
     "androidScheme": "https"
   }

@@ -1,0 +1,45 @@
+workflows:
+  ios-release:
+    name: SereinApp iOS Release
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: fr.sereinapp.app
+      vars:
+        XCODE_PROJECT: "app/ios/App/App.xcodeproj"
+        XCODE_SCHEME: "App"
+      node: latest
+
+    scripts:
+      - name: Install npm dependencies
+        script: npm install
+
+      - name: Capacitor sync iOS
+        script: npx cap sync ios
+
+      - name: Remove audio files from iOS bundle
+        script: find app/ios/App/App/public/assets/audio -name "*.mp3" -delete || true
+
+      - name: Install CocoaPods
+        script: |
+          cd app/ios/App
+          pod install
+
+      - name: Build iOS IPA
+        script: |
+          xcode-project use-profiles
+          xcode-project build-ipa \
+            --project "$XCODE_PROJECT" \
+            --scheme "$XCODE_SCHEME"
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true

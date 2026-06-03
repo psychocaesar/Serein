@@ -1,16 +1,15 @@
 const CACHE_VERSION = 'serein-v3';
 const STATIC_CACHE  = CACHE_VERSION + '-static';
 const AUDIO_CACHE   = 'serein-audio'; // non versionné — survit aux mises à jour
-
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/app.js',
   '/assets/logo.png',
-  '/assets/audio/cloche.mp3'
 ];
 
 const OPTIONAL_ASSETS = [
+  '/assets/audio/cloche.mp3',
   '/assets/illustrations/player-01.jpg',
   '/assets/illustrations/player-02.jpg',
   '/assets/illustrations/player-03.jpg',
