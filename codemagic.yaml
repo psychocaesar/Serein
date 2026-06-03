@@ -20,11 +20,6 @@ workflows:
       - name: Remove audio files from iOS bundle
         script: find app/ios/App/App/public/assets/audio -name "*.mp3" -delete || true
 
-      - name: Install CocoaPods
-        script: |
-          cd app/ios/App
-          pod install
-
       - name: Build iOS (sans signature - vérification compilation)
         script: |
           xcodebuild \
