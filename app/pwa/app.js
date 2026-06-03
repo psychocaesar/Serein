@@ -1,3 +1,8 @@
+// ── CONFIG ──
+const AUDIO_BASE_URL = (typeof Capacitor !== 'undefined' && Capacitor.isNativePlatform())
+  ? 'https://audio.sereinapp.fr/'
+  : 'assets/audio/';
+
 // ── GLOBALS ──
 let timerInterval = null;
 let timerSecondsLeft = 0;
@@ -279,7 +284,7 @@ function launchPlayer(id, title, parcours, duration, filename, voice, artwork) {
 
   openPlayerScreen();
 
-  audio.src = 'assets/audio/' + voiceFolder(voice) + '/' + encodeURIComponent(filename);
+  audio.src = AUDIO_BASE_URL + voiceFolder(voice) + '/' + encodeURIComponent(filename);
   audio.load();
   audio.play().then(() => {
     document.getElementById('audio-loading').textContent = '';
@@ -454,7 +459,7 @@ async function toolbarOffline() {
   if (!('caches' in window)) { alert('Cache non disponible sur ce navigateur.'); return; }
   try {
     const cache = await caches.open(AUDIO_CACHE);
-    const url = 'assets/audio/' + currentAudioFolder() + '/' + encodeURIComponent(currentOfflineFilename);
+    const url = AUDIO_BASE_URL + currentAudioFolder() + '/' + encodeURIComponent(currentOfflineFilename);
     const existing = await cache.match(url);
     if (existing) {
       await cache.delete(url);
@@ -471,7 +476,7 @@ async function updateOfflineBtnState() {
   if (!currentOfflineFilename || !('caches' in window)) return;
   try {
     const cache = await caches.open(AUDIO_CACHE);
-    const url = 'assets/audio/' + currentAudioFolder() + '/' + encodeURIComponent(currentOfflineFilename);
+    const url = AUDIO_BASE_URL + currentAudioFolder() + '/' + encodeURIComponent(currentOfflineFilename);
     const existing = await cache.match(url);
     const btn = document.getElementById('toolbar-offline-btn');
     btn.classList.toggle('active', !!existing);
@@ -490,7 +495,7 @@ function setAmbiance(file) {
     return;
   }
   currentAmbiance = file;
-  ambianceAudio.src = 'assets/audio/ambiance/' + file;
+  ambianceAudio.src = AUDIO_BASE_URL + 'ambiance/' + file;
   ambianceAudio.volume = parseFloat(document.getElementById('ambiance-volume-slider').value);
   ambianceAudio.play().catch(() => {});
   const id = 'amb-' + file.replace('.mp3','').replace('bruit-blanc','blanc');
@@ -516,7 +521,7 @@ async function toggleOfflineCache(btn, filename) {
   btn.classList.add('loading');
   try {
     const cache = await caches.open(AUDIO_CACHE);
-    const url = 'assets/audio/' + voiceFolder(btn.dataset.voice) + '/' + encodeURIComponent(filename);
+    const url = AUDIO_BASE_URL + voiceFolder(btn.dataset.voice) + '/' + encodeURIComponent(filename);
     const existing = await cache.match(url);
     if (existing) {
       await cache.delete(url);
@@ -554,7 +559,7 @@ async function restoreOfflineButtons() {
     await Promise.all(btns.map(async btn => {
       const fn = btn.dataset.filename;
       if (!fn) return;
-      const match = await cache.match('assets/audio/' + voiceFolder(btn.dataset.voice) + '/' + encodeURIComponent(fn));
+      const match = await cache.match(AUDIO_BASE_URL + voiceFolder(btn.dataset.voice) + '/' + encodeURIComponent(fn));
       if (match) { btn.classList.add('cached'); btn.textContent = '✓'; }
     }));
   } catch(e) { console.warn('[Serein cache]', e); }
@@ -1888,7 +1893,7 @@ function clearChoices() {
 
 
 // ── MINUTEUR LIBRE ──
-const bell = new Audio('assets/audio/cloche.mp3');
+const bell = new Audio(AUDIO_BASE_URL + 'cloche.mp3');
 
 function playBell() {
   if (localStorage.getItem('serein-bells') !== 'true') return;
@@ -1934,7 +1939,7 @@ function startTimer(minutes) {
   timerElapsedBeforePause = 0;
 
   const timerEngine = document.getElementById('timer-engine');
-  timerEngine.src = 'assets/audio/timer-' + minutes + 'min.mp3';
+  timerEngine.src = AUDIO_BASE_URL + 'timer-' + minutes + 'min.mp3';
   timerEngine.load();
   // Le MP3 démarre avec la cloche intégrée — pas de bell.play() séparé.
   // Si le fichier est absent on replie sur AudioContext + cloche seule.

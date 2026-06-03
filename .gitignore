@@ -1,2 +1,7 @@
 node_modules/
 assets/audio/
+
+# Android signing — ne jamais commiter
+*.keystore
+*.jks
+app/android/keystore.properties
