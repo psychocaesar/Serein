@@ -6,6 +6,18 @@
       "runtimeExecutable": "npx",
       "runtimeArgs": ["serve", "app/pwa", "-p", "3456", "--no-clipboard"],
       "port": 3456
+    },
+    {
+      "name": "psygest-pwa",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "psygest-pwa/src/public", "-p", "4321", "--no-clipboard"],
+      "port": 4321
+    },
+    {
+      "name": "psygest",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 1420
     }
   ]
 }
