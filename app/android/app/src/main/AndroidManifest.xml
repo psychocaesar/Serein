@@ -10,7 +10,7 @@
   - Compatible Android 8+ (API 26)
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="fr.sereinapp.app">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!-- ══════════════════════════════════════════════════
          PERMISSIONS
@@ -122,13 +122,6 @@
 
     </application>
 
-    <!-- ══════════════════════════════════════════════════
-         COMPATIBILITÉ ANDROID
-         minSdk 26 = Android 8.0 (~98% des appareils actifs)
-         targetSdk 34 = Android 14 (requis par le Play Store en 2024-2025)
-    ══════════════════════════════════════════════════ -->
-    <uses-sdk
-        android:minSdkVersion="26"
-        android:targetSdkVersion="34" />
+    <!-- minSdk et targetSdk définis dans variables.gradle — ne pas redéclarer ici -->
 
 </manifest>

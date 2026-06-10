@@ -2084,4 +2084,15 @@ document.addEventListener('DOMContentLoaded', () => {
   loadPrefs();
   restoreOfflineButtons();
   updateOfflineCount();
+
+  // Swipe down to close ambient sound sheet
+  const optionsSheet = document.getElementById('options-sheet');
+  let swipeStartY = 0;
+  optionsSheet.addEventListener('touchstart', e => {
+    swipeStartY = e.touches[0].clientY;
+  }, { passive: true });
+  optionsSheet.addEventListener('touchend', e => {
+    const delta = e.changedTouches[0].clientY - swipeStartY;
+    if (delta > 60) toggleOptionsSheet();
+  }, { passive: true });
 });

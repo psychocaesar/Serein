@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "psygest-pwa-preview",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "-s", "src/public", "-l", "4321"],
+      "port": 4321
+    }
+  ]
+}
