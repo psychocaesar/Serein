@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#0d1b15">
   <title>Serein - Méditation guidée en français</title>
   <meta name="description" content="Serein : méditations guidées en français, gratuites et sans publicité. Séances pour le stress, l'anxiété, le sommeil et la respiration. Sans compte requis, sans tracking.">
@@ -156,6 +156,8 @@
     /* EXPLORE */
     .session-card { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
     .session-info p { font-size: .85rem; color: var(--color-muted); margin-top: .2rem; }
+    .session-desc { font-size: .8rem; color: var(--color-muted); line-height: 1.4; margin-top: .25rem; }
+    .session-done-check { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; background: var(--color-primary-light); color: var(--color-primary); font-size: .65rem; font-weight: 700; margin-left: .4rem; vertical-align: 2px; flex-shrink: 0; }
     .session-list { display: flex; flex-direction: column; gap: .75rem; margin-top: 1.25rem; }
     .filter-tabs { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; }
     .tab { border: 1px solid var(--color-border); background: var(--color-surface); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); border-radius: 999px; padding: .4rem .9rem; font-size: .85rem; cursor: pointer; transition: background .2s, color .2s, border-color .2s; color: var(--color-text); }
@@ -495,7 +497,9 @@
     .about-card .trust { margin-top: 1.25rem; }
 
     /* Focus visible */
-    .btn:focus-visible, .tab:focus-visible, .chat-choice:focus-visible, .btn-offline:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+    .btn:focus-visible, .tab:focus-visible, .chat-choice:focus-visible, .btn-offline:focus-visible,
+    .path-card:focus-visible, .guide-hub-card:focus-visible, .timer-card-horizontal:focus-visible,
+    .article-hero:focus-visible, .article-mini-card:focus-visible, .progress-track:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
 
     /* Responsive */
     @media (max-width:600px) { h1{font-size:1.5rem} .card-grid{grid-template-columns:repeat(2,1fr)} .path-card{min-height:160px} }
@@ -668,7 +672,8 @@
         <span class="voice-option-check"></span>
       </button>
     </div>
-    <button class="voice-sheet-launch" onclick="confirmVoiceAndLaunch()">▶ Lancer la séance</button>
+    <p class="voice-sheet-hint" id="voice-sheet-hint" style="font-size:.75rem;color:var(--color-muted);text-align:center;margin-bottom:1rem;">Ton choix sera retenu — modifiable à tout moment dans les Réglages.</p>
+    <button class="voice-sheet-launch" id="voice-sheet-launch" onclick="confirmVoiceAndLaunch()">▶ Lancer la séance</button>
     <button class="voice-sheet-cancel" onclick="closeVoiceOverlay()">Annuler</button>
   </div>
 </div>
@@ -865,35 +870,59 @@
     <div class="stat-chip"><span class="stat-value" id="stat-time">0 min</span><span class="stat-label">⏱ Temps<br>total</span></div>
   </div>
 
+  <!-- Reprendre : rempli par renderResumeCard() si une séance est en cours -->
+  <section id="resume-block" class="timer-block" style="display:none;margin-top:1.25rem;" aria-label="Reprendre la séance en cours">
+    <p class="timer-block-label">Reprendre</p>
+    <article class="timer-card-horizontal" id="resume-card" role="button" tabindex="0">
+      <div class="timer-info-h">
+        <div class="timer-icon-wrap" aria-hidden="true">⏯</div>
+        <div><h3 id="resume-title"></h3><p id="resume-meta"></p></div>
+      </div>
+      <span class="timer-cta">▶ Reprendre</span>
+    </article>
+  </section>
+
+  <!-- Suggestion du moment : remplie par renderDailySuggestion() pour les utilisateurs réguliers -->
+  <section id="suggestion-block" class="timer-block" style="display:none;margin-top:1.25rem;" aria-label="Suggestion du moment">
+    <p class="timer-block-label" id="suggestion-label">Suggestion du moment</p>
+    <article class="timer-card-horizontal" id="suggestion-card" role="button" tabindex="0">
+      <div class="timer-info-h">
+        <div class="timer-icon-wrap" aria-hidden="true" id="suggestion-emoji">🌿</div>
+        <div><h3 id="suggestion-title"></h3><p id="suggestion-meta"></p></div>
+      </div>
+      <span class="timer-cta">▶ Lancer</span>
+    </article>
+  </section>
+
   <section>
     <h2>Parcours</h2>
     <div class="card-grid">
-      <article class="card path-card" onclick="filterParcours('Premiers pas')">
+      <article class="card path-card" role="button" tabindex="0" aria-label="Parcours Premiers pas, voir les séances" onclick="filterParcours('Premiers pas')">
         <img class="card-illustration" src="assets/illustrations/Illustrations site-01.webp" alt="" aria-hidden="true">
         <div class="card-content"><h3>Premiers pas</h3><p>Pour entrer doucement dans la pratique.</p><p class="meta">7 séances</p>
         <div class="path-card-nav"><span class="path-card-nav-label">Voir les séances</span><svg class="path-card-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>
       </article>
-      <article class="card path-card" style="background: linear-gradient(135deg, #8e5468, #2c1424);" onclick="filterParcours('Émotions')">
+      <article class="card path-card" role="button" tabindex="0" aria-label="Parcours Émotions, voir les séances" style="background: linear-gradient(135deg, #8e5468, #2c1424);" onclick="filterParcours('Émotions')">
         <img class="card-illustration" src="assets/illustrations/Illustrations site-02.webp" alt="" aria-hidden="true">
         <div class="card-content"><h3>Émotions</h3><p>Comprendre, accueillir et traverser ses émotions.</p><p class="meta">9 séances</p>
         <div class="path-card-nav"><span class="path-card-nav-label">Voir les séances</span><svg class="path-card-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>
       </article>
-      <article class="card path-card" onclick="filterParcours('Sommeil')">
+      <article class="card path-card" role="button" tabindex="0" aria-label="Parcours Sommeil, voir les séances" onclick="filterParcours('Sommeil')">
         <img class="card-illustration" src="assets/illustrations/Illustrations site-03.webp" alt="" aria-hidden="true">
         <div class="card-content"><h3>Sommeil</h3><p>Pour préparer le coucher et bien dormir.</p><p class="meta">6 séances</p>
         <div class="path-card-nav"><span class="path-card-nav-label">Voir les séances</span><svg class="path-card-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>
       </article>
-      <article class="card path-card" onclick="filterParcours('Respirer')">
+      <article class="card path-card" role="button" tabindex="0" aria-label="Parcours Respirer, voir les séances" onclick="filterParcours('Respirer')">
         <img class="card-illustration" src="assets/illustrations/Illustrations site-04.webp" alt="" aria-hidden="true">
         <div class="card-content"><h3>Respirer</h3><p>Pour explorer les techniques de respiration.</p><p class="meta">5 séances</p>
         <div class="path-card-nav"><span class="path-card-nav-label">Voir les séances</span><svg class="path-card-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>
       </article>
-      <article class="card path-card" onclick="filterParcours('Anxiété')">
+      <article class="card path-card" role="button" tabindex="0" aria-label="Parcours Anxiété, voir les séances" onclick="filterParcours('Anxiété')">
         <img class="card-illustration" src="assets/illustrations/Illustrations site-05.webp" alt="" aria-hidden="true">
         <div class="card-content"><h3>Anxiété</h3><p>Pour apaiser l'agitation mentale.</p><p class="meta">6 séances</p>
         <div class="path-card-nav"><span class="path-card-nav-label">Voir les séances</span><svg class="path-card-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>
       </article>
-      <article class="card path-card" onclick="filterParcours('Concentration')">
+      <article class="card path-card" role="button" tabindex="0" aria-label="Parcours Concentration, voir les séances" onclick="filterParcours('Concentration')">
         <img class="card-illustration" src="assets/illustrations/Illustrations site-06.webp" alt="" aria-hidden="true">
         <div class="card-content"><h3>Concentration</h3><p>Pour clarifier l'esprit et entrer dans la zone.</p><p class="meta">7 séances</p>
         <div class="path-card-nav"><span class="path-card-nav-label">Voir les séances</span><svg class="path-card-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>
@@ -1122,6 +1151,10 @@
       <div class="info"><h3>Sons d'ambiance</h3><p>Fond sonore pendant les séances</p></div>
       <span class="setting-value" id="ambiance-default-label">Aucun ›</span>
     </article>
+    <article class="card setting-item" style="cursor:pointer;" onclick="openVoiceSettings()">
+      <div class="info"><h3>Voix des séances</h3><p>Quand les deux voix sont disponibles</p></div>
+      <span class="setting-value" id="voice-default-label">— ›</span>
+    </article>
   </div>
 
   <!-- APPARENCE -->
@@ -1202,7 +1235,7 @@
       <div class="info" style="flex:1;">
         <a href="https://www.instagram.com/serein_project/" target="_blank" rel="noopener noreferrer" class="insta-link">
           <div class="insta-icon"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></div>
-          <div class="insta-text"><div class="insta-title">Suivez-nous sur Instagram</div><div class="insta-handle">@serein_project</div></div>
+          <div class="insta-text"><div class="insta-title">Suis-nous sur Instagram</div><div class="insta-handle">@serein_project</div></div>
         </a>
       </div>
       <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--color-muted);fill:none;stroke-width:2;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
@@ -1241,7 +1274,7 @@
       <button class="ambiance-settings-btn" data-value="feu.mp3" onclick="selectAmbianceDefault(this)">🔥<span>Feu</span></button>
       <button class="ambiance-settings-btn" data-value="bruit-blanc.mp3" onclick="selectAmbianceDefault(this)">〰️<span>Blanc</span></button>
     </div>
-    <button class="timer-sheet-cancel" onclick="document.getElementById('ambiance-settings-backdrop').classList.remove('open')">Fermer</button>
+    <button class="timer-sheet-cancel" onclick="closeAmbianceSettings()">Fermer</button>
   </div>
 </div>
 

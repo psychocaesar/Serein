@@ -33,7 +33,55 @@ function stopSilentSession() {
 // ── NAVIGATION ──
 const SCREENS = ['home','explore','guide','settings'];
 
+// Pile d'overlays adossée à l'historique du navigateur : le bouton retour
+// (Android, navigateur) ferme l'élément du dessus au lieu de quitter l'app.
+const overlayStack = [];
+let suppressPop = 0;
+// Enchaînement sheet → player : on réutilise l'entrée d'historique de la sheet
+// pour le player (un back() suivi d'un pushState immédiat se court-circuitent).
+let reuseOverlayEntry = false;
+
+function registerOverlay(name, closeFn) {
+  if (reuseOverlayEntry) {
+    reuseOverlayEntry = false;
+    overlayStack.push({ name, closeFn });
+    return;
+  }
+  overlayStack.push({ name, closeFn });
+  try { history.pushState({ serein: name }, ''); } catch(e) {}
+}
+
+// Ferme visuellement une sheet et marque son entrée d'historique comme
+// réutilisable par l'overlay qui s'ouvre juste après (ex : player).
+function handOverOverlay(name) {
+  const top = overlayStack[overlayStack.length - 1];
+  if (top && top.name === name) {
+    overlayStack.pop();
+    reuseOverlayEntry = true;
+  }
+}
+
+// Fermeture déclenchée par l'UI (bouton ✕, Annuler…) : on retire l'entrée
+// d'historique correspondante sans redéclencher la fermeture au popstate.
+function releaseOverlay(name) {
+  const idx = overlayStack.map(o => o.name).lastIndexOf(name);
+  if (idx === -1) return;
+  overlayStack.splice(idx, 1);
+  suppressPop++;
+  try { history.back(); } catch(e) { suppressPop--; }
+}
+
+window.addEventListener('popstate', () => {
+  if (suppressPop > 0) { suppressPop--; return; }
+  const top = overlayStack.pop();
+  if (top) { top.closeFn(); return; }
+  // Pile vide : retour depuis un écran secondaire → accueil.
+  const home = document.getElementById('home');
+  if (home && !home.classList.contains('active')) showScreen('home');
+});
+
 function showScreen(id) {
+  const wasHome = document.getElementById('home').classList.contains('active');
   SCREENS.forEach(s => {
     document.getElementById(s).classList.toggle('active', s === id);
     const btn = document.getElementById('nav-' + s);
@@ -41,6 +89,18 @@ function showScreen(id) {
   });
   window.scrollTo(0, 0);
   if (id === 'guide') showGuideView('hub');
+  // Garde d'historique : retour depuis un écran secondaire ramène à l'accueil.
+  if (id !== 'guide') {
+    let g;
+    while ((g = overlayStack.find(o => o.name.startsWith('guide-')))) releaseOverlay(g.name);
+  }
+  if (id === 'home') {
+    releaseOverlay('screen');
+    renderResumeCard();
+    renderDailySuggestion();
+  } else if (wasHome && !overlayStack.some(o => o.name === 'screen')) {
+    registerOverlay('screen', () => showScreen('home'));
+  }
 }
 
 let activeThemeFilter = 'Toutes';
@@ -89,10 +149,10 @@ function updateFilterCount() {
 
 function filterParcours(label) {
   showScreen('explore');
-  requestAnimationFrame(() => {
-    document.querySelectorAll('.filter-tabs .tab').forEach(t => {
-      if (t.textContent.trim() === label) t.click();
-    });
+  // Synchrone : requestAnimationFrame est suspendu page en arrière-plan,
+  // ce qui laissait le filtre sur « Toutes ».
+  document.querySelectorAll('.filter-tabs .tab').forEach(t => {
+    if (t.textContent.trim() === label) t.click();
   });
 }
 
@@ -123,6 +183,7 @@ function makeSessionCard(s, group, subgroupName) {
   card.dataset.parcours = group.name;
   card.dataset.duration = durationClass(s.duration);
   card.dataset.durationMin = s.duration;
+  card.dataset.title = s.title;
 
   const info = document.createElement('div');
   info.className = 'session-info';
@@ -133,6 +194,12 @@ function makeSessionCard(s, group, subgroupName) {
     ? group.name + ' · ' + subgroupName + ' · ' + durationLabel
     : group.name + ' · ' + durationLabel;
   info.appendChild(h3);
+  if (s.desc) {
+    const desc = document.createElement('p');
+    desc.className = 'session-desc';
+    desc.textContent = s.desc;
+    info.appendChild(desc);
+  }
   info.appendChild(meta);
 
   const actions = document.createElement('div');
@@ -182,6 +249,53 @@ function makeResourcesBlock(resources) {
   return wrap;
 }
 
+let CATALOG = null; // catalogue chargé — réutilisé par la suggestion du moment et les compteurs
+
+// Titres des séances déjà écoutées (historique partagé avec le guide)
+function getListenedTitles() {
+  try {
+    return new Set((JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]')).map(e => e.title));
+  } catch(e) { return new Set(); }
+}
+
+// Coche ✓ sur les séances déjà écoutées
+function updateSessionChecks() {
+  const listened = getListenedTitles();
+  document.querySelectorAll('.session-list .session-card').forEach(card => {
+    const h3 = card.querySelector('h3');
+    if (!h3) return;
+    const done = listened.has(card.dataset.title);
+    let check = h3.querySelector('.session-done-check');
+    if (done && !check) {
+      check = document.createElement('span');
+      check.className = 'session-done-check';
+      check.textContent = '✓';
+      check.setAttribute('aria-label', 'Séance déjà écoutée');
+      h3.appendChild(check);
+    } else if (!done && check) {
+      check.remove();
+    }
+  });
+}
+
+// Compteurs des cartes parcours : "7 séances" ou "3/7 séances" (calculés, plus de valeurs codées en dur)
+function updatePathCardCounts() {
+  if (!CATALOG) return;
+  const listened = getListenedTitles();
+  CATALOG.groups.forEach(group => {
+    const sessions = group.subgroups ? group.subgroups.flatMap(sub => sub.sessions) : group.sessions;
+    const done = sessions.filter(s => listened.has(s.title)).length;
+    document.querySelectorAll('#home .path-card').forEach(card => {
+      const h3 = card.querySelector('h3');
+      const meta = card.querySelector('.meta');
+      if (!h3 || !meta || h3.textContent !== group.name) return;
+      meta.textContent = done > 0
+        ? done + '/' + sessions.length + ' séances'
+        : sessions.length + ' séances';
+    });
+  });
+}
+
 async function renderSessionList() {
   const list = document.getElementById('session-list');
   if (!list) return;
@@ -189,6 +303,7 @@ async function renderSessionList() {
     const res = await fetch('assets/sessions.json');
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const catalog = await res.json();
+    CATALOG = catalog;
     list.textContent = '';
     catalog.groups.forEach(group => {
       list.appendChild(makeGroupHeader(group.name));
@@ -212,6 +327,9 @@ async function renderSessionList() {
       if (group.resources) list.appendChild(makeResourcesBlock(group.resources));
     });
     applyFilters();
+    updateSessionChecks();
+    updatePathCardCounts();
+    renderDailySuggestion();
   } catch(e) {
     console.warn('[Serein catalogue]', e);
     const msg = document.createElement('p');
@@ -222,20 +340,62 @@ async function renderSessionList() {
 }
 
 // ── VOICE OVERLAY ──
+// Le choix de voix est mémorisé : l'overlay ne s'affiche qu'au tout premier
+// lancement d'une séance à deux voix, puis se change dans les Réglages.
+const VOICE_KEY = 'serein-voice';
 let pendingSession = null;
 let selectedVoice = 'masculine';
+let voiceOverlayMode = 'launch'; // 'launch' | 'settings'
+
+function getSavedVoice() {
+  const v = localStorage.getItem(VOICE_KEY);
+  return v === 'masculine' || v === 'feminine' ? v : null;
+}
+
+function voiceLabel(voice) {
+  return voice === 'feminine' ? 'Voix féminine — Daïdrée' : 'Voix masculine — César';
+}
+
+function updateVoiceSettingLabel() {
+  const el = document.getElementById('voice-default-label');
+  if (!el) return;
+  const saved = getSavedVoice();
+  el.textContent = (saved ? (saved === 'feminine' ? 'Daïdrée' : 'César') : 'Au 1er lancement') + ' ›';
+}
 
 function openVoiceOverlay(id, title, parcours, duration, filenameMasc, filenameFem, artwork) {
   pendingSession = { id, title, parcours, duration, filenameMasc, filenameFem, artwork };
   if (!filenameFem) {
-    selectedVoice = 'masculine';
     launchPlayer(id, title, parcours, duration, filenameMasc, 'masculine', artwork);
     return;
   }
+  const saved = getSavedVoice();
+  if (saved) {
+    const filename = saved === 'feminine' ? filenameFem : filenameMasc;
+    launchPlayer(id, title, parcours, duration, filename, saved, artwork);
+    return;
+  }
+  voiceOverlayMode = 'launch';
   selectedVoice = 'masculine';
+  document.getElementById('voice-sheet-hint').style.display = '';
+  document.getElementById('voice-sheet-launch').textContent = '▶ Lancer la séance';
   document.querySelectorAll('.voice-option').forEach(o => o.classList.remove('selected'));
   document.getElementById('vopt-masculine').classList.add('selected');
   document.getElementById('voice-overlay').classList.add('open');
+  registerOverlay('voice', () => document.getElementById('voice-overlay').classList.remove('open'));
+}
+
+// Depuis les Réglages : même sheet, mais on enregistre sans lancer de séance.
+function openVoiceSettings() {
+  voiceOverlayMode = 'settings';
+  pendingSession = null;
+  selectedVoice = getSavedVoice() || 'masculine';
+  document.getElementById('voice-sheet-hint').style.display = 'none';
+  document.getElementById('voice-sheet-launch').textContent = 'Enregistrer';
+  document.querySelectorAll('.voice-option').forEach(o => o.classList.remove('selected'));
+  document.getElementById('vopt-' + selectedVoice).classList.add('selected');
+  document.getElementById('voice-overlay').classList.add('open');
+  registerOverlay('voice', () => document.getElementById('voice-overlay').classList.remove('open'));
 }
 
 function selectVoiceOption(voice) {
@@ -246,13 +406,19 @@ function selectVoiceOption(voice) {
 
 function closeVoiceOverlay() {
   document.getElementById('voice-overlay').classList.remove('open');
+  releaseOverlay('voice');
 }
 
 function confirmVoiceAndLaunch() {
-  if (!pendingSession) return;
+  try { localStorage.setItem(VOICE_KEY, selectedVoice); } catch(e) {}
+  updateVoiceSettingLabel();
+  haptic('light');
+  if (voiceOverlayMode === 'settings' || !pendingSession) { closeVoiceOverlay(); return; }
+  // Mode lancement : fermeture visuelle + l'entrée d'historique passe au player
+  document.getElementById('voice-overlay').classList.remove('open');
+  handOverOverlay('voice');
   const s = pendingSession;
   const filename = selectedVoice === 'feminine' && s.filenameFem ? s.filenameFem : s.filenameMasc;
-  closeVoiceOverlay();
   launchPlayer(s.id, s.title, s.parcours, s.duration, filename, selectedVoice, s.artwork);
   pendingSession = null;
 }
@@ -300,8 +466,12 @@ function clearMediaSession() {
 }
 
 function openPlayerScreen() {
-  document.getElementById('player-screen').classList.add('open');
+  const el = document.getElementById('player-screen');
+  const wasOpen = el.classList.contains('open');
+  el.classList.add('open');
   document.body.style.overflow = 'hidden';
+  if (!wasOpen) registerOverlay('player', closePlayer);
+  else reuseOverlayEntry = false; // replay : déjà enregistré, rien à réutiliser
 }
 
 function closePlayer() {
@@ -347,6 +517,11 @@ function closePlayer() {
   guideDuration = null;
   guideContext = null;
 
+  releaseOverlay('options');
+  releaseOverlay('player');
+  renderResumeCard();
+  renderDailySuggestion();
+
   if (interruptedSnapshot) showInterruptedFeedbackToast(interruptedSnapshot);
 }
 
@@ -358,7 +533,7 @@ function showInterruptedFeedbackToast(snap) {
   toast.id = 'interrupted-feedback-toast';
   toast.style.cssText = [
     'position:fixed', 'bottom:80px', 'left:50%', 'transform:translateX(-50%)',
-    'background:var(--card-bg, #1e1e2e)', 'border:1px solid rgba(255,255,255,.12)',
+    'background:var(--color-surface-2)', 'border:1px solid var(--color-border)',
     'border-radius:16px', 'padding:.85rem 1.1rem', 'z-index:9999',
     'display:flex', 'flex-direction:column', 'align-items:center', 'gap:.55rem',
     'box-shadow:0 8px 32px rgba(0,0,0,.35)', 'max-width:320px', 'width:90%',
@@ -367,7 +542,7 @@ function showInterruptedFeedbackToast(snap) {
 
   const label = document.createElement('p');
   label.textContent = 'Comment était cette séance ?';
-  label.style.cssText = 'font-size:.78rem;color:rgba(255,255,255,.55);margin:0;text-align:center;';
+  label.style.cssText = 'font-size:.78rem;color:var(--color-muted);margin:0;text-align:center;';
   toast.appendChild(label);
 
   const btns = document.createElement('div');
@@ -377,8 +552,8 @@ function showInterruptedFeedbackToast(snap) {
     const btn = document.createElement('button');
     btn.textContent = f.label;
     btn.style.cssText = [
-      'background:rgba(255,255,255,.08)', 'border:1px solid rgba(255,255,255,.15)',
-      'border-radius:999px', 'color:rgba(255,255,255,.8)',
+      'background:var(--color-primary-light)', 'border:1px solid var(--color-border)',
+      'border-radius:999px', 'color:var(--color-text)',
       'padding:.35rem .75rem', 'font-size:.75rem', 'cursor:pointer'
     ].join(';');
     btn.addEventListener('click', () => {
@@ -397,12 +572,17 @@ function showInterruptedFeedbackToast(snap) {
 }
 
 function toggleOptionsSheet() {
-  document.getElementById('options-sheet').classList.toggle('open');
+  const sheet = document.getElementById('options-sheet');
+  const opening = !sheet.classList.contains('open');
+  sheet.classList.toggle('open');
+  if (opening) registerOverlay('options', () => sheet.classList.remove('open'));
+  else releaseOverlay('options');
 }
 
-function launchPlayer(id, title, parcours, duration, filename, voice, artwork) {
+function launchPlayer(id, title, parcours, duration, filename, voice, artwork, resumeAt) {
   currentSession = { id, title, parcours, duration, filename, voice, artwork };
   currentOfflineFilename = filename;
+  pendingResumeTime = (typeof resumeAt === 'number' && resumeAt > 0) ? resumeAt : null;
 
   // Artwork + fond flou
   const img = artwork || 'assets/logo.png';
@@ -455,7 +635,7 @@ function launchPlayer(id, title, parcours, duration, filename, voice, artwork) {
   audio.play().then(() => {
     document.getElementById('audio-loading').textContent = '';
     updatePlayIcon(true);
-    playBell();
+    if (!pendingResumeTime) playBell();
   }).catch(() => {
     document.getElementById('audio-loading').textContent = 'Appuie sur ▶ pour démarrer';
     updatePlayIcon(false);
@@ -502,6 +682,7 @@ function togglePlay() {
     ambianceAudio.pause();
     updatePlayIcon(false);
   }
+  haptic('light');
 }
 
 function updatePlayIcon(playing) {
@@ -548,6 +729,7 @@ audio.addEventListener('timeupdate', () => {
   document.getElementById('progress-thumb').style.left = pct + '%';
   document.getElementById('time-current').textContent = fmt(audio.currentTime);
   document.getElementById('progress-track').setAttribute('aria-valuenow', Math.round(pct));
+  saveResumePoint();
   if ('mediaSession' in navigator && navigator.mediaSession.setPositionState) {
     try {
       navigator.mediaSession.setPositionState({
@@ -562,18 +744,129 @@ audio.addEventListener('timeupdate', () => {
 audio.addEventListener('loadedmetadata', () => {
   document.getElementById('time-total').textContent = fmt(audio.duration);
   document.getElementById('audio-loading').textContent = '';
+  if (pendingResumeTime && pendingResumeTime < audio.duration - 5) {
+    audio.currentTime = pendingResumeTime;
+  }
+  pendingResumeTime = null;
 });
 
 audio.addEventListener('ended', () => {
   updatePlayIcon(false);
   playBell();
+  haptic('success');
+  clearResumePoint();
   document.getElementById('player-main').style.display = 'none';
   document.getElementById('player-main').classList.add('hidden');
   document.getElementById('complete-screen').classList.add('visible');
   if (currentSession) document.getElementById('complete-title').textContent = currentSession.title;
   recordCompletion();
-  if (guideMood) showGuideFeedback();
+  // Feedback de fin pour toutes les séances (sauf la mini-séance d'observation
+  // du guide, qui enchaîne sur sa propre conversation).
+  if (currentSession && currentSession.id !== 'observation') showCompletionFeedback();
 });
+
+// ── REPRISE DE LECTURE ──
+// La position est sauvegardée pendant l'écoute ; une carte « Reprendre »
+// sur l'accueil permet de relancer la séance là où elle s'était arrêtée.
+const RESUME_KEY = 'serein-resume';
+let pendingResumeTime = null;
+let lastResumeSave = 0;
+
+function saveResumePoint() {
+  if (!currentSession || !audio.duration || currentSession.id === 'intro' || currentSession.id === 'observation') return;
+  const now = Date.now();
+  if (now - lastResumeSave < 5000) return; // throttle 5 s
+  lastResumeSave = now;
+  // Trop tôt ou presque fini : rien à reprendre
+  if (audio.currentTime < 30 || audio.currentTime > audio.duration * 0.95) return;
+  try {
+    localStorage.setItem(RESUME_KEY, JSON.stringify({
+      session: currentSession,
+      time: Math.floor(audio.currentTime),
+      total: Math.floor(audio.duration),
+      ts: now
+    }));
+  } catch(e) {}
+}
+
+function clearResumePoint() {
+  try { localStorage.removeItem(RESUME_KEY); } catch(e) {}
+  renderResumeCard();
+}
+
+function getResumePoint() {
+  try {
+    const r = JSON.parse(localStorage.getItem(RESUME_KEY) || 'null');
+    if (!r || !r.session || !r.time) return null;
+    if (Date.now() - (r.ts || 0) > 14 * 24 * 3600 * 1000) return null; // expiré (14 j)
+    return r;
+  } catch(e) { return null; }
+}
+
+function renderResumeCard() {
+  const block = document.getElementById('resume-block');
+  if (!block) return;
+  const r = getResumePoint();
+  const playerOpen = document.getElementById('player-screen').classList.contains('open');
+  if (!r || playerOpen) { block.style.display = 'none'; return; }
+  document.getElementById('resume-title').textContent = r.session.title;
+  const remaining = Math.max(0, r.total - r.time);
+  document.getElementById('resume-meta').textContent =
+    r.session.parcours + ' · ' + fmt(remaining) + ' restantes';
+  const card = document.getElementById('resume-card');
+  card.setAttribute('aria-label', 'Reprendre ' + r.session.title + ' à ' + fmt(r.time));
+  card.onclick = () => {
+    const s = r.session;
+    launchPlayer(s.id, s.title, s.parcours, s.duration, s.filename, s.voice, s.artwork, r.time);
+  };
+  block.style.display = '';
+  // Une seule carte contextuelle à la fois : Reprendre prime sur la suggestion
+  const sugg = document.getElementById('suggestion-block');
+  if (sugg) sugg.style.display = 'none';
+}
+
+// ── SUGGESTION DU MOMENT ──
+// Pour les utilisateurs réguliers : une séance adaptée à l'heure, à un tap.
+function pickSuggestion() {
+  if (!CATALOG) return null;
+  const h = new Date().getHours();
+  let pick;
+  if (h >= 21 || h < 5)      pick = { group: 'Sommeil',       emoji: '🌙', label: 'Pour préparer la nuit' };
+  else if (h < 10)           pick = { group: 'Respirer',      emoji: '🌬️', label: 'Pour bien démarrer la journée' };
+  else if (h < 18)           pick = { group: 'Concentration', emoji: '🎯', label: 'Pour rester dans la zone' };
+  else                       pick = { group: 'Émotions', sub: 'Stress', emoji: '😮‍💨', label: 'Pour souffler après la journée' };
+  const group = CATALOG.groups.find(g => g.name === pick.group);
+  if (!group) return null;
+  let sessions = group.subgroups
+    ? (pick.sub ? (group.subgroups.find(s => s.name === pick.sub) || group.subgroups[0]).sessions : group.subgroups.flatMap(s => s.sessions))
+    : group.sessions;
+  if (!sessions || !sessions.length) return null;
+  // Privilégier une séance pas encore écoutée ; varier selon le jour sinon
+  const listened = getListenedTitles();
+  const fresh = sessions.filter(s => !listened.has(s.title));
+  const pool = fresh.length ? fresh : sessions;
+  const dayIdx = Math.floor(Date.now() / 86400000) % pool.length;
+  return { session: pool[dayIdx], group, emoji: pick.emoji, label: pick.label };
+}
+
+function renderDailySuggestion() {
+  const block = document.getElementById('suggestion-block');
+  if (!block) return;
+  const stats = getStats();
+  const hasResume = !!getResumePoint();
+  if ((stats.sessions || 0) === 0 || hasResume) { block.style.display = 'none'; return; }
+  const sugg = pickSuggestion();
+  if (!sugg) { block.style.display = 'none'; return; }
+  const s = sugg.session;
+  document.getElementById('suggestion-emoji').textContent = sugg.emoji;
+  document.getElementById('suggestion-label').textContent = sugg.label;
+  document.getElementById('suggestion-title').textContent = s.title;
+  document.getElementById('suggestion-meta').textContent = sugg.group.name + ' · ' + s.duration + ' min';
+  const card = document.getElementById('suggestion-card');
+  card.setAttribute('aria-label', 'Lancer la séance suggérée : ' + s.title + ', ' + s.duration + ' minutes');
+  card.onclick = () => openVoiceOverlay(s.id, s.title, sugg.group.name, s.duration + ' min', s.file, s.fileFem || false, sugg.group.artwork);
+  block.style.display = '';
+}
 
 audio.addEventListener('play', () => {
   updatePlayIcon(true);
@@ -794,6 +1087,13 @@ function recordCompletion() {
     s.lastDate = today;
     localStorage.setItem('serein-stats', JSON.stringify(s));
     loadStats();
+    // Historique partagé : alimente les coches « déjà écoutée », la progression
+    // des parcours et les recommandations du guide.
+    if (currentSession && currentSession.id !== 'intro' && currentSession.id !== 'observation') {
+      recordGuidePlay(currentSession.title);
+      updateSessionChecks();
+      updatePathCardCounts();
+    }
   } catch(e) { console.warn('[Serein stats]', e); }
 }
 
@@ -833,6 +1133,12 @@ function openAmbianceSettings() {
     btn.classList.toggle('active', btn.dataset.value === saved);
   });
   document.getElementById('ambiance-settings-backdrop').classList.add('open');
+  registerOverlay('ambiance-settings', () => document.getElementById('ambiance-settings-backdrop').classList.remove('open'));
+}
+
+function closeAmbianceSettings() {
+  document.getElementById('ambiance-settings-backdrop').classList.remove('open');
+  releaseOverlay('ambiance-settings');
 }
 
 function selectAmbianceDefault(btn) {
@@ -842,7 +1148,8 @@ function selectAmbianceDefault(btn) {
   localStorage.setItem('serein-ambiance-default', val);
   const label = document.getElementById('ambiance-default-label');
   if (label) label.textContent = (AMBIANCE_LABELS[val] || 'Aucun') + ' ›';
-  setTimeout(() => document.getElementById('ambiance-settings-backdrop').classList.remove('open'), 300);
+  haptic('light');
+  setTimeout(closeAmbianceSettings, 300);
 }
 
 function savePref(key, value) {
@@ -957,18 +1264,34 @@ async function cancelReminder() {
   } catch(e) {}
 }
 
+const GUIDE_DEPTH = { hub: 0, comprendre: 1, chat: 1, article: 2 };
+let currentGuideView = 'hub';
+
 function showGuideView(view) {
   const hub = document.getElementById('guide-hub');
   const comprendre = document.getElementById('guide-comprendre');
   const chat = document.getElementById('guide-chat');
   const article = document.getElementById('guide-article');
   if (!hub) return;
+  const from = currentGuideView;
+  currentGuideView = view;
   hub.style.display = view === 'hub' ? '' : 'none';
   comprendre.style.display = view === 'comprendre' ? '' : 'none';
   chat.style.display = view === 'chat' ? '' : 'none';
   if (article) article.style.display = view === 'article' ? '' : 'none';
   if (view === 'chat') initGuide();
   window.scrollTo(0, 0);
+  // Bouton retour : chaque niveau de profondeur du guide est une entrée d'historique
+  const dFrom = GUIDE_DEPTH[from] || 0;
+  const dTo = GUIDE_DEPTH[view] || 0;
+  if (dTo > dFrom) {
+    for (let d = dFrom + 1; d <= dTo; d++) {
+      const parent = d === 2 ? 'comprendre' : 'hub';
+      registerOverlay('guide-' + d, () => showGuideView(parent));
+    }
+  } else if (dTo < dFrom) {
+    for (let d = dFrom; d > dTo; d--) releaseOverlay('guide-' + d);
+  }
 }
 
 // ── ARTICLES ──
@@ -1038,7 +1361,7 @@ C'est précisément ce mouvement de retour qui constitue la musculation de l'esp
 
 ### L'exercice de base
 
-Pour commencer, il n'est pas nécessaire de s'isoler pendant des heures. Une minute suffit. Laissez votre respiration suivre son rythme naturel. Observez l'air entrer et sortir. Si une pensée surgit, notez simplement sa présence, puis revenez à la sensation physique de l'air. C'est le premier pas vers une meilleure flexibilité psychologique.`
+Pour commencer, il n'est pas nécessaire de s'isoler pendant des heures. Une minute suffit. Laisse ta respiration suivre son rythme naturel. Observe l'air entrer et sortir. Si une pensée surgit, note simplement sa présence, puis reviens à la sensation physique de l'air. C'est le premier pas vers une meilleure flexibilité psychologique.`
   },
 
   'pourquoi-mediter': {
@@ -1084,7 +1407,7 @@ Que l'on choisisse une chaise, un coussin ou un banc de méditation, quelques pr
 
 - **L'ancrage :** Les pieds sont bien à plat sur le sol (ou les genoux reposent sur le coussin), offrant une base stable.
 
-- **Le dos droit :** La colonne vertébrale s'érige naturellement, respectant sa courbure. Imaginez un fil invisible qui tire doucement le sommet du crâne vers le plafond.
+- **Le dos droit :** La colonne vertébrale s'érige naturellement, respectant sa courbure. Imagine un fil invisible qui tire doucement le sommet du crâne vers le plafond.
 
 - **Les épaules relâchées :** Elles s'abaissent loin des oreilles, libérant la cage thoracique pour faciliter la respiration.
 
@@ -1100,7 +1423,7 @@ L'immobilité n'est pas une règle absolue. Si une douleur aiguë apparaît, l'a
 
 Soyons clairs : le cerveau est conçu pour produire des pensées. Essayer d'arrêter de penser est aussi impossible que d'essayer d'arrêter son cœur de battre par la seule force de la volonté. L'objectif de la pleine conscience n'est pas de supprimer les pensées, mais de changer la relation que l'on entretient avec elles.
 
-### La défusion cognitive : vous n'êtes pas vos pensées
+### La défusion cognitive : tu n'es pas tes pensées
 
 En TCC, on utilise le concept de "défusion cognitive". Habituellement, nous sommes "fusionnés" avec nos pensées : si l'esprit dit "je n'y arriverai pas", on le croit immédiatement.
 
@@ -1110,11 +1433,11 @@ La méditation permet de faire un pas de recul. Elle nous apprend à regarder **
 
 Quand une pensée surgit pendant la pratique et détourne l'attention, voici l'approche à adopter :
 
-1. **L'accueillir :** Ne luttez pas contre la distraction. Remarquez simplement que l'esprit s'est égaré.
+1. **L'accueillir :** Ne lutte pas contre la distraction. Remarque simplement que l'esprit s'est égaré.
 
-2. **L'étiqueter :** Posez un mot mental neutre sur ce qui vous a distrait ("pensée", "souvenir", "planification"). Cela crée instantanément une distance.
+2. **L'étiqueter :** Pose un mot mental neutre sur ce qui t'a distrait ("pensée", "souvenir", "planification"). Cela crée instantanément une distance.
 
-3. **Laisser passer :** Ramenez doucement, mais fermement, votre attention vers votre point d'ancrage (la respiration ou le corps).
+3. **Laisser passer :** Ramène doucement, mais fermement, ton attention vers ton point d'ancrage (la respiration ou le corps).
 
 Le succès de la méditation ne se mesure pas à l'absence de pensées, mais à la capacité de s'en rendre compte de plus en plus vite pour revenir à l'instant présent.`
   },
@@ -1716,16 +2039,18 @@ function applyFeedbackToEntry(entry, mood, duration, context) {
     );
     if (softerAlt) {
       const idx = result.alts.indexOf(softerAlt);
-      result.alts[idx] = { ...result.main, reason: result.main.reason + ' (ajusté selon vos retours)' };
-      result.main = { ...softerAlt, reason: softerAlt.reason + ' — plus doux selon vos préférences' };
+      result.alts[idx] = { ...result.main, reason: result.main.reason + ' (ajusté selon tes retours)' };
+      result.main = { ...softerAlt, reason: softerAlt.reason + ' — plus doux selon tes préférences' };
     }
   }
   return result;
 }
 
-function showGuideFeedback() {
+// Feedback en fin de séance — pour les séances guidées (contexte du guide)
+// comme pour les séances lancées directement (mood/contexte inconnus).
+function showCompletionFeedback() {
   const completeScreen = document.getElementById('complete-screen');
-  if (!completeScreen || !guideMood) return;
+  if (!completeScreen) return;
 
   // Supprimer un feedback existant si déjà affiché
   const existing = document.getElementById('guide-feedback-wrap');
@@ -1764,9 +2089,11 @@ function showGuideFeedback() {
     ].join(';');
     btn.addEventListener('click', () => {
       if (currentSession) {
-        saveFeedback(guideMood, guideDuration, guideContext, currentSession.title, f.value);
-        recordGuidePlay(currentSession.title);
+        // Hors guide, mood/durée/contexte sont inconnus : le retour reste
+        // rattaché au titre et nourrit les recommandations.
+        saveFeedback(guideMood || null, guideDuration || null, guideContext || null, currentSession.title, f.value);
       }
+      haptic('light');
       // Remplacer les boutons par un message de confirmation discret
       wrap.innerHTML = '';
       const thanks = document.createElement('p');
@@ -2092,14 +2419,19 @@ function playBell() {
 
 function openTimerSheet() {
   document.getElementById('timer-sheet-backdrop').classList.add('open');
+  registerOverlay('timer-sheet', () => document.getElementById('timer-sheet-backdrop').classList.remove('open'));
 }
 
 function closeTimerSheet() {
   document.getElementById('timer-sheet-backdrop').classList.remove('open');
+  releaseOverlay('timer-sheet');
 }
 
 function startTimer(minutes) {
-  closeTimerSheet();
+  haptic('light');
+  // Fermeture visuelle de la sheet ; son entrée d'historique passe au player
+  document.getElementById('timer-sheet-backdrop').classList.remove('open');
+  handOverOverlay('timer-sheet');
   timerTotalSeconds = minutes * 60;
   timerSecondsLeft = timerTotalSeconds;
   timerRunning = false;
@@ -2157,6 +2489,7 @@ function timerTick() {
     clearInterval(timerInterval);
     timerRunning = false;
     updatePlayIcon(false);
+    haptic('success');
     bell.currentTime = 0;
     bell.play().catch(() => {});
     setTimeout(() => {
@@ -2217,10 +2550,12 @@ function openReportSheet() {
   const title = currentSession ? currentSession.title : 'cette séance';
   document.getElementById('report-sheet-sub').textContent = `Signaler un problème avec "${title}"`;
   document.getElementById('report-sheet-backdrop').classList.add('open');
+  registerOverlay('report', () => document.getElementById('report-sheet-backdrop').classList.remove('open'));
 }
 
 function closeReportSheet() {
   document.getElementById('report-sheet-backdrop').classList.remove('open');
+  releaseOverlay('report');
 }
 
 function sendReport(type) {
@@ -2240,7 +2575,7 @@ Séance : ${title}
 Parcours : ${parcours}
 
 Description du problème :
-[merci de décrire ici ce que vous avez constaté]
+[décris ici ce que tu as constaté]
 
 ---
 Envoyé depuis sereinapp.fr`;
@@ -2256,7 +2591,7 @@ Parcours : ${parcours}
 Timestamp : ${currentTime}
 
 Description du problème :
-[merci de décrire ici ce que vous avez constaté]
+[décris ici ce que tu as constaté]
 
 ---
 Envoyé depuis sereinapp.fr`;
@@ -2271,7 +2606,8 @@ Envoyé depuis sereinapp.fr`;
 const DATA_KEYS = [
   'serein-stats', 'serein-history', 'serein-feedback', 'serein-guide-session',
   'serein-theme', 'serein-speed', 'serein-bells', 'serein-wifi-only',
-  'serein-ambiance-default', 'serein-reminder-enabled', 'serein-reminder-time'
+  'serein-ambiance-default', 'serein-reminder-enabled', 'serein-reminder-time',
+  'serein-voice', 'serein-resume'
 ];
 
 function exportData() {
@@ -2333,6 +2669,16 @@ function handleImportFile(input) {
   reader.readAsText(file);
 }
 
+// ── HAPTICS (natif uniquement, silencieux sur le web) ──
+function haptic(kind) {
+  try {
+    const H = window.Capacitor?.Plugins?.Haptics;
+    if (!H || !window.Capacitor?.isNativePlatform?.()) return;
+    if (kind === 'success') H.notification({ type: 'SUCCESS' });
+    else H.impact({ style: kind === 'medium' ? 'MEDIUM' : 'LIGHT' });
+  } catch(e) {}
+}
+
 // ── PONT NATIF : état de lecture ──
 // Android ne démarre le service de premier plan (lecture écran verrouillé)
 // que si quelque chose joue réellement (voir MainActivity / PlaybackStatePlugin).
@@ -2349,6 +2695,17 @@ function notifyNativePlayback() {
   } catch(e) {}
 }
 
+// ── ACCESSIBILITÉ CLAVIER ──
+// Les cartes interactives (parcours, guide, minuteur…) sont des éléments
+// non-button avec role="button" : Entrée et Espace doivent les activer.
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+  const el = e.target.closest('[role="button"][tabindex], [role="article"][tabindex]');
+  if (!el || el.tagName === 'BUTTON' || el.tagName === 'A' || el.tagName === 'INPUT') return;
+  e.preventDefault();
+  el.click();
+});
+
 // ── INIT ──
 document.addEventListener('DOMContentLoaded', async () => {
   // Stockage persistant : évite que le navigateur purge les séances
@@ -2360,9 +2717,40 @@ document.addEventListener('DOMContentLoaded', async () => {
   loadSpeed();
   loadStats();
   loadPrefs();
+  updateVoiceSettingLabel();
+  renderResumeCard();
   await renderSessionList();
   restoreOfflineButtons();
   updateOfflineCount();
+
+  // Slider de progression : navigation au clavier (±15 s, Début/Fin)
+  const progressTrack = document.getElementById('progress-track');
+  progressTrack.addEventListener('keydown', e => {
+    if (!audio.duration) return;
+    if (e.key === 'ArrowLeft')       audio.currentTime = Math.max(0, audio.currentTime - 15);
+    else if (e.key === 'ArrowRight') audio.currentTime = Math.min(audio.duration, audio.currentTime + 15);
+    else if (e.key === 'Home')       audio.currentTime = 0;
+    else if (e.key === 'End')        audio.currentTime = Math.max(0, audio.duration - 3);
+    else return;
+    e.preventDefault();
+  });
+
+  // Tap sur le fond = fermer la sheet (geste standard des bottom sheets)
+  const BACKDROP_CLOSERS = {
+    'voice-overlay': closeVoiceOverlay,
+    'timer-sheet-backdrop': closeTimerSheet,
+    'ambiance-settings-backdrop': closeAmbianceSettings,
+    'report-sheet-backdrop': closeReportSheet
+  };
+  Object.entries(BACKDROP_CLOSERS).forEach(([id, close]) => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('click', e => { if (e.target === el) close(); });
+  });
+  // Options du player : tap en dehors de la sheet la referme
+  document.getElementById('player-main').addEventListener('click', () => {
+    const sheet = document.getElementById('options-sheet');
+    if (sheet.classList.contains('open')) toggleOptionsSheet();
+  });
 
   // Swipe down to close ambient sound sheet
   const optionsSheet = document.getElementById('options-sheet');
