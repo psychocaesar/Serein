@@ -31,6 +31,7 @@ test('chaque séance a les champs requis', () => {
     assert.ok(Number.isInteger(s.duration) && s.duration > 0, `durée invalide pour ${s.id}`);
     assert.ok(typeof s.file === 'string' && s.file.endsWith('.mp3'), `fichier invalide pour ${s.id}`);
     assert.ok(s.fileFem === null || (typeof s.fileFem === 'string' && s.fileFem.endsWith('.mp3')), `fileFem invalide pour ${s.id}`);
+    assert.ok(typeof s.desc === 'string' && s.desc.length >= 15 && s.desc.length <= 120, `desc manquante ou hors format pour ${s.id}`);
   }
 });
 

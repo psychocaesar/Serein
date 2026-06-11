@@ -78,7 +78,7 @@ La version de l'app est définie dans `package.json` et doit correspondre à `ve
 
 ## Contribuer
 
-Les contributions sont les bienvenues, mais Serein doit rester cohérent avec sa mission : lisez le [manifeste](docs/manifesto.md) et [CONTRIBUTING.md](CONTRIBUTING.md) avant une contribution importante.
+Les contributions sont les bienvenues, mais Serein doit rester cohérent avec sa mission : lis le [manifeste](docs/manifesto.md) et [CONTRIBUTING.md](CONTRIBUTING.md) avant une contribution importante.
 
 **Le point d'entrée le plus simple : [`app/pwa/assets/sessions.json`](app/pwa/assets/sessions.json).** Ajouter ou corriger une séance = éditer une entrée JSON (titre, durée, fichier audio, description). L'interface se génère à partir de ce catalogue.
 
@@ -108,7 +108,7 @@ Projet porté par un psychologue, financé uniquement par les dons. Version actu
 
 ## Contact
 
-Ouvrez une [issue GitHub](https://github.com/psychocaesar/Serein/issues) ou écrivez à [serein@cesarbroche.fr](mailto:serein@cesarbroche.fr).
+Ouvre une [issue GitHub](https://github.com/psychocaesar/Serein/issues) ou écris à [serein@cesarbroche.fr](mailto:serein@cesarbroche.fr).
 
 ---
 
