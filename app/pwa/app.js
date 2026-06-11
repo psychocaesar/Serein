@@ -96,6 +96,131 @@ function filterParcours(label) {
   });
 }
 
+// ── CATALOGUE (assets/sessions.json) ──
+// Les cartes de l'écran Explorer sont générées depuis le catalogue JSON :
+// ajouter une séance = ajouter une entrée dans assets/sessions.json.
+
+function durationClass(min) {
+  return min <= 5 ? 'short' : (min <= 10 ? 'medium' : 'long');
+}
+
+function makeGroupHeader(name) {
+  const h = document.createElement('h2');
+  h.className = 'group-header';
+  h.dataset.parcours = name;
+  const dot = document.createElement('span');
+  dot.className = 'group-dot';
+  dot.setAttribute('aria-hidden', 'true');
+  h.appendChild(dot);
+  h.appendChild(document.createTextNode(name));
+  return h;
+}
+
+function makeSessionCard(s, group, subgroupName) {
+  const durationLabel = s.duration + ' min';
+  const card = document.createElement('article');
+  card.className = 'card session-card';
+  card.dataset.parcours = group.name;
+  card.dataset.duration = durationClass(s.duration);
+  card.dataset.durationMin = s.duration;
+
+  const info = document.createElement('div');
+  info.className = 'session-info';
+  const h3 = document.createElement('h3');
+  h3.textContent = s.title;
+  const meta = document.createElement('p');
+  meta.textContent = subgroupName
+    ? group.name + ' · ' + subgroupName + ' · ' + durationLabel
+    : group.name + ' · ' + durationLabel;
+  info.appendChild(h3);
+  info.appendChild(meta);
+
+  const actions = document.createElement('div');
+  actions.className = 'session-actions';
+  const dl = document.createElement('button');
+  dl.className = 'btn-offline';
+  dl.setAttribute('aria-label', 'Télécharger ' + s.title + ' pour écoute hors ligne');
+  dl.dataset.filename = s.file;
+  dl.textContent = '⬇';
+  dl.addEventListener('click', () => toggleOfflineCache(dl, s.file));
+  const launch = document.createElement('button');
+  launch.className = 'btn btn-primary';
+  launch.setAttribute('aria-label', 'Lancer la séance ' + s.title + ', ' + group.name + ', ' + durationLabel);
+  launch.textContent = 'Lancer';
+  launch.addEventListener('click', () => openVoiceOverlay(s.id, s.title, group.name, durationLabel, s.file, s.fileFem || false, group.artwork));
+  actions.appendChild(dl);
+  actions.appendChild(launch);
+
+  card.appendChild(info);
+  card.appendChild(actions);
+  return card;
+}
+
+function makeResourcesBlock(resources) {
+  const wrap = document.createElement('div');
+  wrap.className = 'emotion-ressources card';
+  const title = document.createElement('p');
+  title.className = 'emotion-ressources-title';
+  title.textContent = 'Ressources utiles';
+  wrap.appendChild(title);
+  resources.forEach(r => {
+    const a = document.createElement('a');
+    a.className = 'emotion-ressource-link';
+    a.href = r.url;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    const name = document.createElement('span');
+    name.className = 'ressource-name';
+    name.textContent = r.name;
+    const desc = document.createElement('span');
+    desc.className = 'ressource-desc';
+    desc.textContent = r.desc;
+    a.appendChild(name);
+    a.appendChild(desc);
+    wrap.appendChild(a);
+  });
+  return wrap;
+}
+
+async function renderSessionList() {
+  const list = document.getElementById('session-list');
+  if (!list) return;
+  try {
+    const res = await fetch('assets/sessions.json');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const catalog = await res.json();
+    list.textContent = '';
+    catalog.groups.forEach(group => {
+      list.appendChild(makeGroupHeader(group.name));
+      if (group.disclaimer) {
+        const d = document.createElement('p');
+        d.className = 'emotion-top-disclaimer';
+        d.textContent = group.disclaimer;
+        list.appendChild(d);
+      }
+      if (group.subgroups) {
+        group.subgroups.forEach(sub => {
+          const label = document.createElement('div');
+          label.className = 'emotion-subgroup';
+          label.textContent = sub.label;
+          list.appendChild(label);
+          sub.sessions.forEach(s => list.appendChild(makeSessionCard(s, group, sub.name)));
+        });
+      } else {
+        group.sessions.forEach(s => list.appendChild(makeSessionCard(s, group, null)));
+      }
+      if (group.resources) list.appendChild(makeResourcesBlock(group.resources));
+    });
+    applyFilters();
+  } catch(e) {
+    console.warn('[Serein catalogue]', e);
+    const msg = document.createElement('p');
+    msg.style.cssText = 'text-align:center;color:var(--color-muted);padding:2rem 1rem;';
+    msg.textContent = 'Impossible de charger le catalogue. Vérifie ta connexion puis relance l’app.';
+    list.appendChild(msg);
+  }
+}
+
 // ── VOICE OVERLAY ──
 let pendingSession = null;
 let selectedVoice = 'masculine';
@@ -138,6 +263,42 @@ const audio = document.getElementById('audio-engine');
 const ambianceAudio = document.getElementById('ambiance-engine');
 let currentOfflineFilename = null;
 
+// ── MEDIA SESSION (écran de verrouillage, écouteurs, notification Android) ──
+function setupMediaSession(title, subtitle, artwork) {
+  if (!('mediaSession' in navigator)) return;
+  try {
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: title,
+      artist: 'Serein',
+      album: subtitle || 'Méditation guidée',
+      artwork: artwork ? [{ src: artwork, sizes: '512x512', type: 'image/jpeg' }] : []
+    });
+    // togglePlay route correctement entre séance guidée, ambiance seule et minuteur
+    navigator.mediaSession.setActionHandler('play', () => togglePlay());
+    navigator.mediaSession.setActionHandler('pause', () => togglePlay());
+    navigator.mediaSession.setActionHandler('seekbackward', () => { audio.currentTime = Math.max(0, audio.currentTime - 15); });
+    navigator.mediaSession.setActionHandler('seekforward', () => { audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + 15); });
+    navigator.mediaSession.setActionHandler('seekto', d => {
+      if (d.seekTime != null && audio.duration) audio.currentTime = d.seekTime;
+    });
+    navigator.mediaSession.setActionHandler('stop', () => closePlayer());
+  } catch(e) { console.warn('[Serein mediaSession]', e); }
+}
+
+function setMediaPlaybackState(state) {
+  if ('mediaSession' in navigator) {
+    try { navigator.mediaSession.playbackState = state; } catch(e) {}
+  }
+}
+
+function clearMediaSession() {
+  if (!('mediaSession' in navigator)) return;
+  try {
+    navigator.mediaSession.metadata = null;
+    navigator.mediaSession.playbackState = 'none';
+  } catch(e) {}
+}
+
 function openPlayerScreen() {
   document.getElementById('player-screen').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -153,12 +314,14 @@ function closePlayer() {
   // Stop all audio
   audio.pause();
   ambianceAudio.pause();
+  clearMediaSession();
 
   // Clean up timer if active
   if (timerInterval) { clearInterval(timerInterval); timerInterval = null; timerRunning = false; }
   const timerEngine = document.getElementById('timer-engine');
   if (timerEngine) { timerEngine.pause(); timerEngine.src = ''; }
   stopSilentSession();
+  notifyNativePlayback();
 
   // Always restore guided player UI
   const artworkWrap = document.getElementById('player-artwork-wrap');
@@ -251,6 +414,9 @@ function launchPlayer(id, title, parcours, duration, filename, voice, artwork) {
   document.getElementById('player-meta').textContent = parcours + ' · ' + duration;
   document.getElementById('player-voice-tag').textContent = voice === 'feminine' ? 'Voix féminine — Daïdrée' : 'Voix masculine — César';
 
+  // Contrôles écran de verrouillage
+  setupMediaSession(title, parcours + ' · ' + duration, img);
+
   // Reset UI
   document.getElementById('complete-screen').classList.remove('visible');
   document.getElementById('player-main').classList.remove('hidden');
@@ -308,6 +474,7 @@ function togglePlay() {
       timerEngine.pause();
       if (timerAudioCtx) timerAudioCtx.suspend().catch(() => {});
       updatePlayIcon(false);
+      setMediaPlaybackState('paused');
     } else {
       timerRunning = true;
       timerStartTimestamp = Date.now();
@@ -315,6 +482,7 @@ function togglePlay() {
       if (timerAudioCtx) timerAudioCtx.resume().catch(() => {});
       timerInterval = setInterval(timerTick, 1000);
       updatePlayIcon(true);
+      setMediaPlaybackState('playing');
     }
     return;
   }
@@ -339,6 +507,7 @@ function togglePlay() {
 function updatePlayIcon(playing) {
   document.getElementById('icon-play').style.display = playing ? 'none' : '';
   document.getElementById('icon-pause').style.display = playing ? '' : 'none';
+  notifyNativePlayback();
 }
 
 // Vitesse avec cycle depuis toolbar
@@ -379,6 +548,15 @@ audio.addEventListener('timeupdate', () => {
   document.getElementById('progress-thumb').style.left = pct + '%';
   document.getElementById('time-current').textContent = fmt(audio.currentTime);
   document.getElementById('progress-track').setAttribute('aria-valuenow', Math.round(pct));
+  if ('mediaSession' in navigator && navigator.mediaSession.setPositionState) {
+    try {
+      navigator.mediaSession.setPositionState({
+        duration: audio.duration,
+        playbackRate: audio.playbackRate,
+        position: Math.min(audio.currentTime, audio.duration)
+      });
+    } catch(e) {}
+  }
 });
 
 audio.addEventListener('loadedmetadata', () => {
@@ -397,8 +575,18 @@ audio.addEventListener('ended', () => {
   if (guideMood) showGuideFeedback();
 });
 
-audio.addEventListener('play', () => updatePlayIcon(true));
-audio.addEventListener('pause', () => updatePlayIcon(false));
+audio.addEventListener('play', () => {
+  updatePlayIcon(true);
+  if (currentAmbiance && ambianceAudio.paused) ambianceAudio.play().catch(() => {});
+  setMediaPlaybackState('playing');
+});
+audio.addEventListener('pause', () => {
+  updatePlayIcon(false);
+  // Interruption système (appel, autre app) : suspendre aussi l'ambiance.
+  // En fin naturelle de séance (ended), l'ambiance continue pour accompagner l'écran de fin.
+  if (!audio.ended && currentAmbiance && !ambianceAudio.paused) ambianceAudio.pause();
+  setMediaPlaybackState('paused');
+});
 audio.addEventListener('error', () => {
   document.getElementById('audio-loading').textContent = 'Fichier audio introuvable ou non chargé.';
   updatePlayIcon(false);
@@ -492,6 +680,7 @@ function setAmbiance(file) {
     document.getElementById('ambiance-volume-wrap').style.display = 'none';
     currentAmbiance = null;
     updateAmbianceTag('Aucun');
+    notifyNativePlayback();
     return;
   }
   currentAmbiance = file;
@@ -504,6 +693,7 @@ function setAmbiance(file) {
   document.getElementById('ambiance-volume-wrap').style.display = 'flex';
   const label = file.replace('.mp3','').replace('bruit-blanc','Bruit blanc');
   updateAmbianceTag(label);
+  notifyNativePlayback();
 }
 
 document.getElementById('ambiance-volume-slider').addEventListener('input', e => {
@@ -1257,7 +1447,6 @@ if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
       }
     }
     if (warnings.length) console.warn('[Serein] GUIDE_MAP validation:\n' + warnings.join('\n'));
-    else console.info('[Serein] GUIDE_MAP OK');
   })();
 }
 
@@ -1928,6 +2117,8 @@ function startTimer(minutes) {
   document.getElementById('player-voice-tag').style.display = 'none';
   document.getElementById('audio-loading').textContent = '';
 
+  setupMediaSession('Minuteur libre', minutes + ' min · Méditation silencieuse', 'assets/logo.png');
+
   updateTimerDisplay();
 
   document.getElementById('complete-screen').classList.remove('visible');
@@ -2076,12 +2267,100 @@ Envoyé depuis sereinapp.fr`;
 }
 
 
+// ── EXPORT / IMPORT DES DONNÉES (local-first, aucun serveur) ──
+const DATA_KEYS = [
+  'serein-stats', 'serein-history', 'serein-feedback', 'serein-guide-session',
+  'serein-theme', 'serein-speed', 'serein-bells', 'serein-wifi-only',
+  'serein-ambiance-default', 'serein-reminder-enabled', 'serein-reminder-time'
+];
+
+function exportData() {
+  const payload = { app: 'serein', version: 1, exportedAt: new Date().toISOString(), data: {} };
+  DATA_KEYS.forEach(k => {
+    const v = localStorage.getItem(k);
+    if (v !== null) payload.data[k] = v;
+  });
+  const json = JSON.stringify(payload, null, 2);
+  const isNative = typeof Capacitor !== 'undefined' && Capacitor.isNativePlatform && Capacitor.isNativePlatform();
+  if (isNative && navigator.clipboard) {
+    // Le téléchargement de Blob ne fonctionne pas dans la WebView native :
+    // on passe par le presse-papiers.
+    navigator.clipboard.writeText(json).then(
+      () => alert('Données copiées dans le presse-papiers.\nColle-les dans une note ou un fichier pour les conserver.'),
+      () => alert('Impossible de copier les données.')
+    );
+    return;
+  }
+  const blob = new Blob([json], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'serein-donnees-' + new Date().toISOString().slice(0, 10) + '.json';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+}
+
+function importData() {
+  document.getElementById('import-file-input').click();
+}
+
+function handleImportFile(input) {
+  const file = input.files && input.files[0];
+  input.value = '';
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const payload = JSON.parse(reader.result);
+      if (!payload || payload.app !== 'serein' || !payload.data) {
+        alert('Ce fichier ne ressemble pas à une sauvegarde Serein.');
+        return;
+      }
+      if (!confirm('Remplacer les données actuelles par cette sauvegarde ?')) return;
+      DATA_KEYS.forEach(k => {
+        if (k in payload.data) localStorage.setItem(k, payload.data[k]);
+      });
+      applyTheme();
+      loadSpeed();
+      loadStats();
+      loadPrefs();
+      alert('Données restaurées.');
+    } catch(e) {
+      alert('Fichier illisible : ' + e.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ── PONT NATIF : état de lecture ──
+// Android ne démarre le service de premier plan (lecture écran verrouillé)
+// que si quelque chose joue réellement (voir MainActivity / PlaybackStatePlugin).
+function notifyNativePlayback() {
+  try {
+    const P = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.PlaybackState;
+    if (!P) return;
+    const timerEngine = document.getElementById('timer-engine');
+    const playing = (!audio.paused && !audio.ended)
+      || (!!currentAmbiance && !ambianceAudio.paused)
+      || timerRunning
+      || !!(timerEngine && timerEngine.src && !timerEngine.paused);
+    P.setPlaying({ playing: !!playing });
+  } catch(e) {}
+}
+
 // ── INIT ──
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  // Stockage persistant : évite que le navigateur purge les séances
+  // téléchargées hors ligne sous pression de stockage.
+  if (navigator.storage && navigator.storage.persist) {
+    navigator.storage.persist().catch(() => {});
+  }
   applyTheme();
   loadSpeed();
   loadStats();
   loadPrefs();
+  await renderSessionList();
   restoreOfflineButtons();
   updateOfflineCount();
 

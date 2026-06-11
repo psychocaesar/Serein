@@ -11,13 +11,18 @@ public class MainActivity extends BridgeActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        registerPlugin(PlaybackStatePlugin.class);
         super.onCreate(savedInstanceState);
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        startPlaybackService();
+        // Service de premier plan uniquement si une lecture est en cours,
+        // sinon notification "Lecture en cours…" fantôme à chaque sortie de l'app.
+        if (PlaybackStatePlugin.isPlaying) {
+            startPlaybackService();
+        }
     }
 
     @Override
