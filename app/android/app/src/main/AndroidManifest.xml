@@ -37,17 +37,9 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- Permet de reprogrammer le rappel après un redémarrage de l'appareil -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <!-- Alarmes exactes pour déclencher le rappel à l'heure précise -->
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
-
-    <!-- Écriture dans le stockage interne pour le cache audio hors ligne.
-         Requis par @capacitor/filesystem sur API < 29. -->
-    <uses-permission
-        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="28" />
-    <uses-permission
-        android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:maxSdkVersion="32" />
+    <!-- Pas de SCHEDULE_EXACT_ALARM : un rappel quotidien tolère quelques minutes
+         d'imprécision, et le Play Store exige une justification pour les alarmes
+         exactes depuis Android 14. Le plugin retombe sur une alarme inexacte. -->
 
     <!-- ══════════════════════════════════════════════════
          DÉCLARATION DE L'APPLICATION
@@ -104,21 +96,6 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
-
-        <!-- ── Provider Capacitor FileSystem ──
-             Requis par @capacitor/filesystem pour partager des fichiers
-             entre l'app et d'autres composants Android.
-             authorities doit correspondre à votre appId.
-        -->
-        <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}.fileprovider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths" />
-        </provider>
 
     </application>
 

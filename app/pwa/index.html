@@ -22,12 +22,46 @@
   <meta name="twitter:description" content="Méditations guidées gratuites en français. Sans pub, sans tracking.">
   <meta name="twitter:image" content="https://www.sereinapp.fr/assets/og-image.png">
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Serein","url":"https://www.sereinapp.fr","applicationCategory":"HealthApplication","inLanguage":"fr-FR","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"},"author":{"@type":"Person","name":"César Broche Aguilar"}}</script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* Polices auto-hébergées (fontes variables) — aucune requête vers Google, conforme à la promesse "sans tiers" */
+    @font-face {
+      font-family: 'Bricolage Grotesque';
+      font-style: normal;
+      font-weight: 400 700;
+      font-stretch: 100%;
+      font-display: swap;
+      src: url('assets/fonts/bricolage-grotesque-latin.woff2') format('woff2');
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+    @font-face {
+      font-family: 'Bricolage Grotesque';
+      font-style: normal;
+      font-weight: 400 700;
+      font-stretch: 100%;
+      font-display: swap;
+      src: url('assets/fonts/bricolage-grotesque-latin-ext.woff2') format('woff2');
+      unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+    }
+    @font-face {
+      font-family: 'Hanken Grotesk';
+      font-style: normal;
+      font-weight: 400 700;
+      font-display: swap;
+      src: url('assets/fonts/hanken-grotesk-latin.woff2') format('woff2');
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+    @font-face {
+      font-family: 'Hanken Grotesk';
+      font-style: normal;
+      font-weight: 400 700;
+      font-display: swap;
+      src: url('assets/fonts/hanken-grotesk-latin-ext.woff2') format('woff2');
+      unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+    }
+  </style>
   <link rel="manifest" href="/manifest.json">
-  <link rel="icon" type="image/png" href="assets/logo.png">
-  <link rel="apple-touch-icon" href="assets/logo.png">
+  <link rel="icon" type="image/png" href="assets/icon-192.png">
+  <link rel="apple-touch-icon" href="assets/icon-192.png">
   <script>
     try {
       var _s = JSON.parse(localStorage.getItem('serein-stats') || '{}');
@@ -913,80 +947,7 @@
   <p class="filter-count" id="filter-count" aria-live="polite"></p>
 
   <div class="session-list" id="session-list">
-    
-    <h2 class="group-header" data-parcours="Premiers pas"><span class="group-dot" aria-hidden="true"></span>Premiers pas</h2>
-    <article class="card session-card" data-parcours="Premiers pas" data-duration="short" data-duration-min="5"><div class="session-info"><h3>Première respiration consciente</h3><p>Premiers pas · 5 min</p></div><div class="session-actions"><button class="btn-offline" aria-label="Télécharger Méditation Premiere Respiration Consciente pour écoute hors ligne" data-filename="Méditation Premiere Respiration Consciente.mp3" onclick="toggleOfflineCache(this,'Méditation Premiere Respiration Consciente.mp3')">⬇</button><button class="btn btn-primary" aria-label="Lancer la séance Première respiration consciente, Premiers pas, 5 min" onclick="openVoiceOverlay('s1','Première respiration consciente','Premiers pas','5 min','Méditation Premiere Respiration Consciente.mp3',false,'assets/illustrations/player-01.jpg')">Lancer</button></div></article>
-    <article class="card session-card" data-parcours="Premiers pas" data-duration="short" data-duration-min="5"><div class="session-info"><h3>S'asseoir, ne rien faire</h3><p>Premiers pas · 5 min</p></div><div class="session-actions"><button class="btn-offline" aria-label="Télécharger Revenir au souffle pour écoute hors ligne" data-filename="Revenir au souffle.mp3" onclick="toggleOfflineCache(this,'Revenir au souffle.mp3')">⬇</button><button class="btn btn-primary" aria-label="Lancer la séance S'asseoir, ne rien faire, Premiers pas, 5 min" onclick="openVoiceOverlay('s2',&quot;S'asseoir, ne rien faire&quot;,'Premiers pas','5 min','Revenir au souffle.mp3',false,'assets/illustrations/player-01.jpg')">Lancer</button></div></article>
-    <article class="card session-card" data-parcours="Premiers pas" data-duration="medium" data-duration-min="9"><div class="session-info"><h3>Observer ses pensées sans les juger</h3><p>Premiers pas · 9 min</p></div><div class="session-actions"><button class="btn-offline" aria-label="Télécharger Observer ses pensées sans les juger pour écoute hors ligne" data-filename="Observer ses pensées sans les juger.mp3" onclick="toggleOfflineCache(this,'Observer ses pensées sans les juger.mp3')">⬇</button><button class="btn btn-primary" aria-label="Lancer la séance Observer ses pensées sans les juger, Premiers pas, 9 min" onclick="openVoiceOverlay('s3','Observer ses pensées sans les juger','Premiers pas','9 min','Observer ses pensées sans les juger.mp3','Observer ses pensées sans les juger.mp3','assets/illustrations/player-01.jpg')">Lancer</button></div></article>
-    <article class="card session-card" data-parcours="Premiers pas" data-duration="medium" data-duration-min="10"><div class="session-info"><h3>Le scan corporel — découvrir ses sensations</h3><p>Premiers pas · 10 min</p></div><div class="session-actions"><button class="btn-offline" aria-label="Télécharger Le scan corporel pour écoute hors ligne" data-filename="Le scan corporel.mp3" onclick="toggleOfflineCache(this,'Le scan corporel.mp3')">⬇</button><button class="btn btn-primary" aria-label="Lancer la séance Le scan corporel - découvrir ses sensations, Premiers pas, 10 min" onclick="openVoiceOverlay('s4','Le scan corporel — découvrir ses sensations','Premiers pas','10 min','Le scan corporel.mp3','Le scan corporel — découvrir ses sensations.mp3','assets/illustrations/player-01.jpg')">Lancer</button></div></article>
-    <article class="card session-card" data-parcours="Premiers pas" data-duration="short" data-duration-min="5"><div class="session-info"><h3>Revenir à l'instant présent</h3><p>Premiers pas · 5 min</p></div><div class="session-actions"><button class="btn-offline" aria-label="Télécharger Revenir à l'instant présent pour écoute hors ligne" data-filename="Revenir à l'instant présent.mp3" onclick="toggleOfflineCache(this,&quot;Revenir à l'instant présent.mp3&quot;)">⬇</button><button class="btn btn-primary" onclick="openVoiceOverlay('s16',&quot;Revenir à l'instant présent&quot;,'Premiers pas','5 min',&quot;Revenir à l'instant présent.mp3&quot;,false,'assets/illustrations/player-01.jpg')">Lancer</button></div></article>
-    <article class="card session-card" data-parcours="Premiers pas" data-duration="short" data-duration-min="5"><div class="session-info"><h3>La bienveillance envers soi</h3><p>Premiers pas · 5 min</p></div><div class="session-actions"><button class="btn-offline" aria-label="Télécharger La bienveillance envers soi pour écoute hors ligne" data-filename="La bienveillance envers soi.mp3" onclick="toggleOfflineCache(this,'La bienveillance envers soi.mp3')">⬇</button><button class="btn btn-primary" aria-label="Lancer la séance La bienveillance envers soi, Premiers pas, 5 min" onclick="openVoiceOverlay('s17','La bienveillance envers soi','Premiers pas','5 min','La bienveillance envers soi.mp3',false,'assets/illustrations/player-01.jpg')">Lancer</button></div></article>
-    <article class="card session-card" data-parcours="Premiers pas" data-duration="medium" data-duration-min="6"><div class="session-info"><h3>Mon ancre personnelle</h3><p>Premiers pas · 6 min</p></div><div class="session-actions"><button class="btn-offline" aria-label="Télécharger Mon ancre personnelle pour écoute hors ligne" data-filename="Mon ancre personnelle.mp3" onclick="toggleOfflineCache(this,'Mon ancre personnelle.mp3')">⬇</button><button class="btn btn-primary" aria-label="Lancer la séance Mon ancre personnelle, Premiers pas, 6 min" onclick="openVoiceOverlay('s18','Mon ancre personnelle','Premiers pas','6 min','Mon ancre personnelle.mp3',false,'assets/illustrations/player-01.jpg')">Lancer</button></div></article>
-    
-    <h2 class="group-header" data-parcours="Émotions"><span class="group-dot" aria-hidden="true"></span>Émotions</h2>
-
-    <p class="emotion-top-disclaimer">Ces séances sont des outils de soutien psychologique. Elles ne remplacent pas un accompagnement professionnel. Si tu traverses une période difficile, n'hésite pas à consulter un·e psychologue ou ton médecin traitant.</p>
-
-    <div class="emotion-subgroup">😮‍💨 Stress</div>
-    <article class="card session-card" data-parcours="Émotions" data-duration="medium" data-duration-min="6"><div class="session-info"><h3>SOS Stress en 6 minutes</h3><p>Émotions · Stress · 6 min</p></div><div class="session-actions"><button class="btn-offline" aria-label="Télécharger SOS Stress en 6 minutes pour écoute hors ligne" data-filename="SOS Stress en 6 minutes.mp3" onclick="toggleOfflineCache(this,'SOS Stress en 6 minutes.mp3')">⬇</button><button class="btn btn-primary" aria-label="Lancer SOS Stress en 6 minutes, Émotions, 6 min" onclick="openVoiceOverlay('s5','SOS Stress en 6 minutes','Émotions','6 min','SOS Stress en 6 minutes.mp3',false,'assets/illustrations/player-02.jpg')">Lancer</button></div></article>
-    <article class="card session-card" data-parcours="Émotions" data-duration="medium" data-duration-min="7"><div class="session-info"><h3>Lâcher prise sur l'urgence</h3><p>Émotions · Stress · 7 min</p></div><div class="session-actions"><button class="btn-offline" aria-label="Télécharger Lacher prise sur lurgence pour écoute hors ligne" data-filename="Lacher prise sur lurgence.mp3" onclick="toggleOfflineCache(this,'Lacher prise sur lurgence.mp3')">⬇</button><button class="btn btn-primary" aria-label="Lancer Lâcher prise sur l'urgence, Émotions, 7 min" onclick="openVoiceOverlay('s31',&quot;Lâcher prise sur l'urgence&quot;,'Émotions','7 min','Lacher prise sur lurgence.mp3',false,'assets/illustrations/player-02.jpg')">Lancer</button></div></article>
-    <article class="card session-card" data-parcours="Émotions" data-duration="short" data-duration-min="5"><div class="session-info"><h3>La cohérence cardiaque guidée</h3><p>Émotions · Stress · 5 min</p></div><div class="session-actions"><button class="btn-offline" aria-label="Télécharger Cohérence cardiaque 5 minutes pour écoute hors ligne" data-filename="Cohérence cardiaque 5 minutes.mp3" onclick="toggleOfflineCache(this,'Cohérence cardiaque 5 minutes.mp3')">⬇</button><button class="btn btn-primary" aria-label="Lancer La cohérence cardiaque guidée, Émotions, 5 min" onclick="openVoiceOverlay('s6','La cohérence cardiaque guidée','Émotions','5 min','Cohérence cardiaque 5 minutes.mp3',false,'assets/illustrations/player-02.jpg')">Lancer</button></div></article>
-    <article class="card session-card" data-parcours="Émotions" data-duration="medium" data-duration-min="10"><div class="session-info"><h3>Le corps qui tient le stress</h3><p>Émotions · Stress · 10 min</p></div><div class="session-actions"><button class="btn-offline" aria-label="Télécharger Le corps qui tient le stress pour écoute hors ligne" data-filename="Le corps qui tient le stress.mp3" onclick="toggleOfflineCache(this,'Le corps qui tient le stress.mp3')">⬇</button><button class="btn btn-primary" aria-label="Lancer Le corps qui tient le stress, Émotions, 10 min" onclick="openVoiceOverlay('s29','Le corps qui tient le stress','Émotions','10 min','Le corps qui tient le stress.mp3',false,'assets/illustrations/player-02.jpg')">Lancer</button></div></article>
-    <article class="card session-card" data-parcours="Émotions" data-duration="medium" data-duration-min="10"><div class="session-info"><h3>Fin de journée - déposer le poids</h3><p>Émotions · Stress · 10 min</p></div><div class="session-actions"><button class="btn-offline" aria-label="Télécharger Fin de journee - deposer le poids pour écoute hors ligne" data-filename="Fin de journee - deposer le poids.mp3" onclick="toggleOfflineCache(this,'Fin de journee - deposer le poids.mp3')">⬇</button><button class="btn btn-primary" aria-label="Lancer Fin de journée - déposer le poids, Émotions, 10 min" onclick="openVoiceOverlay('s26','Fin de journée - déposer le poids','Émotions','10 min','Fin de journee - deposer le poids.mp3',false,'assets/illustrations/player-02.jpg')">Lancer</button></div></article>
-
-    <div class="emotion-subgroup">😤 Colère</div>
-    <article class="card session-card" data-parcours="Émotions" data-duration="short" data-duration-min="5"><div class="session-info"><h3>SOS Colère - décharger sans exploser</h3><p>Émotions · Colère · 5 min</p></div><div class="session-actions"><button class="btn-offline" aria-label="Télécharger SOS Colère - décharger sans exploser pour écoute hors ligne" data-filename="SOS Colère.mp3" onclick="toggleOfflineCache(this,'SOS Colère.mp3')">⬇</button><button class="btn btn-primary" aria-label="Lancer SOS Colère, Émotions, 5 min" onclick="openVoiceOverlay('s37','SOS Colère - décharger sans exploser','Émotions','5 min','SOS Colère.mp3',false,'assets/illustrations/player-02.jpg')">Lancer</button></div></article>
-    <article class="card session-card" data-parcours="Émotions" data-duration="medium" data-duration-min="9"><div class="session-info"><h3>Traverser l'irritabilité</h3><p>Émotions · Colère · 9 min</p></div><div class="session-actions"><button class="btn-offline" aria-label="Télécharger Traverser l'irritabilité pour écoute hors ligne" data-filename="Traverser l-irritabilité.mp3" onclick="toggleOfflineCache(this,'Traverser l-irritabilité.mp3')">⬇</button><button class="btn btn-primary" aria-label="Lancer Traverser l'irritabilité, Émotions, 9 min" onclick="openVoiceOverlay('s44',&quot;Traverser l'irritabilité&quot;,'Émotions','9 min','Traverser l-irritabilité.mp3',false,'assets/illustrations/player-02.jpg')">Lancer</button></div></article>
-
-    <div class="emotion-subgroup">😢 Tristesse</div>
-    <article class="card session-card" data-parcours="Émotions" data-duration="medium" data-duration-min="8"><div class="session-info"><h3>Quand l'humeur pèse</h3><p>Émotions · Tristesse · 8 min</p></div><div class="session-actions"><button class="btn-offline" aria-label="Télécharger Quand l'humeur pèse pour écoute hors ligne" data-filename="Tristesse et Mauvaise humeur.mp3" onclick="toggleOfflineCache(this,'Tristesse et Mauvaise humeur.mp3')">⬇</button><button class="btn btn-primary" aria-label="Lancer Quand l'humeur pèse, Émotions, 8 min" onclick="openVoiceOverlay('s40',&quot;Quand l'humeur pèse&quot;,'Émotions','8 min','Tristesse et Mauvaise humeur.mp3',false,'assets/illustrations/player-02.jpg')">Lancer</button></div></article>
-    <article class="card session-card" data-parcours="Émotions" data-duration="medium" data-duration-min="8"><div class="session-info"><h3>Retrouver le goût des choses</h3><p>Émotions · Tristesse · 8 min</p></div><div class="session-actions"><button class="btn-offline" aria-label="Télécharger Retrouver le goût des choses pour écoute hors ligne" data-filename="Retrouver le gout des choses.mp3" onclick="toggleOfflineCache(this,'Retrouver le gout des choses.mp3')">⬇</button><button class="btn btn-primary" aria-label="Lancer Retrouver le goût des choses, Émotions, 8 min" onclick="openVoiceOverlay('s45','Retrouver le goût des choses','Émotions','8 min','Retrouver le gout des choses.mp3',false,'assets/illustrations/player-02.jpg')">Lancer</button></div></article>
-
-    <div class="emotion-ressources card">
-      <p class="emotion-ressources-title">Ressources utiles</p>
-      <a class="emotion-ressource-link" href="https://www.ameli.fr/assure/remboursements/rembourse/remboursement-seance-psychologue-mon-soutien-psy" target="_blank" rel="noopener noreferrer">
-        <span class="ressource-name">Mon parcours psy</span>
-        <span class="ressource-desc">Consulter un·e psychologue remboursé·e par l'Assurance Maladie - sans avance de frais.</span>
-      </a>
-      <a class="emotion-ressource-link" href="https://www.psycom.org" target="_blank" rel="noopener noreferrer">
-        <span class="ressource-name">Psycom</span>
-        <span class="ressource-desc">Guide indépendant sur la santé mentale : comprendre, trouver de l'aide, orienter ses proches.</span>
-      </a>
-      <a class="emotion-ressource-link" href="https://3114.fr" target="_blank" rel="noopener noreferrer">
-        <span class="ressource-name">3114 - Numéro national de prévention du suicide</span>
-        <span class="ressource-desc">Disponible 24h/24, 7j/7. Des professionnels de santé à l'écoute en cas de crise.</span>
-      </a>
-    </div>
-    
-    <h2 class="group-header" data-parcours="Sommeil"><span class="group-dot" aria-hidden="true"></span>Sommeil</h2>
-    <article class="card session-card" data-parcours="Sommeil" data-duration="medium" data-duration-min="10"><div class="session-info"><h3>Rituel de déconnexion</h3><p>Sommeil · 10 min</p></div><div class="session-actions"><button class="btn-offline" aria-label="Télécharger Préparer le sommeil pour écoute hors ligne" data-filename="Préparer le sommeil.mp3" onclick="toggleOfflineCache(this,'Préparer le sommeil.mp3')">⬇</button><button class="btn btn-primary" aria-label="Lancer la séance Rituel de déconnexion, Sommeil, 10 min" onclick="openVoiceOverlay('s7','Rituel de déconnexion','Sommeil','10 min','Préparer le sommeil.mp3',false,'assets/illustrations/player-03.jpg')">Lancer</button></div></article>
-    <article class="card session-card" data-parcours="Sommeil" data-duration="medium" data-duration-min="8"><div class="session-info"><h3>Relâcher le corps, couche après couche</h3><p>Sommeil · 8 min</p></div><div class="session-actions"><button class="btn-offline" aria-label="Télécharger Relâcher le corps, couche après couche pour écoute hors ligne" data-filename="Relâcher le corps, couche après couche.mp3" onclick="toggleOfflineCache(this,'Relâcher le corps, couche après couche.mp3')">⬇</button><button class="btn btn-primary" aria-label="Lancer la séance Relâcher le corps, couche après couche, Sommeil, 8 min" onclick="openVoiceOverlay('s20','Relâcher le corps, couche après couche','Sommeil','8 min','Relâcher le corps, couche après couche.mp3',false,'assets/illustrations/player-03.jpg')">Lancer</button></div></article>
-
-    <article class="card session-card" data-parcours="Sommeil" data-duration="long" data-duration-min="12"><div class="session-info"><h3>Sons &amp; silence — endormissement profond</h3><p>Sommeil · 12 min</p></div><div class="session-actions"><button class="btn-offline" aria-label="Télécharger Sons &amp; silence - endormissement profond pour écoute hors ligne" data-filename="Sons &amp; silence - endormissement profond.mp3" onclick="toggleOfflineCache(this,'Sons &amp; silence - endormissement profond.mp3')">⬇</button><button class="btn btn-primary" aria-label="Lancer la séance Sons et silence - endormissement profond, Sommeil, 12 min" onclick="openVoiceOverlay('s19','Sons &amp; silence — endormissement profond','Sommeil','12 min','Sons &amp; silence - endormissement profond.mp3',false,'assets/illustrations/player-03.jpg')">Lancer</button></div></article>
-    <article class="card session-card" data-parcours="Sommeil" data-duration="long" data-duration-min="18"><div class="session-info"><h3>Réveils nocturnes — retrouver le calme</h3><p>Sommeil · 18 min</p></div><div class="session-actions"><button class="btn-offline" aria-label="Télécharger Reveils nocturnes pour écoute hors ligne" data-filename="Reveils nocturnes.mp3" onclick="toggleOfflineCache(this,'Reveils nocturnes.mp3')">⬇</button><button class="btn btn-primary" aria-label="Lancer la séance Réveils nocturnes - retrouver le calme, Sommeil, 18 min" onclick="openVoiceOverlay('s8','Réveils nocturnes — retrouver le calme','Sommeil','18 min','Reveils nocturnes.mp3',false,'assets/illustrations/player-03.jpg')">Lancer</button></div></article>
-    <article class="card session-card" data-parcours="Sommeil" data-duration="medium" data-duration-min="10"><div class="session-info"><h3>Méditation du matin reposé</h3><p>Sommeil · 10 min</p></div><div class="session-actions"><button class="btn-offline" aria-label="Télécharger Méditation du matin reposé pour écoute hors ligne" data-filename="Méditation du matin reposé.mp3" onclick="toggleOfflineCache(this,'Méditation du matin reposé.mp3')">⬇</button><button class="btn btn-primary" aria-label="Lancer la séance Méditation du matin reposé, Sommeil, 10 min" onclick="openVoiceOverlay('s21','Méditation du matin reposé','Sommeil','10 min','Méditation du matin reposé.mp3',false,'assets/illustrations/player-03.jpg')">Lancer</button></div></article>
-    
-    <h2 class="group-header" data-parcours="Respirer"><span class="group-dot" aria-hidden="true"></span>Respirer</h2>
-    <article class="card session-card" data-parcours="Respirer" data-duration="short" data-duration-min="5"><div class="session-info"><h3>La respiration naturelle</h3><p>Respirer · 5 min</p></div><div class="session-actions"><button class="btn-offline" aria-label="Télécharger La respiration naturelle pour écoute hors ligne" data-filename="La respiration naturelle.mp3" onclick="toggleOfflineCache(this,'La respiration naturelle.mp3')">⬇</button><button class="btn btn-primary" aria-label="Lancer la séance La respiration naturelle, Respirer, 5 min" onclick="openVoiceOverlay('s22','La respiration naturelle','Respirer','5 min','La respiration naturelle.mp3',false,'assets/illustrations/player-04.jpg')">Lancer</button></div></article>
-    <article class="card session-card" data-parcours="Respirer" data-duration="short" data-duration-min="5"><div class="session-info"><h3>Cohérence cardiaque 5 minutes</h3><p>Respirer · 5 min</p></div><div class="session-actions"><button class="btn-offline" aria-label="Télécharger Cohérence cardiaque 5 minutes pour écoute hors ligne" data-filename="Cohérence cardiaque 5 minutes.mp3" onclick="toggleOfflineCache(this,'Cohérence cardiaque 5 minutes.mp3')">⬇</button><button class="btn btn-primary" aria-label="Lancer la séance Cohérence cardiaque 5 minutes, Respirer, 5 min" onclick="openVoiceOverlay('s9','Cohérence cardiaque 5 minutes','Respirer','5 min','Cohérence cardiaque 5 minutes.mp3',false,'assets/illustrations/player-04.jpg')">Lancer</button></div></article>
-    <article class="card session-card" data-parcours="Respirer" data-duration="medium" data-duration-min="6"><div class="session-info"><h3>Respiration 4-7-8 — calme profond</h3><p>Respirer · 6 min</p></div><div class="session-actions"><button class="btn-offline" aria-label="Télécharger Respiration 4-7-8 — Calme profond pour écoute hors ligne" data-filename="Respiration 4-7-8 — Calme profond.mp3" onclick="toggleOfflineCache(this,'Respiration 4-7-8 — Calme profond.mp3')">⬇</button><button class="btn btn-primary" aria-label="Lancer la séance Respiration 4-7-8 - calme profond, Respirer, 6 min" onclick="openVoiceOverlay('s10','Respiration 4-7-8 — calme profond','Respirer','6 min','Respiration 4-7-8 — Calme profond.mp3',false,'assets/illustrations/player-04.jpg')">Lancer</button></div></article>
-    <article class="card session-card" data-parcours="Respirer" data-duration="medium" data-duration-min="6"><div class="session-info"><h3>Box breathing</h3><p>Respirer · 6 min</p></div><div class="session-actions"><button class="btn-offline" aria-label="Télécharger Box breathing pour écoute hors ligne" data-filename="Box breathing.mp3" onclick="toggleOfflineCache(this,'Box breathing.mp3')">⬇</button><button class="btn btn-primary" aria-label="Lancer la séance Box breathing, Respirer, 6 min" onclick="openVoiceOverlay('s23','Box breathing','Respirer','6 min','Box breathing.mp3',false,'assets/illustrations/player-04.jpg')">Lancer</button></div></article>
-
-    
-    <h2 class="group-header" data-parcours="Anxiété"><span class="group-dot" aria-hidden="true"></span>Anxiété</h2>
-    <article class="card session-card" data-parcours="Anxiété" data-duration="short" data-duration-min="5"><div class="session-info"><h3>SOS Anxiété — ancrage immédiat</h3><p>Anxiété · 5 min</p></div><div class="session-actions"><button class="btn-offline" aria-label="Télécharger SOS Anxiété ancrage immédiat pour écoute hors ligne" data-filename="SOS Anxiété ancrage immédiat.mp3" onclick="toggleOfflineCache(this,'SOS Anxiété ancrage immédiat.mp3')">⬇</button><button class="btn btn-primary" aria-label="Lancer la séance SOS Anxiété - ancrage immédiat, Anxiété, 5 min" onclick="openVoiceOverlay('s11','SOS Anxiété — ancrage immédiat','Anxiété','5 min','SOS Anxiété ancrage immédiat.mp3',false,'assets/illustrations/player-05.jpg')">Lancer</button></div></article>
-    <article class="card session-card" data-parcours="Anxiété" data-duration="medium" data-duration-min="10"><div class="session-info"><h3>Accueillir l'anxiété sans la combattre</h3><p>Anxiété · 10 min</p></div><div class="session-actions"><button class="btn-offline" aria-label="Télécharger Accueillir l'anxiété sans la combattre pour écoute hors ligne" data-filename="Accueillir l'anxiété sans la combattre.mp3" onclick="toggleOfflineCache(this,&quot;Accueillir l'anxiété sans la combattre.mp3&quot;)">⬇</button><button class="btn btn-primary" aria-label="Lancer la séance Accueillir l'anxiété sans la combattre, Anxiété, 10 min" onclick="openVoiceOverlay('s12',&quot;Accueillir l'anxiété sans la combattre&quot;,'Anxiété','10 min',&quot;Accueillir l'anxiété sans la combattre.mp3&quot;,false,'assets/illustrations/player-05.jpg')">Lancer</button></div></article>
-    <article class="card session-card" data-parcours="Anxiété" data-duration="medium" data-duration-min="7"><div class="session-info"><h3>Les sons autour de toi</h3><p>Anxiété · 7 min</p></div><div class="session-actions"><button class="btn-offline" aria-label="Télécharger Les sons autour de toi pour écoute hors ligne" data-filename="Les sons autour de toi.mp3" onclick="toggleOfflineCache(this,'Les sons autour de toi.mp3')">⬇</button><button class="btn btn-primary" aria-label="Lancer la séance Les sons autour de toi, Anxiété, 7 min" onclick="openVoiceOverlay('s13','Les sons autour de toi','Anxiété','7 min','Les sons autour de toi.mp3','Les sons autour de toi.mp3','assets/illustrations/player-05.jpg')">Lancer</button></div></article>
-    <article class="card session-card" data-parcours="Anxiété" data-duration="medium" data-duration-min="8"><div class="session-info"><h3>La pensée qui tourne en boucle</h3><p>Anxiété · 8 min</p></div><div class="session-actions"><button class="btn-offline" aria-label="Télécharger La pensée qui tourne en boucle pour écoute hors ligne" data-filename="La pensée qui tourne en boucle.mp3" onclick="toggleOfflineCache(this,'La pensée qui tourne en boucle.mp3')">⬇</button><button class="btn btn-primary" aria-label="Lancer la séance La pensée qui tourne en boucle, Anxiété, 8 min" onclick="openVoiceOverlay('s14','La pensée qui tourne en boucle','Anxiété','8 min','La pensée qui tourne en boucle.mp3','La pensée qui tourne en boucle.mp3','assets/illustrations/player-05.jpg')">Lancer</button></div></article>
-    <article class="card session-card" data-parcours="Anxiété" data-duration="short" data-duration-min="5"><div class="session-info"><h3>Mon corps face à la peur</h3><p>Anxiété · 5 min</p></div><div class="session-actions"><button class="btn-offline" aria-label="Télécharger Mon corps face à la peur pour écoute hors ligne" data-filename="Mon corps face à la peur.mp3" onclick="toggleOfflineCache(this,'Mon corps face à la peur.mp3')">⬇</button><button class="btn btn-primary" aria-label="Lancer la séance Mon corps face à la peur, Anxiété, 5 min" onclick="openVoiceOverlay('s24','Mon corps face à la peur','Anxiété','5 min','Mon corps face à la peur.mp3',false,'assets/illustrations/player-05.jpg')">Lancer</button></div></article>
-    <article class="card session-card" data-parcours="Anxiété" data-duration="short" data-duration-min="5"><div class="session-info"><h3>Technique 5-4-3-2-1 guidée</h3><p>Anxiété · 5 min</p></div><div class="session-actions"><button class="btn-offline" aria-label="Télécharger techniques 5-4-3-2-1 guidée pour écoute hors ligne" data-filename="techniques 5-4-3-2-1 guidée.mp3" onclick="toggleOfflineCache(this,'techniques 5-4-3-2-1 guidée.mp3')">⬇</button><button class="btn btn-primary" aria-label="Lancer la séance Technique 5-4-3-2-1 guidée, Anxiété, 5 min" onclick="openVoiceOverlay('s25','Technique 5-4-3-2-1 guidée','Anxiété','5 min','techniques 5-4-3-2-1 guidée.mp3',false,'assets/illustrations/player-05.jpg')">Lancer</button></div></article>
-    
-    <h2 class="group-header" data-parcours="Concentration"><span class="group-dot" aria-hidden="true"></span>Concentration</h2>
-    <article class="card session-card" data-parcours="Concentration" data-duration="medium" data-duration-min="7"><div class="session-info"><h3>Mise en route mentale</h3><p>Concentration · 7 min</p></div><div class="session-actions"><button class="btn-offline" aria-label="Télécharger Mise en route mentale pour écoute hors ligne" data-filename="Mise en route mentale.mp3" onclick="toggleOfflineCache(this,'Mise en route mentale.mp3')">⬇</button><button class="btn btn-primary" aria-label="Lancer la séance Mise en route mentale, Concentration, 7 min" onclick="openVoiceOverlay('s15','Mise en route mentale','Concentration','7 min','Mise en route mentale.mp3',false,'assets/illustrations/player-06.jpg')">Lancer</button></div></article>
-    <article class="card session-card" data-parcours="Concentration" data-duration="medium" data-duration-min="10"><div class="session-info"><h3>Pleine conscience de la tâche</h3><p>Concentration · 10 min</p></div><div class="session-actions"><button class="btn-offline" aria-label="Télécharger Pleine conscience de la tache pour écoute hors ligne" data-filename="Pleine conscience de la tache.mp3" onclick="toggleOfflineCache(this,'Pleine conscience de la tache.mp3')">⬇</button><button class="btn btn-primary" aria-label="Lancer la séance Pleine conscience de la tâche, Concentration, 10 min" onclick="openVoiceOverlay('s27','Pleine conscience de la tâche','Concentration','10 min','Pleine conscience de la tache.mp3',false,'assets/illustrations/player-06.jpg')">Lancer</button></div></article>
-    <article class="card session-card" data-parcours="Concentration" data-duration="medium" data-duration-min="10"><div class="session-info"><h3>Concentration — maintenir le focus</h3><p>Concentration · 10 min</p></div><div class="session-actions"><button class="btn-offline" aria-label="Télécharger Concentration - maintenir le focus pour écoute hors ligne" data-filename="Concentration - maintenir le focus.mp3" onclick="toggleOfflineCache(this,'Concentration - maintenir le focus.mp3')">⬇</button><button class="btn btn-primary" aria-label="Lancer la séance Concentration - maintenir le focus, Concentration, 10 min" onclick="openVoiceOverlay('s28','Concentration — maintenir le focus','Concentration','10 min','Concentration - maintenir le focus.mp3',false,'assets/illustrations/player-06.jpg')">Lancer</button></div></article>
-    <article class="card session-card" data-parcours="Concentration" data-duration="medium" data-duration-min="9"><div class="session-info"><h3>Clarté mentale - faire le vide</h3><p>Concentration · 9 min</p></div><div class="session-actions"><button class="btn-offline" aria-label="Télécharger Clarté mentale - faire le vide pour écoute hors ligne" data-filename="Clarté mentale - faire le vide.mp3" onclick="toggleOfflineCache(this,'Clarté mentale - faire le vide.mp3')">⬇</button><button class="btn btn-primary" aria-label="Lancer la séance Clarté mentale - faire le vide, Concentration, 9 min" onclick="openVoiceOverlay('s32','Clarté mentale - faire le vide','Concentration','9 min','Clarté mentale - faire le vide.mp3',false,'assets/illustrations/player-06.jpg')">Lancer</button></div></article>
-    <article class="card session-card" data-parcours="Concentration" data-duration="medium" data-duration-min="10"><div class="session-info"><h3>Flow - entrer dans la zone</h3><p>Concentration · 10 min</p></div><div class="session-actions"><button class="btn-offline" aria-label="Télécharger Flow - entrer dans la zone pour écoute hors ligne" data-filename="Flow - entrer dans la zone.mp3" onclick="toggleOfflineCache(this,'Flow - entrer dans la zone.mp3')">⬇</button><button class="btn btn-primary" aria-label="Lancer la séance Flow - entrer dans la zone, Concentration, 10 min" onclick="openVoiceOverlay('s33','Flow - entrer dans la zone','Concentration','10 min','Flow - entrer dans la zone.mp3',false,'assets/illustrations/player-06.jpg')">Lancer</button></div></article>
+    <!-- Cartes de séances générées au chargement depuis assets/sessions.json (renderSessionList dans app.js) -->
   </div>
   <p style="text-align:center;color:var(--color-muted);font-size:.85rem;margin-top:2rem;">De nouvelles séances arriveront au fil du projet.</p>
 </section>
@@ -1199,6 +1160,19 @@
       <span class="setting-tag">🔒 Local</span>
     </article>
     <article class="card setting-item">
+      <div class="info"><h3>Exporter mes données</h3><p>Statistiques, historique et préférences dans un fichier JSON</p></div>
+      <button class="setting-link" onclick="exportData()">Exporter</button>
+    </article>
+    <article class="card setting-item">
+      <div class="info"><h3>Importer mes données</h3><p>Restaurer une sauvegarde exportée depuis Serein</p></div>
+      <button class="setting-link" onclick="importData()">Importer</button>
+      <input type="file" id="import-file-input" accept="application/json,.json" style="display:none;" onchange="handleImportFile(this)">
+    </article>
+    <article class="card setting-item">
+      <div class="info"><h3>Politique de confidentialité</h3></div>
+      <a href="privacy.html" target="_blank" rel="noopener" class="setting-link">Lire ›</a>
+    </article>
+    <article class="card setting-item">
       <div class="info"><h3>Réinitialiser ma progression</h3></div>
       <button class="setting-link danger" onclick="confirmResetProgress()">Réinitialiser</button>
     </article>
@@ -1285,5 +1259,40 @@
 </div>
 
 <script src="app.js"></script>
+<script>
+  // Service worker : cache du shell + écoute hors ligne des séances téléchargées
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').then(reg => {
+        // Nouvelle version installée alors qu'une ancienne contrôle la page :
+        // proposer de recharger plutôt que de rester dans un état mixte.
+        reg.addEventListener('updatefound', () => {
+          const nw = reg.installing;
+          if (!nw) return;
+          nw.addEventListener('statechange', () => {
+            if (nw.state === 'installed' && navigator.serviceWorker.controller) showUpdateToast();
+          });
+        });
+      }).catch(e => console.warn('[Serein sw]', e));
+    });
+  }
+
+  function showUpdateToast() {
+    if (document.getElementById('sw-update-toast')) return;
+    const toast = document.createElement('div');
+    toast.id = 'sw-update-toast';
+    toast.setAttribute('role', 'status');
+    toast.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:9999;background:var(--color-surface-2);color:var(--color-text);border:1px solid var(--color-border);border-radius:999px;padding:.6rem .6rem .6rem 1.1rem;display:flex;align-items:center;gap:.75rem;box-shadow:0 8px 32px rgba(0,0,0,.35);font-size:.85rem;max-width:92%;';
+    const label = document.createElement('span');
+    label.textContent = 'Nouvelle version disponible';
+    const btn = document.createElement('button');
+    btn.textContent = 'Recharger';
+    btn.style.cssText = 'background:var(--color-primary);color:var(--color-bg);border:none;border-radius:999px;padding:.45rem .9rem;font-weight:600;font-size:.85rem;cursor:pointer;';
+    btn.addEventListener('click', () => window.location.reload());
+    toast.appendChild(label);
+    toast.appendChild(btn);
+    document.body.appendChild(toast);
+  }
+</script>
 </body>
 </html>

@@ -1,0 +1,100 @@
+{
+  "groups": [
+    {
+      "name": "Premiers pas",
+      "artwork": "assets/illustrations/player-01.jpg",
+      "sessions": [
+        { "id": "s1", "title": "Première respiration consciente", "duration": 5, "file": "Méditation Premiere Respiration Consciente.mp3", "fileFem": null },
+        { "id": "s2", "title": "S'asseoir, ne rien faire", "duration": 5, "file": "Revenir au souffle.mp3", "fileFem": null },
+        { "id": "s3", "title": "Observer ses pensées sans les juger", "duration": 9, "file": "Observer ses pensées sans les juger.mp3", "fileFem": "Observer ses pensées sans les juger.mp3" },
+        { "id": "s4", "title": "Le scan corporel — découvrir ses sensations", "duration": 10, "file": "Le scan corporel.mp3", "fileFem": "Le scan corporel — découvrir ses sensations.mp3" },
+        { "id": "s16", "title": "Revenir à l'instant présent", "duration": 5, "file": "Revenir à l'instant présent.mp3", "fileFem": null },
+        { "id": "s17", "title": "La bienveillance envers soi", "duration": 5, "file": "La bienveillance envers soi.mp3", "fileFem": null },
+        { "id": "s18", "title": "Mon ancre personnelle", "duration": 6, "file": "Mon ancre personnelle.mp3", "fileFem": null }
+      ]
+    },
+    {
+      "name": "Émotions",
+      "artwork": "assets/illustrations/player-02.jpg",
+      "disclaimer": "Ces séances sont des outils de soutien psychologique. Elles ne remplacent pas un accompagnement professionnel. Si tu traverses une période difficile, n'hésite pas à consulter un·e psychologue ou ton médecin traitant.",
+      "subgroups": [
+        {
+          "label": "😮‍💨 Stress",
+          "name": "Stress",
+          "sessions": [
+            { "id": "s5", "title": "SOS Stress en 6 minutes", "duration": 6, "file": "SOS Stress en 6 minutes.mp3", "fileFem": null },
+            { "id": "s31", "title": "Lâcher prise sur l'urgence", "duration": 7, "file": "Lacher prise sur lurgence.mp3", "fileFem": null },
+            { "id": "s6", "title": "La cohérence cardiaque guidée", "duration": 5, "file": "Cohérence cardiaque 5 minutes.mp3", "fileFem": null },
+            { "id": "s29", "title": "Le corps qui tient le stress", "duration": 10, "file": "Le corps qui tient le stress.mp3", "fileFem": null },
+            { "id": "s26", "title": "Fin de journée - déposer le poids", "duration": 10, "file": "Fin de journee - deposer le poids.mp3", "fileFem": null }
+          ]
+        },
+        {
+          "label": "😤 Colère",
+          "name": "Colère",
+          "sessions": [
+            { "id": "s37", "title": "SOS Colère - décharger sans exploser", "duration": 5, "file": "SOS Colère.mp3", "fileFem": null },
+            { "id": "s44", "title": "Traverser l'irritabilité", "duration": 9, "file": "Traverser l-irritabilité.mp3", "fileFem": null }
+          ]
+        },
+        {
+          "label": "😢 Tristesse",
+          "name": "Tristesse",
+          "sessions": [
+            { "id": "s40", "title": "Quand l'humeur pèse", "duration": 8, "file": "Tristesse et Mauvaise humeur.mp3", "fileFem": null },
+            { "id": "s45", "title": "Retrouver le goût des choses", "duration": 8, "file": "Retrouver le gout des choses.mp3", "fileFem": null }
+          ]
+        }
+      ],
+      "resources": [
+        { "name": "Mon parcours psy", "desc": "Consulter un·e psychologue remboursé·e par l'Assurance Maladie - sans avance de frais.", "url": "https://www.ameli.fr/assure/remboursements/rembourse/remboursement-seance-psychologue-mon-soutien-psy" },
+        { "name": "Psycom", "desc": "Guide indépendant sur la santé mentale : comprendre, trouver de l'aide, orienter ses proches.", "url": "https://www.psycom.org" },
+        { "name": "3114 - Numéro national de prévention du suicide", "desc": "Disponible 24h/24, 7j/7. Des professionnels de santé à l'écoute en cas de crise.", "url": "https://3114.fr" }
+      ]
+    },
+    {
+      "name": "Sommeil",
+      "artwork": "assets/illustrations/player-03.jpg",
+      "sessions": [
+        { "id": "s7", "title": "Rituel de déconnexion", "duration": 10, "file": "Préparer le sommeil.mp3", "fileFem": null },
+        { "id": "s20", "title": "Relâcher le corps, couche après couche", "duration": 8, "file": "Relâcher le corps, couche après couche.mp3", "fileFem": null },
+        { "id": "s19", "title": "Sons & silence — endormissement profond", "duration": 12, "file": "Sons & silence - endormissement profond.mp3", "fileFem": null },
+        { "id": "s8", "title": "Réveils nocturnes — retrouver le calme", "duration": 18, "file": "Reveils nocturnes.mp3", "fileFem": null },
+        { "id": "s21", "title": "Méditation du matin reposé", "duration": 10, "file": "Méditation du matin reposé.mp3", "fileFem": null }
+      ]
+    },
+    {
+      "name": "Respirer",
+      "artwork": "assets/illustrations/player-04.jpg",
+      "sessions": [
+        { "id": "s22", "title": "La respiration naturelle", "duration": 5, "file": "La respiration naturelle.mp3", "fileFem": null },
+        { "id": "s9", "title": "Cohérence cardiaque 5 minutes", "duration": 5, "file": "Cohérence cardiaque 5 minutes.mp3", "fileFem": null },
+        { "id": "s10", "title": "Respiration 4-7-8 — calme profond", "duration": 6, "file": "Respiration 4-7-8 — Calme profond.mp3", "fileFem": null },
+        { "id": "s23", "title": "Box breathing", "duration": 6, "file": "Box breathing.mp3", "fileFem": null }
+      ]
+    },
+    {
+      "name": "Anxiété",
+      "artwork": "assets/illustrations/player-05.jpg",
+      "sessions": [
+        { "id": "s11", "title": "SOS Anxiété — ancrage immédiat", "duration": 5, "file": "SOS Anxiété ancrage immédiat.mp3", "fileFem": null },
+        { "id": "s12", "title": "Accueillir l'anxiété sans la combattre", "duration": 10, "file": "Accueillir l'anxiété sans la combattre.mp3", "fileFem": null },
+        { "id": "s13", "title": "Les sons autour de toi", "duration": 7, "file": "Les sons autour de toi.mp3", "fileFem": "Les sons autour de toi.mp3" },
+        { "id": "s14", "title": "La pensée qui tourne en boucle", "duration": 8, "file": "La pensée qui tourne en boucle.mp3", "fileFem": "La pensée qui tourne en boucle.mp3" },
+        { "id": "s24", "title": "Mon corps face à la peur", "duration": 5, "file": "Mon corps face à la peur.mp3", "fileFem": null },
+        { "id": "s25", "title": "Technique 5-4-3-2-1 guidée", "duration": 5, "file": "Technique 5-4-3-2-1 guidée.mp3", "fileFem": null }
+      ]
+    },
+    {
+      "name": "Concentration",
+      "artwork": "assets/illustrations/player-06.jpg",
+      "sessions": [
+        { "id": "s15", "title": "Mise en route mentale", "duration": 7, "file": "Mise en route mentale.mp3", "fileFem": null },
+        { "id": "s27", "title": "Pleine conscience de la tâche", "duration": 10, "file": "Pleine conscience de la tache.mp3", "fileFem": null },
+        { "id": "s28", "title": "Concentration — maintenir le focus", "duration": 10, "file": "Concentration - maintenir le focus.mp3", "fileFem": null },
+        { "id": "s32", "title": "Clarté mentale - faire le vide", "duration": 9, "file": "Clarté mentale - faire le vide.mp3", "fileFem": null },
+        { "id": "s33", "title": "Flow - entrer dans la zone", "duration": 10, "file": "Flow - entrer dans la zone.mp3", "fileFem": null }
+      ]
+    }
+  ]
+}

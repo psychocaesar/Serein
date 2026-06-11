@@ -5,3 +5,7 @@ assets/audio/
 *.keystore
 *.jks
 app/android/keystore.properties
+
+# Fichiers du site cesarbroche.fr (projet separe, ne pas committer ici)
+cesarbroche-theme/
+page-consultations.php
