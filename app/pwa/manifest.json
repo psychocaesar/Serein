@@ -30,6 +30,42 @@
     }
   ],
   "categories": ["health", "lifestyle", "wellness"],
-  "screenshots": [],
+  "screenshots": [
+    {
+      "src": "assets/screenshots/accueil.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Respirer. Dormir. Se recentrer. Méditation guidée en français."
+    },
+    {
+      "src": "assets/screenshots/parcours.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "6 parcours, 35 séances : une séance pour chaque moment de la journée."
+    },
+    {
+      "src": "assets/screenshots/psychologue.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Des séances conçues par un psychologue, voix humaines, 100 % en français."
+    },
+    {
+      "src": "assets/screenshots/guide.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Le guide intelligent : 2 questions, la séance faite pour vous."
+    },
+    {
+      "src": "assets/screenshots/liberte.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Gratuit, open source, sans tracking."
+    }
+  ],
   "prefer_related_applications": false
 }
