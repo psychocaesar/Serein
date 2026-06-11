@@ -1,8 +1,10 @@
 # Serein
 
-**Serein** est un projet d'application de méditation en français conçu comme une alternative éthique, open source et respectueuse de la vie privée des applications de méditation grand public.
+**Serein** est une application de méditation en français, conçue comme une alternative éthique, open source et respectueuse de la vie privée aux applications de méditation grand public.
 
 L'objectif est simple : aider les personnes à respirer, dormir et se recentrer grâce à des audios guidés en français, sans publicité, sans paywall agressif et sans tracking tiers.
+
+🌐 **App web** : [www.sereinapp.fr](https://www.sereinapp.fr) · 📄 [Politique de confidentialité](https://www.sereinapp.fr/privacy.html)
 
 ## Vision
 
@@ -10,145 +12,103 @@ Serein traite la méditation comme un **bien public numérique**.
 
 Nous pensons qu'un produit destiné au calme, au sommeil ou à l'anxiété ne devrait pas se reposer sur l'extraction d'attention, le profilage comportemental ou une monétisation manipulatrice.
 
-Nous voulons construire une expérience de méditation qui soit :
-- librement accessible ;
-- open source au niveau de l'application ;
-- respectueuse de la vie privée par défaut ;
-- compréhensible par des utilisateurs non techniques ;
-- suffisamment simple pour lancer, et utile pour faire une vraie différence.
+- Pas de publicité, pas de compte, pas de trackers.
+- Statistiques 100 % locales (localStorage), exportables et importables depuis les Réglages.
+- Polices, images et code embarqués : la seule requête réseau est le chargement des audios.
+- Code AGPL-3.0, contenus audio CC BY 4.0.
 
-## Principes produit
+## Ce que contient l'app
 
-- Pas de publicité.
-- Pas de vente de données personnelles.
-- Pas de trackers marketing tiers.
-- Pas de compte obligatoire au lancement.
-- Minimisation des données par défaut.
-- Langage clair dans les explications de confidentialité et sur le produit.
-- Licence séparée pour le code et pour les contenus audio.
-- Gouvernance progressive à mesure que de nouveaux contributeurs rejoignent.
-
-## Périmètre du MVP
-
-Objectif de MVP initial :
-- 30 séances audio en français.
-- 5 parcours guidés : débuter, stress, sommeil, respiration, gestion de l'anxiété.
-- Lecture hors ligne.
-- PWA installable comme premier format de publication.
-- Manifeste public et politique de confidentialité simple.
-
-## Pourquoi ce projet
-
-Les observateurs de la vie privée ont régulièrement mis en lumière les faiblesses des applications de santé mentale et de bien-être, tandis que des autorités de protection des données, comme la CNIL, insistent sur la transparence, la minimisation des données et une information claire pour les utilisateurs dans les applications mobiles.
-
-Serein existe pour explorer un autre modèle : une application de méditation utile, qui gagne la confiance par sa conception.
+- **35 séances guidées** réparties en 6 parcours : Premiers pas, Calme & Stress, Sommeil, Respirer, Anxiété, Concentration — conçues par un psychologue, approche TCC, voix humaines.
+- **Guide intelligent** : 2 questions pour recommander la séance adaptée au moment.
+- **Lecture hors ligne** (service worker, cache audio à la demande).
+- **Minuteur de méditation libre** avec sons d'ambiance.
+- Rappel quotidien par notification locale, thèmes clair/sombre, deux voix (masculine/féminine).
 
 ## Structure du dépôt
-
-Structure suggérée :
 
 ```text
 .
 ├── app/
-│   ├── pwa/
-│   └── mobile/
-├── content/
-│   ├── scripts/
-│   ├── audio/
-│   └── metadata/
-├── docs/
-│   ├── manifesto.md
-│   ├── privacy.md
-│   ├── roadmap.md
-│   └── editorial-guidelines.md
-├── LICENSE
-├── CONTRIBUTING.md
-└── README.md
+│   ├── pwa/                  # L'application web (vanilla JS, aucun build)
+│   │   ├── index.html        # Interface complète (écrans, styles)
+│   │   ├── app.js            # Logique : player, catalogue, stats, guide
+│   │   ├── sw.js             # Service worker (offline, cache audio + Range)
+│   │   ├── manifest.json     # Manifest PWA (icônes, screenshots)
+│   │   ├── privacy.html      # Politique de confidentialité
+│   │   └── assets/
+│   │       ├── sessions.json # ⭐ Le catalogue des séances (source de vérité)
+│   │       ├── fonts/        # Polices auto-hébergées (woff2)
+│   │       └── audio/        # MP3 (non versionnés — servis par le CDN)
+│   ├── android/              # Wrapper Capacitor Android (plugin lecture native)
+│   └── ios/                  # Wrapper Capacitor iOS
+├── tests/                    # Tests Node (catalogue, versions, manifest)
+├── docs/                     # Manifeste, config nginx de référence
+├── .github/workflows/        # CI : npm test à chaque push/PR
+└── capacitor.config.json
 ```
 
-## Démarrer avec le projet
+## Démarrer
 
-### Pour les développeurs
+### Lancer l'app en local
 
-1. Clonez le dépôt.
-2. Ouvrez le prototype PWA actuel.
-3. Lisez le manifeste, les principes de confidentialité et le périmètre du MVP.
-4. Choisissez un domaine de contribution : produit, code, montage audio, écriture de scripts, UX writing ou documentation.
+Aucun build, aucune dépendance front : servez `app/pwa/` avec n'importe quel serveur statique.
 
-### Pour les contributeurs non techniques
+```bash
+npx serve app/pwa
+```
 
-Vous pouvez aider sur :
-- l'écriture de scripts ;
-- l'enregistrement de voix de méditation ;
-- la relecture et la correction en français ;
-- des revues d'accessibilité ;
-- des revues de confidentialité ;
-- le contrôle de qualité éditoriale.
+### Lancer les tests
 
-## Contribution
+```bash
+npm test
+```
 
-Les contributions sont les bienvenues, mais Serein doit rester cohérent avec sa mission.
+Les tests valident le catalogue (`sessions.json`), la cohérence des versions et le manifest. Ils tournent aussi en CI sur chaque push et pull request.
 
-Avant de proposer une contribution importante :
-- lisez le manifeste ;
-- vérifiez si le changement ajoute une complexité inutile ;
-- évitez d'ajouter par défaut des SDK tiers ;
-- privilégiez les motifs "local-first" quand c'est possible ;
-- expliquez comment la proposition affecte la confidentialité, l'utilisabilité et la maintenance.
+### Builds natifs (Capacitor)
 
-Premières contributions intéressantes :
-- améliorer les textes et la documentation ;
-- affiner le parcours de découverte (onboarding) ;
-- ajouter des métadonnées pour les séances audio ;
-- améliorer le comportement hors ligne ;
-- améliorer l'accessibilité ;
-- traduire les textes produits.
+```bash
+npm install
+npx cap sync android   # puis ouvrir app/android dans Android Studio
+npx cap sync ios       # puis ouvrir app/ios dans Xcode
+```
+
+La version de l'app est définie dans `package.json` et doit correspondre à `versionName` (build.gradle) et à l'écran Réglages — un test le vérifie.
+
+## Contribuer
+
+Les contributions sont les bienvenues, mais Serein doit rester cohérent avec sa mission : lisez le [manifeste](docs/manifesto.md) et [CONTRIBUTING.md](CONTRIBUTING.md) avant une contribution importante.
+
+**Le point d'entrée le plus simple : [`app/pwa/assets/sessions.json`](app/pwa/assets/sessions.json).** Ajouter ou corriger une séance = éditer une entrée JSON (titre, durée, fichier audio, description). L'interface se génère à partir de ce catalogue.
+
+Autres contributions utiles, y compris non techniques :
+- écriture et relecture de scripts de méditation ;
+- enregistrement de voix ;
+- revues d'accessibilité et de confidentialité ;
+- amélioration des textes et de la documentation.
+
+Quelques règles :
+- pas de SDK tiers par défaut ;
+- privilégier les motifs « local-first » ;
+- expliquer l'impact d'une proposition sur la confidentialité, l'utilisabilité et la maintenance.
 
 ## Licence
 
-### Code
-
-Le code source de Serein est distribué sous licence **GNU Affero General Public License v3.0 (AGPL-3.0)**.
-
-Cela signifie que toute modification du code — y compris si elle est déployée en tant que service en ligne — doit être rendue publique sous la même licence. Serein restera toujours un bien commun.
-
-SPDX-License-Identifier: `AGPL-3.0-or-later`
-
-Voir le fichier [LICENSE](LICENSE) pour le texte complet.
-
-### Contenus audio
-
-Les contenus audio sont licenciés séparément sous **Creative Commons BY 4.0** (attribution requise).
-
-Voir le fichier [LICENSE-audio.md](LICENSE-audio.md) pour les détails.
+- **Code** : [GNU AGPL-3.0](LICENSE) (`AGPL-3.0-or-later`). Toute modification déployée, y compris en tant que service en ligne, doit être publiée sous la même licence.
+- **Contenus audio** : [Creative Commons BY 4.0](LICENSE-audio.md) (attribution requise).
 
 ## Position sur la vie privée
 
-Serein vise à éviter :
-- les SDK d'analyse tiers ;
-- les pixels publicitaires ;
-- les permissions inutiles ;
-- la collecte de données cachée ;
-- les modèles de consentement manipulatoires (dark patterns).
-
-Si une mesure technique devait un jour s'avérer nécessaire, elle doit rester minimale, documentée et compréhensible.
-
-## Feuille de route
-
-- Publication du manifeste et de la landing page.
-- Lancement d'une version alpha PWA installable.
-- Remplacement des audios de démonstration par des sessions originales en français.
-- Recrutement de premiers utilisateurs bêta.
-- Ajout de la documentation de contribution.
-- Évaluation de la gouvernance et de la structure juridique à long terme.
+Serein évite : les SDK d'analyse tiers, les pixels publicitaires, les permissions inutiles, la collecte cachée et les dark patterns de consentement. Si une mesure technique devait un jour s'avérer nécessaire, elle resterait minimale, documentée et compréhensible. Détails : [privacy.html](app/pwa/privacy.html).
 
 ## Statut du projet
 
-Serein est actuellement un projet précoce, piloté par un seul fondateur, en phase alpha active.
+Projet porté par un psychologue, financé uniquement par les dons. Version actuelle : voir `package.json`. L'app web est en production sur [sereinapp.fr](https://www.sereinapp.fr) ; les versions Android et iOS sont en préparation pour les stores.
 
 ## Contact
 
-Si vous souhaitez contribuer, tester le produit ou participer à la définition de la ligne éditoriale, ouvrez une issue ou commencez par la documentation.
+Ouvrez une [issue GitHub](https://github.com/psychocaesar/Serein/issues) ou écrivez à [serein@cesarbroche.fr](mailto:serein@cesarbroche.fr).
 
 ---
 
