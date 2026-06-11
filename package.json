@@ -1,6 +1,6 @@
 {
   "name": "sereinapp",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "**Serein** est un projet d'application de méditation en français conçu comme une alternative éthique, open source et respectueuse de la vie privée des applications de méditation grand public.",
   "main": "app.js",
   "directories": {
