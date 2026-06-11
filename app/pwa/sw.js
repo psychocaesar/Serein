@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'serein-v6';
+const CACHE_VERSION = 'serein-v7';
 const STATIC_CACHE  = CACHE_VERSION + '-static';
 const AUDIO_CACHE   = 'serein-audio'; // non versionné — survit aux mises à jour
 const AUDIO_CDN_HOST = 'audio.sereinapp.fr'; // CDN audio utilisé par l'app native
