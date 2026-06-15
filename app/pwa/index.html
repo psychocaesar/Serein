@@ -66,6 +66,11 @@
     try {
       var _s = JSON.parse(localStorage.getItem('serein-stats') || '{}');
       if ((_s.sessions || 0) > 0) document.documentElement.classList.add('has-sessions');
+      // Thème appliqué avant le premier rendu pour éviter le flash sombre→clair
+      var _t = localStorage.getItem('serein-theme') || 'auto';
+      if (_t === 'light' || (_t === 'auto' && matchMedia('(prefers-color-scheme: light)').matches)) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
     } catch(e) {}
   </script>
   <style>
@@ -131,7 +136,6 @@
 
     /* CARDS */
     .card { background: var(--color-surface); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-radius: var(--radius); border: 1px solid var(--color-border); padding: 1.25rem; }
-    .card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1.25rem; }
 
     /* TRUST */
     .trust { display: flex; flex-wrap: wrap; gap: .75rem; margin: 1.5rem 0; font-size: .85rem; }
@@ -152,6 +156,53 @@
     .path-card .card-content h3 { font-size: .95rem; font-weight: 700; margin-bottom: .2rem; color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,.7); }
     .path-card .card-content p { font-size: .78rem; opacity: .88; line-height: 1.4; text-shadow: 0 1px 4px rgba(0,0,0,.6); }
     .path-card .meta { font-size: .72rem; opacity: .7; margin-top: .2rem; }
+
+    /* CHIPS D'HUMEUR (accueil → guide conversationnel, réponse pré-remplie) */
+    .mood-chips { display: flex; gap: .5rem; overflow-x: auto; margin: .65rem -1.25rem 0; padding: .15rem 1.25rem .5rem; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+    .mood-chips::-webkit-scrollbar { display: none; }
+    .mood-chip { flex-shrink: 0; display: inline-flex; align-items: center; gap: .4rem; border: 1px solid var(--color-border); background: var(--color-surface); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); border-radius: 999px; padding: .5rem 1rem; font-size: .88rem; color: var(--color-text); cursor: pointer; transition: border-color .2s; }
+    .mood-chip:hover, .mood-chip:focus-visible { border-color: var(--color-primary); }
+    [data-theme="light"] .mood-chip { backdrop-filter: none; -webkit-backdrop-filter: none; background: #fff; box-shadow: 0 6px 22px -16px rgba(30,50,40,0.22); }
+
+    /* RAIL PARCOURS (accueil) : cartes compactes, scroll horizontal, la suivante dépasse pour inviter au swipe */
+    .rail-head { display: flex; align-items: baseline; justify-content: space-between; }
+    .rail-link { background: none; border: none; color: var(--color-primary); font-size: .82rem; font-weight: 600; cursor: pointer; padding: 0; }
+    .parcours-rail { display: flex; gap: .65rem; overflow-x: auto; margin: .65rem -1.25rem 0; padding: .15rem 1.25rem .5rem; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+    .parcours-rail::-webkit-scrollbar { display: none; }
+    .parcours-rail .path-card { flex: 0 0 132px; min-height: 158px; }
+
+    /* GRILLE PARCOURS (Explorer) : remplace les onglets Thème, la carte active sert de filtre */
+    .explore-parcours { display: grid; grid-template-columns: repeat(2, 1fr); gap: .65rem; margin-top: .5rem; }
+    .explore-parcours .path-card { min-height: 104px; }
+    .explore-parcours .path-card.selected { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+    .explore-parcours .path-card.selected .card-content h3::after { content: ' ✓'; }
+
+    /* Variante compacte commune rail + grille */
+    .parcours-rail .path-card .card-content, .explore-parcours .path-card .card-content { padding: .7rem .8rem .65rem; }
+    .parcours-rail .path-card .card-content h3, .explore-parcours .path-card .card-content h3 { font-size: .88rem; margin-bottom: 0; }
+    .parcours-rail .path-card .meta, .explore-parcours .path-card .meta { margin-top: .1rem; }
+
+    /* ICÔNES SVG — même trait que la nav (les emojis restent réservés à l'expressif : humeurs, ambiances) */
+    .icon-svg { stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .timer-icon-wrap { color: var(--color-primary); }
+    .timer-icon-wrap .icon-svg { width: 22px; height: 22px; }
+    .stat-label .icon-svg { width: 13px; height: 13px; vertical-align: -2px; margin-right: .15rem; }
+    .seg-btn .icon-svg { width: 13px; height: 13px; vertical-align: -2px; }
+    .setting-tag .icon-svg { width: 12px; height: 12px; vertical-align: -2px; margin-right: .2rem; }
+    .welcome-icon { color: var(--color-primary); }
+    .welcome-icon .icon-svg { width: 26px; height: 26px; }
+
+    /* Footer éditorial du catalogue : seulement quand aucun filtre n'est actif (géré par applyFilters) */
+    .catalog-footer { text-align: center; color: var(--color-muted); font-size: .85rem; margin-top: 2rem; }
+
+    /* État vide des filtres */
+    .filter-empty { text-align: center; color: var(--color-muted); padding: 2rem 1rem; }
+    .filter-empty p { margin-bottom: 1.1rem; line-height: 1.5; }
+
+    /* Filet de sécurité du guide (tristesse récurrente) */
+    .guide-support-note { margin-top: 1.25rem; }
+    .guide-support-note > p { font-size: .85rem; color: var(--color-muted); line-height: 1.55; margin-bottom: .65rem; }
+    .guide-support-note .emotion-ressources { display: block; }
 
     /* EXPLORE */
     .session-card { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
@@ -323,28 +374,6 @@
     .insta-text .insta-title { font-size: .95rem; font-weight: 600; }
     .insta-text .insta-handle { font-size: .8rem; color: var(--color-muted); }
 
-    /* Guide hub */
-    .guide-hub-cards { display: flex; flex-direction: column; gap: 1rem; margin-top: 1.75rem; }
-    .guide-hub-card { position: relative; border-radius: var(--radius); padding: 1.5rem; min-height: 170px; cursor: pointer; overflow: hidden; border: 1px solid transparent; display: flex; flex-direction: column; justify-content: flex-end; transition: transform .2s, box-shadow .2s; }
-    .guide-hub-card:hover { transform: translateY(-3px); box-shadow: 0 14px 36px rgba(0,0,0,.4); }
-    .guide-hub-card--learn { background: linear-gradient(140deg, #1e4a38 0%, #0e2820 70%); border-color: rgba(147,201,172,.12); }
-    .guide-hub-card--chat { background: var(--gradient); }
-    .guide-hub-card-deco { position: absolute; top: 1.25rem; right: 1.5rem; font-size: 2.5rem; opacity: .2; pointer-events: none; }
-    .guide-hub-card-label { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; margin-bottom: .5rem; }
-    .guide-hub-card--learn .guide-hub-card-label { color: rgba(255,255,255,.5); }
-    .guide-hub-card--chat .guide-hub-card-label { color: rgba(13,27,21,.5); }
-    .guide-hub-card h3 { font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-size: 1.3rem; font-weight: 700; line-height: 1.25; margin-bottom: .4rem; }
-    .guide-hub-card--learn h3, .guide-hub-card--learn p { color: #fff; }
-    .guide-hub-card--chat h3, .guide-hub-card--chat p { color: #0d1b15; }
-    [data-theme="light"] .guide-hub-card--chat h3, [data-theme="light"] .guide-hub-card--chat p { color: #fff; }
-    .guide-hub-card p { font-size: .85rem; opacity: .7; line-height: 1.5; margin-bottom: 1rem; }
-    .guide-hub-card-arrow { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; align-self: flex-end; flex-shrink: 0; }
-    .guide-hub-card--learn .guide-hub-card-arrow { background: rgba(255,255,255,.15); }
-    .guide-hub-card--chat .guide-hub-card-arrow { background: rgba(13,27,21,.15); }
-    .guide-hub-card-arrow svg { width: 16px; height: 16px; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
-    .guide-hub-card--learn .guide-hub-card-arrow svg { stroke: #fff; }
-    .guide-hub-card--chat .guide-hub-card-arrow svg { stroke: #0d1b15; }
-    [data-theme="light"] .guide-hub-card--chat .guide-hub-card-arrow svg { stroke: #fff; }
     /* Guide sub-view */
     .guide-subview-header { display: flex; align-items: center; margin-bottom: 1.75rem; margin-top: .25rem; }
     .guide-back-btn { background: var(--color-surface); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid var(--color-border); border-radius: 999px; padding: .45rem 1rem .45rem .75rem; font-size: .85rem; cursor: pointer; color: var(--color-text); display: flex; align-items: center; gap: .4rem; transition: opacity .2s; }
@@ -413,7 +442,6 @@
 
     /* Conditionnel sessions */
     .has-sessions #welcome-block { display: none !important; }
-    .has-sessions #stats-block   { display: flex !important; }
 
     /* WELCOME BLOCK */
     .welcome-block { margin-top: 2rem; margin-bottom: 1.5rem; background: var(--color-surface); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid var(--color-border); border-radius: var(--radius); padding: 1.25rem; display: block !important; }
@@ -424,9 +452,6 @@
     .welcome-cta { width: 100%; justify-content: center; }
 
     /* PATH CARD NAV */
-    .path-card-nav { display: flex; align-items: center; justify-content: space-between; margin-top: .4rem; }
-    .path-card-nav-label { font-size: .7rem; color: rgba(255,255,255,.75); font-weight: 500; letter-spacing: .04em; }
-    .path-card-chevron { width: 15px; height: 15px; stroke: rgba(255,255,255,.75); fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
 
     /* TIMER BLOCK */
     .timer-block { margin-top: 1.5rem; }
@@ -485,11 +510,6 @@
     .about-card { padding: 1.25rem; }
     .about-card h3 { font-size: 1rem; margin-bottom: .5rem; }
     .about-intro { color: var(--color-muted); font-size: .9rem; line-height: 1.6; }
-    .about-features { list-style: none; padding: 0; margin: 1.25rem 0 0; display: flex; flex-direction: column; gap: .85rem; }
-    .about-features li { display: flex; gap: .85rem; align-items: flex-start; }
-    .about-features .about-icon { font-size: 1.3rem; flex-shrink: 0; line-height: 1; margin-top: .15rem; }
-    .about-features strong { font-size: .92rem; font-weight: 700; color: var(--color-text); display: block; }
-    .about-features p { font-size: .82rem; color: var(--color-muted); margin-top: .2rem; line-height: 1.5; }
     .about-author { margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--color-border); display: flex; gap: .85rem; align-items: center; }
     .about-author-photo { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
     .about-author strong { font-size: .92rem; font-weight: 700; color: var(--color-text); }
@@ -498,12 +518,11 @@
 
     /* Focus visible */
     .btn:focus-visible, .tab:focus-visible, .chat-choice:focus-visible, .btn-offline:focus-visible,
-    .path-card:focus-visible, .guide-hub-card:focus-visible, .timer-card-horizontal:focus-visible,
+    .path-card:focus-visible, .mood-chip:focus-visible, .rail-link:focus-visible, .timer-card-horizontal:focus-visible,
     .article-hero:focus-visible, .article-mini-card:focus-visible, .progress-track:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
 
     /* Responsive */
-    @media (max-width:600px) { h1{font-size:1.5rem} .card-grid{grid-template-columns:repeat(2,1fr)} .path-card{min-height:160px} }
-    @media (max-width:380px) { .card-grid{grid-template-columns:1fr} }
+    @media (max-width:600px) { h1{font-size:1.5rem} }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration:.01ms !important; animation-duration:.01ms !important; } }
 
     /* Skip button */
@@ -644,9 +663,6 @@
     /* Guide rec main : ombre + bordure verte */
     [data-theme="light"] .guide-rec-main { border-color: rgba(47,107,80,.45); box-shadow: 0 0 0 1px rgba(47,107,80,.14), 0 12px 34px -22px rgba(30,50,40,.4); }
 
-    /* Hub cards */
-    [data-theme="light"] .guide-hub-card--chat .guide-hub-card-label { color: rgba(255,255,255,.6); }
-
     /* Speed btn actif */
     [data-theme="light"] .speed-btn.active { color: #fff; }
 
@@ -672,7 +688,7 @@
         <span class="voice-option-check"></span>
       </button>
     </div>
-    <p class="voice-sheet-hint" id="voice-sheet-hint" style="font-size:.75rem;color:var(--color-muted);text-align:center;margin-bottom:1rem;">Ton choix sera retenu — modifiable à tout moment dans les Réglages.</p>
+    <p class="voice-sheet-hint" id="voice-sheet-hint" style="font-size:.75rem;color:var(--color-muted);text-align:center;margin-bottom:1rem;">Ton choix sera retenu, modifiable à tout moment dans les Réglages.</p>
     <button class="voice-sheet-launch" id="voice-sheet-launch" onclick="confirmVoiceAndLaunch()">▶ Lancer la séance</button>
     <button class="voice-sheet-cancel" onclick="closeVoiceOverlay()">Annuler</button>
   </div>
@@ -842,7 +858,7 @@
   <!-- Welcome-block : visible par défaut pour nouveaux visiteurs, masqué par anti-flash JS si sessions > 0 -->
   <div id="welcome-block" class="welcome-block">
     <div class="welcome-inner">
-      <span class="welcome-icon">🌱</span>
+      <span class="welcome-icon" aria-hidden="true"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M11 20A7 7 0 019.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg></span>
       <div>
         <p class="welcome-title">Bienvenue sur Serein.</p>
         <p class="welcome-sub">Des séances guidées en français, sans compte, sans publicité.</p>
@@ -863,19 +879,27 @@
     <button class="btn btn-primary welcome-cta" onclick="showScreen('explore')">Choisir une séance</button>
   </div>
 
-  <!-- Stats : masquées par défaut, affichées par JS si sessions > 0 -->
-  <div id="stats-block" class="stats-widget" style="display:none;">
-    <div class="stat-chip"><span class="stat-value" id="stat-streak">0</span><span class="stat-label">🔥 Jours<br>d'affilée</span></div>
-    <div class="stat-chip"><span class="stat-value" id="stat-sessions">0</span><span class="stat-label">▶ Séances<br>terminées</span></div>
-    <div class="stat-chip"><span class="stat-value" id="stat-time">0 min</span><span class="stat-label">⏱ Temps<br>total</span></div>
-  </div>
+  <!-- Chips d'humeur : la première question du guide, directement sur l'accueil -->
+  <section class="timer-block" aria-label="Comment tu te sens">
+    <p class="timer-block-label">Comment tu te sens, là ?</p>
+    <div class="mood-chips">
+      <button class="mood-chip" onclick="openGuideMood('stress')">😮‍💨 Stressé(e)</button>
+      <button class="mood-chip" onclick="openGuideMood('anxiete')">😰 Anxieux/se</button>
+      <button class="mood-chip" onclick="openGuideMood('colere')">😤 Irritable</button>
+      <button class="mood-chip" onclick="openGuideMood('tristesse')">😔 Tristesse</button>
+      <button class="mood-chip" onclick="openGuideMood('fatigue')">😴 Fatigué(e)</button>
+      <button class="mood-chip" onclick="openGuideMood('sommeil')">🌙 Sommeil</button>
+      <button class="mood-chip" id="mood-chip-concentration" onclick="openGuideMood('concentration')">🎯 Concentration</button>
+      <button class="mood-chip" onclick="openGuideMood('unknown')">🤷 Je ne sais pas</button>
+    </div>
+  </section>
 
   <!-- Reprendre : rempli par renderResumeCard() si une séance est en cours -->
   <section id="resume-block" class="timer-block" style="display:none;margin-top:1.25rem;" aria-label="Reprendre la séance en cours">
     <p class="timer-block-label">Reprendre</p>
     <article class="timer-card-horizontal" id="resume-card" role="button" tabindex="0">
       <div class="timer-info-h">
-        <div class="timer-icon-wrap" aria-hidden="true">⏯</div>
+        <div class="timer-icon-wrap" aria-hidden="true"><svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polygon points="10 8.5 16 12 10 15.5 10 8.5"/></svg></div>
         <div><h3 id="resume-title"></h3><p id="resume-meta"></p></div>
       </div>
       <span class="timer-cta">▶ Reprendre</span>
@@ -887,45 +911,43 @@
     <p class="timer-block-label" id="suggestion-label">Suggestion du moment</p>
     <article class="timer-card-horizontal" id="suggestion-card" role="button" tabindex="0">
       <div class="timer-info-h">
-        <div class="timer-icon-wrap" aria-hidden="true" id="suggestion-emoji">🌿</div>
+        <div class="timer-icon-wrap" aria-hidden="true" id="suggestion-emoji"></div>
         <div><h3 id="suggestion-title"></h3><p id="suggestion-meta"></p></div>
       </div>
       <span class="timer-cta">▶ Lancer</span>
     </article>
   </section>
 
-  <section>
-    <h2>Parcours</h2>
-    <div class="card-grid">
+  <!-- Parcours sous la main : rail horizontal compact, « Tout voir » ouvre Explorer -->
+  <section class="timer-block" aria-label="Parcours">
+    <div class="rail-head">
+      <p class="timer-block-label">Parcours</p>
+      <button class="rail-link" onclick="filterParcours(null)">Tout voir ›</button>
+    </div>
+    <div class="parcours-rail">
       <article class="card path-card" role="button" tabindex="0" aria-label="Parcours Premiers pas, voir les séances" onclick="filterParcours('Premiers pas')">
         <img class="card-illustration" src="assets/illustrations/Illustrations site-01.webp" alt="" aria-hidden="true">
-        <div class="card-content"><h3>Premiers pas</h3><p>Pour entrer doucement dans la pratique.</p><p class="meta">7 séances</p>
-        <div class="path-card-nav"><span class="path-card-nav-label">Voir les séances</span><svg class="path-card-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+        <div class="card-content"><h3>Premiers pas</h3><p class="meta">7 séances</p></div>
       </article>
-      <article class="card path-card" role="button" tabindex="0" aria-label="Parcours Émotions, voir les séances" style="background: linear-gradient(135deg, #8e5468, #2c1424);" onclick="filterParcours('Émotions')">
+      <article class="card path-card" role="button" tabindex="0" aria-label="Parcours Émotions, voir les séances" onclick="filterParcours('Émotions')">
         <img class="card-illustration" src="assets/illustrations/Illustrations site-02.webp" alt="" aria-hidden="true">
-        <div class="card-content"><h3>Émotions</h3><p>Comprendre, accueillir et traverser ses émotions.</p><p class="meta">9 séances</p>
-        <div class="path-card-nav"><span class="path-card-nav-label">Voir les séances</span><svg class="path-card-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+        <div class="card-content"><h3>Émotions</h3><p class="meta">9 séances</p></div>
       </article>
       <article class="card path-card" role="button" tabindex="0" aria-label="Parcours Sommeil, voir les séances" onclick="filterParcours('Sommeil')">
         <img class="card-illustration" src="assets/illustrations/Illustrations site-03.webp" alt="" aria-hidden="true">
-        <div class="card-content"><h3>Sommeil</h3><p>Pour préparer le coucher et bien dormir.</p><p class="meta">6 séances</p>
-        <div class="path-card-nav"><span class="path-card-nav-label">Voir les séances</span><svg class="path-card-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+        <div class="card-content"><h3>Sommeil</h3><p class="meta">6 séances</p></div>
       </article>
       <article class="card path-card" role="button" tabindex="0" aria-label="Parcours Respirer, voir les séances" onclick="filterParcours('Respirer')">
         <img class="card-illustration" src="assets/illustrations/Illustrations site-04.webp" alt="" aria-hidden="true">
-        <div class="card-content"><h3>Respirer</h3><p>Pour explorer les techniques de respiration.</p><p class="meta">5 séances</p>
-        <div class="path-card-nav"><span class="path-card-nav-label">Voir les séances</span><svg class="path-card-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+        <div class="card-content"><h3>Respirer</h3><p class="meta">5 séances</p></div>
       </article>
       <article class="card path-card" role="button" tabindex="0" aria-label="Parcours Anxiété, voir les séances" onclick="filterParcours('Anxiété')">
         <img class="card-illustration" src="assets/illustrations/Illustrations site-05.webp" alt="" aria-hidden="true">
-        <div class="card-content"><h3>Anxiété</h3><p>Pour apaiser l'agitation mentale.</p><p class="meta">6 séances</p>
-        <div class="path-card-nav"><span class="path-card-nav-label">Voir les séances</span><svg class="path-card-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+        <div class="card-content"><h3>Anxiété</h3><p class="meta">6 séances</p></div>
       </article>
       <article class="card path-card" role="button" tabindex="0" aria-label="Parcours Concentration, voir les séances" onclick="filterParcours('Concentration')">
         <img class="card-illustration" src="assets/illustrations/Illustrations site-06.webp" alt="" aria-hidden="true">
-        <div class="card-content"><h3>Concentration</h3><p>Pour clarifier l'esprit et entrer dans la zone.</p><p class="meta">7 séances</p>
-        <div class="path-card-nav"><span class="path-card-nav-label">Voir les séances</span><svg class="path-card-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+        <div class="card-content"><h3>Concentration</h3><p class="meta">7 séances</p></div>
       </article>
     </div>
   </section>
@@ -934,7 +956,7 @@
     <p class="timer-block-label">Pratique libre</p>
     <article class="timer-card-horizontal" onclick="openTimerSheet()" role="button" tabindex="0" aria-label="Démarrer un minuteur libre pour méditer sans guide">
       <div class="timer-info-h">
-        <div class="timer-icon-wrap" aria-hidden="true">🔔</div>
+        <div class="timer-icon-wrap" aria-hidden="true"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></div>
         <div><h3>Minuteur libre</h3><p>Méditer sans guide · 5, 10, 15 ou 20 min</p></div>
       </div>
       <span class="timer-cta">▶ Démarrer</span>
@@ -947,20 +969,34 @@
   <header>
     <p class="eyebrow">Explorer</p>
     <h1>Choisis une séance selon ton besoin du moment.</h1>
-    <p class="lead">Filtre par thème ou par durée - combine les deux pour trouver ta séance plus vite.</p>
+    <p class="lead">Choisis un parcours, affine par durée. Retape sur un parcours pour tout réafficher.</p>
   </header>
 
-  <div class="filter-group">
-    <p class="filter-group-label">Thème</p>
-    <nav class="filter-tabs" role="tablist" aria-label="Filtres de thème">
-      <button class="tab active" role="tab" aria-selected="true" onclick="filterTab(this)">Toutes</button>
-      <button class="tab" role="tab" aria-selected="false" onclick="filterTab(this)">Premiers pas</button>
-      <button class="tab" role="tab" aria-selected="false" onclick="filterTab(this)">Émotions</button>
-      <button class="tab" role="tab" aria-selected="false" onclick="filterTab(this)">Sommeil</button>
-      <button class="tab" role="tab" aria-selected="false" onclick="filterTab(this)">Respirer</button>
-      <button class="tab" role="tab" aria-selected="false" onclick="filterTab(this)">Anxiété</button>
-      <button class="tab" role="tab" aria-selected="false" onclick="filterTab(this)">Concentration</button>
-    </nav>
+  <div class="explore-parcours" role="group" aria-label="Filtrer par parcours">
+    <article class="card path-card" role="button" tabindex="0" aria-label="Filtrer sur le parcours Premiers pas" onclick="exploreParcoursClick('Premiers pas')">
+      <img class="card-illustration" src="assets/illustrations/Illustrations site-01.webp" alt="" aria-hidden="true">
+      <div class="card-content"><h3>Premiers pas</h3><p class="meta">7 séances</p></div>
+    </article>
+    <article class="card path-card" role="button" tabindex="0" aria-label="Filtrer sur le parcours Émotions" onclick="exploreParcoursClick('Émotions')">
+      <img class="card-illustration" src="assets/illustrations/Illustrations site-02.webp" alt="" aria-hidden="true">
+      <div class="card-content"><h3>Émotions</h3><p class="meta">9 séances</p></div>
+    </article>
+    <article class="card path-card" role="button" tabindex="0" aria-label="Filtrer sur le parcours Sommeil" onclick="exploreParcoursClick('Sommeil')">
+      <img class="card-illustration" src="assets/illustrations/Illustrations site-03.webp" alt="" aria-hidden="true">
+      <div class="card-content"><h3>Sommeil</h3><p class="meta">6 séances</p></div>
+    </article>
+    <article class="card path-card" role="button" tabindex="0" aria-label="Filtrer sur le parcours Respirer" onclick="exploreParcoursClick('Respirer')">
+      <img class="card-illustration" src="assets/illustrations/Illustrations site-04.webp" alt="" aria-hidden="true">
+      <div class="card-content"><h3>Respirer</h3><p class="meta">5 séances</p></div>
+    </article>
+    <article class="card path-card" role="button" tabindex="0" aria-label="Filtrer sur le parcours Anxiété" onclick="exploreParcoursClick('Anxiété')">
+      <img class="card-illustration" src="assets/illustrations/Illustrations site-05.webp" alt="" aria-hidden="true">
+      <div class="card-content"><h3>Anxiété</h3><p class="meta">6 séances</p></div>
+    </article>
+    <article class="card path-card" role="button" tabindex="0" aria-label="Filtrer sur le parcours Concentration" onclick="exploreParcoursClick('Concentration')">
+      <img class="card-illustration" src="assets/illustrations/Illustrations site-06.webp" alt="" aria-hidden="true">
+      <div class="card-content"><h3>Concentration</h3><p class="meta">7 séances</p></div>
+    </article>
   </div>
 
   <div class="filter-group">
@@ -978,58 +1014,35 @@
   <div class="session-list" id="session-list">
     <!-- Cartes de séances générées au chargement depuis assets/sessions.json (renderSessionList dans app.js) -->
   </div>
-  <p style="text-align:center;color:var(--color-muted);font-size:.85rem;margin-top:2rem;">De nouvelles séances arriveront au fil du projet.</p>
-</section>
 
-<!-- GUIDE -->
-<section id="guide" class="screen">
-
-  <!-- ── HUB ── -->
-  <div id="guide-hub">
-    <header>
-      <p class="eyebrow">Guide</p>
-      <h1>Par où commencer ?</h1>
-      <p class="lead">Explore à ton rythme ou laisse-toi guider vers la bonne séance.</p>
-    </header>
-    <div class="guide-hub-cards">
-
-      <div class="guide-hub-card guide-hub-card--learn" onclick="showGuideView('comprendre')" role="button" tabindex="0">
-        <span class="guide-hub-card-deco" aria-hidden="true">📖</span>
-        <p class="guide-hub-card-label">Comprendre</p>
-        <h3>La pleine conscience,<br>à ton rythme.</h3>
-        <p>Articles et FAQ pour débuter sans jargon, sans pression.</p>
-        <div class="guide-hub-card-arrow">
-          <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-        </div>
-      </div>
-
-      <div class="guide-hub-card guide-hub-card--chat" onclick="showGuideView('chat')" role="button" tabindex="0">
-        <span class="guide-hub-card-deco" aria-hidden="true">💬</span>
-        <p class="guide-hub-card-label">Guide conversationnel</p>
-        <h3>Trouver ma séance.</h3>
-        <p>Réponds à quelques questions, je te propose la séance qui colle à ce que tu ressens.</p>
-        <div class="guide-hub-card-arrow">
-          <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-        </div>
-      </div>
-
-    </div>
+  <div class="filter-empty" id="filter-empty" style="display:none;">
+    <p>Aucune séance ne combine ce parcours et cette durée.<br>Élargis un peu, il y a forcément quelque chose pour toi.</p>
+    <button class="btn btn-ghost" onclick="resetFilters()">Réinitialiser les filtres</button>
   </div>
 
-  <!-- ── COMPRENDRE ── -->
-  <div id="guide-comprendre" style="display:none">
-    <div class="guide-subview-header">
-      <button class="guide-back-btn" onclick="showGuideView('hub')">
-        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-        Retour
-      </button>
-    </div>
+  <p class="catalog-footer" id="catalog-footer">De nouvelles séances arriveront au fil du projet.</p>
+</section>
 
+<!-- APPRENDRE (ex-Guide) : les articles + FAQ sont la racine, le chat s'ouvre depuis l'accueil ou la carte ci-dessous -->
+<section id="guide" class="screen">
+
+  <!-- ── COMPRENDRE (vue racine) ── -->
+  <div id="guide-comprendre">
     <header style="margin-bottom:0">
-      <p class="eyebrow">Comprendre</p>
-      <h1>À ton rythme.</h1>
+      <p class="eyebrow">Apprendre</p>
+      <h1>La pleine conscience, à ton rythme.</h1>
       <p class="lead" style="margin-bottom:0">De courtes lectures pour t'accompagner dans la pratique.</p>
     </header>
+
+    <section class="timer-block" aria-label="Guide conversationnel">
+      <article class="timer-card-horizontal" onclick="showGuideView('chat')" role="button" tabindex="0" aria-label="Ouvrir le guide conversationnel pour trouver une séance">
+        <div class="timer-info-h">
+          <div class="timer-icon-wrap" aria-hidden="true"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></div>
+          <div><h3>Trouver ma séance</h3><p>Quelques questions, une séance qui colle à ce que tu ressens</p></div>
+        </div>
+        <span class="timer-cta">Ouvrir</span>
+      </article>
+    </section>
 
     <div class="article-hero" role="article" tabindex="0" onclick="openArticle('pleine-conscience')" style="cursor:pointer;">
       <img class="article-hero-bg" src="assets/illustrations/Illustrations site-01.webp" alt="" aria-hidden="true">
@@ -1080,11 +1093,15 @@
       </div>
       <div class="faq-item">
         <button class="faq-question" onclick="toggleFaq(this.parentElement)" aria-expanded="false">Puis-je méditer le soir au lit ?<svg class="faq-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button>
-        <div class="faq-answer">Oui, mais tu risques de t'endormir — ce qui n'est pas un problème si c'est ton objectif. Pour une pratique active, une position assise aide à rester éveillé.</div>
+        <div class="faq-answer">Oui, mais tu risques de t'endormir, ce qui n'est pas un problème si c'est ton objectif. Pour une pratique active, une position assise aide à rester éveillé.</div>
       </div>
       <div class="faq-item">
         <button class="faq-question" onclick="toggleFaq(this.parentElement)" aria-expanded="false">Mes données sont-elles vraiment privées ?<svg class="faq-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button>
         <div class="faq-answer">Oui. Serein ne collecte aucune donnée. Tes statistiques restent uniquement sur ton appareil et ne sont jamais transmises à un serveur.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this.parentElement)" aria-expanded="false">Le guide est-il une intelligence artificielle ?<svg class="faq-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button>
+        <div class="faq-answer">Non. Le guide fonctionne avec des règles simples écrites par un psychologue : tes réponses sélectionnent une séance du catalogue, et tes retours de fin de séance affinent les suggestions. Tout reste sur ton appareil : rien n'est envoyé à un serveur, personne ne lit tes réponses.</div>
       </div>
     </div>
   </div>
@@ -1105,7 +1122,7 @@
   <!-- ── CHATBOT ── -->
   <div id="guide-chat" style="display:none">
     <div class="guide-subview-header">
-      <button class="guide-back-btn" onclick="showGuideView('hub')">
+      <button class="guide-back-btn" onclick="showGuideView('comprendre')">
         <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
         Retour
       </button>
@@ -1163,8 +1180,9 @@
     <article class="card setting-item">
       <div class="info"><h3>Thème</h3></div>
       <div class="theme-seg" role="group" aria-label="Choisir le thème">
-        <button class="seg-btn" id="seg-light" onclick="setThemeMode('light')">☀️ Clair</button>
-        <button class="seg-btn active" id="seg-dark" onclick="setThemeMode('dark')">🌙 Sombre</button>
+        <button class="seg-btn" id="seg-light" onclick="setThemeMode('light')"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg> Clair</button>
+        <button class="seg-btn" id="seg-auto" onclick="setThemeMode('auto')">Auto</button>
+        <button class="seg-btn" id="seg-dark" onclick="setThemeMode('dark')"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg> Sombre</button>
       </div>
     </article>
   </div>
@@ -1185,12 +1203,20 @@
     </article>
   </div>
 
+  <!-- STATISTIQUES (déplacées de l'accueil : consultables, pas imposées) -->
+  <p class="settings-group-header">Ta pratique</p>
+  <div id="stats-block" class="stats-widget" style="margin-top:.75rem;">
+    <div class="stat-chip"><span class="stat-value" id="stat-streak">0</span><span class="stat-label"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c2 4.5 6 6.6 6 11a6 6 0 11-12 0c0-1.9.7-3.5 1.9-4.9.5 1.4 1.4 2.4 2.6 2.9C10.2 8.2 10.6 5 12 2z"/></svg>Jours<br>d'affilée</span></div>
+    <div class="stat-chip"><span class="stat-value" id="stat-sessions">0</span><span class="stat-label"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"/></svg>Séances<br>terminées</span></div>
+    <div class="stat-chip"><span class="stat-value" id="stat-time">0 min</span><span class="stat-label"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>Temps<br>total</span></div>
+  </div>
+
   <!-- CONFIDENTIALITÉ -->
   <p class="settings-group-header">Confidentialité</p>
   <div class="settings-group">
     <article class="card setting-item">
       <div class="info"><h3>Statistiques 100 % locales</h3><p>Aucune donnée ne quitte l'appareil</p></div>
-      <span class="setting-tag">🔒 Local</span>
+      <span class="setting-tag"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>Local</span>
     </article>
     <article class="card setting-item">
       <div class="info"><h3>Exporter mes données</h3><p>Statistiques, historique et préférences dans un fichier JSON</p></div>
@@ -1215,13 +1241,7 @@
   <p class="settings-group-header">À propos</p>
   <div class="settings-group">
     <article class="card setting-item">
-      <div class="info"><h3>Soutenir le projet<span class="setting-badge-soon">Bientôt</span></h3><p>Serein est gratuit et sans pub</p>
-        <ul class="about-features" style="margin-top:1rem;">
-          <li><span class="about-icon">🔒</span><div><strong>Vie privée par défaut</strong><p>Aucun tracker, aucune donnée collectée. Tes statistiques restent sur ton appareil.</p></div></li>
-          <li><span class="about-icon">🆓</span><div><strong>Toujours gratuit</strong><p>Pas de paywall, pas d'abonnement. Toutes les séances sont accessibles à tous.</p></div></li>
-          <li><span class="about-icon">🌐</span><div><strong>Open source</strong><p>Code publié sous licence AGPL-3.0. Auditable, modifiable, transparent.</p></div></li>
-        </ul>
-      </div>
+      <div class="info"><h3>Soutenir le projet<span class="setting-badge-soon">Bientôt</span></h3><p>Serein est gratuit, sans pub et open source (AGPL-3.0)</p></div>
     </article>
     <article class="card setting-item">
       <div class="info"><h3>Code source</h3></div>
@@ -1254,7 +1274,7 @@
     <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Explorer
   </button>
   <button class="nav-btn" id="nav-guide" onclick="showScreen('guide')">
-    <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Guide
+    <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20M4 19.5A2.5 2.5 0 006.5 22H20V2H6.5A2.5 2.5 0 004 4.5v15z"/></svg>Apprendre
   </button>
   <button class="nav-btn" id="nav-settings" onclick="showScreen('settings')">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Réglages

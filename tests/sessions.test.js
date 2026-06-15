@@ -61,6 +61,20 @@ test('les fichiers audio référencés existent localement', { skip: !fs.existsS
   }
 });
 
+// Le guide (GUIDE_MAP) ne stocke que des ids résolus depuis le catalogue :
+// chaque id référencé doit exister dans sessions.json.
+test('les ids référencés par GUIDE_MAP existent dans le catalogue', () => {
+  const appJs = fs.readFileSync(path.join(PWA_DIR, 'app.js'), 'utf8');
+  const mapMatch = appJs.match(/const GUIDE_MAP = \{[\s\S]*?\n\};/);
+  assert.ok(mapMatch, 'GUIDE_MAP introuvable dans app.js');
+  const catalogIds = new Set(allSessions().map(({ session }) => session.id));
+  const refIds = [...mapMatch[0].matchAll(/id:\s*'(s\w+)'/g)].map(m => m[1]);
+  assert.ok(refIds.length >= 40, `trop peu d'ids trouvés dans GUIDE_MAP (${refIds.length})`);
+  for (const id of refIds) {
+    assert.ok(catalogIds.has(id), `GUIDE_MAP référence un id absent du catalogue : ${id}`);
+  }
+});
+
 // Le guide (GUIDE_MAP) et les lancements directs dans app.js référencent
 // leurs propres fichiers : on vérifie qu'aucun ne pointe dans le vide.
 test('les fichiers audio référencés dans app.js existent localement', { skip: !fs.existsSync(mascDir) }, () => {

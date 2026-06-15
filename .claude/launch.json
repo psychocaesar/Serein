@@ -8,6 +8,12 @@
       "port": 3456
     },
     {
+      "name": "landing",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "E:/Serein/Landing", "-p", "5500", "--no-clipboard"],
+      "port": 5500
+    },
+    {
       "name": "psygest-pwa",
       "runtimeExecutable": "npx",
       "runtimeArgs": ["serve", "psygest-pwa/src/public", "-p", "4321", "--no-clipboard"],
