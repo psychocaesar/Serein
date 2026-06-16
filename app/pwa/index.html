@@ -1240,8 +1240,9 @@
   <!-- À PROPOS -->
   <p class="settings-group-header">À propos</p>
   <div class="settings-group">
-    <article class="card setting-item">
-      <div class="info"><h3>Soutenir le projet<span class="setting-badge-soon">Bientôt</span></h3><p>Serein est gratuit, sans pub et open source (AGPL-3.0)</p></div>
+    <article class="card setting-item" style="cursor:pointer;" onclick="openDon()">
+      <div class="info"><h3>Soutenir le projet</h3><p>Serein est gratuit, sans pub et open source (AGPL-3.0)</p></div>
+      <button class="setting-link" onclick="event.stopPropagation();openDon()">Soutenir ›</button>
     </article>
     <article class="card setting-item">
       <div class="info"><h3>Code source</h3></div>
