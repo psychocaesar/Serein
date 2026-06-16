@@ -2719,6 +2719,13 @@ Envoyé depuis sereinapp.fr`;
 }
 
 
+// ── DON ──
+function openDon() {
+  const url = 'https://www.helloasso.com/associations/sereinapp/formulaires/1';
+  const isNative = typeof Capacitor !== 'undefined' && Capacitor.isNativePlatform && Capacitor.isNativePlatform();
+  window.open(url, isNative ? '_system' : '_blank', 'noopener,noreferrer');
+}
+
 // ── EXPORT / IMPORT DES DONNÉES (local-first, aucun serveur) ──
 const DATA_KEYS = [
   'serein-stats', 'serein-history', 'serein-feedback', 'serein-guide-session',
