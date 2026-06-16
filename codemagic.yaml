@@ -4,19 +4,14 @@ workflows:
     max_build_duration: 60
     instance_type: mac_mini_m2
 
-    # Connexion App Store Connect — à créer dans :
-    # Codemagic → Teams → Integrations → App Store Connect → Add
     integrations:
       app_store_connect: Serein ASC
 
     environment:
-      # Signature automatique via l'intégration ASC ci-dessus
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: fr.sereinapp.app
       vars:
         XCODE_PROJECT: "app/ios/App/App.xcodeproj"
         XCODE_SCHEME: "App"
+        BUNDLE_ID: "fr.sereinapp.app"
       node: latest
 
     scripts:
@@ -29,7 +24,19 @@ workflows:
       - name: Remove audio from iOS bundle (servi via CDN)
         script: find app/ios/App/App/public/assets/audio -name "*.mp3" -delete || true
 
-      - name: Set up code signing
+      - name: Set up keychain
+        script: keychain initialize
+
+      - name: Fetch certificate and create provisioning profile
+        script: |
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --create
+
+      - name: Add certificate to keychain
+        script: keychain add-certificates
+
+      - name: Apply code signing to Xcode project
         script: xcode-project use-profiles
 
       - name: Build iOS IPA
