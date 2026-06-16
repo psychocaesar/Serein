@@ -2566,7 +2566,7 @@ function startTimer(minutes) {
   document.getElementById('player-voice-tag').style.display = 'none';
   document.getElementById('audio-loading').textContent = '';
 
-  setupMediaSession('Minuteur libre', minutes + ' min · Méditation silencieuse', 'assets/logo.png');
+  setupMediaSession('Minuteur libre', minutes + ' min · Méditation silencieuse', window.location.origin + '/assets/icon-512.png');
 
   updateTimerDisplay();
 
@@ -2722,6 +2722,12 @@ Envoyé depuis sereinapp.fr`;
 // ── DON ──
 function openDon() {
   const url = 'https://www.helloasso.com/associations/sereinapp/formulaires/1';
+  const isNative = typeof Capacitor !== 'undefined' && Capacitor.isNativePlatform && Capacitor.isNativePlatform();
+  window.open(url, isNative ? '_system' : '_blank', 'noopener,noreferrer');
+}
+
+function openPrivacyPolicy() {
+  const url = 'https://sereinapp.fr/privacy.html';
   const isNative = typeof Capacitor !== 'undefined' && Capacitor.isNativePlatform && Capacitor.isNativePlatform();
   window.open(url, isNative ? '_system' : '_blank', 'noopener,noreferrer');
 }
@@ -2886,5 +2892,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   optionsSheet.addEventListener('touchend', e => {
     const delta = e.changedTouches[0].clientY - swipeStartY;
     if (delta > 60) toggleOptionsSheet();
+  }, { passive: true });
+
+  // Swipe right to go back from article reader
+  const articleView = document.getElementById('guide-article');
+  let artSwipeX = 0, artSwipeY = 0;
+  articleView.addEventListener('touchstart', e => {
+    artSwipeX = e.touches[0].clientX;
+    artSwipeY = e.touches[0].clientY;
+  }, { passive: true });
+  articleView.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - artSwipeX;
+    const dy = Math.abs(e.changedTouches[0].clientY - artSwipeY);
+    if (dx > 60 && dy < 50) showGuideView('comprendre');
   }, { passive: true });
 });

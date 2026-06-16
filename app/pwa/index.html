@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, maximum-scale=1.0">
   <meta name="theme-color" content="#0d1b15">
   <title>Serein - Méditation guidée en français</title>
   <meta name="description" content="Serein : méditations guidées en français, gratuites et sans publicité. Séances pour le stress, l'anxiété, le sommeil et la respiration. Sans compte requis, sans tracking.">
@@ -107,18 +107,19 @@
       --radius: 1.5rem;
     }
 
-    body { font-family: 'Hanken Grotesk', system-ui, -apple-system, sans-serif; background: var(--color-bg); color: var(--color-text); min-height: 100vh; padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
+    * { touch-action: manipulation; }
+    body { font-family: 'Hanken Grotesk', system-ui, -apple-system, sans-serif; background: var(--color-bg); color: var(--color-text); min-height: 100vh; padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)); -webkit-tap-highlight-color: transparent; }
 
     /* NAV */
     .nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(13,27,21,0.88); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-top: 1px solid var(--color-border); display: flex; justify-content: space-around; align-items: center; padding: .75rem 0 calc(.75rem + env(safe-area-inset-bottom, 0px)); z-index: 100; }
     [data-theme="light"] .nav { background: rgba(240,245,243,0.95); }
-    .nav-btn { background: none; border: none; display: flex; flex-direction: column; align-items: center; gap: .25rem; font-size: .75rem; color: var(--color-muted); cursor: pointer; padding: .25rem .5rem; border-radius: var(--radius-sm); transition: color .2s; }
+    .nav-btn { background: none; border: none; display: flex; flex-direction: column; align-items: center; gap: .25rem; font-size: .75rem; color: var(--color-muted); cursor: pointer; padding: .25rem .75rem; border-radius: var(--radius-sm); transition: color .2s, background .2s; }
     .nav-btn:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
-    .nav-btn.active { color: var(--color-primary); font-weight: 600; }
+    .nav-btn.active { color: var(--color-primary); font-weight: 600; background: var(--color-primary-light); }
     .nav-btn svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
     /* SCREENS */
-    .screen { display: none; padding: 2rem 1.25rem 1.5rem; max-width: 760px; margin: 0 auto; }
+    .screen { display: none; padding: max(2rem, calc(env(safe-area-inset-top, 0px) + 1.25rem)) 1.25rem 1.5rem; max-width: 760px; margin: 0 auto; }
     .screen.active { display: block; }
     .eyebrow { text-transform: uppercase; letter-spacing: .1em; font-size: .75rem; color: var(--color-primary); font-weight: 600; margin-bottom: .5rem; }
     h1 { font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-size: 2rem; line-height: 1.2; margin-bottom: .75rem; font-weight: 700; }
@@ -244,7 +245,7 @@
 
     /* Progress */
     .player-progress { padding: 0 1.5rem .5rem; }
-    .progress-track { width: 100%; height: 4px; background: rgba(255,255,255,.25); border-radius: 999px; position: relative; cursor: pointer; padding: 10px 0; margin: -10px 0; box-sizing: content-box; }
+    .progress-track { width: 100%; height: 4px; background: rgba(255,255,255,.25); border-radius: 999px; position: relative; cursor: pointer; padding: 10px 0; margin: -10px 0; box-sizing: content-box; touch-action: none; }
     .progress-track-inner { width: 100%; height: 4px; background: rgba(255,255,255,.25); border-radius: 999px; overflow: hidden; }
     .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #93c9ac, #d8b78a); border-radius: 999px; transition: width .25s linear; }
     .progress-thumb { position: absolute; top: 50%; width: 14px; height: 14px; border-radius: 50%; background: #fff; transform: translate(-50%, -50%); left: 0%; opacity: 0; transition: opacity .2s; pointer-events: none; margin-top: -2px; box-shadow: 0 0 8px rgba(0,0,0,.4); }
@@ -851,7 +852,6 @@
 <!-- ACCUEIL -->
 <section id="home" class="screen active">
   <header>
-    <p class="eyebrow">Serein</p>
     <h1>Respirer, s'apaiser, se recentrer.</h1>
   </header>
 
@@ -967,7 +967,6 @@
 <!-- EXPLORER -->
 <section id="explore" class="screen">
   <header>
-    <p class="eyebrow">Explorer</p>
     <h1>Choisis une séance selon ton besoin du moment.</h1>
     <p class="lead">Choisis un parcours, affine par durée. Retape sur un parcours pour tout réafficher.</p>
   </header>
@@ -1029,7 +1028,6 @@
   <!-- ── COMPRENDRE (vue racine) ── -->
   <div id="guide-comprendre">
     <header style="margin-bottom:0">
-      <p class="eyebrow">Apprendre</p>
       <h1>La pleine conscience, à ton rythme.</h1>
       <p class="lead" style="margin-bottom:0">De courtes lectures pour t'accompagner dans la pratique.</p>
     </header>
@@ -1138,7 +1136,6 @@
 <!-- RÉGLAGES -->
 <section id="settings" class="screen">
   <header>
-    <p class="eyebrow">Réglages</p>
     <h1>À ton image.</h1>
     <p class="lead">Tout reste sur ton appareil. Ajuste l'app pour qu'elle te ressemble.</p>
   </header>
@@ -1191,7 +1188,7 @@
   <p class="settings-group-header">Hors ligne</p>
   <div class="settings-group">
     <article class="card setting-item">
-      <div class="info"><h3>Séances téléchargées</h3><p>Appuie sur ⬇ sur une séance pour l'écouter sans connexion</p></div>
+      <div class="info"><h3>Séances en cache</h3><p>Les séances écoutées et téléchargées sont disponibles hors ligne</p></div>
       <span class="setting-tag" id="offline-count-tag">0 séance</span>
     </article>
     <article class="card setting-item">
@@ -1229,7 +1226,7 @@
     </article>
     <article class="card setting-item">
       <div class="info"><h3>Politique de confidentialité</h3></div>
-      <a href="privacy.html" target="_blank" rel="noopener" class="setting-link">Lire ›</a>
+      <button class="setting-link" onclick="openPrivacyPolicy()">Lire ›</button>
     </article>
     <article class="card setting-item">
       <div class="info"><h3>Réinitialiser ma progression</h3></div>
