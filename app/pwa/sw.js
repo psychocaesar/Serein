@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'serein-v8';
+const CACHE_VERSION = 'serein-v9';
 const STATIC_CACHE  = CACHE_VERSION + '-static';
 const AUDIO_CACHE   = 'serein-audio'; // non versionné — survit aux mises à jour
 const AUDIO_CDN_HOST = 'audio.sereinapp.fr'; // CDN audio utilisé par l'app native
@@ -11,6 +11,7 @@ const STATIC_ASSETS = [
   '/privacy.html',
   '/assets/sessions.json',
   '/assets/logo.png',
+  '/assets/logo-serein.png',
   '/assets/fonts/bricolage-grotesque-latin.woff2',
   '/assets/fonts/bricolage-grotesque-latin-ext.woff2',
   '/assets/fonts/hanken-grotesk-latin.woff2',

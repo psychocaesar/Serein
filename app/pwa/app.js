@@ -453,11 +453,13 @@ let currentOfflineFilename = null;
 function setupMediaSession(title, subtitle, artwork) {
   if (!('mediaSession' in navigator)) return;
   try {
+    const ext = (artwork || '').split('.').pop().toLowerCase();
+    const mime = { png: 'image/png', webp: 'image/webp', jpg: 'image/jpeg', jpeg: 'image/jpeg' }[ext] || 'image/jpeg';
     navigator.mediaSession.metadata = new MediaMetadata({
       title: title,
       artist: 'Serein',
       album: subtitle || 'Méditation guidée',
-      artwork: artwork ? [{ src: artwork, sizes: '512x512', type: 'image/jpeg' }] : []
+      artwork: artwork ? [{ src: artwork, sizes: '512x512', type: mime }] : []
     });
     // togglePlay route correctement entre séance guidée, ambiance seule et minuteur
     navigator.mediaSession.setActionHandler('play', () => togglePlay());
@@ -605,7 +607,7 @@ function launchPlayer(id, title, parcours, duration, filename, voice, artwork, r
   pendingResumeTime = (typeof resumeAt === 'number' && resumeAt > 0) ? resumeAt : null;
 
   // Artwork + fond flou
-  const img = artwork || 'assets/logo.png';
+  const img = artwork || 'assets/logo-serein.png';
   document.getElementById('player-artwork-img').src = img;
   document.getElementById('player-bg').style.backgroundImage = 'url(' + img + ')';
 
@@ -725,7 +727,8 @@ function setSpeed(s) {
   currentSpeedIdx = SPEEDS.indexOf(s);
   if (currentSpeedIdx === -1) currentSpeedIdx = 3;
   const label = s === 1.0 ? '1×' : s + '×';
-  document.getElementById('speed-display').textContent = label;
+  const sd = document.getElementById('speed-display');
+  if (sd) sd.textContent = label;
   document.querySelectorAll('.speed-btn').forEach(b => {
     b.classList.toggle('active', parseFloat(b.textContent.replace('×','')) === s);
   });
@@ -1007,7 +1010,7 @@ function setAmbiance(file) {
   ambianceAudio.src = AUDIO_BASE_URL + 'ambiance/' + file;
   ambianceAudio.volume = parseFloat(document.getElementById('ambiance-volume-slider').value);
   ambianceAudio.play().catch(() => {});
-  const id = 'amb-' + file.replace('.mp3','').replace('bruit-blanc','blanc');
+  const id = 'amb-' + file.replace('.mp3','').replace('bruit-blanc','blanc').toLowerCase();
   const btn = document.getElementById(id);
   if (btn) btn.classList.add('active');
   document.getElementById('ambiance-volume-wrap').style.display = 'flex';
@@ -2566,7 +2569,7 @@ function startTimer(minutes) {
   document.getElementById('player-voice-tag').style.display = 'none';
   document.getElementById('audio-loading').textContent = '';
 
-  setupMediaSession('Minuteur libre', minutes + ' min · Méditation silencieuse', window.location.origin + '/assets/icon-512.png');
+  setupMediaSession('Minuteur libre', minutes + ' min · Méditation silencieuse', window.location.origin + '/assets/logo-serein.png');
 
   updateTimerDisplay();
 
