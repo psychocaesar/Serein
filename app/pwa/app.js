@@ -99,6 +99,7 @@ function showScreen(id) {
     renderResumeCard();
     renderDailySuggestion();
     updateMoodChips();
+    renderDonInvitation();
   } else if (id === 'settings') {
     updateOfflineCount();
     renderDownloadsManager();
@@ -1222,9 +1223,63 @@ function recordCompletion() {
       recordGuidePlay(currentSession.title);
       updateSessionChecks();
       updatePathCardCounts();
+      incrementDonCounter();
     }
   } catch(e) { console.warn('[Serein stats]', e); }
 }
+
+// ── INVITATION AU DON ──
+// Déclenchée par l'usage local (aucun réseau, aucun tracker) : après SEUIL
+// séances guidées terminées, une carte discrète et dismissable apparaît UNE
+// SEULE FOIS sur l'accueil. Réutilise openDon() pour l'ouverture HelloAsso.
+const DON_INVITATION_SEUIL = 7;            // ← seuil facile à modifier
+const DON_COUNT_KEY = 'serein_seances_terminees';
+const DON_SEEN_KEY = 'serein_invitation_don_vue';
+
+function incrementDonCounter() {
+  try {
+    const n = (parseInt(localStorage.getItem(DON_COUNT_KEY), 10) || 0) + 1;
+    localStorage.setItem(DON_COUNT_KEY, String(n));
+  } catch(e) {}
+}
+
+function renderDonInvitation() {
+  const block = document.getElementById('don-invitation-block');
+  if (!block) return;
+  let n = 0, seen = false;
+  try {
+    n = parseInt(localStorage.getItem(DON_COUNT_KEY), 10) || 0;
+    seen = localStorage.getItem(DON_SEEN_KEY) === 'true';
+  } catch(e) {}
+  if (seen || n < DON_INVITATION_SEUIL) { block.style.display = 'none'; return; }
+  const text = document.getElementById('don-invitation-text');
+  // Apostrophes françaises → template literal obligatoire (quotes simples = crash).
+  if (text) text.textContent = `Serein t'a accompagné·e sur ${n} séances. C'est gratuit et sans pub parce que d'autres soutiennent le projet. Tu peux faire pareil.`;
+  block.style.display = 'block';
+}
+
+// Marque l'invitation comme vue : elle ne réapparaîtra plus jamais.
+function markDonInvitationSeen() {
+  try { localStorage.setItem(DON_SEEN_KEY, 'true'); } catch(e) {}
+  const block = document.getElementById('don-invitation-block');
+  if (block) block.style.display = 'none';
+}
+
+function dismissDonInvitation() {
+  markDonInvitationSeen();
+}
+
+function supportFromInvitation() {
+  markDonInvitationSeen();
+  openDon();
+}
+
+// Fermeture au clavier (Échap) quand l'invitation est visible.
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  const block = document.getElementById('don-invitation-block');
+  if (block && block.style.display !== 'none') dismissDonInvitation();
+});
 
 // ── THÈME ──
 // Trois modes : light / dark / auto (par défaut, suit prefers-color-scheme).
@@ -2844,7 +2899,8 @@ const DATA_KEYS = [
   'serein-stats', 'serein-history', 'serein-feedback', 'serein-guide-session',
   'serein-theme', 'serein-speed', 'serein-bells', 'serein-wifi-only',
   'serein-ambiance-default', 'serein-ambiance-volume', 'serein-reminder-enabled', 'serein-reminder-time',
-  'serein-voice', 'serein-resume', 'serein-mood-log'
+  'serein-voice', 'serein-resume', 'serein-mood-log',
+  'serein_seances_terminees', 'serein_invitation_don_vue'
 ];
 
 function exportData() {
