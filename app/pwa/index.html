@@ -476,6 +476,18 @@
     .timer-block-label { font-size: .85rem; font-weight: 600; color: var(--color-muted); margin-bottom: .5rem; }
     .timer-card-horizontal { background: var(--color-surface); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid var(--color-border); border-radius: var(--radius); padding: 1rem 1.1rem; display: flex; justify-content: space-between; align-items: center; gap: .75rem; cursor: pointer; color: var(--color-text); transition: transform .15s, box-shadow .2s; }
     .timer-card-horizontal:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.3); }
+    /* Invitation au don (carte discrète, affichée une seule fois après SEUIL séances) */
+    .don-invitation-card { position: relative; background: var(--color-surface); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid var(--color-border); border-radius: var(--radius); padding: 1.25rem 1.25rem 1.1rem; }
+    .don-invitation-text { font-size: .92rem; line-height: 1.6; color: var(--color-text); margin-bottom: 1rem; padding-right: 1.75rem; }
+    .don-invitation-cta { width: 100%; }
+    .don-invitation-close { position: absolute; top: .5rem; right: .5rem; width: 32px; height: 32px; border: none; background: none; color: var(--color-muted); font-size: 1.5rem; line-height: 1; cursor: pointer; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background .18s, color .18s; }
+    .don-invitation-close:hover { background: var(--color-surface-2); color: var(--color-text); }
+    .don-invitation-close:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+    [data-theme="light"] .don-invitation-card { backdrop-filter: none; -webkit-backdrop-filter: none; background: #fff; box-shadow: 0 6px 22px -16px rgba(30,50,40,0.22); }
+    @media (prefers-reduced-motion: no-preference) {
+      #don-invitation-block { animation: donFadeIn .4s ease; }
+      @keyframes donFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    }
     .timer-card-horizontal .timer-info-h { display: flex; gap: .85rem; align-items: center; }
     .timer-card-horizontal .timer-icon-wrap { width: 44px; height: 44px; background: var(--color-primary-light); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.35rem; flex-shrink: 0; }
     .timer-card-horizontal h3 { font-size: 1.05rem; font-weight: 700; margin: 0; }
@@ -871,6 +883,15 @@
   <header>
     <h1>Respirer, s'apaiser, se recentrer.</h1>
   </header>
+
+  <!-- Invitation au don : affichée une seule fois après SEUIL séances guidées (renderDonInvitation) -->
+  <section id="don-invitation-block" class="timer-block" style="display:none;margin-top:1.25rem;" role="region" aria-label="Soutenir Serein">
+    <article class="don-invitation-card">
+      <button class="don-invitation-close" id="don-invitation-close" type="button" aria-label="Fermer" onclick="dismissDonInvitation()">&times;</button>
+      <p class="don-invitation-text" id="don-invitation-text"></p>
+      <button class="btn btn-primary don-invitation-cta" type="button" onclick="supportFromInvitation()">Soutenir Serein</button>
+    </article>
+  </section>
 
   <!-- Welcome-block : visible par défaut pour nouveaux visiteurs, masqué par anti-flash JS si sessions > 0 -->
   <div id="welcome-block" class="welcome-block">
