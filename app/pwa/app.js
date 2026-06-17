@@ -99,7 +99,11 @@ function showScreen(id) {
     renderResumeCard();
     renderDailySuggestion();
     updateMoodChips();
-  } else if (wasHome && !overlayStack.some(o => o.name === 'screen')) {
+  } else if (id === 'settings') {
+    updateOfflineCount();
+    renderDownloadsManager();
+  }
+  if (id !== 'home' && wasHome && !overlayStack.some(o => o.name === 'screen')) {
     registerOverlay('screen', () => showScreen('home'));
   }
 }
@@ -1021,6 +1025,7 @@ function setAmbiance(file) {
 
 document.getElementById('ambiance-volume-slider').addEventListener('input', e => {
   ambianceAudio.volume = e.target.value;
+  try { localStorage.setItem('serein-ambiance-volume', e.target.value); } catch(_) {}
 });
 
 function updateAmbianceTag(label) {
@@ -1062,6 +1067,102 @@ async function updateOfflineCount() {
     const tag = document.getElementById('offline-count-tag');
     if (tag) tag.textContent = keys.length + ' séance' + (keys.length > 1 ? 's' : '');
   } catch(e) { console.warn('[Serein cache]', e); }
+}
+
+// ── GESTIONNAIRE DE TÉLÉCHARGEMENTS (Réglages) ──
+function flattenSessions() {
+  if (!CATALOG) return [];
+  const out = [];
+  for (const group of CATALOG.groups) {
+    const sessions = group.subgroups
+      ? group.subgroups.flatMap(sub => sub.sessions || [])
+      : (group.sessions || []);
+    for (const s of sessions) out.push(s);
+  }
+  return out;
+}
+
+// Décrit une clé de cache (URL audio) → titre lisible + voix
+function describeCachedUrl(url) {
+  const parts = url.split('/');
+  const file = decodeURIComponent(parts.pop() || '');
+  const folder = parts.pop() || '';
+  const voiceLabel = folder === 'feminin' ? 'Voix féminine' : (folder === 'masculin' ? 'Voix masculine' : '');
+  const match = flattenSessions().find(s => s.file === file || s.fileFem === file);
+  const title = match ? match.title : file.replace(/\.mp3$/i, '');
+  return { url, title, voiceLabel };
+}
+
+async function renderDownloadsManager() {
+  const listEl = document.getElementById('downloads-list');
+  const emptyEl = document.getElementById('downloads-empty');
+  const purgeRow = document.getElementById('downloads-purge-row');
+  if (!listEl || !('caches' in window)) return;
+  try {
+    const cache = await caches.open(AUDIO_CACHE);
+    const keys = await cache.keys();
+    listEl.textContent = '';
+    const items = keys
+      .map(req => describeCachedUrl(req.url))
+      .sort((a, b) => a.title.localeCompare(b.title, 'fr'));
+    items.forEach(item => {
+      const row = document.createElement('div');
+      row.className = 'download-row';
+      const info = document.createElement('div');
+      info.className = 'download-info';
+      const t = document.createElement('span');
+      t.className = 'download-title';
+      t.textContent = item.title;
+      info.appendChild(t);
+      if (item.voiceLabel) {
+        const v = document.createElement('span');
+        v.className = 'download-voice';
+        v.textContent = item.voiceLabel;
+        info.appendChild(v);
+      }
+      const del = document.createElement('button');
+      del.className = 'download-del';
+      del.setAttribute('aria-label', 'Supprimer ' + item.title);
+      del.textContent = '✕';
+      del.addEventListener('click', () => deleteDownload(item.url));
+      row.appendChild(info);
+      row.appendChild(del);
+      listEl.appendChild(row);
+    });
+    if (emptyEl) emptyEl.style.display = items.length ? 'none' : '';
+    if (purgeRow) purgeRow.style.display = items.length ? '' : 'none';
+  } catch(e) { console.warn('[Serein downloads]', e); }
+}
+
+async function deleteDownload(url) {
+  if (!('caches' in window)) return;
+  try {
+    const cache = await caches.open(AUDIO_CACHE);
+    await cache.delete(url);
+    haptic('light');
+    await refreshDownloadsUI();
+  } catch(e) { console.warn('[Serein downloads]', e); }
+}
+
+async function purgeAllDownloads() {
+  if (!confirm('Supprimer toutes les séances en cache ?\n\nTu pourras les retélécharger à tout moment.')) return;
+  if (!('caches' in window)) return;
+  try {
+    const cache = await caches.open(AUDIO_CACHE);
+    const keys = await cache.keys();
+    await Promise.all(keys.map(req => cache.delete(req)));
+    haptic('light');
+    await refreshDownloadsUI();
+  } catch(e) { console.warn('[Serein downloads]', e); }
+}
+
+// Resynchronise toute l'UI liée au cache après une suppression
+async function refreshDownloadsUI() {
+  await renderDownloadsManager();
+  await updateOfflineCount();
+  // Réinitialise les coches ✓ de l'écran Explorer puis ré-applique l'état réel
+  document.querySelectorAll('.btn-offline.cached').forEach(b => { b.classList.remove('cached'); b.textContent = '⬇'; });
+  await restoreOfflineButtons();
 }
 
 async function restoreOfflineButtons() {
@@ -1199,6 +1300,9 @@ function loadPrefs() {
     const ambianceVal = localStorage.getItem('serein-ambiance-default') || '';
     const ambianceLabel = document.getElementById('ambiance-default-label');
     if (ambianceLabel) ambianceLabel.textContent = (AMBIANCE_LABELS[ambianceVal] || 'Aucun') + ' ›';
+    const ambVol = localStorage.getItem('serein-ambiance-volume');
+    const ambVolSlider = document.getElementById('ambiance-volume-slider');
+    if (ambVol !== null && ambVolSlider) ambVolSlider.value = ambVol;
     loadReminderPrefs();
   } catch(e) {}
 }
@@ -2739,7 +2843,7 @@ function openPrivacyPolicy() {
 const DATA_KEYS = [
   'serein-stats', 'serein-history', 'serein-feedback', 'serein-guide-session',
   'serein-theme', 'serein-speed', 'serein-bells', 'serein-wifi-only',
-  'serein-ambiance-default', 'serein-reminder-enabled', 'serein-reminder-time',
+  'serein-ambiance-default', 'serein-ambiance-volume', 'serein-reminder-enabled', 'serein-reminder-time',
   'serein-voice', 'serein-resume', 'serein-mood-log'
 ];
 

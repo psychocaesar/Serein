@@ -351,6 +351,15 @@
     .setting-item p { font-size: .85rem; color: var(--color-muted); margin-top: .2rem; }
     .setting-item .info { flex: 1; }
     .setting-tag { font-size: .8rem; color: var(--color-primary); background: var(--color-primary-light); border-radius: 999px; padding: .25rem .75rem; white-space: nowrap; }
+    /* Gestionnaire de téléchargements */
+    .downloads-list { display: flex; flex-direction: column; gap: 1px; }
+    .download-row { display: flex; align-items: center; justify-content: space-between; gap: .75rem; background: var(--color-surface); padding: .8rem 1.1rem; }
+    .download-info { display: flex; flex-direction: column; gap: .15rem; min-width: 0; }
+    .download-title { font-size: .92rem; font-weight: 600; color: var(--color-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .download-voice { font-size: .75rem; color: var(--color-muted); }
+    .download-del { flex-shrink: 0; width: 30px; height: 30px; border-radius: 50%; border: none; background: var(--color-surface-2); color: #e06060; font-size: .9rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .18s; }
+    .download-del:hover { background: rgba(224,96,96,.15); }
+    .download-del:active { transform: scale(.92); }
     /* Segmented control thème */
     .theme-seg { display: flex; background: #1c3127; border-radius: 999px; padding: 3px; gap: 2px; }
     [data-theme="light"] .theme-seg { background: #e0eeea; }
@@ -1198,6 +1207,14 @@
     <article class="card setting-item">
       <div class="info"><h3>Séances en cache</h3><p>Les séances écoutées et téléchargées sont disponibles hors ligne</p></div>
       <span class="setting-tag" id="offline-count-tag">0 séance</span>
+    </article>
+    <div id="downloads-list" class="downloads-list"></div>
+    <article class="card setting-item" id="downloads-empty">
+      <div class="info"><p style="margin:0;color:var(--color-muted);font-size:.85rem;">Aucune séance en cache pour l'instant.</p></div>
+    </article>
+    <article class="card setting-item" id="downloads-purge-row" style="display:none">
+      <div class="info"><h3>Tout supprimer</h3><p>Vide le cache et libère l'espace</p></div>
+      <button class="setting-link danger" onclick="purgeAllDownloads()">Purger</button>
     </article>
     <article class="card setting-item">
       <div class="info"><h3>Télécharger en Wi-Fi uniquement</h3></div>
