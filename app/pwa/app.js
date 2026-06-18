@@ -1246,6 +1246,7 @@ function incrementDonCounter() {
 function renderDonInvitation() {
   const block = document.getElementById('don-invitation-block');
   if (!block) return;
+  if (isIosNative()) { block.style.display = 'none'; return; } // dons retirés du build iOS (App Store 3.1.1)
   let n = 0, seen = false;
   try {
     n = parseInt(localStorage.getItem(DON_COUNT_KEY), 10) || 0;
@@ -2882,7 +2883,26 @@ Envoyé depuis sereinapp.fr`;
 
 
 // ── DON ──
+// Les dons sont retirés du build iOS (conformité App Store, guideline 3.1.1).
+// La PWA et l'app Android conservent le don HelloAsso.
+function isIosNative() {
+  try {
+    return typeof Capacitor !== 'undefined'
+      && typeof Capacitor.getPlatform === 'function'
+      && Capacitor.getPlatform() === 'ios';
+  } catch(e) { return false; }
+}
+
+// Masque les points d'entrée du don sur iOS (carte Réglages ; l'invitation et
+// openDon sont gardées séparément).
+function hideDonationOnIos() {
+  if (!isIosNative()) return;
+  const card = document.getElementById('settings-don-card');
+  if (card) card.style.display = 'none';
+}
+
 function openDon() {
+  if (isIosNative()) return;
   const url = 'https://www.helloasso.com/associations/sereinapp/formulaires/1';
   const isNative = typeof Capacitor !== 'undefined' && Capacitor.isNativePlatform && Capacitor.isNativePlatform();
   window.open(url, isNative ? '_system' : '_blank', 'noopener,noreferrer');
@@ -3010,6 +3030,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   loadSpeed();
   loadStats();
   loadPrefs();
+  hideDonationOnIos();
   updateVoiceSettingLabel();
   renderResumeCard();
   updateMoodChips();
