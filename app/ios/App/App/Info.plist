@@ -115,12 +115,12 @@
   </array>
 
   <!-- ═══════════════════════════════════════
-       NOTIFICATIONS LOCALES
-       SUPPRIMÉ : vous avez décidé de ne pas
-       intégrer les notifications pour l'instant.
-       À réactiver si besoin futur.
+       NOTIFICATIONS LOCALES (rappel quotidien)
+       Fonction native : rappel de méditation programmé localement via
+       @capacitor/local-notifications (Réglages › Rappel quotidien).
+       La permission est demandée au runtime (UNUserNotificationCenter) —
+       aucune clé Info.plist requise pour les notifications locales.
   ═══════════════════════════════════════ -->
-  <!-- <key>NSUserNotificationUsageDescription</key> -->
 
   <!-- ═══════════════════════════════════════
        SÉCURITÉ RÉSEAU (ATS)
