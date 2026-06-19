@@ -4,7 +4,8 @@
 
 L'objectif est simple : aider les personnes à respirer, dormir et se recentrer grâce à des audios guidés en français, sans publicité, sans paywall agressif et sans tracking tiers.
 
-🌐 **App web** : [www.sereinapp.fr](https://www.sereinapp.fr) · 📄 [Politique de confidentialité](https://www.sereinapp.fr/privacy.html)
+📱 **Télécharger** : [App Store](https://apps.apple.com/fr/app/serein-meditation-guidee/id6780955764) · [Google Play](https://play.google.com/store/apps/details?id=fr.sereinapp.app)
+🌐 **Site** : [sereinapp.fr](https://sereinapp.fr) · 📄 [Politique de confidentialité](https://sereinapp.fr/privacy.html)
 
 ## Vision
 
@@ -104,7 +105,7 @@ Serein évite : les SDK d'analyse tiers, les pixels publicitaires, les permissio
 
 ## Statut du projet
 
-Projet porté par un psychologue, financé uniquement par les dons. Version actuelle : voir `package.json`. L'app web est en production sur [sereinapp.fr](https://www.sereinapp.fr) ; les versions Android et iOS sont en préparation pour les stores.
+Projet porté par un psychologue, financé uniquement par les dons. Version actuelle : voir `package.json`. Disponible sur l'[App Store](https://apps.apple.com/fr/app/serein-meditation-guidee/id6780955764) et [Google Play](https://play.google.com/store/apps/details?id=fr.sereinapp.app) ; le site [sereinapp.fr](https://sereinapp.fr) présente l'application.
 
 ## Contact
 
