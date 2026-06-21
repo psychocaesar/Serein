@@ -14,6 +14,8 @@ workflows:
       vars:
         XCODE_PROJECT: "app/ios/App/App.xcodeproj"
         XCODE_SCHEME: "App"
+        # Apple ID numérique de Serein Méditation (App Store : .../id6780955764)
+        APP_APPLE_ID: "6780955764"
       node: latest
 
     scripts:
@@ -25,6 +27,18 @@ workflows:
 
       - name: Remove audio from iOS bundle (servi via CDN)
         script: find app/ios/App/App/public/assets/audio -name "*.mp3" -delete || true
+
+      - name: Auto-incrémente le build number (dernier TestFlight + 1)
+        script: |
+          LATEST=$(app-store-connect get-latest-testflight-build-number "$APP_APPLE_ID")
+          if [ -z "$LATEST" ]; then
+            echo "⚠️  Build number introuvable — vérifie APP_APPLE_ID et l'intégration App Store Connect."
+            exit 1
+          fi
+          NEW=$((LATEST + 1))
+          echo "Dernier build TestFlight : $LATEST → nouveau : $NEW"
+          cd "$CM_BUILD_DIR/app/ios/App"
+          agvtool new-version -all "$NEW"
 
       - name: Apply code signing to Xcode project
         script: xcode-project use-profiles
