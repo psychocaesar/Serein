@@ -1,4 +1,6 @@
-const CACHE_VERSION = 'serein-v12';
+// Doit contenir la version de package.json (vérifié par tests/versions.test.js) :
+// change à chaque release, ce qui purge l'ancien index.html/app.js du cache client.
+const CACHE_VERSION = 'serein-1.3.0';
 const STATIC_CACHE  = CACHE_VERSION + '-static';
 const AUDIO_CACHE   = 'serein-audio'; // non versionné — survit aux mises à jour
 const AUDIO_CDN_HOST = 'audio.sereinapp.fr'; // CDN audio utilisé par l'app native
