@@ -510,6 +510,34 @@
     .timer-card-horizontal .timer-cta { background: var(--gradient); color: #0d1b15; padding: .35rem .85rem; border-radius: 999px; font-size: .82rem; font-weight: 700; white-space: nowrap; flex-shrink: 0; }
     [data-theme="light"] .timer-cta { color: #fff; }
 
+    /* ── Favoris ── */
+    .btn-fav { background: none; border: none; cursor: pointer; color: var(--color-muted); padding: .35rem; border-radius: 8px; line-height: 0; transition: color .18s, transform .15s; flex-shrink: 0; }
+    .btn-fav:hover, .btn-fav.is-fav { color: #e05a7a; }
+    .btn-fav svg path { fill: none; stroke: currentColor; }
+    .btn-fav.is-fav svg path { fill: #e05a7a; stroke: #e05a7a; }
+    .btn-fav:active { transform: scale(.82); }
+    #favoris-section { margin-top: 1.25rem; }
+
+    /* ── Respiration visuelle ── */
+    .breath-wrap { display: none; flex: 1; align-items: center; justify-content: center; flex-direction: column; gap: 2rem; }
+    .player-screen[data-parcours="respirer"] .player-artwork-wrap { display: none !important; }
+    .player-screen[data-parcours="respirer"] .breath-wrap { display: flex; }
+    .breath-circle {
+      width: 160px; height: 160px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(76,135,193,.8) 0%, rgba(53,100,118,.5) 55%, transparent 100%);
+      box-shadow: 0 0 40px rgba(76,135,193,.35);
+      animation: breathe 10s ease-in-out infinite;
+      will-change: transform;
+    }
+    .breath-label {
+      font-size: .9rem; font-weight: 600; color: rgba(255,255,255,.8);
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    @keyframes breathe {
+      0%, 100% { transform: scale(1);     box-shadow: 0 0 30px rgba(76,135,193,.25); }
+      50%       { transform: scale(1.65); box-shadow: 0 0 70px rgba(76,135,193,.65); }
+    }
+
     /* EXPLORER groupes */
     .session-card { position: relative; overflow: hidden; }
     .session-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: transparent; }
@@ -781,6 +809,12 @@
         </div>
       </div>
 
+      <!-- Animation de respiration (visible uniquement pour le parcours Respirer) -->
+      <div class="breath-wrap" id="breath-wrap">
+        <div class="breath-circle" id="breath-circle"></div>
+        <span class="breath-label" id="breath-label">Inspirez</span>
+      </div>
+
       <!-- Infos -->
       <div class="player-info">
         <h2 id="player-title">Aucune séance</h2>
@@ -1050,6 +1084,12 @@
       <div class="card-content"><h3>Concentration</h3><p class="meta">7 séances</p></div>
     </article>
   </div>
+
+  <!-- Séances favorites — rempli par renderFavorisSection() -->
+  <section id="favoris-section" style="display:none;" aria-label="Mes favoris">
+    <p class="timer-block-label">♥ Mes favoris</p>
+    <div class="favoris-list"></div>
+  </section>
 
   <div class="filter-group">
     <p class="filter-group-label">Durée</p>
