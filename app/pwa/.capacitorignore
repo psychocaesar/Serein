@@ -6,3 +6,6 @@ assets/audio/timer-5min.mp3
 assets/audio/timer-10min.mp3
 assets/audio/timer-15min.mp3
 assets/audio/timer-20min.mp3
+
+# Artefacts web non destinés au bundle natif
+coherence-prototype.html

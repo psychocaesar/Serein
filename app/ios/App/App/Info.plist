@@ -142,27 +142,19 @@
   <array>
     <string>sereinapp.fr</string>
     <string>www.sereinapp.fr</string>
+    <!-- CDN des audios téléchargés par l'app native (voir app.js AUDIO_BASE_URL) -->
+    <string>audio.sereinapp.fr</string>
   </array>
 
   <!-- ═══════════════════════════════════════
-       APP STORE — CHIFFREMENT & DONNÉES
-       Déclare l'absence de collecte et de chiffrement
+       APP STORE — CONFORMITÉ AU CHIFFREMENT
+       Déclare l'absence de chiffrement non exempté.
+       NB : les déclarations de confidentialité (données collectées,
+       tracking, APIs système) vivent UNIQUEMENT dans PrivacyInfo.xcprivacy ;
+       Apple ignore ces clés si elles sont placées dans Info.plist.
   ═══════════════════════════════════════ -->
-  <key>NSPrivacyCollectedDataTypes</key>
-  <array/>
-
   <key>ITSAppUsesNonExemptEncryption</key>
   <false/>
-
-  <!-- AJOUTÉ : requis par Apple depuis 2024
-       Déclare que l'app ne fait pas de tracking publicitaire -->
-  <key>NSPrivacyTrackingEnabled</key>
-  <false/>
-
-  <!-- AJOUTÉ : URL du fichier de confidentialité Apple (PrivacyInfo.xcprivacy)
-       Obligatoire depuis le SDK iOS 17 pour certaines APIs système -->
-  <key>NSPrivacyAccessedAPITypes</key>
-  <array/>
 
 </dict>
 </plist>

@@ -23,6 +23,16 @@ test('le versionName Android correspond à package.json', () => {
   assert.strictEqual(m[1], pkg.version, `build.gradle dit ${m[1]}, package.json dit ${pkg.version}`);
 });
 
+test('le MARKETING_VERSION iOS correspond à package.json', () => {
+  const pbxproj = fs.readFileSync(
+    path.join(ROOT, 'app', 'ios', 'App', 'App.xcodeproj', 'project.pbxproj'), 'utf8');
+  const versions = [...pbxproj.matchAll(/MARKETING_VERSION = ([^;]+);/g)].map(m => m[1].trim());
+  assert.ok(versions.length > 0, 'MARKETING_VERSION introuvable dans project.pbxproj');
+  for (const v of versions) {
+    assert.strictEqual(v, pkg.version, `project.pbxproj dit ${v}, package.json dit ${pkg.version}`);
+  }
+});
+
 test('les screenshots déclarés dans le manifest existent', () => {
   const manifest = JSON.parse(fs.readFileSync(path.join(PWA_DIR, 'manifest.json'), 'utf8'));
   assert.ok(Array.isArray(manifest.screenshots) && manifest.screenshots.length > 0, 'aucun screenshot déclaré');
