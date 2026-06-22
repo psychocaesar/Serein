@@ -17,6 +17,11 @@ workflows:
         # Apple ID numérique de Serein Méditation (App Store : .../id6780955764)
         APP_APPLE_ID: "6780955764"
       node: latest
+      # Build contre le SDK le plus récent (rendu Liquid Glass + conformité
+      # "compiler avec le dernier SDK" exigée par Apple pour iOS 26/27).
+      # Pour des builds 100 % reproductibles, remplacer "latest" par une
+      # version figée (ex. "26.0") une fois confirmée disponible sur Codemagic.
+      xcode: latest
 
     scripts:
       - name: Install npm dependencies
