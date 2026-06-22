@@ -201,6 +201,44 @@ function makeGroupHeader(name) {
   return h;
 }
 
+function getFavoris() {
+  try { return new Set(JSON.parse(localStorage.getItem("serein-favoris") || "[]")); }
+  catch(e) { return new Set(); }
+}
+
+function isFavori(sessionId) {
+  return getFavoris().has(sessionId);
+}
+
+function toggleFavoris(sessionId, btn) {
+  const favs = getFavoris();
+  if (favs.has(sessionId)) { favs.delete(sessionId); }
+  else { favs.add(sessionId); }
+  try { localStorage.setItem("serein-favoris", JSON.stringify([...favs])); } catch(e) {}
+  const active = favs.has(sessionId);
+  btn.classList.toggle("is-fav", active);
+  btn.setAttribute("aria-label", active ? "Retirer des favoris" : "Ajouter aux favoris");
+  renderFavorisSection();
+}
+
+function renderFavorisSection() {
+  const section = document.getElementById("favoris-section");
+  if (!section || !CATALOG) return;
+  const favs = getFavoris();
+  if (favs.size === 0) { section.style.display = "none"; return; }
+  const list = section.querySelector(".favoris-list");
+  list.innerHTML = "";
+  CATALOG.groups.forEach(function(group) {
+    const sessions = group.sessions
+      || (group.subgroups ? group.subgroups.flatMap(function(sg) { return sg.sessions; }) : []);
+    sessions.forEach(function(s) {
+      if (favs.has(s.id)) list.appendChild(makeSessionCard(s, group, null));
+    });
+  });
+  section.style.display = "";
+  updateSessionChecks();
+}
+
 function makeSessionCard(s, group, subgroupName) {
   const durationLabel = s.duration + ' min';
   const card = document.createElement('article');
@@ -241,6 +279,12 @@ function makeSessionCard(s, group, subgroupName) {
   launch.textContent = 'Lancer';
   launch.addEventListener('click', () => openVoiceOverlay(s.id, s.title, group.name, durationLabel, s.file, s.fileFem || false, group.artwork));
   actions.appendChild(dl);
+  const fav = document.createElement("button");
+  fav.className = "btn-fav" + (isFavori(s.id) ? " is-fav" : "");
+  fav.setAttribute("aria-label", isFavori(s.id) ? "Retirer des favoris" : "Ajouter aux favoris");
+  fav.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
+  fav.addEventListener("click", function(e) { e.stopPropagation(); toggleFavoris(s.id, fav); });
+  actions.appendChild(fav);
   actions.appendChild(launch);
 
   card.appendChild(info);
@@ -286,7 +330,7 @@ function getListenedTitles() {
 // Coche ✓ sur les séances déjà écoutées
 function updateSessionChecks() {
   const listened = getListenedTitles();
-  document.querySelectorAll('.session-list .session-card').forEach(card => {
+  document.querySelectorAll('.session-list .session-card, .favoris-list .session-card').forEach(card => {
     const h3 = card.querySelector('h3');
     if (!h3) return;
     const done = listened.has(card.dataset.title);
@@ -355,6 +399,7 @@ async function renderSessionList() {
     updateSessionChecks();
     updatePathCardCounts();
     renderDailySuggestion();
+    renderFavorisSection();
   } catch(e) {
     console.warn('[Serein catalogue]', e);
     const msg = document.createElement('p');
@@ -492,6 +537,39 @@ function clearMediaSession() {
   } catch(e) {}
 }
 
+// ── RESPIRATION GUIDÉE (parcours Respirer) ──
+// Cloches calées sur le cycle visuel : cloche.mp3 à l'inspiration,
+// clochegrave.mp3 à l'expiration (mêmes sons que Serein TCC·ACT).
+const breathInhaleBell = new Audio(AUDIO_BASE_URL + "cloche.mp3");
+const breathExhaleBell = new Audio(AUDIO_BASE_URL + "clochegrave.mp3");
+breathInhaleBell.volume = 0.5;
+breathExhaleBell.volume = 0.5;
+
+function playBreathBell(inhale) {
+  // Pas de cloche si la séance est en pause ou terminée : le label et le
+  // cercle (CSS) continuent, mais le son suit l'écoute réelle.
+  if (audio.paused || audio.ended) return;
+  const b = inhale ? breathInhaleBell : breathExhaleBell;
+  try { b.currentTime = 0; b.play().catch(function() {}); } catch(e) {}
+}
+
+function startBreathLabel() {
+  const label = document.getElementById("breath-label");
+  if (!label) return;
+  label.textContent = "Inspirez";
+  if (window._breathTimer) clearInterval(window._breathTimer);
+  let phase = true; // true = inspiration, false = expiration
+  window._breathTimer = setInterval(function() {
+    phase = !phase;
+    label.textContent = phase ? "Inspirez" : "Expirez";
+    playBreathBell(phase);
+  }, 5000);
+}
+
+function stopBreathLabel() {
+  if (window._breathTimer) { clearInterval(window._breathTimer); window._breathTimer = null; }
+}
+
 function openPlayerScreen() {
   const el = document.getElementById('player-screen');
   const wasOpen = el.classList.contains('open');
@@ -510,6 +588,7 @@ function closePlayer() {
 
   // Stop all audio
   audio.pause();
+  stopBreathLabel();
   ambianceAudio.pause();
   clearMediaSession();
 
@@ -652,6 +731,7 @@ function launchPlayer(id, title, parcours, duration, filename, voice, artwork, r
   playerEl.removeAttribute('data-parcours');
   const pKey = parcoursMap[parcours] || 'premiers-pas';
   playerEl.setAttribute('data-parcours', pKey);
+  if (pKey === "respirer") startBreathLabel(); else stopBreathLabel();
   // Background is handled by CSS gradients per parcours — clear any leftover image
   document.getElementById('player-bg').style.backgroundImage = '';
 
@@ -864,32 +944,26 @@ const SUGGESTION_ICONS = {
 
 function pickSuggestion() {
   if (!CATALOG) return null;
-  const h = new Date().getHours();
-  let pick;
-  if (h >= 21 || h < 5)      pick = { group: 'Sommeil',       icon: 'lune',   label: 'Pour préparer la nuit' };
-  else if (h < 10)           pick = { group: 'Respirer',      icon: 'soleil', label: 'Pour bien démarrer la journée' };
-  else if (h < 18)           pick = { group: 'Concentration', icon: 'cible',  label: 'Pour rester dans la zone' };
-  else                       pick = { group: 'Émotions', sub: 'Stress', icon: 'vent', label: 'Pour souffler après la journée' };
-  const group = CATALOG.groups.find(g => g.name === pick.group);
-  if (!group) return null;
-  let sessions = group.subgroups
-    ? (pick.sub ? (group.subgroups.find(s => s.name === pick.sub) || group.subgroups[0]).sessions : group.subgroups.flatMap(s => s.sessions))
-    : group.sessions;
-  if (!sessions || !sessions.length) return null;
-  // Privilégier une séance pas encore écoutée ; varier selon le jour sinon
+  const allSessions = [];
+  CATALOG.groups.forEach(function(group) {
+    const sessions = group.sessions
+      || (group.subgroups ? group.subgroups.flatMap(function(sg) { return sg.sessions; }) : []);
+    sessions.forEach(function(s) { allSessions.push({ session: s, group: group }); });
+  });
+  if (!allSessions.length) return null;
   const listened = getListenedTitles();
-  const fresh = sessions.filter(s => !listened.has(s.title));
-  const pool = fresh.length ? fresh : sessions;
+  const fresh = allSessions.filter(function(e) { return !listened.has(e.session.title); });
+  const pool = fresh.length ? fresh : allSessions;
   const dayIdx = Math.floor(Date.now() / 86400000) % pool.length;
-  return { session: pool[dayIdx], group, icon: pick.icon, label: pick.label };
+  const pick = pool[dayIdx];
+  return { session: pick.session, group: pick.group, icon: "soleil", label: "Séance du jour" };
 }
 
 function renderDailySuggestion() {
   const block = document.getElementById('suggestion-block');
   if (!block) return;
-  const stats = getStats();
   const hasResume = !!getResumePoint();
-  if ((stats.sessions || 0) === 0 || hasResume) { block.style.display = 'none'; return; }
+  if (hasResume) { block.style.display = 'none'; return; }
   const sugg = pickSuggestion();
   if (!sugg) { block.style.display = 'none'; return; }
   const s = sugg.session;
@@ -2916,7 +2990,7 @@ function openPrivacyPolicy() {
 
 // ── EXPORT / IMPORT DES DONNÉES (local-first, aucun serveur) ──
 const DATA_KEYS = [
-  'serein-stats', 'serein-history', 'serein-feedback', 'serein-guide-session',
+  'serein-stats', 'serein-history', 'serein-feedback', 'serein-guide-session', 'serein-favoris',
   'serein-theme', 'serein-speed', 'serein-bells', 'serein-wifi-only',
   'serein-ambiance-default', 'serein-ambiance-volume', 'serein-reminder-enabled', 'serein-reminder-time',
   'serein-voice', 'serein-resume', 'serein-mood-log',
