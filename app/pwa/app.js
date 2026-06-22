@@ -537,39 +537,6 @@ function clearMediaSession() {
   } catch(e) {}
 }
 
-// ── RESPIRATION GUIDÉE (parcours Respirer) ──
-// Cloches calées sur le cycle visuel : cloche.mp3 à l'inspiration,
-// clochegrave.mp3 à l'expiration (mêmes sons que Serein TCC·ACT).
-const breathInhaleBell = new Audio(AUDIO_BASE_URL + "cloche.mp3");
-const breathExhaleBell = new Audio(AUDIO_BASE_URL + "clochegrave.mp3");
-breathInhaleBell.volume = 0.5;
-breathExhaleBell.volume = 0.5;
-
-function playBreathBell(inhale) {
-  // Pas de cloche si la séance est en pause ou terminée : le label et le
-  // cercle (CSS) continuent, mais le son suit l'écoute réelle.
-  if (audio.paused || audio.ended) return;
-  const b = inhale ? breathInhaleBell : breathExhaleBell;
-  try { b.currentTime = 0; b.play().catch(function() {}); } catch(e) {}
-}
-
-function startBreathLabel() {
-  const label = document.getElementById("breath-label");
-  if (!label) return;
-  label.textContent = "Inspirez";
-  if (window._breathTimer) clearInterval(window._breathTimer);
-  let phase = true; // true = inspiration, false = expiration
-  window._breathTimer = setInterval(function() {
-    phase = !phase;
-    label.textContent = phase ? "Inspirez" : "Expirez";
-    playBreathBell(phase);
-  }, 5000);
-}
-
-function stopBreathLabel() {
-  if (window._breathTimer) { clearInterval(window._breathTimer); window._breathTimer = null; }
-}
-
 function openPlayerScreen() {
   const el = document.getElementById('player-screen');
   const wasOpen = el.classList.contains('open');
@@ -588,7 +555,6 @@ function closePlayer() {
 
   // Stop all audio
   audio.pause();
-  stopBreathLabel();
   ambianceAudio.pause();
   clearMediaSession();
 
@@ -731,7 +697,6 @@ function launchPlayer(id, title, parcours, duration, filename, voice, artwork, r
   playerEl.removeAttribute('data-parcours');
   const pKey = parcoursMap[parcours] || 'premiers-pas';
   playerEl.setAttribute('data-parcours', pKey);
-  if (pKey === "respirer") startBreathLabel(); else stopBreathLabel();
   // Background is handled by CSS gradients per parcours — clear any leftover image
   document.getElementById('player-bg').style.backgroundImage = '';
 
@@ -2761,6 +2726,210 @@ function clearChoices() {
   if (el) el.remove();
 }
 
+
+// ════════════════════════════════════════════════════════════
+// RESPIRATION GUIDÉE — feature autonome (overlay #breath-overlay)
+// Portée de Serein TCC·ACT : cohérence 5-5, boîte 4-4-4-4, 4-7-8,
+// cercle animé + anneau de progression, cloche aiguë à l'inspiration
+// et grave à l'expiration (les paliers "Retiens" restent silencieux).
+// ════════════════════════════════════════════════════════════
+const breathBellInhale = new Audio(AUDIO_BASE_URL + "cloche.mp3");
+const breathBellExhale = new Audio(AUDIO_BASE_URL + "clochegrave.mp3");
+
+function breathPlayBell(which) {
+  const el = which === "grave" ? breathBellExhale : breathBellInhale;
+  if (!el) return;
+  try { el.currentTime = 0; el.play().catch(function() {}); } catch(e) {}
+}
+
+const breathTechs = {
+  coherence: { phases: [5, 5],          labels: ["Inspire", "Expire"],                   name: "Cohérence cardiaque" },
+  box:       { phases: [4, 4, 4, 4],    labels: ["Inspire", "Retiens", "Expire", "Retiens"], name: "Respiration en boîte" },
+  "478":     { phases: [4, 7, 8],       labels: ["Inspire", "Retiens", "Expire"],        name: "Technique 4-7-8" }
+};
+let breathActive = false;
+let breathTech = "coherence";
+let breathPhaseIdx = 0;
+let breathSecondsLeft = 0;
+let breathPhaseDuration = 0;
+let breathCycles = 0;
+let breathTimer = null;
+let breathTargetSec = 0;   // 0 = séance libre (illimitée)
+let breathStartTime = 0;
+const BREATH_RING_CIRC = 2 * Math.PI * 100; // r=100 sur le cercle SVG
+
+function breathFmt(s) { s = Math.max(0, Math.round(s)); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); }
+
+function setBreathRingProgress(fractionRemaining, instant) {
+  const ring = document.getElementById("breathProgressRing");
+  if (!ring) return;
+  const offset = BREATH_RING_CIRC * (1 - fractionRemaining);
+  if (instant) {
+    ring.style.transition = "none";
+    ring.style.strokeDashoffset = offset;
+    ring.getBoundingClientRect(); // force le reflow avant de réactiver la transition
+    ring.style.transition = "stroke-dashoffset 1s linear";
+  } else {
+    ring.style.strokeDashoffset = offset;
+  }
+}
+
+function selectBreathTech(tech, el) {
+  if (breathActive) stopBreathing();
+  breathTech = tech;
+  document.querySelectorAll(".breath-tab").forEach(function(b) { b.classList.remove("active"); b.setAttribute("aria-pressed", "false"); });
+  el.classList.add("active");
+  el.setAttribute("aria-pressed", "true");
+  resetBreathCircle();
+}
+
+function selectBreathDuration(sec, el) {
+  if (breathActive) stopBreathing();
+  breathTargetSec = sec;
+  document.querySelectorAll(".breath-dur").forEach(function(b) { b.classList.remove("active"); b.setAttribute("aria-pressed", "false"); });
+  el.classList.add("active");
+  el.setAttribute("aria-pressed", "true");
+}
+
+function toggleBreathing() { breathActive ? stopBreathing() : startBreathing(); }
+
+function startBreathing() {
+  breathActive = true;
+  breathPhaseIdx = 0;
+  breathCycles = 0;
+  breathStartTime = Date.now();
+  const btn = document.getElementById("breathBtn");
+  btn.textContent = "⏹ Arrêter";
+  btn.setAttribute("aria-label", "Arrêter la respiration guidée");
+  runBreathPhase();
+}
+
+function stopBreathing() {
+  breathActive = false;
+  clearTimeout(breathTimer);
+  const btn = document.getElementById("breathBtn");
+  btn.textContent = "▶ Commencer";
+  btn.setAttribute("aria-label", "Démarrer la respiration guidée");
+  resetBreathCircle();
+}
+
+function resetBreathCircle() {
+  const c = document.getElementById("breathCircle");
+  if (!c) return;
+  c.classList.remove("holding");
+  c.style.transition = "transform 0.5s ease, box-shadow 0.5s ease";
+  c.style.transform = "scale(0.72)";
+  c.style.boxShadow = "0 0 0 0 rgba(147,201,172,0.2)";
+  document.getElementById("breathPhaseText").innerHTML = "Appuie<br>pour commencer";
+  document.getElementById("breathCountdown").textContent = "";
+  document.getElementById("breathInfo").textContent = "";
+  setBreathRingProgress(0, true);
+}
+
+function runBreathPhase() {
+  if (!breathActive) return;
+  const tech = breathTechs[breathTech];
+  const duration = tech.phases[breathPhaseIdx];
+  const label = tech.labels[breathPhaseIdx];
+  const isInspire = label === "Inspire";
+  const isExpire = label === "Expire";
+  const isHold = !isInspire && !isExpire; // "Retiens" (boîte, 4-7-8)
+
+  document.getElementById("breathPhaseText").textContent = label;
+
+  // Cloche aiguë à l'inspiration, grave à l'expiration ; les paliers
+  // "Retiens" restent silencieux (seule l'haptique les marque).
+  if (isInspire) breathPlayBell("aigu");
+  else if (isExpire) breathPlayBell("grave");
+
+  const c = document.getElementById("breathCircle");
+  if (isHold) {
+    haptic("medium");
+    const prevLabel = tech.labels[(breathPhaseIdx - 1 + tech.phases.length) % tech.phases.length];
+    c.style.setProperty("--hold-base", prevLabel === "Inspire" ? 1 : 0.72);
+    c.classList.add("holding");
+  } else {
+    haptic("light");
+    c.classList.remove("holding");
+    c.style.transition = "transform " + duration + "s ease-in-out, box-shadow " + duration + "s ease-in-out";
+    if (isInspire) {
+      c.style.transform = "scale(1)";
+      c.style.boxShadow = "0 0 50px 16px rgba(147,201,172,0.18)";
+    } else {
+      c.style.transform = "scale(0.72)";
+      c.style.boxShadow = "0 0 0 0 rgba(147,201,172,0.2)";
+    }
+  }
+
+  breathPhaseDuration = duration;
+  breathSecondsLeft = duration;
+  setBreathRingProgress(1, true);
+  tickBreath();
+}
+
+function tickBreath() {
+  if (!breathActive) return;
+  if (breathSecondsLeft <= 0) { advanceBreathPhase(); return; }
+  document.getElementById("breathCountdown").textContent = breathSecondsLeft;
+  setBreathRingProgress(breathSecondsLeft / breathPhaseDuration, false);
+  if (breathTargetSec > 0) {
+    const remaining = breathTargetSec - (Date.now() - breathStartTime) / 1000;
+    document.getElementById("breathInfo").textContent = "⏳ " + breathFmt(remaining) + " restantes";
+  }
+  breathSecondsLeft--;
+  breathTimer = setTimeout(tickBreath, 1000);
+}
+
+function advanceBreathPhase() {
+  if (!breathActive) return;
+  const tech = breathTechs[breathTech];
+  breathPhaseIdx = (breathPhaseIdx + 1) % tech.phases.length;
+  if (breathPhaseIdx === 0) { // fin d'un cycle complet (on termine sur une expiration)
+    breathCycles++;
+    if (breathTargetSec > 0) {
+      const elapsed = (Date.now() - breathStartTime) / 1000;
+      if (elapsed >= breathTargetSec) { finishBreathSession(); return; }
+    } else {
+      document.getElementById("breathInfo").textContent = breathCycles === 1 ? "1 cycle complété" : breathCycles + " cycles complétés";
+    }
+  }
+  runBreathPhase();
+}
+
+function finishBreathSession() {
+  breathActive = false;
+  clearTimeout(breathTimer);
+  haptic("success");
+  const c = document.getElementById("breathCircle");
+  c.classList.remove("holding");
+  c.style.transition = "transform 0.6s ease, box-shadow 0.6s ease";
+  c.style.transform = "scale(0.82)";
+  c.style.boxShadow = "0 0 40px 12px rgba(147,201,172,0.2)";
+  document.getElementById("breathPhaseText").innerHTML = "Séance<br>terminée 🌿";
+  document.getElementById("breathCountdown").textContent = "";
+  document.getElementById("breathInfo").textContent = "Bravo, tu as pris ce temps pour toi.";
+  setBreathRingProgress(1, true);
+  const btn = document.getElementById("breathBtn");
+  btn.textContent = "▶ Recommencer";
+  btn.setAttribute("aria-label", "Recommencer la respiration guidée");
+}
+
+function openBreathing() {
+  const ov = document.getElementById("breath-overlay");
+  if (!ov) return;
+  ov.classList.add("open");
+  document.body.style.overflow = "hidden";
+  resetBreathCircle();
+  registerOverlay("breath", closeBreathing);
+}
+
+function closeBreathing() {
+  if (breathActive) stopBreathing();
+  const ov = document.getElementById("breath-overlay");
+  if (ov) ov.classList.remove("open");
+  document.body.style.overflow = "";
+  releaseOverlay("breath");
+}
 
 // ── MINUTEUR LIBRE ──
 const bell = new Audio(AUDIO_BASE_URL + 'cloche.mp3');
