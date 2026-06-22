@@ -7,7 +7,9 @@
     "doc": "docs"
   },
   "scripts": {
-    "test": "node --test \"tests/*.test.js\""
+    "test": "node --test \"tests/*.test.js\"",
+    "bump:android": "node scripts/bump-android-version.mjs",
+    "release:android": "npx cap sync android && npm run bump:android"
   },
   "repository": {
     "type": "git",
