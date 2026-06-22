@@ -66,3 +66,68 @@ workflows:
       email:
         recipients:
           - builds@sereinapp.fr
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Build Android automatisé (équivalent de l'iOS ci-dessus).
+  # Prérequis à configurer UNE FOIS dans Codemagic :
+  #   1. Code signing identities ▸ uploader le keystore Android sous la
+  #      référence "serein_keystore" (le même que keystore.properties local).
+  #   2. Environment variables ▸ groupe "google_play" contenant
+  #      GCLOUD_SERVICE_ACCOUNT_CREDENTIALS (JSON du compte de service Play,
+  #      avec accès à l'API Google Play Developer).
+  # ─────────────────────────────────────────────────────────────────────────
+  android-release:
+    name: SereinApp Android Release
+    max_build_duration: 60
+    instance_type: linux_x2
+
+    environment:
+      android_signing:
+        - serein_keystore
+      groups:
+        - google_play
+      vars:
+        PACKAGE_NAME: "fr.sereinapp.app"
+      node: latest
+
+    scripts:
+      - name: Install npm dependencies
+        script: npm install
+
+      - name: Capacitor sync Android
+        script: npx cap sync android
+
+      - name: Reconstruit keystore.properties depuis le keystore Codemagic
+        script: |
+          printf 'storeFile=%s\nstorePassword=%s\nkeyAlias=%s\nkeyPassword=%s\n' \
+            "$CM_KEYSTORE_PATH" "$CM_KEYSTORE_PASSWORD" "$CM_KEY_ALIAS" "$CM_KEY_PASSWORD" \
+            > "$CM_BUILD_DIR/app/android/keystore.properties"
+
+      - name: Auto-incrémente le versionCode (dernier build Play + 1)
+        script: |
+          LATEST=$(google-play get-latest-build-number --package-name "$PACKAGE_NAME")
+          if [ -z "$LATEST" ]; then
+            echo "⚠️  versionCode introuvable sur Play — vérifie PACKAGE_NAME et GCLOUD_SERVICE_ACCOUNT_CREDENTIALS."
+            exit 1
+          fi
+          NEW=$((LATEST + 1))
+          echo "Dernier versionCode Play : $LATEST → nouveau : $NEW"
+          sed -i "s/versionCode [0-9]\+/versionCode $NEW/" "$CM_BUILD_DIR/app/android/app/build.gradle"
+
+      - name: Build release AAB
+        script: |
+          cd "$CM_BUILD_DIR/app/android"
+          ./gradlew bundleRelease
+
+    artifacts:
+      - app/android/**/outputs/**/*.aab
+      - app/android/**/outputs/**/mapping.txt
+
+    publishing:
+      google_play:
+        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+        track: internal
+        submit_as_draft: true
+      email:
+        recipients:
+          - builds@sereinapp.fr

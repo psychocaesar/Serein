@@ -1,5 +1,6 @@
 node_modules/
 assets/audio/
+app/pwa/assets/audio/
 
 # Android signing — ne jamais commiter
 *.keystore

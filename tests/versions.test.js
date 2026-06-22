@@ -33,6 +33,14 @@ test('le MARKETING_VERSION iOS correspond à package.json', () => {
   }
 });
 
+test('le CACHE_VERSION du service worker suit la version de package.json', () => {
+  const sw = fs.readFileSync(path.join(PWA_DIR, 'sw.js'), 'utf8');
+  const m = /const CACHE_VERSION = '([^']+)'/.exec(sw);
+  assert.ok(m, 'CACHE_VERSION introuvable dans sw.js');
+  assert.ok(m[1].includes(pkg.version),
+    `CACHE_VERSION (${m[1]}) ne contient pas ${pkg.version} — bumpe-le à chaque release sinon les clients web gardent l'ancien cache`);
+});
+
 test('les screenshots déclarés dans le manifest existent', () => {
   const manifest = JSON.parse(fs.readFileSync(path.join(PWA_DIR, 'manifest.json'), 'utf8'));
   assert.ok(Array.isArray(manifest.screenshots) && manifest.screenshots.length > 0, 'aucun screenshot déclaré');
