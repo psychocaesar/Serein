@@ -395,6 +395,7 @@ async function renderSessionList() {
       }
       if (group.resources) list.appendChild(makeResourcesBlock(group.resources));
     });
+    renderExploreGrid();
     applyFilters();
     updateSessionChecks();
     updatePathCardCounts();
@@ -1700,16 +1701,391 @@ La pleine conscience ne se limite pas aux séances formelles, les yeux fermés. 
 - **Écouter :** Être pleinement présent lors d'une conversation, sans préparer mentalement sa prochaine réponse.
 
 Chaque instant de la journée offre une opportunité de s'entraîner. Même en cas de baisse de motivation, s'asseoir et ne prendre que trois grandes respirations conscientes est déjà une victoire sur le pilote automatique.`
+  },
+
+  // ── Fiches de psychoéducation, une par parcours (voir PARCOURS_ARTICLES) ──
+  'anxiete-tcc': {
+    title: "Comprendre et traverser l'anxiété avec la TCC",
+    meta: 'Thérapie cognitivo-comportementale · 2 min de lecture',
+    md: `L'anxiété n'est pas un défaut de fabrication, mais un système d'alarme naturel de ton corps conçu à l'origine pour te protéger des menaces. Parfois, cette alarme se dérègle et s'active très fort alors qu'il n'y a pas de véritable danger, mais la Thérapie Cognitivo-Comportementale (TCC) offre des clés concrètes pour l'apaiser.
+
+### Le triangle de l'anxiété et les fausses alarmes
+
+Pour comprendre ce qui se passe en toi, il est essentiel de faire la différence entre un danger réel et un danger perçu. Face à une menace immédiate, comme une voiture qui freine brusquement, la peur est un réflexe utile de survie. L'anxiété, en revanche, est l'anticipation d'une menace future ou imaginaire, où ton corps réagit comme s'il était en danger alors que tu es en sécurité.
+
+Quand cette anxiété s'installe, elle fonctionne selon un mécanisme appelé le modèle cognitif. Ce modèle décrit un lien constant entre trois éléments : tes pensées, tes émotions et tes comportements. Si tu te dis « je vais perdre le contrôle », cette simple pensée déclenche une peur intense et des sensations physiques très inconfortables, comme le cœur qui s'emballe. Ton cerveau interprète cette réaction corporelle bénigne comme une catastrophe imminente, ce qui crée un cycle anxiogène s'auto-alimentant sans fin.
+
+### Le piège du soulagement immédiat
+
+Face à cette sensation d'angoisse oppressante, notre premier réflexe naturel est souvent de fuir la situation ou de contourner ce qui nous fait peur. Ce comportement défensif, appelé évitement, te procure un soulagement immédiat et une baisse très agréable de la tension sur le moment.
+
+Cependant, c'est précisément cette fuite répétée qui entretient et aggrave ton anxiété sur le long terme. En évitant systématiquement les situations qui te rendent nerveux, tu empêches ton cerveau de découvrir que la catastrophe redoutée ne se serait probablement pas produite. L'évitement agit ainsi comme un carburant caché : il valide tes craintes irrationnelles et rend la situation encore plus effrayante lorsque tu devras y faire face la fois suivante.
+
+### Se libérer par l'exposition graduelle
+
+Pour briser ce cercle vicieux, la thérapie propose une approche bienveillante nommée l'exposition graduelle. Le principe consiste à affronter tes peurs de manière très progressive et découpée, en commençant par des situations qui te procurent une gêne légère, pour aller doucement vers celles qui t'impressionnent le plus.
+
+En choisissant de rester dans la situation inconfortable sans chercher à la fuir, ton anxiété va d'abord monter, puis inévitablement redescendre d'elle-même au fil des minutes. Ce phénomène naturel permet à ton corps d'apprendre par l'expérience que tu es en sécurité. Tes pensées automatiques se modifient d'elles-mêmes, te redonnant petit à petit ta liberté d'action et ta sérénité.
+
+Ces outils sont des supports de soutien. Si tu traverses une période difficile, consulter un·e psychologue ou ton médecin traitant reste la meilleure démarche.`
+  },
+
+  'stress-mecanisme': {
+    title: 'Le stress : mécanisme et régulation',
+    meta: 'Mécanisme et régulation · 2 min de lecture',
+    md: `Le stress est une réaction naturelle et protectrice de ton corps, conçue pour t'aider à faire face aux défis du quotidien. S'il est un formidable moteur ponctuel pour te mettre en mouvement, il peut toutefois devenir pesant et épuisant lorsqu'il s'installe dans la durée.
+
+### Utile ou épuisant : la mécanique du stress
+
+Face à une menace ou un défi, ton système nerveux autonome prend automatiquement les commandes et déclenche un réflexe de survie naturel : le mécanisme de combat-fuite-figement. En une fraction de seconde, ton cœur s'accélère, ta respiration se modifie et tes muscles se tendent pour te préparer à l'action. Ce stress aigu est particulièrement utile et sain, car il mobilise toute ton énergie pour te permettre de réagir rapidement et efficacement.
+
+Cependant, les défis modernes sont souvent invisibles ou continus. Si cette alarme biologique reste activée en permanence face aux tracas du quotidien, on parle alors de stress chronique. Ton organisme traverse un processus appelé le syndrome général d'adaptation, qui passe par une phase d'alarme, une phase de résistance pour tenter de tenir le coup, puis finit par atteindre l'épuisement.
+
+Bien avant de craquer, ton corps t'envoie des signaux d'alerte précoces qu'il est essentiel d'écouter. Ces petits indices prennent souvent la forme de tensions musculaires inexpliquées, d'une fatigue présente dès le réveil, de légers troubles digestifs, de perturbations du sommeil ou d'une irritabilité soudaine.
+
+### Leviers de régulation et prévention
+
+Pour éviter que la pression ne s'accumule et n'épuise tes ressources, il est possible d'utiliser des techniques simples pour indiquer à ton système nerveux que tu es en sécurité. L'ancrage est une pratique de pleine conscience redoutable pour ramener ton attention dans le moment présent. Elle consiste à ressentir fermement le contact de tes pieds sur le sol, à redresser ton dos et à observer ton environnement. Cela aide à ne pas te laisser emporter par les vagues de pensées angoissantes.
+
+La cohérence cardiaque est un autre levier d'apaisement rapide, agissant directement sur ta physiologie. Le principe est d'inspirer profondément en gonflant le ventre pendant cinq secondes, puis d'expirer lentement pendant cinq secondes. Cet exercice synchronise le rythme de ton cœur et de ton cerveau, freinant l'emballement physique et chassant la sensation de panique.
+
+En intégrant ces courtes pauses respiratoires dans ta journée, tu crées des espaces de récupération indispensables pour prévenir l'épuisement. Accorder de l'importance à une bonne hygiène de vie, avec un sommeil régulier et des moments de déconnexion, consolidera ta résistance face aux pressions extérieures.
+
+Prends le temps d'observer tes propres signaux corporels sans les juger, afin de t'accorder le repos que tu mérites. Ces outils sont des supports de soutien. Si tu traverses une période difficile, consulter un·e psychologue ou ton médecin traitant reste la meilleure démarche.`
+  },
+
+  'sommeil-pleine-conscience': {
+    title: 'Sommeil et pleine conscience',
+    meta: 'Hygiène du sommeil · 2 min de lecture',
+    md: `Le sommeil peut parfois sembler insaisissable lorsque l'esprit refuse de s'apaiser à la nuit tombée. Des approches éprouvées permettent de relâcher cette pression mentale pour retrouver des nuits sereines.
+
+### Le piège de l'hyperéveil et de la lutte
+
+L'insomnie et l'anxiété s'entretiennent souvent à travers le phénomène de l'hyperéveil cognitif. Au lieu de ralentir, ton cerveau maintient une vigilance élevée et se perd dans des ruminations, anticipant le lendemain ou ressassant des préoccupations. Ton organisme reste en état d'alerte, rendant l'endormissement impossible.
+
+Face à cela, le premier réflexe est de faire des efforts démesurés pour trouver le sommeil. Pourtant, vouloir contrôler le sommeil produit l'effet inverse. Plus tu t'efforces de dormir, plus ta frustration augmente, et moins tu t'endors car le corps perçoit cette injonction comme un stress supplémentaire. Comprendre que le sommeil ne se commande pas est essentiel pour désamorcer ce cercle vicieux.
+
+### L'hygiène du sommeil et la déconnexion
+
+La thérapie cognitivo-comportementale propose des règles d'hygiène du sommeil scientifiquement validées pour recréer un lien apaisé avec la nuit. L'un des principes de base est d'instaurer une régularité dans tes horaires de lever et de coucher, afin d'aider ton horloge biologique à se synchroniser et à stabiliser tes cycles.
+
+Pour apaiser ton esprit avant d'aller au lit, instaurer un rituel de déconnexion cognitive est précieux. Il s'agit de prévoir une transition douce en fin de journée, sans écrans stimulants, dédiée à des activités relaxantes comme la lecture ou la respiration lente. L'objectif est d'indiquer à ton système nerveux que la journée est terminée et qu'il n'y a plus de problème à résoudre dans l'immédiat.
+
+### La pleine conscience pour s'apaiser
+
+Lorsque les pensées anxieuses surgissent dans le noir, la pleine conscience t'invite à adopter une posture d'observation. Il ne s'agit pas de chercher à faire le vide dans ton esprit, mais d'accueillir tes sensations ou pensées vagabondes sans les juger ni t'y accrocher fermement.
+
+En portant ton attention sur ta respiration ou les points de contact avec le matelas, tu offres à ton esprit un point d'ancrage. Si ton attention s'échappe vers une inquiétude, remarque-le avec bienveillance, puis ramène patiemment ta concentration sur ton souffle. Cette pratique habitue ton organisme à relâcher ses tensions naturellement.
+
+Ces outils sont des supports de soutien. Si tu traverses une période difficile, consulter un·e psychologue ou ton médecin traitant reste la meilleure démarche.`
+  },
+
+  'respiration-regulateur': {
+    title: 'La respiration comme régulateur nerveux',
+    meta: 'Régulation du système nerveux · 2 min de lecture',
+    md: `Ta respiration est bien plus qu'un simple réflexe vital, c'est une véritable télécommande pour apaiser ton système nerveux. En modifiant consciemment ton souffle, tu peux envoyer un signal de sécurité immédiat à ton corps et calmer les tempêtes intérieures.
+
+### Le lien direct entre ton souffle et ton apaisement
+
+Ton système nerveux autonome gère tes réactions de survie, comme l'accélération de ton cœur face au stress. Le pont entre ton corps et ton esprit s'appelle le nerf vague, une autoroute nerveuse qui relie ton cerveau à tes organes majeurs.
+
+Lorsque tu respires lentement et profondément par le ventre, tu stimules ce nerf. Ce dernier active alors ton système parasympathique, c'est-à-dire le mode « repos et digestion » de ton organisme. Ce mécanisme physiologique explique pourquoi modifier ton rythme respiratoire permet de freiner physiquement l'emballement de ton cœur et de dissiper la sensation d'angoisse.
+
+### Trois techniques pour retrouver ton équilibre
+
+La cohérence cardiaque synchronise de manière optimale le rythme de ton cœur et de ton cerveau. Il te suffit d'inspirer profondément en gonflant le ventre pendant cinq secondes, puis d'expirer lentement pendant cinq secondes.
+
+La respiration 4-7-8 est une méthode ciblée pour forcer l'activation du système parasympathique. Tu inspires silencieusement par le nez pendant 4 secondes, tu retiens ton souffle pendant 7 secondes, puis tu expires bruyamment par la bouche pendant 8 secondes.
+
+La respiration au carré est très utile pour réguler les émotions intenses et retrouver ta concentration. Tu visualises un carré en inspirant sur 4 secondes, en bloquant l'air 4 secondes, en expirant sur 4 secondes, puis en bloquant à nouveau 4 secondes à poumons vides.
+
+### Pourquoi quelques minutes suffisent
+
+Il n'est pas du tout nécessaire de t'isoler pendant une heure pour ressentir les bienfaits de ces exercices. En seulement trois minutes de pratique, le taux de dioxyde de carbone et d'oxygène dans ton sang se rééquilibre naturellement. Ce simple ajustement physiologique indique à ton cerveau que le danger est écarté, interrompant ainsi l'alerte interne.
+
+En intégrant ces courtes pauses respiratoires dans ta journée, tu offres à ton système nerveux des espaces de récupération précieux. Ces outils sont des supports de soutien. Si tu traverses une période difficile, consulter un·e psychologue ou ton médecin traitant reste la meilleure démarche.`
+  },
+
+  'attention-entrainement': {
+    title: "L'attention, ça s'entraîne",
+    meta: 'Entraîner son attention · 2 min de lecture',
+    md: `Ton attention est comme un muscle : plus tu la sollicites consciemment, plus elle se renforce. Apprendre à la diriger t'aide à retrouver de la clarté mentale et à ne plus subir le flux incessant de tes pensées.
+
+### Le pilote automatique et la surcharge mentale
+
+Naturellement, ton esprit a tendance à vagabonder et à fonctionner sur un pilote automatique, un mode de traitement très rapide et inconscient. C'est un mécanisme tout à fait normal et très utile pour gérer les routines familières de la vie de tous les jours sans épuiser tes ressources.
+
+Cependant, lorsque les pensées tournent en boucle sur le passé ou anticipent anxieusement l'avenir, cette attention vagabonde peut se transformer en une hypervigilance permanente. Ton cerveau se met à scanner activement et de manière excessive les moindres détails inquiétants de ton environnement. Cette sur-stimulation sature ta capacité de traitement et crée une véritable surcharge attentionnelle. Comme un ordinateur ralenti par un trop grand nombre d'onglets ouverts, ton esprit s'épuise, ce qui entraîne une profonde fatigue cognitive, de la confusion et des difficultés persistantes à te concentrer.
+
+À l'inverse, l'attention focalisée demande un effort conscient, volontaire et contrôlé pour diriger tes précieuses ressources mentales vers une tâche précise ou vers l'ici et maintenant.
+
+### La pleine conscience pour retrouver sa clarté
+
+Pour soulager cette fatigue et reprendre les commandes, la pleine conscience agit comme un véritable entraînement de tes circuits attentionnels. L'objectif n'est absolument pas d'effacer tes pensées ou de faire le vide dans ta tête, mais de développer une attention flexible, capable d'observer les pensées vagabondes sans te laisser aveuglément emporter par elles.
+
+Cet apprentissage se décline sous deux formes complémentaires pour s'intégrer facilement à ton rythme de vie :
+
+- **Les pratiques formelles :** ce sont des moments spécifiques et structurés que tu accordes à ton esprit, comme s'asseoir quelques minutes pour observer ta respiration ou réaliser un balayage attentif des sensations de ton corps (scan corporel).
+
+- **Les pratiques informelles :** il s'agit d'inviter cette conscience sensorielle directement dans tes routines quotidiennes, par exemple en portant une attention totale aux odeurs et aux mouvements lorsque tu te brosses les dents, que tu prends une douche ou que tu savoures un repas.
+
+À chaque fois que tu remarques que ton esprit s'est échappé et que tu ramènes doucement ton attention à l'action présente, tu muscles ta concentration. Cette flexibilité attentionnelle te permet de réduire la lutte interne et favorise des moments d'immersion totale, un état naturel où ton énergie est pleinement et sereinement alignée sur ce que tu es en train de vivre.
+
+Ces outils sont des supports de soutien. Si tu traverses une période difficile, consulter un·e psychologue ou ton médecin traitant reste la meilleure démarche.`
+  },
+
+  'emotions-act': {
+    title: 'Accueillir ses émotions sans les combattre',
+    meta: "Thérapie d'acceptation et d'engagement · 2 min de lecture",
+    md: `Ressentir des émotions difficiles est une expérience profondément humaine, mais notre premier réflexe est souvent de vouloir les effacer au plus vite. La Thérapie d'Acceptation et d'Engagement (ACT) te propose un chemin différent : cesser de combattre tes tempêtes intérieures pour mieux avancer vers ce qui compte pour toi.
+
+### Le piège de la lutte émotionnelle
+
+Face à la tristesse, la colère ou l'anxiété, il est tout à fait naturel de chercher à s'en débarrasser. Pourtant, vouloir supprimer à tout prix une émotion crée souvent un effet de rebond : plus tu luttes contre elle, plus elle prend de l'espace et t'épuise. C'est ce qu'on appelle l'évitement expérientiel, un mécanisme qui transforme une douleur inévitable en souffrance durable.
+
+Pour sortir de cette impasse, l'approche ACT t'invite à pratiquer l'acceptation (ou l'expansion). Il s'agit de faire volontairement de la place à l'inconfort, en accueillant tes émotions et tes sensations physiques telles qu'elles se présentent, sans chercher à les fuir ni à les modifier. En cessant de résister, tu permets à l'émotion de traverser ton corps naturellement, comme une vague qui finit toujours par redescendre d'elle-même.
+
+### Observer sans s'identifier
+
+Lorsque l'inconfort émotionnel est fort, ton esprit produit souvent un flot de pensées critiques ou alarmistes auxquelles tu as tendance à t'accrocher fermement. La défusion cognitive est une compétence qui consiste à prendre du recul pour observer tes pensées comme de simples événements mentaux de passage, et non comme des vérités absolues qui définissent qui tu es.
+
+Au lieu de te dire « je suis incapable » et d'y croire aveuglément, tu peux remarquer cette pensée en te disant « j'ai la pensée que je suis incapable ». Cette petite distance change toute ton expérience. Tes pensées deviennent alors un simple discours intérieur que tu peux écouter avec curiosité, sans être obligé d'y obéir ou de te laisser diriger par elles.
+
+### L'action guidée par tes valeurs
+
+L'objectif de cette démarche n'est pas de te rendre passif face à la souffrance, mais de libérer ton énergie pour l'investir dans l'action engagée. Il s'agit d'entreprendre des actions concrètes, petites ou grandes, qui sont en accord avec tes valeurs personnelles, c'est-à-dire les principes profonds qui donnent du sens à ta vie.
+
+En faisant de la place à tes émotions difficiles, tu n'as plus besoin d'attendre qu'elles disparaissent pour commencer à vivre pleinement. Tu peux faire le choix d'avancer dans la direction qui t'inspire, en acceptant d'emporter tes doutes et tes peurs avec toi sur le chemin.
+
+Ces outils sont des supports de soutien. Si tu traverses une période difficile, consulter un·e psychologue ou ton médecin traitant reste la meilleure démarche.`
+  },
+
+  'colere-reguler': {
+    title: 'Comprendre et réguler la colère',
+    meta: 'Comprendre et réguler · 2 min de lecture',
+    md: `La colère est une énergie intense et naturelle qui t'indique très souvent qu'une de tes limites a été franchie ou qu'une situation te semble injuste. Plutôt que de chercher à l'étouffer ou à la fuir, tu peux apprendre à écouter attentivement son message tout en gardant le contrôle de tes réactions.
+
+### Les déclencheurs invisibles et le débordement
+
+L'étincelle de la colère ne vient pas toujours directement de l'événement extérieur lui-même, mais de la façon dont ton esprit l'interprète. Les pensées automatiques, comme le sentiment d'une injustice flagrante ou les règles rigides dictées par ton cerveau (les fameux « il n'aurait jamais dû dire ça » ou « on doit me respecter »), agissent comme un puissant accélérateur. Ton esprit perçoit une attaque personnelle ou une menace, ce qui déclenche instantanément une alerte physique générale.
+
+Lorsque cette activation corporelle devient trop intense, tu sors de ta fenêtre de tolérance, cet espace mental optimal où tu es encore capable de réfléchir sereinement. Ton système nerveux s'emballe et prend les commandes pour te préparer au combat. Cela explique pourquoi, sous le coup de la colère, tu peux avoir l'impression de perdre totalement le contrôle, de ne plus trouver tes mots ou de « déborder » émotionnellement.
+
+### Apaiser le corps pour calmer l'esprit
+
+Puisque la colère s'exprime de manière si foudroyante dans ton corps, avec des mâchoires serrées, des tensions musculaires et un cœur qui s'accélère, la première étape de régulation passe par ta physiologie. Utiliser ton corps pour apaiser ton cerveau est une stratégie redoutable et accessible à chaque instant.
+
+En pratiquant consciemment un ancrage dans le sol ou une respiration ventrale ralentie, tu envoies un signal de sécurité direct à ton système nerveux autonome. Ce retour progressif au calme physique freine la production des hormones de stress. Il permet à ton esprit de retrouver sa clarté habituelle, t'offrant ainsi le précieux recul nécessaire pour choisir comment répondre intelligemment à la situation, plutôt que d'y réagir par pur automatisme.
+
+### L'affirmation de soi et la bienveillance
+
+Une fois le calme revenu, il est essentiel de faire la différence entre ressentir de la colère et devenir agressif. L'agressivité cherche à imposer tes besoins par la force, souvent au détriment de la personne en face de toi. À l'inverse, l'affirmation de soi te permet d'exprimer tes limites et ton ressenti de manière directe, honnête et respectueuse. C'est l'art de dire « je ne suis pas d'accord » sans attaquer l'autre.
+
+Si jamais tu as cédé à l'impulsivité lors d'un conflit, l'auto-compassion est ton meilleur allié pour ne pas sombrer ensuite dans de longues ruminations ou dans la culpabilité. Traite tes propres erreurs avec la même indulgence et la même douceur que tu offrirais à un ami proche. L'imperfection fait partie intégrante de notre nature humaine, et chaque tempête traversée est une occasion supplémentaire d'apprendre sur tes propres fonctionnements.
+
+Ces outils sont des supports de soutien. Si tu traverses une période difficile, consulter un·e psychologue ou ton médecin traitant reste la meilleure démarche.`
+  },
+
+  'tristesse-activation': {
+    title: "La tristesse et l'activation comportementale",
+    meta: 'Activation comportementale · 2 min de lecture',
+    md: `Ressentir de la tristesse face aux épreuves est une réaction humaine naturelle et saine, mais elle peut parfois s'installer et t'isoler du monde. En comprenant comment fonctionne ce repli, tu peux utiliser l'action comme un levier pour retrouver doucement ton élan vital.
+
+### Tristesse passagère ou inertie dépressive ?
+
+La tristesse est une émotion utile qui signale souvent une perte ou un besoin de réconfort, t'invitant à ralentir pour te ressourcer. Cette tristesse adaptée fluctue, fonctionne par vagues, et te permet de conserver des moments d'apaisement. En revanche, l'humeur dépressive est une sensation de vide persistante qui éteint ta capacité à ressentir du plaisir et te coupe de ton énergie au quotidien.
+
+Face à cette fatigue intense, le réflexe naturel est de se mettre en retrait pour se protéger. Cependant, ce repli déclenche l'inertie comportementale. En t'isolant et en évitant tes activités habituelles, tu te prives totalement des stimulations positives de ton environnement. Moins tu en fais, plus tu te sens incapable et fatigué, ce qui aggrave la tristesse et t'enferme dans un cercle vicieux d'isolement.
+
+### L'action comme moteur de changement
+
+Pour briser ce cycle, la thérapie cognitivo-comportementale propose une approche très pragmatique : l'activation comportementale. Son principe fondamental va à l'encontre de nos intuitions : il ne faut surtout pas attendre d'aller mieux ou d'être motivé pour commencer à agir. C'est au contraire l'action concrète qui précède et entraîne l'amélioration de l'humeur.
+
+Il s'agit de réintroduire très progressivement dans ton quotidien de petites actions en ciblant deux piliers essentiels. D'un côté, les activités qui t'apportent un sentiment de plaisir, même minime, comme écouter une musique que tu aimes ou te promener. De l'autre, les activités qui te procurent un sentiment d'accomplissement, comme ranger un tiroir ou répondre à un courrier en retard.
+
+Chaque micro-tâche réalisée, sans exigence de perfection, envoie un signal de réussite à ton cerveau et réamorce ton énergie. En te remettant doucement en mouvement à ton rythme, tu recrées un environnement nourrissant et tu multiplies les opportunités de te sentir bien.
+
+Prends le temps de valoriser chaque petite étape accomplie, car aucune action n'est insignifiante lorsque l'esprit est fatigué. Ces outils sont des supports de soutien. Si tu traverses une période difficile, consulter un·e psychologue ou ton médecin traitant reste la meilleure démarche.`
   }
 };
 
 function openArticle(slug) {
   const art = ARTICLES[slug];
   if (!art) return;
+  // Permet d'ouvrir un article depuis un autre onglet (ex. fiche Explorer) :
+  // on bascule sur l'onglet Apprendre avant d'afficher la sous-vue article.
+  if (!document.getElementById('guide').classList.contains('active')) showScreen('guide');
   document.getElementById('article-title').textContent = art.title;
   document.getElementById('article-meta').textContent = art.meta;
   document.getElementById('article-body').innerHTML = mdToHTML(art.md);
   showGuideView('article');
+}
+
+// Associe chaque parcours (et sous-groupe d'Émotions) à sa fiche de
+// psychoéducation. Clé "Groupe::Sous-groupe" pour les sous-groupes.
+const PARCOURS_ARTICLES = {
+  'Anxiété': 'anxiete-tcc',
+  'Sommeil': 'sommeil-pleine-conscience',
+  'Respirer': 'respiration-regulateur',
+  'Concentration': 'attention-entrainement',
+  'Émotions': 'emotions-act',
+  'Émotions::Stress': 'stress-mecanisme',
+  'Émotions::Colère': 'colere-reguler',
+  'Émotions::Tristesse': 'tristesse-activation'
+};
+
+// Illustrations vectorielles (page d'accueil/Explorer) par parcours, avec le
+// recadrage approuvé par parcours et la hauteur de carte (rythme « masonry »).
+const PARCOURS_ILLUS = {
+  'Premiers pas':  { src: 'assets/illustrations/Illustrations site-01.webp', y: 10, h: 150 },
+  'Émotions':      { src: 'assets/illustrations/Illustrations site-02.webp', y: 20, h: 205 },
+  'Sommeil':       { src: 'assets/illustrations/Illustrations site-03.webp', y: 10, h: 175 },
+  'Respirer':      { src: 'assets/illustrations/Illustrations site-04.webp', y: 20, h: 150 },
+  'Anxiété':       { src: 'assets/illustrations/Illustrations site-05.webp', y: 0,  h: 195 },
+  'Concentration': { src: 'assets/illustrations/Illustrations site-06.webp', y: 0,  h: 160 }
+};
+
+function groupSessionCount(group) {
+  const sessions = group.sessions || (group.subgroups ? group.subgroups.flatMap(sg => sg.sessions) : []);
+  return sessions.length;
+}
+
+// Grille « masonry » de l'Explorer, générée depuis le catalogue (compteurs
+// toujours à jour, contrairement à des libellés codés en dur dans le HTML).
+function renderExploreGrid() {
+  const grid = document.getElementById('explore-parcours-grid');
+  if (!grid || !CATALOG) return;
+  grid.innerHTML = '';
+  CATALOG.groups.forEach(group => {
+    const illus = PARCOURS_ILLUS[group.name];
+    if (!illus) return;
+    const card = document.createElement('article');
+    card.className = 'card path-card';
+    card.setAttribute('role', 'button');
+    card.tabIndex = 0;
+    card.setAttribute('aria-label', 'Parcours ' + group.name + ', voir les séances');
+    card.style.minHeight = illus.h + 'px';
+    card.onclick = () => openParcoursOverlay(group.name);
+    const img = document.createElement('img');
+    img.className = 'card-illustration';
+    img.src = illus.src;
+    img.alt = '';
+    img.setAttribute('aria-hidden', 'true');
+    img.style.objectPosition = 'center ' + illus.y + '%';
+    const content = document.createElement('div');
+    content.className = 'card-content';
+    const h3 = document.createElement('h3');
+    h3.textContent = group.name;
+    const meta = document.createElement('p');
+    meta.className = 'meta';
+    meta.textContent = groupSessionCount(group) + ' séances';
+    content.appendChild(h3);
+    content.appendChild(meta);
+    card.appendChild(img);
+    card.appendChild(content);
+    grid.appendChild(card);
+  });
+}
+
+// Filtre texte de l'Explorer : recherche un parcours (carte masquée/affichée)
+// et, si une requête est active, les séances par titre/description.
+function searchExplore(value) {
+  const query = value.trim().toLowerCase();
+  const clearBtn = document.getElementById('explore-search-clear');
+  if (clearBtn) clearBtn.classList.toggle('show', !!query);
+  document.querySelectorAll('#explore-parcours-grid .path-card').forEach(card => {
+    const name = (card.querySelector('h3')?.textContent || '').toLowerCase();
+    card.style.display = (!query || name.includes(query)) ? '' : 'none';
+  });
+  if (!query) { applyFilters(); return; }
+  document.querySelectorAll('.session-list .session-card').forEach(card => {
+    const hay = (card.dataset.title + ' ' + (card.querySelector('.session-desc')?.textContent || '')).toLowerCase();
+    card.style.display = hay.includes(query) ? '' : 'none';
+  });
+  updateFilterCount();
+}
+
+function clearExploreSearch() {
+  const input = document.getElementById('explore-search-input');
+  if (input) { input.value = ''; searchExplore(''); input.focus(); }
+}
+
+// Teaser de fiche (réutilise le style .article-hero déjà existant dans
+// l'onglet Apprendre) : ouvre l'article complet dans le lecteur partagé.
+function ficheTeaserHTML(slug) {
+  const art = ARTICLES[slug];
+  if (!art) return '';
+  const lede = (art.md.split('\n\n')[0] || '').trim();
+  return '<div class="article-hero fiche-teaser" role="button" tabindex="0" aria-label="Lire : ' + art.title + '" onclick="openArticleFromParcours(\'' + slug + '\')">' +
+    '<div class="article-hero-content">' +
+    '<span class="article-hero-badge">📖 Comprendre</span>' +
+    '<h3>' + art.title + '</h3>' +
+    '<p class="fiche-lede">' + lede + '</p>' +
+    '<p class="article-hero-meta">' + art.meta + '</p>' +
+    '</div></div>';
+}
+
+function openArticleFromParcours(slug) {
+  closeParcoursOverlay();
+  releaseOverlay('parcours');
+  openArticle(slug);
+}
+
+// Vue détail d'un parcours : hero + fiche(s) de psychoéducation + séances
+// réelles du catalogue (mêmes cartes que la liste complète, favoris inclus).
+function openParcoursOverlay(groupName) {
+  if (!CATALOG) return;
+  const group = CATALOG.groups.find(g => g.name === groupName);
+  if (!group) return;
+  const illus = PARCOURS_ILLUS[groupName];
+  const heroImg = document.getElementById('parcours-hero-img');
+  heroImg.src = (illus && illus.src) || group.artwork || '';
+  heroImg.style.objectPosition = 'center ' + (illus ? illus.y : 30) + '%';
+  document.getElementById('parcours-title').textContent = groupName;
+
+  const body = document.getElementById('parcours-body');
+  body.innerHTML = '';
+
+  const slug = PARCOURS_ARTICLES[groupName];
+  if (slug) body.insertAdjacentHTML('beforeend', ficheTeaserHTML(slug));
+
+  if (group.disclaimer) {
+    const d = document.createElement('p');
+    d.className = 'emotion-top-disclaimer';
+    d.textContent = group.disclaimer;
+    body.appendChild(d);
+  }
+
+  if (group.subgroups) {
+    group.subgroups.forEach(sg => {
+      const label = document.createElement('p');
+      label.className = 'parcours-sub-label';
+      label.textContent = sg.label;
+      body.appendChild(label);
+      const subSlug = PARCOURS_ARTICLES[groupName + '::' + sg.name];
+      if (subSlug) body.insertAdjacentHTML('beforeend', ficheTeaserHTML(subSlug));
+      sg.sessions.forEach(s => body.appendChild(makeSessionCard(s, group, sg.name)));
+    });
+  } else {
+    const label = document.createElement('p');
+    label.className = 'parcours-sub-label';
+    label.textContent = '🎧 Les séances';
+    body.appendChild(label);
+    group.sessions.forEach(s => body.appendChild(makeSessionCard(s, group, null)));
+  }
+  if (group.resources) body.appendChild(makeResourcesBlock(group.resources));
+
+  updateSessionChecks();
+  const ov = document.getElementById('parcours-overlay');
+  ov.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  registerOverlay('parcours', closeParcoursOverlay);
+  window.scrollTo(0, 0);
+}
+
+function closeParcoursOverlay() {
+  document.getElementById('parcours-overlay').classList.remove('open');
+  document.body.style.overflow = '';
 }
 
 function toggleFaq(item) {

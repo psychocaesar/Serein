@@ -173,8 +173,11 @@
     .parcours-rail .path-card { flex: 0 0 132px; min-height: 158px; }
 
     /* GRILLE PARCOURS (Explorer) : remplace les onglets Thème, la carte active sert de filtre */
-    .explore-parcours { display: grid; grid-template-columns: repeat(2, 1fr); gap: .65rem; margin-top: .5rem; }
-    .explore-parcours .path-card { min-height: 104px; }
+    /* Grille « masonry » de l'Explorer : colonnes CSS natives, hauteurs de
+       carte variables (définies par parcours dans PARCOURS_ILLUS) → rythme
+       façon Medito, sans calcul JS de colonnes. */
+    .explore-parcours { column-count: 2; column-gap: .65rem; margin-top: .9rem; }
+    .explore-parcours .path-card { width: 100%; margin: 0 0 .65rem; break-inside: avoid; }
     .explore-parcours .path-card.selected { outline: 2px solid var(--color-primary); outline-offset: 2px; }
     .explore-parcours .path-card.selected .card-content h3::after { content: ' ✓'; }
 
@@ -182,6 +185,33 @@
     .parcours-rail .path-card .card-content, .explore-parcours .path-card .card-content { padding: .7rem .8rem .65rem; }
     .parcours-rail .path-card .card-content h3, .explore-parcours .path-card .card-content h3 { font-size: .88rem; margin-bottom: 0; }
     .parcours-rail .path-card .meta, .explore-parcours .path-card .meta { margin-top: .1rem; }
+
+    /* ── Recherche Explorer ── */
+    .explore-search { display: flex; align-items: center; gap: .6rem; background: var(--color-surface); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid var(--color-border); border-radius: 2rem; padding: .7rem 1rem; margin-top: 1rem; }
+    .explore-search svg { width: 18px; height: 18px; flex-shrink: 0; stroke: var(--color-muted); fill: none; stroke-width: 2; }
+    .explore-search input { flex: 1; min-width: 0; background: none; border: none; color: var(--color-text); font-size: .95rem; font-family: inherit; outline: none; }
+    .explore-search input::placeholder { color: var(--color-muted); }
+    .explore-search-clear { display: none; background: none; border: none; color: var(--color-muted); font-size: 1rem; cursor: pointer; padding: 0 .15rem; }
+    .explore-search-clear.show { display: block; }
+
+    /* ── Fiche de psychoéducation (teaser, réutilise .article-hero) ── */
+    .fiche-teaser { margin: 1.1rem 0; }
+    .fiche-teaser .fiche-lede { font-size: .82rem; color: rgba(255,255,255,.78); line-height: 1.55; margin: .35rem 0 .55rem; }
+    .parcours-sub-label { font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; margin: 1.6rem 0 .3rem; color: var(--color-muted); padding-left: .25rem; }
+    /* Réutilise les blocs Émotions (disclaimer + ressources) hors de #session-list */
+    #parcours-body .emotion-top-disclaimer, #parcours-body .emotion-ressources { display: block; }
+
+    /* ── Overlay détail de parcours ── */
+    .parcours-overlay { display: none; position: fixed; inset: 0; z-index: 250; background: var(--color-bg); overflow-y: auto; -webkit-overflow-scrolling: touch; }
+    .parcours-overlay.open { display: block; animation: fadeInBd .2s ease; }
+    .parcours-hero { position: relative; height: 230px; overflow: hidden; }
+    .parcours-hero img { width: 100%; height: 100%; object-fit: cover; object-position: center 30%; display: block; }
+    .parcours-hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, var(--color-bg) 2%, rgba(13,27,21,.35) 50%, rgba(13,27,21,.55) 100%); }
+    [data-theme="light"] .parcours-hero::after { background: linear-gradient(to top, var(--color-bg) 2%, rgba(244,242,236,.45) 55%, rgba(244,242,236,.65) 100%); }
+    .parcours-hero-txt { position: absolute; left: 1.25rem; right: 1.25rem; bottom: 1rem; z-index: 2; }
+    .parcours-hero-txt h1 { font-family: 'Bricolage Grotesque', sans-serif; font-size: 1.9rem; color: #fff; text-shadow: 0 1px 8px rgba(0,0,0,.5); }
+    .parcours-overlay .back { position: absolute; top: max(.9rem, env(safe-area-inset-top)); left: .9rem; z-index: 3; background: rgba(0,0,0,.42); backdrop-filter: blur(8px); color: #fff; border: none; border-radius: 2rem; padding: .45rem .9rem; font-size: .85rem; cursor: pointer; }
+    .parcours-overlay-body { max-width: 640px; margin: 0 auto; padding: 1.25rem 1.25rem calc(2rem + env(safe-area-inset-bottom)); }
 
     /* ICÔNES SVG — même trait que la nav (les emojis restent réservés à l'expressif : humeurs, ambiances) */
     .icon-svg { stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
@@ -1017,27 +1047,27 @@
       <button class="rail-link" onclick="filterParcours(null)">Tout voir ›</button>
     </div>
     <div class="parcours-rail">
-      <article class="card path-card" role="button" tabindex="0" aria-label="Parcours Premiers pas, voir les séances" onclick="filterParcours('Premiers pas')">
-        <img class="card-illustration" src="assets/illustrations/Illustrations site-01.webp" alt="" aria-hidden="true">
+      <article class="card path-card" role="button" tabindex="0" aria-label="Parcours Premiers pas, voir les séances" onclick="openParcoursOverlay('Premiers pas')">
+        <img class="card-illustration" src="assets/illustrations/Illustrations site-01.webp" alt="" aria-hidden="true" style="object-position:center 10%">
         <div class="card-content"><h3>Premiers pas</h3><p class="meta">7 séances</p></div>
       </article>
-      <article class="card path-card" role="button" tabindex="0" aria-label="Parcours Émotions, voir les séances" onclick="filterParcours('Émotions')">
-        <img class="card-illustration" src="assets/illustrations/Illustrations site-02.webp" alt="" aria-hidden="true">
+      <article class="card path-card" role="button" tabindex="0" aria-label="Parcours Émotions, voir les séances" onclick="openParcoursOverlay('Émotions')">
+        <img class="card-illustration" src="assets/illustrations/Illustrations site-02.webp" alt="" aria-hidden="true" style="object-position:center 20%">
         <div class="card-content"><h3>Émotions</h3><p class="meta">9 séances</p></div>
       </article>
-      <article class="card path-card" role="button" tabindex="0" aria-label="Parcours Sommeil, voir les séances" onclick="filterParcours('Sommeil')">
-        <img class="card-illustration" src="assets/illustrations/Illustrations site-03.webp" alt="" aria-hidden="true">
+      <article class="card path-card" role="button" tabindex="0" aria-label="Parcours Sommeil, voir les séances" onclick="openParcoursOverlay('Sommeil')">
+        <img class="card-illustration" src="assets/illustrations/Illustrations site-03.webp" alt="" aria-hidden="true" style="object-position:center 10%">
         <div class="card-content"><h3>Sommeil</h3><p class="meta">6 séances</p></div>
       </article>
-      <article class="card path-card" role="button" tabindex="0" aria-label="Parcours Respirer, voir les séances" onclick="filterParcours('Respirer')">
-        <img class="card-illustration" src="assets/illustrations/Illustrations site-04.webp" alt="" aria-hidden="true">
+      <article class="card path-card" role="button" tabindex="0" aria-label="Parcours Respirer, voir les séances" onclick="openParcoursOverlay('Respirer')">
+        <img class="card-illustration" src="assets/illustrations/Illustrations site-04.webp" alt="" aria-hidden="true" style="object-position:center 20%">
         <div class="card-content"><h3>Respirer</h3><p class="meta">5 séances</p></div>
       </article>
-      <article class="card path-card" role="button" tabindex="0" aria-label="Parcours Anxiété, voir les séances" onclick="filterParcours('Anxiété')">
+      <article class="card path-card" role="button" tabindex="0" aria-label="Parcours Anxiété, voir les séances" onclick="openParcoursOverlay('Anxiété')">
         <img class="card-illustration" src="assets/illustrations/Illustrations site-05.webp" alt="" aria-hidden="true">
         <div class="card-content"><h3>Anxiété</h3><p class="meta">6 séances</p></div>
       </article>
-      <article class="card path-card" role="button" tabindex="0" aria-label="Parcours Concentration, voir les séances" onclick="filterParcours('Concentration')">
+      <article class="card path-card" role="button" tabindex="0" aria-label="Parcours Concentration, voir les séances" onclick="openParcoursOverlay('Concentration')">
         <img class="card-illustration" src="assets/illustrations/Illustrations site-06.webp" alt="" aria-hidden="true">
         <div class="card-content"><h3>Concentration</h3><p class="meta">7 séances</p></div>
       </article>
@@ -1106,38 +1136,27 @@
   </div>
 </div>
 
+<!-- Overlay détail d'un parcours : hero + fiche(s) de psychoéducation + séances -->
+<div class="parcours-overlay" id="parcours-overlay" role="dialog" aria-modal="true" aria-label="Détail du parcours">
+  <div class="parcours-hero">
+    <button class="back" onclick="closeParcoursOverlay();releaseOverlay('parcours')" aria-label="Retour à Explorer">‹ Parcours</button>
+    <img id="parcours-hero-img" src="" alt="">
+    <div class="parcours-hero-txt"><h1 id="parcours-title"></h1></div>
+  </div>
+  <div class="parcours-overlay-body" id="parcours-body"></div>
+</div>
+
 <!-- EXPLORER -->
 <section id="explore" class="screen">
   <header>
     <h1>Choisis une séance selon ton besoin du moment.</h1>
-    <p class="lead">Choisis un parcours, affine par durée. Retape sur un parcours pour tout réafficher.</p>
+    <p class="lead">Tape un parcours pour le découvrir, ou cherche directement une séance.</p>
   </header>
 
-  <div class="explore-parcours" role="group" aria-label="Filtrer par parcours">
-    <article class="card path-card" role="button" tabindex="0" aria-label="Filtrer sur le parcours Premiers pas" onclick="exploreParcoursClick('Premiers pas')">
-      <img class="card-illustration" src="assets/illustrations/Illustrations site-01.webp" alt="" aria-hidden="true">
-      <div class="card-content"><h3>Premiers pas</h3><p class="meta">7 séances</p></div>
-    </article>
-    <article class="card path-card" role="button" tabindex="0" aria-label="Filtrer sur le parcours Émotions" onclick="exploreParcoursClick('Émotions')">
-      <img class="card-illustration" src="assets/illustrations/Illustrations site-02.webp" alt="" aria-hidden="true">
-      <div class="card-content"><h3>Émotions</h3><p class="meta">9 séances</p></div>
-    </article>
-    <article class="card path-card" role="button" tabindex="0" aria-label="Filtrer sur le parcours Sommeil" onclick="exploreParcoursClick('Sommeil')">
-      <img class="card-illustration" src="assets/illustrations/Illustrations site-03.webp" alt="" aria-hidden="true">
-      <div class="card-content"><h3>Sommeil</h3><p class="meta">6 séances</p></div>
-    </article>
-    <article class="card path-card" role="button" tabindex="0" aria-label="Filtrer sur le parcours Respirer" onclick="exploreParcoursClick('Respirer')">
-      <img class="card-illustration" src="assets/illustrations/Illustrations site-04.webp" alt="" aria-hidden="true">
-      <div class="card-content"><h3>Respirer</h3><p class="meta">5 séances</p></div>
-    </article>
-    <article class="card path-card" role="button" tabindex="0" aria-label="Filtrer sur le parcours Anxiété" onclick="exploreParcoursClick('Anxiété')">
-      <img class="card-illustration" src="assets/illustrations/Illustrations site-05.webp" alt="" aria-hidden="true">
-      <div class="card-content"><h3>Anxiété</h3><p class="meta">6 séances</p></div>
-    </article>
-    <article class="card path-card" role="button" tabindex="0" aria-label="Filtrer sur le parcours Concentration" onclick="exploreParcoursClick('Concentration')">
-      <img class="card-illustration" src="assets/illustrations/Illustrations site-06.webp" alt="" aria-hidden="true">
-      <div class="card-content"><h3>Concentration</h3><p class="meta">7 séances</p></div>
-    </article>
+  <div class="explore-search">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input type="search" id="explore-search-input" placeholder="Rechercher un parcours, une séance…" oninput="searchExplore(this.value)" aria-label="Rechercher un parcours ou une séance">
+    <button class="explore-search-clear" id="explore-search-clear" onclick="clearExploreSearch()" aria-label="Effacer la recherche">✕</button>
   </div>
 
   <!-- Séances favorites — rempli par renderFavorisSection() -->
@@ -1145,6 +1164,11 @@
     <p class="timer-block-label">♥ Mes favoris</p>
     <div class="favoris-list"></div>
   </section>
+
+  <!-- Grille des parcours — générée par renderExploreGrid() depuis le catalogue -->
+  <div class="explore-parcours" id="explore-parcours-grid" role="group" aria-label="Découvrir un parcours"></div>
+
+  <p class="article-section-label" style="margin-top:1.8rem;">Toutes les séances</p>
 
   <div class="filter-group">
     <p class="filter-group-label">Durée</p>
@@ -1220,6 +1244,50 @@
         <span class="article-mini-icon">🔁</span>
         <div class="article-mini-title">Méditer au quotidien</div>
         <div class="article-mini-desc">Créer une habitude douce</div>
+      </div>
+    </div>
+
+    <p class="article-section-label">Comprendre tes émotions et ton corps</p>
+    <div class="article-mini-grid">
+      <div class="article-mini-card" role="article" tabindex="0" onclick="openArticle('anxiete-tcc')" style="cursor:pointer;">
+        <span class="article-mini-icon">🤍</span>
+        <div class="article-mini-title">L'anxiété et la TCC</div>
+        <div class="article-mini-desc">Le triangle de l'anxiété</div>
+      </div>
+      <div class="article-mini-card" role="article" tabindex="0" onclick="openArticle('stress-mecanisme')" style="cursor:pointer;">
+        <span class="article-mini-icon">😮‍💨</span>
+        <div class="article-mini-title">Le mécanisme du stress</div>
+        <div class="article-mini-desc">Utile ou épuisant ?</div>
+      </div>
+      <div class="article-mini-card" role="article" tabindex="0" onclick="openArticle('sommeil-pleine-conscience')" style="cursor:pointer;">
+        <span class="article-mini-icon">🌙</span>
+        <div class="article-mini-title">Sommeil et pleine conscience</div>
+        <div class="article-mini-desc">Sortir du piège de l'hyperéveil</div>
+      </div>
+      <div class="article-mini-card" role="article" tabindex="0" onclick="openArticle('respiration-regulateur')" style="cursor:pointer;">
+        <span class="article-mini-icon">🌬️</span>
+        <div class="article-mini-title">Le souffle, un régulateur</div>
+        <div class="article-mini-desc">3 techniques pour t'apaiser</div>
+      </div>
+      <div class="article-mini-card" role="article" tabindex="0" onclick="openArticle('attention-entrainement')" style="cursor:pointer;">
+        <span class="article-mini-icon">🎯</span>
+        <div class="article-mini-title">L'attention, ça s'entraîne</div>
+        <div class="article-mini-desc">Sortir du pilote automatique</div>
+      </div>
+      <div class="article-mini-card" role="article" tabindex="0" onclick="openArticle('emotions-act')" style="cursor:pointer;">
+        <span class="article-mini-icon">🌿</span>
+        <div class="article-mini-title">Accueillir ses émotions</div>
+        <div class="article-mini-desc">L'approche ACT</div>
+      </div>
+      <div class="article-mini-card" role="article" tabindex="0" onclick="openArticle('colere-reguler')" style="cursor:pointer;">
+        <span class="article-mini-icon">😤</span>
+        <div class="article-mini-title">Comprendre la colère</div>
+        <div class="article-mini-desc">L'écouter sans déborder</div>
+      </div>
+      <div class="article-mini-card" role="article" tabindex="0" onclick="openArticle('tristesse-activation')" style="cursor:pointer;">
+        <span class="article-mini-icon">☁️</span>
+        <div class="article-mini-title">Tristesse et activation</div>
+        <div class="article-mini-desc">Agir avant d'aller mieux</div>
       </div>
     </div>
 
