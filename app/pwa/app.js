@@ -2756,7 +2756,27 @@ let breathCycles = 0;
 let breathTimer = null;
 let breathTargetSec = 0;   // 0 = séance libre (illimitée)
 let breathStartTime = 0;
+let breathCounted = false; // garde-fou : 1 seul incrément de stats par run
 const BREATH_RING_CIRC = 2 * Math.PI * 100; // r=100 sur le cercle SVG
+const BREATH_MIN_CYCLES = 4; // en deçà, trop court pour compter comme une séance
+
+// Compte la respiration dans les stats (séances/minutes/série), comme le
+// minuteur libre (recordTimerCompletion). Pas d'historique ni de compteur de
+// don : ce n'est pas une séance du catalogue.
+function recordBreathCompletion(minutes) {
+  try {
+    const s = getStats();
+    s.sessions = (s.sessions || 0) + 1;
+    s.minutes = (s.minutes || 0) + (minutes || 0);
+    const today = new Date().toLocaleDateString('fr-CA');
+    if (s.lastDate !== today) {
+      s.streak = isYesterday(s.lastDate) ? (s.streak || 0) + 1 : 1;
+      s.lastDate = today;
+    }
+    localStorage.setItem('serein-stats', JSON.stringify(s));
+    loadStats();
+  } catch(e) { console.warn('[Serein stats]', e); }
+}
 
 function breathFmt(s) { s = Math.max(0, Math.round(s)); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); }
 
@@ -2797,6 +2817,7 @@ function startBreathing() {
   breathActive = true;
   breathPhaseIdx = 0;
   breathCycles = 0;
+  breathCounted = false;
   breathStartTime = Date.now();
   const btn = document.getElementById("breathBtn");
   btn.textContent = "⏹ Arrêter";
@@ -2805,6 +2826,12 @@ function startBreathing() {
 }
 
 function stopBreathing() {
+  // Compte la séance si l'utilisateur a tenu un minimum de cycles (libre comme
+  // minuté interrompu) : minutes = temps réellement écoulé.
+  if (breathActive && !breathCounted && breathCycles >= BREATH_MIN_CYCLES) {
+    recordBreathCompletion(Math.max(1, Math.round((Date.now() - breathStartTime) / 60000)));
+    breathCounted = true;
+  }
   breathActive = false;
   clearTimeout(breathTimer);
   const btn = document.getElementById("breathBtn");
@@ -2899,6 +2926,8 @@ function advanceBreathPhase() {
 function finishBreathSession() {
   breathActive = false;
   clearTimeout(breathTimer);
+  // Séance minutée menée à terme : on compte la durée cible visée.
+  if (!breathCounted) { recordBreathCompletion(Math.round(breathTargetSec / 60)); breathCounted = true; }
   haptic("success");
   const c = document.getElementById("breathCircle");
   c.classList.remove("holding");
