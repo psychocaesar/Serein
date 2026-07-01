@@ -20,27 +20,22 @@
   gitignoré, donc il faut bien ce prebuild dans la recette F-Droid — voir
   `fr.sereinapp.app.yml`).
 
-## Ce qui reste à faire avant de soumettre
+## Suivi de la soumission
 
-1. **Tagger la release actuelle.** F-Droid build à partir d'un tag git, pas
-   d'une branche. Le seul tag existant est `v0.3-alpha` (très ancien). Il
-   faut créer et pousser un tag correspondant à la version publiée sur les
-   stores, ex. `v1.3.0` (à faire pointer sur le commit qui a ce
-   `versionCode`/`versionName`, pas forcément `HEAD`).
-2. **Vérifier le build depuis un checkout propre** (idéalement via Android
-   Studio ou la CI Codemagic existante) après le nettoyage Gradle ci-dessus —
-   pas pu être vérifié localement dans cette session (JDK 17 absent de cet
-   environnement, seul un JRE 8 était disponible).
-3. **Créer un compte GitLab** (si pas déjà fait) pour ouvrir la merge request
-   sur https://gitlab.com/fdroid/fdroiddata.
-4. **Copier `fr.sereinapp.app.yml`** dans `metadata/fr.sereinapp.app.yml` de
-   ce dépôt fdroiddata, ajuster `commit:`/`versionCode:`/`versionName:` si la
-   version a changé entre temps.
-5. **Optionnel mais recommandé** : tester la recette en local avec
-   `fdroid build --verbose fr.sereinapp.app` (nécessite d'installer
-   `fdroidserver`, voir https://f-droid.org/docs/Submitting_to_F-Droid_Quick_Start_Guide/).
-6. Ouvrir la merge request sur fdroiddata avec le fichier YAML. Le délai de
-   revue est généralement de plusieurs jours à quelques semaines.
+1. ✅ Tag `v1.3.0` créé et poussé (commit `4d3bc17b93fd305109e4edf76cfc3387901ce1d9`).
+2. ✅ Build vérifié (compile toujours après le nettoyage Gradle).
+3. ✅ Merge request ouverte sur https://gitlab.com/fdroid/fdroiddata.
+4. **Retour reviewer (juin 2026) : ne pas utiliser de tag ni de branche dans
+   `commit:`, utiliser le hash de commit complet.** Corrigé dans
+   `fr.sereinapp.app.yml` (`commit: 4d3bc17b93fd305109e4edf76cfc3387901ce1d9`
+   au lieu de `commit: v1.3.0`). Si une nouvelle version est taguée plus
+   tard, il faudra toujours résoudre le tag vers son hash de commit complet
+   (`git rev-parse v1.3.0^{commit}`) avant de mettre à jour la recette —
+   F-Droid n'accepte pas les références mutables (tag/branche) dans les
+   recettes de build, seulement des commits figés.
+5. **Reste à faire sur la MR GitLab** : éditer la description de la MR pour
+   utiliser le template "App Inclusion" fourni par F-Droid, lire ses
+   instructions et cocher les cases de la checklist qu'il contient.
 
 ## Fiche descriptive (à réutiliser dans la MR ou en fastlane metadata)
 
