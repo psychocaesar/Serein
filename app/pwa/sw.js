@@ -82,6 +82,10 @@ async function audioResponse(request) {
   if (start >= buf.byteLength) {
     return new Response(null, { status: 416, headers: { 'Content-Range': 'bytes */' + buf.byteLength } });
   }
+  // Le média est désormais chargé avec crossOrigin="anonymous" (Web Audio, pour
+  // régler le volume sur iOS) : la réponse 206 synthétisée doit rester
+  // CORS-propre, sinon le son servi depuis le cache est « tainted » (silence).
+  const acao = response.headers.get('Access-Control-Allow-Origin') || '*';
   return new Response(buf.slice(start, end + 1), {
     status: 206,
     statusText: 'Partial Content',
@@ -89,7 +93,8 @@ async function audioResponse(request) {
       'Content-Type': response.headers.get('Content-Type') || 'audio/mpeg',
       'Content-Length': String(end - start + 1),
       'Content-Range': 'bytes ' + start + '-' + end + '/' + buf.byteLength,
-      'Accept-Ranges': 'bytes'
+      'Accept-Ranges': 'bytes',
+      'Access-Control-Allow-Origin': acao
     }
   });
 }

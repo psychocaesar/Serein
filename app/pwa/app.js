@@ -9,6 +9,7 @@ let timerSecondsLeft = 0;
 let timerTotalSeconds = 0;
 let timerRunning = false;
 let currentAmbiance = null;
+let currentAudioBlobUrl = null; // révoqué/remplacé à chaque nouvelle lecture (voir launchPlayer)
 let timerAudioCtx = null;
 let timerStartTimestamp = 0;
 let timerElapsedBeforePause = 0;
@@ -498,6 +499,11 @@ function confirmVoiceAndLaunch() {
 let currentSession = null;
 const audio = document.getElementById('audio-engine');
 const ambianceAudio = document.getElementById('ambiance-engine');
+// crossOrigin doit être posé AVANT toute src : sans lui, router un flux
+// cross-origin (CDN) dans un MediaElementSource Web Audio sort du silence
+// (média « tainted »). Le CDN renvoie bien les en-têtes CORS pour
+// capacitor://localhost (iOS) et https://localhost (Android).
+ambianceAudio.crossOrigin = 'anonymous';
 let currentOfflineFilename = null;
 
 // ── MEDIA SESSION (écran de verrouillage, écouteurs, notification Android) ──
@@ -652,6 +658,22 @@ function toggleOptionsSheet() {
   else releaseOverlay('options');
 }
 
+// Sert l'audio depuis le Cache Storage s'il a été téléchargé, sinon depuis le
+// réseau. Ne dépend PAS du service worker (audioResponse dans sw.js) : sur
+// iOS, WKWebView + le scheme custom de Capacitor ne fait pas tourner le SW,
+// donc audio.src pointant vers le CDN échoue en mode avion même si le fichier
+// est bien dans le cache (constaté : téléchargement OK, lecture offline KO).
+async function resolveAudioSrc(voice, filename) {
+  const url = AUDIO_BASE_URL + voiceFolder(voice) + '/' + encodeURIComponent(filename);
+  if (!('caches' in window)) return url;
+  try {
+    const cache = await caches.open(AUDIO_CACHE);
+    const cached = await cache.match(url);
+    if (cached) return URL.createObjectURL(await cached.blob());
+  } catch (e) { console.warn('[Serein cache]', e); }
+  return url;
+}
+
 function launchPlayer(id, title, parcours, duration, filename, voice, artwork, resumeAt) {
   currentSession = { id, title, parcours, duration, filename, voice, artwork };
   currentOfflineFilename = filename;
@@ -703,15 +725,23 @@ function launchPlayer(id, title, parcours, duration, filename, voice, artwork, r
 
   openPlayerScreen();
 
-  audio.src = AUDIO_BASE_URL + voiceFolder(voice) + '/' + encodeURIComponent(filename);
-  audio.load();
-  audio.play().then(() => {
-    document.getElementById('audio-loading').textContent = '';
-    updatePlayIcon(true);
-    if (!pendingResumeTime) playBell();
-  }).catch(() => {
-    document.getElementById('audio-loading').textContent = 'Appuie sur ▶ pour démarrer';
-    updatePlayIcon(false);
+  const staleBlobUrl = currentAudioBlobUrl;
+  currentAudioBlobUrl = null;
+  resolveAudioSrc(voice, filename).then(src => {
+    if (src.startsWith('blob:')) currentAudioBlobUrl = src;
+    // Révoquer l'ancien blob seulement après que le nouveau src soit prêt
+    // (évite de couper une lecture/replay en cours si l'utilisateur relance vite).
+    if (staleBlobUrl) URL.revokeObjectURL(staleBlobUrl);
+    audio.src = src;
+    audio.load();
+    audio.play().then(() => {
+      document.getElementById('audio-loading').textContent = '';
+      updatePlayIcon(true);
+      if (!pendingResumeTime) playBell();
+    }).catch(() => {
+      document.getElementById('audio-loading').textContent = 'Appuie sur ▶ pour démarrer';
+      updatePlayIcon(false);
+    });
   });
 }
 
@@ -742,13 +772,13 @@ function togglePlay() {
   // Guided session mode
   if (!audio.src || audio.src === window.location.href) {
     if (!currentAmbiance) return;
-    if (ambianceAudio.paused) { ambianceAudio.play().catch(() => {}); updatePlayIcon(true); }
+    if (ambianceAudio.paused) { resumeAmbianceCtx(); ambianceAudio.play().catch(() => {}); updatePlayIcon(true); }
     else { ambianceAudio.pause(); updatePlayIcon(false); }
     return;
   }
   if (audio.paused) {
     audio.play();
-    if (currentAmbiance) ambianceAudio.play().catch(() => {});
+    if (currentAmbiance) { resumeAmbianceCtx(); ambianceAudio.play().catch(() => {}); }
     updatePlayIcon(true);
   } else {
     audio.pause();
@@ -1040,6 +1070,38 @@ async function updateOfflineBtnState() {
 }
 
 // ── AMBIANCE ──
+// iOS (Safari/WKWebView) ignore HTMLMediaElement.volume : le seul moyen de
+// régler le volume d'un son en JS y est la Web Audio API. On route donc
+// l'ambiance (element → gain → destination) et on pilote le GainNode.
+let ambianceCtx = null, ambianceGain = null, ambianceGraphBuilt = false;
+
+function ensureAmbianceGraph() {
+  if (ambianceGraphBuilt) return;
+  const Ctx = window.AudioContext || window.webkitAudioContext;
+  if (!Ctx) return; // pas de Web Audio → on garde element.volume en repli
+  try {
+    ambianceCtx = new Ctx();
+    const src = ambianceCtx.createMediaElementSource(ambianceAudio);
+    ambianceGain = ambianceCtx.createGain();
+    src.connect(ambianceGain).connect(ambianceCtx.destination);
+    ambianceGraphBuilt = true;
+  } catch (e) {
+    console.warn('[Serein ambiance webaudio]', e);
+    ambianceCtx = null; ambianceGain = null;
+  }
+}
+
+// iOS suspend l'AudioContext hors geste utilisateur → le relancer à la lecture.
+function resumeAmbianceCtx() {
+  if (ambianceCtx && ambianceCtx.state === 'suspended') ambianceCtx.resume().catch(() => {});
+}
+
+function setAmbianceVolume(v) {
+  const vol = Math.max(0, Math.min(1, parseFloat(v) || 0));
+  if (ambianceGain) ambianceGain.gain.value = vol; // chemin Web Audio (iOS inclus)
+  else ambianceAudio.volume = vol;                 // repli si Web Audio indisponible
+}
+
 function setAmbiance(file) {
   document.querySelectorAll('.ambiance-btn').forEach(b => b.classList.remove('active'));
   if (!file) {
@@ -1053,7 +1115,9 @@ function setAmbiance(file) {
   }
   currentAmbiance = file;
   ambianceAudio.src = AUDIO_BASE_URL + 'ambiance/' + file;
-  ambianceAudio.volume = parseFloat(document.getElementById('ambiance-volume-slider').value);
+  ensureAmbianceGraph();
+  resumeAmbianceCtx();
+  setAmbianceVolume(document.getElementById('ambiance-volume-slider').value);
   ambianceAudio.play().catch(() => {});
   const id = 'amb-' + file.replace('.mp3','').replace('bruit-blanc','blanc').toLowerCase();
   const btn = document.getElementById(id);
@@ -1065,7 +1129,7 @@ function setAmbiance(file) {
 }
 
 document.getElementById('ambiance-volume-slider').addEventListener('input', e => {
-  ambianceAudio.volume = e.target.value;
+  setAmbianceVolume(e.target.value);
   try { localStorage.setItem('serein-ambiance-volume', e.target.value); } catch(_) {}
 });
 
