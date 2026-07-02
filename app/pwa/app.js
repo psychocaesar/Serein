@@ -72,6 +72,14 @@ function releaseOverlay(name) {
   try { history.back(); } catch(e) { suppressPop--; }
 }
 
+// Point d'entrée unique pour "revenir en arrière" (bouton back Android, edge-swipe,
+// gestes internes comme l'article) : passe par history.back() pour rejouer le même
+// pop de pile que le popstate natif, plutôt que de coder en dur une destination.
+function goBack() {
+  if (overlayStack.length === 0) return; // déjà à la racine, rien à fermer
+  try { history.back(); } catch(e) {}
+}
+
 window.addEventListener('popstate', () => {
   if (suppressPop > 0) { suppressPop--; return; }
   const top = overlayStack.pop();
@@ -1973,16 +1981,32 @@ Prends le temps de valoriser chaque petite étape accomplie, car aucune action n
   }
 };
 
+// Écran depuis lequel un article a été ouvert quand ce n'était pas Apprendre
+// (ex. fiche Explorer) : permet à goBack() de revenir au bon endroit au lieu
+// d'atterrir systématiquement sur Apprendre (bug remonté par César : ouvrir un
+// article depuis Explorer puis revenir en arrière renvoyait vers Apprendre).
+let articleOriginScreen = null;
+
 function openArticle(slug) {
   const art = ARTICLES[slug];
   if (!art) return;
   // Permet d'ouvrir un article depuis un autre onglet (ex. fiche Explorer) :
-  // on bascule sur l'onglet Apprendre avant d'afficher la sous-vue article.
-  if (!document.getElementById('guide').classList.contains('active')) showScreen('guide');
+  // on bascule sur l'onglet Apprendre avant d'afficher la sous-vue article,
+  // en mémorisant l'onglet d'origine pour un retour cohérent.
+  const guideActive = document.getElementById('guide').classList.contains('active');
+  articleOriginScreen = guideActive ? null : SCREENS.find(s => document.getElementById(s).classList.contains('active'));
+  if (!guideActive) showScreen('guide');
   document.getElementById('article-title').textContent = art.title;
   document.getElementById('article-meta').textContent = art.meta;
   document.getElementById('article-body').innerHTML = mdToHTML(art.md);
   showGuideView('article');
+  if (articleOriginScreen) {
+    const top = overlayStack[overlayStack.length - 1];
+    if (top && top.name.startsWith('guide-')) {
+      const origin = articleOriginScreen;
+      top.closeFn = () => { articleOriginScreen = null; showScreen(origin); };
+    }
+  }
 }
 
 // Associe chaque parcours (et sous-groupe d'Émotions) à sa fiche de
@@ -3800,6 +3824,25 @@ document.addEventListener('DOMContentLoaded', async () => {
   articleView.addEventListener('touchend', e => {
     const dx = e.changedTouches[0].clientX - artSwipeX;
     const dy = Math.abs(e.changedTouches[0].clientY - artSwipeY);
-    if (dx > 60 && dy < 50) showGuideView('comprendre');
+    if (dx > 60 && dy < 50) goBack();
+  }, { passive: true });
+
+  // Swipe depuis le bord gauche de l'écran pour revenir en arrière (équivalent
+  // du geste système Android/iOS), unifié avec goBack() donc avec le bouton
+  // back matériel : ferme sheet/overlay/écran secondaire actuellement ouvert.
+  const EDGE_ZONE = 24;
+  let edgeSwipeActive = false, edgeSwipeStartX = 0, edgeSwipeStartY = 0;
+  document.addEventListener('touchstart', e => {
+    const t = e.touches[0];
+    edgeSwipeActive = t.clientX <= EDGE_ZONE;
+    edgeSwipeStartX = t.clientX;
+    edgeSwipeStartY = t.clientY;
+  }, { passive: true });
+  document.addEventListener('touchend', e => {
+    if (!edgeSwipeActive) return;
+    edgeSwipeActive = false;
+    const dx = e.changedTouches[0].clientX - edgeSwipeStartX;
+    const dy = Math.abs(e.changedTouches[0].clientY - edgeSwipeStartY);
+    if (dx > 60 && dy < 50) goBack();
   }, { passive: true });
 });
