@@ -71,11 +71,20 @@
       if (_t === 'light' || (_t === 'auto' && matchMedia('(prefers-color-scheme: light)').matches)) {
         document.documentElement.setAttribute('data-theme', 'light');
       }
+      // Taille du texte, même logique anti-flash (tout le reste de l'app est en rem)
+      var _ts = localStorage.getItem('serein-text-size');
+      if (_ts === 'large' || _ts === 'xlarge') {
+        document.documentElement.setAttribute('data-text-size', _ts);
+      }
     } catch(e) {}
   </script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { overflow-x: hidden; max-width: 100%; }
+    /* Base rem de tout le reste de l'app : couvre les préférences comme les
+       "Réglages d'affichage" système, qu'une WebView ne suit pas nativement. */
+    html[data-text-size="large"] { font-size: 112.5%; }
+    html[data-text-size="xlarge"] { font-size: 125%; }
     :root {
       --color-bg: #0d1b15;
       --color-surface: rgba(28,49,39,0.6);
@@ -236,17 +245,22 @@
     .guide-support-note .emotion-ressources { display: block; }
 
     /* EXPLORE */
-    .session-card { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+    .session-card { display: flex; flex-direction: column; gap: .85rem; }
     .session-info p { font-size: .85rem; color: var(--color-muted); margin-top: .2rem; }
     .session-desc { font-size: .8rem; color: var(--color-muted); line-height: 1.4; margin-top: .25rem; }
     .session-done-check { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; background: var(--color-primary-light); color: var(--color-primary); font-size: .65rem; font-weight: 700; margin-left: .4rem; vertical-align: 2px; flex-shrink: 0; }
-    .session-list { display: flex; flex-direction: column; gap: .75rem; margin-top: 1.25rem; }
+    .session-list { display: flex; flex-direction: column; gap: 1.1rem; margin-top: 1.25rem; }
+    .favoris-list { display: flex; flex-direction: column; gap: 1.1rem; }
+    /* #parcours-body (overlay de détail parcours) appelle makeSessionCard()
+       sans conteneur flex : sans cette marge, les cartes se touchent (0px). */
+    #parcours-body .session-card { margin-bottom: 1.1rem; }
     .filter-tabs { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; }
     .tab { border: 1px solid var(--color-border); background: var(--color-surface); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); border-radius: 999px; padding: .4rem .9rem; font-size: .85rem; cursor: pointer; transition: background .2s, color .2s, border-color .2s; color: var(--color-text); }
     .tab.active { background: var(--gradient); color: #0d1b15; border-color: transparent; font-weight: 600; }
     [data-theme="light"] .tab.active { color: #fff; }
-    .session-actions { display: flex; align-items: center; gap: .5rem; flex-shrink: 0; }
-    .btn-offline { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--color-border); background: var(--color-surface); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); color: var(--color-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: .9rem; transition: all .2s; flex-shrink: 0; }
+    .session-actions { display: flex; align-items: center; gap: .6rem; }
+    .session-actions .btn.btn-primary { flex: 1; text-align: center; }
+    .btn-offline { width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--color-border); background: var(--color-surface); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); color: var(--color-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: .9rem; transition: all .2s; flex-shrink: 0; }
     .btn-offline.cached { background: var(--color-primary-light); border-color: var(--color-primary); color: var(--color-primary); }
     .btn-offline.loading { opacity: .6; cursor: wait; }
 
@@ -331,7 +345,7 @@
     .sheet-section-label { font-size: .68rem; text-transform: uppercase; letter-spacing: .1em; color: rgba(255,255,255,.35); margin-bottom: .65rem; }
     .ambiance-btns { display: flex; gap: .4rem; flex-wrap: wrap; margin-bottom: 1rem; }
     .ambiance-btn { display: flex; flex-direction: column; align-items: center; gap: .2rem; background: rgba(255,255,255,.07); border: 1.5px solid transparent; border-radius: .75rem; padding: .45rem .6rem; font-size: 1rem; cursor: pointer; transition: all .2s; min-width: 50px; color: #fff; }
-    .ambiance-btn span { font-size: .58rem; color: rgba(255,255,255,.45); line-height: 1; }
+    .ambiance-btn span { font-size: .58rem; color: rgba(255,255,255,.62); line-height: 1; }
     .ambiance-btn.active { border-color: #93c9ac; background: rgba(147,201,172,.18); }
     .ambiance-volume-wrap { display: flex; align-items: center; gap: .75rem; margin-bottom: 1.25rem; font-size: .8rem; color: rgba(255,255,255,.4); }
     .speed-wrap { display: flex; align-items: center; gap: .4rem; flex-wrap: wrap; }
@@ -352,6 +366,8 @@
     .complete-screen #complete-title { color: rgba(255,255,255,.4); font-size: .85rem; margin-bottom: .75rem; }
     .btn-white { background: #fff; color: #0a1a15; border: none; border-radius: 999px; padding: .9rem 1.75rem; font-size: .95rem; font-weight: 700; cursor: pointer; transition: opacity .2s; }
     .btn-white:hover { opacity: .9; }
+    .complete-actions { display: flex; flex-direction: column; gap: .75rem; width: 100%; margin-top: 1.25rem; }
+    .complete-actions .btn-white, .complete-actions .btn-outline-white { width: 100%; }
     .btn-outline-white { background: transparent; color: rgba(255,255,255,.8); border: 1.5px solid rgba(255,255,255,.25); border-radius: 999px; padding: .9rem 1.75rem; font-size: .95rem; cursor: pointer; transition: opacity .2s; }
 
     /* Voice overlay */
@@ -541,7 +557,7 @@
     [data-theme="light"] .timer-cta { color: #fff; }
 
     /* ── Favoris ── */
-    .btn-fav { background: none; border: none; cursor: pointer; color: var(--color-muted); padding: .35rem; border-radius: 8px; line-height: 0; transition: color .18s, transform .15s; flex-shrink: 0; }
+    .btn-fav { background: none; border: none; cursor: pointer; color: var(--color-muted); padding: .8125rem; border-radius: 8px; line-height: 0; transition: color .18s, transform .15s; flex-shrink: 0; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; box-sizing: border-box; }
     .btn-fav:hover, .btn-fav.is-fav { color: #e05a7a; }
     .btn-fav svg path { fill: none; stroke: currentColor; }
     .btn-fav.is-fav svg path { fill: #e05a7a; stroke: #e05a7a; }
@@ -1148,7 +1164,7 @@
 <!-- EXPLORER -->
 <section id="explore" class="screen">
   <header>
-    <h1>Choisis une séance selon ton besoin du moment.</h1>
+    <h1>Ton besoin du moment.</h1>
   </header>
 
   <div class="explore-search">
@@ -1395,6 +1411,14 @@
         <button class="seg-btn" id="seg-dark" onclick="setThemeMode('dark')"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg> Sombre</button>
       </div>
     </article>
+    <article class="card setting-item">
+      <div class="info"><h3>Taille du texte</h3></div>
+      <div class="theme-seg" role="group" aria-label="Choisir la taille du texte">
+        <button class="seg-btn" id="seg-textsize-normal" onclick="setTextSize('normal')">Normal</button>
+        <button class="seg-btn" id="seg-textsize-large" onclick="setTextSize('large')">Grand</button>
+        <button class="seg-btn" id="seg-textsize-xlarge" onclick="setTextSize('xlarge')">Très grand</button>
+      </div>
+    </article>
   </div>
 
   <!-- HORS LIGNE -->
@@ -1446,6 +1470,10 @@
       <input type="file" id="import-file-input" accept="application/json,.json" style="display:none;" onchange="handleImportFile(this)">
     </article>
     <article class="card setting-item">
+      <div class="info"><h3>Copier les infos de diagnostic</h3><p>Version, plateforme, cache — utile pour signaler un bug</p></div>
+      <button class="setting-link" onclick="copyDiagnostics(this)">Copier</button>
+    </article>
+    <article class="card setting-item">
       <div class="info"><h3>Politique de confidentialité</h3></div>
       <button class="setting-link" onclick="openPrivacyPolicy()">Lire ›</button>
     </article>
@@ -1468,7 +1496,7 @@
     </article>
     <article class="card setting-item">
       <div class="info"><h3>Version</h3></div>
-      <span class="setting-value">1.3.0</span>
+      <span class="setting-value" id="app-version-value">1.3.0</span>
     </article>
     <article class="card setting-item">
       <div class="info" style="flex:1;">

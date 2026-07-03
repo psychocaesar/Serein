@@ -36,8 +36,11 @@
 5. **Reste à faire sur la MR GitLab** : éditer la description de la MR pour
    utiliser le template "App Inclusion" fourni par F-Droid, lire ses
    instructions et cocher les cases de la checklist qu'il contient.
+6. ✅ Fastlane metadata ajoutée dans le dépôt (`fastlane/metadata/android/fr-FR/`),
+   lue automatiquement par F-Droid depuis `Repo:` — la case "strongly
+   recommended" du template App Inclusion peut être cochée.
 
-## Fiche descriptive (à réutiliser dans la MR ou en fastlane metadata)
+## Fiche descriptive (dupliquée dans fastlane/metadata/android/fr-FR/)
 
 **Résumé court (~80 car. max) :**
 Méditation guidée gratuite, sans pub ni tracking, conçue par un psychologue
