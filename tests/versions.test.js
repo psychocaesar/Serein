@@ -11,7 +11,7 @@ const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'))
 
 test('la version affichée dans les Réglages correspond à package.json', () => {
   const html = fs.readFileSync(path.join(PWA_DIR, 'index.html'), 'utf8');
-  const m = /<h3>Version<\/h3><\/div>\s*<span class="setting-value">([^<]+)<\/span>/.exec(html);
+  const m = /<h3>Version<\/h3><\/div>\s*<span class="setting-value"[^>]*>([^<]+)<\/span>/.exec(html);
   assert.ok(m, 'bloc Version introuvable dans index.html');
   assert.strictEqual(m[1], pkg.version, `index.html affiche ${m[1]}, package.json dit ${pkg.version}`);
 });

@@ -45,6 +45,7 @@ Nous pensons qu'un produit destiné au calme, au sommeil ou à l'anxiété ne de
 │   └── ios/                  # Wrapper Capacitor iOS
 ├── tests/                    # Tests Node (catalogue, versions, manifest)
 ├── docs/                     # Manifeste, config nginx de référence
+├── fastlane/                 # Descriptions, notes de version, captures (voir fastlane/README.md)
 ├── .github/workflows/        # CI : npm test à chaque push/PR
 └── capacitor.config.json
 ```
@@ -76,6 +77,8 @@ npx cap sync ios       # puis ouvrir app/ios dans Xcode
 ```
 
 La version de l'app est définie dans `package.json` et doit correspondre à `versionName` (build.gradle) et à l'écran Réglages — un test le vérifie.
+
+`npm install` configure aussi un hook git (`scripts/git-hooks/post-commit`, activé via `core.hooksPath`) qui relance `npx cap sync android` après chaque commit. Sans lui, `app/android/app/src/main/assets/public/` (gitignoré) peut rester périmé et faire builder Android Studio sur un ancien web build.
 
 ## Contribuer
 

@@ -1,0 +1,7 @@
+Explorer repensé : tape sur un parcours pour l'ouvrir en plein écran avec une fiche explicative et ses séances.
+
+8 fiches de psychoéducation TCC·ACT ajoutées (anxiété, stress, sommeil, respiration, émotions…), accessibles depuis Explorer et Apprendre.
+
+Interface allégée pour réduire la charge mentale.
+
+Les séances de respiration sont maintenant comptées dans tes stats.

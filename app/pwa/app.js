@@ -3,6 +3,29 @@ const AUDIO_BASE_URL = (typeof Capacitor !== 'undefined' && Capacitor.isNativePl
   ? 'https://audio.sereinapp.fr/'
   : 'assets/audio/';
 
+// ── JOURNAL D'ERREURS LOCAL (diagnostic) ──
+// Pas de crash reporting/télémétrie réseau (choix vie privée) : les erreurs
+// sont juste gardées en local, incluses dans le bouton "Copier les infos de
+// diagnostic" des Réglages si l'utilisateur veut les coller dans un mail.
+const ERROR_LOG_KEY = 'serein-error-log';
+const ERROR_LOG_MAX = 10;
+
+function logErrorLocally(message) {
+  try {
+    const log = JSON.parse(localStorage.getItem(ERROR_LOG_KEY) || '[]');
+    log.push({ t: new Date().toISOString(), message: String(message).slice(0, 300) });
+    while (log.length > ERROR_LOG_MAX) log.shift();
+    localStorage.setItem(ERROR_LOG_KEY, JSON.stringify(log));
+  } catch(e) {}
+}
+
+window.addEventListener('error', e => {
+  logErrorLocally((e.message || 'Erreur') + ' — ' + (e.filename || '') + ':' + (e.lineno || ''));
+});
+window.addEventListener('unhandledrejection', e => {
+  logErrorLocally('Promise rejetée — ' + (e.reason && e.reason.message ? e.reason.message : e.reason));
+});
+
 // ── GLOBALS ──
 let timerInterval = null;
 let timerSecondsLeft = 0;
@@ -223,7 +246,7 @@ function toggleFavoris(sessionId, btn) {
   const favs = getFavoris();
   if (favs.has(sessionId)) { favs.delete(sessionId); }
   else { favs.add(sessionId); }
-  try { localStorage.setItem("serein-favoris", JSON.stringify([...favs])); } catch(e) {}
+  try { localStorage.setItem("serein-favoris", JSON.stringify([...favs])); mirrorToNative('serein-favoris'); } catch(e) {}
   const active = favs.has(sessionId);
   btn.classList.toggle("is-fav", active);
   btn.setAttribute("aria-label", active ? "Retirer des favoris" : "Ajouter aux favoris");
@@ -875,6 +898,8 @@ audio.addEventListener('ended', () => {
   // Feedback de fin pour toutes les séances (sauf la mini-séance d'observation
   // du guide, qui enchaîne sur sa propre conversation).
   if (currentSession && currentSession.id !== 'observation') showCompletionFeedback();
+  maybeShowReminderPrompt();
+  maybeRequestStoreReview();
 });
 
 // ── REPRISE DE LECTURE ──
@@ -1328,6 +1353,7 @@ function recordCompletion() {
     }
     s.lastDate = today;
     localStorage.setItem('serein-stats', JSON.stringify(s));
+    mirrorToNative('serein-stats');
     loadStats();
     // Historique partagé : alimente les coches « déjà écoutée », la progression
     // des parcours et les recommandations du guide.
@@ -1427,6 +1453,37 @@ function applyTheme() {
 
 // Le système change de thème pendant que l'app est ouverte (ex. bascule auto au coucher du soleil)
 lightSchemeQuery.addEventListener('change', () => { if (getThemeMode() === 'auto') applyTheme(); });
+
+// ── TAILLE DU TEXTE ──
+// Une WebView ne suit pas le réglage système "Taille d'affichage" (Dynamic
+// Type iOS / échelle de police Android) : ce réglage in-app le remplace.
+// Toute l'app est en rem, donc changer le font-size racine suffit à tout
+// mettre à l'échelle. Le script anti-flash du <head> applique la même valeur
+// avant le premier rendu.
+function getTextSize() {
+  const t = localStorage.getItem('serein-text-size');
+  return (t === 'large' || t === 'xlarge') ? t : 'normal';
+}
+
+function setTextSize(size) {
+  localStorage.setItem('serein-text-size', size);
+  applyTextSize();
+}
+
+function updateTextSizeSegButtons() {
+  const size = getTextSize();
+  ['normal', 'large', 'xlarge'].forEach(s => {
+    const btn = document.getElementById('seg-textsize-' + s);
+    if (btn) btn.classList.toggle('active', s === size);
+  });
+}
+
+function applyTextSize() {
+  const size = getTextSize();
+  if (size === 'normal') document.documentElement.removeAttribute('data-text-size');
+  else document.documentElement.setAttribute('data-text-size', size);
+  updateTextSizeSegButtons();
+}
 
 const AMBIANCE_LABELS = { '': 'Aucun', 'pluie.mp3': 'Pluie', 'foret.mp3': 'Forêt', 'vagues.mp3': 'Vagues', 'feu.mp3': 'Feu', 'bruit-blanc.mp3': 'Blanc' };
 
@@ -1567,6 +1624,104 @@ async function cancelReminder() {
     const LC = window.Capacitor?.Plugins?.LocalNotifications;
     if (!LC) return;
     await LC.cancel({ notifications: [{ id: 1001 }] });
+  } catch(e) {}
+}
+
+// Propose le rappel quotidien au bon moment (fin de la 2e ou 3e séance guidée),
+// plutôt que de le laisser dormir dans les Réglages où seuls les utilisateurs
+// déjà convaincus le trouveraient. Une seule fois, quelle que soit la réponse.
+const REMINDER_PROMPT_SEEN_KEY = 'serein-reminder-prompt-vue';
+
+function maybeShowReminderPrompt() {
+  try {
+    if (localStorage.getItem('serein-reminder-enabled') === 'true') return; // déjà activé
+    if (localStorage.getItem(REMINDER_PROMPT_SEEN_KEY)) return; // déjà proposé une fois
+    if (!(typeof Capacitor !== 'undefined' && Capacitor.isNativePlatform())) return; // notifications natives seulement
+    const s = getStats();
+    if (s.sessions !== 2 && s.sessions !== 3) return;
+    localStorage.setItem(REMINDER_PROMPT_SEEN_KEY, 'true'); // qu'on accepte ou refuse, on ne redemande plus
+    setTimeout(showReminderPromptToast, 2500); // laisse respirer l'écran de fin avant de proposer
+  } catch(e) {}
+}
+
+function showReminderPromptToast() {
+  const existing = document.getElementById('reminder-prompt-toast');
+  if (existing) existing.remove();
+
+  const toast = document.createElement('div');
+  toast.id = 'reminder-prompt-toast';
+  toast.style.cssText = [
+    'position:fixed', 'bottom:80px', 'left:50%', 'transform:translateX(-50%)',
+    'background:var(--color-surface-2)', 'border:1px solid var(--color-border)',
+    'border-radius:16px', 'padding:.85rem 1.1rem', 'z-index:9999',
+    'display:flex', 'flex-direction:column', 'align-items:center', 'gap:.55rem',
+    'box-shadow:0 8px 32px rgba(0,0,0,.35)', 'max-width:320px', 'width:90%',
+    'animation:fadeInUp .25s ease'
+  ].join(';');
+
+  const label = document.createElement('p');
+  label.textContent = "Tu veux qu'on se retrouve demain ?";
+  label.style.cssText = 'font-size:.78rem;color:var(--color-muted);margin:0;text-align:center;';
+  toast.appendChild(label);
+
+  const btns = document.createElement('div');
+  btns.style.cssText = 'display:flex;gap:.5rem;';
+
+  const yes = document.createElement('button');
+  yes.textContent = 'Oui, me le rappeler';
+  yes.style.cssText = [
+    'background:var(--color-primary-light)', 'border:1px solid var(--color-border)',
+    'border-radius:999px', 'color:var(--color-text)',
+    'padding:.4rem .85rem', 'font-size:.75rem', 'cursor:pointer'
+  ].join(';');
+  yes.addEventListener('click', async () => {
+    toast.remove();
+    const time = localStorage.getItem('serein-reminder-time') || '21:00';
+    const [h, m] = time.split(':').map(Number);
+    const ok = await scheduleReminder(h, m);
+    if (ok) {
+      localStorage.setItem('serein-reminder-enabled', 'true');
+      const toggle = document.getElementById('reminder-toggle');
+      const btn = document.getElementById('reminder-time-btn');
+      if (toggle) toggle.checked = true;
+      if (btn) btn.style.display = '';
+    }
+  });
+
+  const no = document.createElement('button');
+  no.textContent = 'Non merci';
+  no.style.cssText = [
+    'background:transparent', 'border:1px solid var(--color-border)',
+    'border-radius:999px', 'color:var(--color-muted)',
+    'padding:.4rem .85rem', 'font-size:.75rem', 'cursor:pointer'
+  ].join(';');
+  no.addEventListener('click', () => toast.remove());
+
+  btns.appendChild(yes);
+  btns.appendChild(no);
+  toast.appendChild(btns);
+  document.body.appendChild(toast);
+  setTimeout(() => { if (toast.parentNode) toast.remove(); }, 12000);
+}
+
+// Sollicite une note sur le store, une seule fois, après quelques séances
+// terminées (assez pour juger l'app, avant que la motivation du 1er lancement
+// ne retombe). Plugin natif in-app review (pas de redirection vers le store) :
+// Apple/Google gèrent eux-mêmes leurs propres quotas d'affichage, notre seul
+// rôle est de ne pas re-solliciter une fois que c'est fait.
+const STORE_REVIEW_SEUIL = 5;
+const STORE_REVIEW_SEEN_KEY = 'serein-store-review-demande';
+
+async function maybeRequestStoreReview() {
+  try {
+    if (localStorage.getItem(STORE_REVIEW_SEEN_KEY)) return; // une seule fois, jamais relancée
+    if (!(typeof Capacitor !== 'undefined' && Capacitor.isNativePlatform())) return;
+    const plugin = window.Capacitor?.Plugins?.InAppReview;
+    if (!plugin) return; // plugin non disponible (build pas encore synchronisé) : no-op silencieux
+    const s = getStats();
+    if ((s.sessions || 0) < STORE_REVIEW_SEUIL) return;
+    localStorage.setItem(STORE_REVIEW_SEEN_KEY, 'true');
+    setTimeout(() => { plugin.requestReview().catch(() => {}); }, 2500);
   } catch(e) {}
 }
 
@@ -2075,19 +2230,29 @@ function renderExploreGrid() {
   });
 }
 
+// Retire les accents pour une recherche tolérante ("meditation" trouve "méditation").
+// Décompose en NFD (lettre + marque diacritique séparées) puis filtre les marques
+// combinantes par code de caractère (768–879 = U+0300–U+036F) plutôt qu'une regex
+// \uXXXX, plus fiable à travers les différentes couches de transport de texte.
+function stripAccents(s) {
+  return Array.from(s.normalize('NFD'))
+    .filter(ch => { const c = ch.codePointAt(0); return c < 768 || c > 879; })
+    .join('');
+}
+
 // Filtre texte de l'Explorer : recherche un parcours (carte masquée/affichée)
 // et, si une requête est active, les séances par titre/description.
 function searchExplore(value) {
-  const query = value.trim().toLowerCase();
+  const query = stripAccents(value.trim().toLowerCase());
   const clearBtn = document.getElementById('explore-search-clear');
   if (clearBtn) clearBtn.classList.toggle('show', !!query);
   document.querySelectorAll('#explore-parcours-grid .path-card').forEach(card => {
-    const name = (card.querySelector('h3')?.textContent || '').toLowerCase();
+    const name = stripAccents((card.querySelector('h3')?.textContent || '').toLowerCase());
     card.style.display = (!query || name.includes(query)) ? '' : 'none';
   });
   if (!query) { applyFilters(); return; }
   document.querySelectorAll('.session-list .session-card').forEach(card => {
-    const hay = (card.dataset.title + ' ' + (card.querySelector('.session-desc')?.textContent || '')).toLowerCase();
+    const hay = stripAccents((card.dataset.title + ' ' + (card.querySelector('.session-desc')?.textContent || '')).toLowerCase());
     card.style.display = hay.includes(query) ? '' : 'none';
   });
   updateFilterCount();
@@ -2196,6 +2361,8 @@ function confirmResetProgress() {
     localStorage.removeItem('serein-feedback');
     localStorage.removeItem('serein-mood-log');
     localStorage.removeItem('serein-support-shown');
+    removeFromNative('serein-stats');
+    removeFromNative('serein-history');
     document.documentElement.classList.remove('has-sessions');
     loadStats();
   } catch(e) {}
@@ -2590,6 +2757,7 @@ function recordGuidePlay(title) {
     const history = getRecentHistory();
     history.push({ title, ts: Date.now() });
     localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    mirrorToNative('serein-history');
   } catch(e) {}
 }
 
@@ -3238,6 +3406,7 @@ function recordBreathCompletion(minutes) {
       s.lastDate = today;
     }
     localStorage.setItem('serein-stats', JSON.stringify(s));
+    mirrorToNative('serein-stats');
     loadStats();
   } catch(e) { console.warn('[Serein stats]', e); }
 }
@@ -3540,6 +3709,7 @@ function recordTimerCompletion() {
       s.lastDate = today;
     }
     localStorage.setItem('serein-stats', JSON.stringify(s));
+    mirrorToNative('serein-stats');
     loadStats();
   } catch(e) { console.warn('[Serein stats]', e); }
 }
@@ -3653,11 +3823,55 @@ function openPrivacyPolicy() {
 // ── EXPORT / IMPORT DES DONNÉES (local-first, aucun serveur) ──
 const DATA_KEYS = [
   'serein-stats', 'serein-history', 'serein-feedback', 'serein-guide-session', 'serein-favoris',
-  'serein-theme', 'serein-speed', 'serein-bells', 'serein-wifi-only',
+  'serein-theme', 'serein-text-size', 'serein-speed', 'serein-bells', 'serein-wifi-only',
   'serein-ambiance-default', 'serein-ambiance-volume', 'serein-reminder-enabled', 'serein-reminder-time',
   'serein-voice', 'serein-resume', 'serein-mood-log',
   'serein_seances_terminees', 'serein_invitation_don_vue'
 ];
+
+// ── SAUVEGARDE NATIVE (résilience) ──
+// localStorage reste la source de vérité, lue de façon synchrone partout
+// dans l'app (aucun autre endroit n'est touché par ce qui suit). Ces 3 clés
+// — les plus coûteuses à perdre pour l'utilisateur (progression, favoris,
+// séances déjà écoutées) — sont EN PLUS mirror-ées vers le stockage natif
+// Capacitor Preferences (UserDefaults iOS / SharedPreferences Android),
+// plus résistant qu'une WebView à une purge de stockage. Écriture
+// fire-and-forget à chaque sauvegarde ; lecture seulement au démarrage,
+// et seulement pour restaurer si localStorage s'avère vide.
+const NATIVE_MIRROR_KEYS = ['serein-stats', 'serein-favoris', 'serein-history'];
+
+function mirrorToNative(key) {
+  try {
+    const plugin = window.Capacitor?.Plugins?.Preferences;
+    if (!plugin) return;
+    const value = localStorage.getItem(key);
+    if (value === null) return;
+    plugin.set({ key, value }).catch(() => {});
+  } catch(e) {}
+}
+
+async function restoreFromNativeIfMissing() {
+  try {
+    const plugin = window.Capacitor?.Plugins?.Preferences;
+    if (!plugin) return;
+    for (const key of NATIVE_MIRROR_KEYS) {
+      if (localStorage.getItem(key) !== null) continue; // déjà présent, rien à restaurer
+      const res = await plugin.get({ key });
+      if (res && res.value !== null) localStorage.setItem(key, res.value);
+    }
+  } catch(e) {}
+}
+
+// Sans ça, une réinitialisation resterait locale à la WebView : au prochain
+// lancement, restoreFromNativeIfMissing() ressusciterait silencieusement les
+// stats/l'historique tout juste supprimés depuis le miroir natif.
+function removeFromNative(key) {
+  try {
+    const plugin = window.Capacitor?.Plugins?.Preferences;
+    if (!plugin) return;
+    plugin.remove({ key }).catch(() => {});
+  } catch(e) {}
+}
 
 function exportData() {
   const payload = { app: 'serein', version: 1, exportedAt: new Date().toISOString(), data: {} };
@@ -3686,6 +3900,49 @@ function exportData() {
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 }
 
+// Pas de crash reporting réseau : le diagnostic reste local et c'est
+// l'utilisateur qui choisit de le coller dans un mail s'il signale un bug
+// (évite les allers-retours de devinettes sur version/plateforme/cache).
+async function copyDiagnostics(btn) {
+  const lines = [];
+  lines.push('Serein — infos de diagnostic');
+  lines.push('Version : ' + (document.getElementById('app-version-value')?.textContent || 'inconnue'));
+  const isNative = typeof Capacitor !== 'undefined' && Capacitor.isNativePlatform && Capacitor.isNativePlatform();
+  const platform = isNative && Capacitor.getPlatform ? Capacitor.getPlatform() : 'web';
+  lines.push('Plateforme : ' + platform);
+  lines.push('Thème : ' + (localStorage.getItem('serein-theme') || 'auto'));
+  lines.push('Ambiance par défaut : ' + (AMBIANCE_LABELS[localStorage.getItem('serein-ambiance-default') || ''] || 'Aucun'));
+
+  let cacheCount = 0, swActive = false;
+  try {
+    if ('caches' in window) {
+      const cache = await caches.open(AUDIO_CACHE);
+      cacheCount = (await cache.keys()).length;
+    }
+    swActive = !!(navigator.serviceWorker && navigator.serviceWorker.controller);
+  } catch(e) {}
+  lines.push('Séances en cache hors ligne : ' + cacheCount);
+  lines.push('Service worker actif : ' + (swActive ? 'oui' : 'non'));
+
+  let errorLog = [];
+  try { errorLog = JSON.parse(localStorage.getItem(ERROR_LOG_KEY) || '[]'); } catch(e) {}
+  lines.push('Erreurs récentes : ' + (errorLog.length ? errorLog.length : 'aucune'));
+  errorLog.forEach(e => lines.push('  · ' + e.t + ' — ' + e.message));
+
+  const text = lines.join('\n');
+  try {
+    await navigator.clipboard.writeText(text);
+    haptic('light');
+    if (btn) {
+      const original = btn.textContent;
+      btn.textContent = 'Copié !';
+      setTimeout(() => { btn.textContent = original; }, 2000);
+    }
+  } catch(e) {
+    alert('Impossible de copier automatiquement. Voici les infos :\n\n' + text);
+  }
+}
+
 function importData() {
   document.getElementById('import-file-input').click();
 }
@@ -3706,7 +3963,9 @@ function handleImportFile(input) {
       DATA_KEYS.forEach(k => {
         if (k in payload.data) localStorage.setItem(k, payload.data[k]);
       });
+      NATIVE_MIRROR_KEYS.forEach(mirrorToNative); // resynchronise le miroir natif avec la sauvegarde importée
       applyTheme();
+      applyTextSize();
       loadSpeed();
       loadStats();
       loadPrefs();
@@ -3757,12 +4016,16 @@ document.addEventListener('keydown', e => {
 
 // ── INIT ──
 document.addEventListener('DOMContentLoaded', async () => {
+  // Restaure stats/favoris/historique depuis le stockage natif si localStorage
+  // est vide (purge WebView) : à faire AVANT tout ce qui les lit ci-dessous.
+  await restoreFromNativeIfMissing();
   // Stockage persistant : évite que le navigateur purge les séances
   // téléchargées hors ligne sous pression de stockage.
   if (navigator.storage && navigator.storage.persist) {
     navigator.storage.persist().catch(() => {});
   }
   applyTheme();
+  applyTextSize();
   loadSpeed();
   loadStats();
   loadPrefs();
