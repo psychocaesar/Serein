@@ -3826,7 +3826,11 @@ const DATA_KEYS = [
   'serein-theme', 'serein-text-size', 'serein-speed', 'serein-bells', 'serein-wifi-only',
   'serein-ambiance-default', 'serein-ambiance-volume', 'serein-reminder-enabled', 'serein-reminder-time',
   'serein-voice', 'serein-resume', 'serein-mood-log',
-  'serein_seances_terminees', 'serein_invitation_don_vue'
+  'serein_seances_terminees', 'serein_invitation_don_vue',
+  // Flags "une seule fois" : sans eux, une restauration re-sollicite
+  // l'utilisateur (proposition de rappel, avis store, bloc soutien).
+  // serein-error-log exclu volontairement : diagnostic propre à l'appareil.
+  'serein-reminder-prompt-vue', 'serein-store-review-demande', 'serein-support-shown'
 ];
 
 // ── SAUVEGARDE NATIVE (résilience) ──
