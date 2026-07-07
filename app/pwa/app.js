@@ -635,12 +635,16 @@ function closePlayer() {
   if (interruptedSnapshot) showInterruptedFeedbackToast(interruptedSnapshot);
 }
 
-function showInterruptedFeedbackToast(snap) {
-  const existing = document.getElementById('interrupted-feedback-toast');
+// Toast d'action générique (bas d'écran, fermé automatiquement après 12 s),
+// partagé par le feedback de séance interrompue et la proposition de rappel.
+// buttons : [{ label, ghost?, onClick(toast) }] — le onClick décide lui-même
+// de fermer le toast (toast.remove()).
+function showActionToast(id, labelText, buttons) {
+  const existing = document.getElementById(id);
   if (existing) existing.remove();
 
   const toast = document.createElement('div');
-  toast.id = 'interrupted-feedback-toast';
+  toast.id = id;
   toast.style.cssText = [
     'position:fixed', 'bottom:80px', 'left:50%', 'transform:translateX(-50%)',
     'background:var(--color-surface-2)', 'border:1px solid var(--color-border)',
@@ -651,34 +655,43 @@ function showInterruptedFeedbackToast(snap) {
   ].join(';');
 
   const label = document.createElement('p');
-  label.textContent = 'Comment était cette séance ?';
+  label.textContent = labelText;
   label.style.cssText = 'font-size:.78rem;color:var(--color-muted);margin:0;text-align:center;';
   toast.appendChild(label);
 
   const btns = document.createElement('div');
-  btns.style.cssText = 'display:flex;gap:.5rem;';
-
-  [{ label: '😮 Trop intense', value: 'intense' }, { label: '✓ Bien', value: 'ok' }, { label: '🌿 Trop doux', value: 'doux' }, { label: '✕', value: 'dismiss' }].forEach(f => {
+  btns.style.cssText = 'display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center;';
+  buttons.forEach(b => {
     const btn = document.createElement('button');
-    btn.textContent = f.label;
+    btn.textContent = b.label;
     btn.style.cssText = [
-      'background:var(--color-primary-light)', 'border:1px solid var(--color-border)',
-      'border-radius:999px', 'color:var(--color-text)',
-      'padding:.35rem .75rem', 'font-size:.75rem', 'cursor:pointer'
+      b.ghost ? 'background:transparent' : 'background:var(--color-primary-light)',
+      'border:1px solid var(--color-border)', 'border-radius:999px',
+      b.ghost ? 'color:var(--color-muted)' : 'color:var(--color-text)',
+      'padding:.4rem .85rem', 'font-size:.75rem', 'cursor:pointer'
     ].join(';');
-    btn.addEventListener('click', () => {
-      if (f.value !== 'dismiss') {
-        saveFeedback(snap.mood, snap.duration, snap.context, snap.title, f.value);
-        recordGuidePlay(snap.title);
-      }
-      toast.remove();
-    });
+    btn.addEventListener('click', () => b.onClick(toast));
     btns.appendChild(btn);
   });
-
   toast.appendChild(btns);
   document.body.appendChild(toast);
   setTimeout(() => { if (toast.parentNode) toast.remove(); }, 12000);
+}
+
+function showInterruptedFeedbackToast(snap) {
+  const answer = value => toast => {
+    if (value !== 'dismiss') {
+      saveFeedback(snap.mood, snap.duration, snap.context, snap.title, value);
+      recordGuidePlay(snap.title);
+    }
+    toast.remove();
+  };
+  showActionToast('interrupted-feedback-toast', 'Comment était cette séance ?', [
+    { label: '😮 Trop intense', onClick: answer('intense') },
+    { label: '✓ Bien', onClick: answer('ok') },
+    { label: '🌿 Trop doux', onClick: answer('doux') },
+    { label: '✕', onClick: answer('dismiss') },
+  ]);
 }
 
 function toggleOptionsSheet() {
@@ -1645,63 +1658,22 @@ function maybeShowReminderPrompt() {
 }
 
 function showReminderPromptToast() {
-  const existing = document.getElementById('reminder-prompt-toast');
-  if (existing) existing.remove();
-
-  const toast = document.createElement('div');
-  toast.id = 'reminder-prompt-toast';
-  toast.style.cssText = [
-    'position:fixed', 'bottom:80px', 'left:50%', 'transform:translateX(-50%)',
-    'background:var(--color-surface-2)', 'border:1px solid var(--color-border)',
-    'border-radius:16px', 'padding:.85rem 1.1rem', 'z-index:9999',
-    'display:flex', 'flex-direction:column', 'align-items:center', 'gap:.55rem',
-    'box-shadow:0 8px 32px rgba(0,0,0,.35)', 'max-width:320px', 'width:90%',
-    'animation:fadeInUp .25s ease'
-  ].join(';');
-
-  const label = document.createElement('p');
-  label.textContent = "Tu veux qu'on se retrouve demain ?";
-  label.style.cssText = 'font-size:.78rem;color:var(--color-muted);margin:0;text-align:center;';
-  toast.appendChild(label);
-
-  const btns = document.createElement('div');
-  btns.style.cssText = 'display:flex;gap:.5rem;';
-
-  const yes = document.createElement('button');
-  yes.textContent = 'Oui, me le rappeler';
-  yes.style.cssText = [
-    'background:var(--color-primary-light)', 'border:1px solid var(--color-border)',
-    'border-radius:999px', 'color:var(--color-text)',
-    'padding:.4rem .85rem', 'font-size:.75rem', 'cursor:pointer'
-  ].join(';');
-  yes.addEventListener('click', async () => {
-    toast.remove();
-    const time = localStorage.getItem('serein-reminder-time') || '21:00';
-    const [h, m] = time.split(':').map(Number);
-    const ok = await scheduleReminder(h, m);
-    if (ok) {
-      localStorage.setItem('serein-reminder-enabled', 'true');
-      const toggle = document.getElementById('reminder-toggle');
-      const btn = document.getElementById('reminder-time-btn');
-      if (toggle) toggle.checked = true;
-      if (btn) btn.style.display = '';
-    }
-  });
-
-  const no = document.createElement('button');
-  no.textContent = 'Non merci';
-  no.style.cssText = [
-    'background:transparent', 'border:1px solid var(--color-border)',
-    'border-radius:999px', 'color:var(--color-muted)',
-    'padding:.4rem .85rem', 'font-size:.75rem', 'cursor:pointer'
-  ].join(';');
-  no.addEventListener('click', () => toast.remove());
-
-  btns.appendChild(yes);
-  btns.appendChild(no);
-  toast.appendChild(btns);
-  document.body.appendChild(toast);
-  setTimeout(() => { if (toast.parentNode) toast.remove(); }, 12000);
+  showActionToast('reminder-prompt-toast', "Tu veux qu'on se retrouve demain ?", [
+    { label: 'Oui, me le rappeler', onClick: async (toast) => {
+      toast.remove();
+      const time = localStorage.getItem('serein-reminder-time') || '21:00';
+      const [h, m] = time.split(':').map(Number);
+      const ok = await scheduleReminder(h, m);
+      if (ok) {
+        localStorage.setItem('serein-reminder-enabled', 'true');
+        const toggle = document.getElementById('reminder-toggle');
+        const btn = document.getElementById('reminder-time-btn');
+        if (toggle) toggle.checked = true;
+        if (btn) btn.style.display = '';
+      }
+    } },
+    { label: 'Non merci', ghost: true, onClick: toast => toast.remove() },
+  ]);
 }
 
 // Sollicite une note sur le store, une seule fois, après quelques séances

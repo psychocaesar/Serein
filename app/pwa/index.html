@@ -249,8 +249,8 @@
     .session-info p { font-size: .85rem; color: var(--color-muted); margin-top: .2rem; }
     .session-desc { font-size: .8rem; color: var(--color-muted); line-height: 1.4; margin-top: .25rem; }
     .session-done-check { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; background: var(--color-primary-light); color: var(--color-primary); font-size: .65rem; font-weight: 700; margin-left: .4rem; vertical-align: 2px; flex-shrink: 0; }
-    .session-list { display: flex; flex-direction: column; gap: 1.1rem; margin-top: 1.25rem; }
-    .favoris-list { display: flex; flex-direction: column; gap: 1.1rem; }
+    .session-list, .favoris-list { display: flex; flex-direction: column; gap: 1.1rem; }
+    .session-list { margin-top: 1.25rem; }
     /* #parcours-body (overlay de détail parcours) appelle makeSessionCard()
        sans conteneur flex : sans cette marge, les cartes se touchent (0px). */
     #parcours-body .session-card { margin-bottom: 1.1rem; }
