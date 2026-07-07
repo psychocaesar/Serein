@@ -1383,6 +1383,12 @@ function recordCompletion() {
 // Déclenchée par l'usage local (aucun réseau, aucun tracker) : après SEUIL
 // séances guidées terminées, une carte discrète et dismissable apparaît UNE
 // SEULE FOIS sur l'accueil. Réutilise openDon() pour l'ouverture HelloAsso.
+// EN PAUSE (juillet 2026) : invitation désactivée en attendant la validation
+// de l'association par Benevity (exigée par Apple) et Goodstack (exigée par
+// Google Play) pour la sollicitation de dons in-app. Le compteur local
+// continue de tourner : repasser DON_INVITATION_ACTIVE à true suffit à
+// réactiver (les utilisateurs au-dessus du seuil la verront à ce moment-là).
+const DON_INVITATION_ACTIVE = false;
 const DON_INVITATION_SEUIL = 7;            // ← seuil facile à modifier
 const DON_COUNT_KEY = 'serein_seances_terminees';
 const DON_SEEN_KEY = 'serein_invitation_don_vue';
@@ -1397,6 +1403,7 @@ function incrementDonCounter() {
 function renderDonInvitation() {
   const block = document.getElementById('don-invitation-block');
   if (!block) return;
+  if (!DON_INVITATION_ACTIVE) { block.style.display = 'none'; return; } // en pause (voir flag ci-dessus)
   if (isIosNative()) { block.style.display = 'none'; return; } // dons retirés du build iOS (App Store 3.1.1)
   let n = 0, seen = false;
   try {
