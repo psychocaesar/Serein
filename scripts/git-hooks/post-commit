@@ -8,4 +8,7 @@ cd "$(git rev-parse --show-toplevel)" || exit 0
 if [ -f package.json ] && [ -d app/android ]; then
   echo "post-commit: npx cap sync android"
   npx cap sync android
+  # Retire les MP3 recopiés par cap sync (servis via le CDN, pas depuis le
+  # bundle) pour ne pas laisser ~900 Mo d'audio dans les assets natifs.
+  node scripts/strip-native-audio.mjs
 fi

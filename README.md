@@ -16,7 +16,7 @@ Nous pensons qu'un produit destiné au calme, au sommeil ou à l'anxiété ne de
 - Pas de publicité, pas de compte, pas de trackers.
 - Statistiques 100 % locales (localStorage), exportables et importables depuis les Réglages.
 - Polices, images et code embarqués : la seule requête réseau est le chargement des audios.
-- Code AGPL-3.0, contenus audio CC BY 4.0.
+- Code AGPL-3.0, contenus audio CC BY-NC-ND 4.0.
 
 ## Ce que contient l'app
 
@@ -72,9 +72,11 @@ Les tests valident le catalogue (`sessions.json`), la cohérence des versions et
 
 ```bash
 npm install
-npx cap sync android   # puis ouvrir app/android dans Android Studio
+npm run sync:android   # cap sync + retire les MP3 du bundle ; puis Android Studio
 npx cap sync ios       # puis ouvrir app/ios dans Xcode
 ```
+
+**Audio & taille du bundle :** les MP3 (gitignorés, dans `app/pwa/assets/audio/`) sont servis en natif via le CDN Cloudflare (`AUDIO_BASE_URL`), jamais depuis le bundle. `npx cap sync` les recopie pourtant dans les projets natifs → un AAB/IPA de ~900 Mo si on ne les retire pas. Utiliser `npm run sync:android` (= `cap sync` + `scripts/strip-native-audio.mjs`) plutôt que `npx cap sync android`. Filet de sécurité : la tâche Gradle `stripBundledAudio` (dans `app/android/app/build.gradle`) supprime de toute façon l'audio avant le merge, donc **tout** build AAB reste propre même si le strip n'a pas tourné. (`ignoreAssetsPattern` ne suffit pas : Android l'ignore pour les AAB, seulement respecté pour les APK.)
 
 La version de l'app est définie dans `package.json` et doit correspondre à `versionName` (build.gradle) et à l'écran Réglages — un test le vérifie.
 
@@ -100,7 +102,7 @@ Quelques règles :
 ## Licence
 
 - **Code** : [GNU AGPL-3.0](LICENSE) (`AGPL-3.0-or-later`). Toute modification déployée, y compris en tant que service en ligne, doit être publiée sous la même licence.
-- **Contenus audio** : [Creative Commons BY 4.0](LICENSE-audio.md) (attribution requise).
+- **Contenus audio** : [Creative Commons BY-NC-ND 4.0](LICENSE-audio.md) (attribution requise, pas d'usage commercial, pas de modification ; usage IA et clonage vocal interdits).
 
 ## Position sur la vie privée
 
