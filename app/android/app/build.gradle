@@ -43,6 +43,19 @@ android {
     }
 }
 
+// Les MP3 sont servis via le CDN (AUDIO_BASE_URL = https://audio.sereinapp.fr)
+// et ne sont JAMAIS lus depuis le bundle en natif. `cap sync` les recopie
+// quand même dans assets/public, et aaptOptions.ignoreAssetsPattern ne les
+// exclut pas d'un AAB (bug Android connu : le pattern n'agit que sur les APK,
+// pas les app bundles). On les supprime donc explicitement avant le merge des
+// assets, sinon l'AAB embarque ~900 Mo d'audio inutile.
+def stripBundledAudio = tasks.register('stripBundledAudio', Delete) {
+    delete "${projectDir}/src/main/assets/public/assets/audio"
+}
+tasks.matching { it.name ==~ /^merge.*Assets$/ }.configureEach {
+    dependsOn stripBundledAudio
+}
+
 repositories {
     flatDir{
         dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
