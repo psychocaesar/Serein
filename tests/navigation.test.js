@@ -117,6 +117,7 @@ const SHIM = `
   showScreen: showScreen,
   openArticle: openArticle,
   goBack: goBack,
+  setupAndroidBackButton: setupAndroidBackButton,
   overlayStack: overlayStack,
   ARTICLES: ARTICLES,
   activeScreen: function () {
@@ -164,4 +165,30 @@ test('goBack() ne fait rien à la racine (pile vide)', () => {
   assert.strictEqual(N.overlayStack.length, 0, 'pile attendue vide sur home sans overlay ouvert');
   assert.doesNotThrow(() => N.goBack());
   assert.strictEqual(N.activeScreen(), 'home');
+});
+
+test('bouton retour Android : ferme un écran secondaire, quitte seulement depuis la racine', () => {
+  // Simule le plugin natif @capacitor/app : capture le handler + compte exitApp.
+  let backHandler = null;
+  let exitCalls = 0;
+  sandbox.Capacitor = { Plugins: { App: {
+    addListener: (evt, cb) => { if (evt === 'backButton') backHandler = cb; return { remove() {} }; },
+    exitApp: () => { exitCalls++; },
+  } } };
+  N.setupAndroidBackButton();
+  assert.strictEqual(typeof backHandler, 'function', 'le handler backButton doit être enregistré');
+
+  // Depuis Explorer (pile non vide) : back revient à l'accueil, ne quitte pas.
+  N.showScreen('explore');
+  assert.ok(N.overlayStack.length > 0, 'Explorer doit empiler une entrée "screen"');
+  backHandler();
+  assert.strictEqual(N.activeScreen(), 'home', 'back depuis un écran secondaire doit revenir à l\'accueil');
+  assert.strictEqual(exitCalls, 0, 'back depuis un écran secondaire ne doit pas quitter l\'app');
+
+  // Depuis l'accueil (pile vide) : back quitte l'app.
+  assert.strictEqual(N.overlayStack.length, 0, 'pile vide attendue sur l\'accueil');
+  backHandler();
+  assert.strictEqual(exitCalls, 1, 'back depuis l\'accueil doit quitter l\'app');
+
+  delete sandbox.Capacitor;
 });
