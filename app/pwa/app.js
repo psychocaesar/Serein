@@ -142,6 +142,7 @@ function showScreen(id) {
   }
   if (id === 'home') {
     releaseOverlay('screen');
+    renderProgramHomeCard();
     renderResumeCard();
     renderDailySuggestion();
     updateMoodChips();
@@ -442,6 +443,8 @@ async function renderSessionList() {
       if (group.resources) list.appendChild(makeResourcesBlock(group.resources));
     });
     renderExploreGrid();
+    renderProgramsSection();
+    renderProgramHomeCard();
     applyFilters();
     updateSessionChecks();
     updatePathCardCounts();
@@ -609,6 +612,9 @@ function closePlayer() {
   audio.pause();
   ambianceAudio.pause();
   clearMediaSession();
+
+  // Séance de programme quittée sans aller au bout : ne pas valider le jour.
+  if (!audio.ended) programDayInProgress = null;
 
   // Clean up timer if active
   if (timerInterval) { clearInterval(timerInterval); timerInterval = null; timerRunning = false; }
@@ -925,6 +931,7 @@ audio.addEventListener('ended', () => {
   // Feedback de fin pour toutes les séances (sauf la mini-séance d'observation
   // du guide, qui enchaîne sur sa propre conversation).
   if (currentSession && currentSession.id !== 'observation') showCompletionFeedback();
+  if (programDayInProgress) { completeProgramDay(); programDayInProgress = null; }
   maybeShowReminderPrompt();
   maybeRequestStoreReview();
 });
@@ -2279,6 +2286,175 @@ function openArticleFromParcours(slug) {
 
 // Vue détail d'un parcours : hero + fiche(s) de psychoéducation + séances
 // réelles du catalogue (mêmes cartes que la liste complète, favoris inclus).
+// ── PROGRAMMES JOUR PAR JOUR ──
+// Un seul programme actif à la fois. Progression en localStorage (+ miroir
+// natif). Soft-lock 1 jour/jour SANS pénalité de gap : le jour du moment se
+// relance le lendemain, mais sauter des jours ne casse rien (pas de streak).
+const PROGRAM_KEY = 'serein-program';
+let programDayInProgress = null; // {programId, day} : séance lancée depuis un jour de programme
+
+function escapeHtml(s) { return String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c])); }
+function getPrograms() { return (CATALOG && CATALOG.programs) || []; }
+function findProgram(id) { return getPrograms().find(p => p.id === id) || null; }
+function programToday() { return new Date().toLocaleDateString('fr-CA'); }
+
+function getProgramState() {
+  try { const s = JSON.parse(localStorage.getItem(PROGRAM_KEY) || 'null'); return (s && s.programId) ? s : null; }
+  catch(e) { return null; }
+}
+function setProgramState(state) {
+  try {
+    if (state) localStorage.setItem(PROGRAM_KEY, JSON.stringify(state));
+    else localStorage.removeItem(PROGRAM_KEY);
+  } catch(e) {}
+  mirrorToNative(PROGRAM_KEY);
+}
+// Soft-lock : le jour du moment est lançable tant qu'aucun jour n'a été complété
+// AUJOURD'HUI. Aucune pénalité de gap : sauter des jours ne verrouille rien.
+function isProgramDayAvailable(state) { return !state.lastDate || state.lastDate !== programToday(); }
+
+function enrollProgram(id) {
+  if (!findProgram(id)) return;
+  const existing = getProgramState();
+  if (existing && existing.programId !== id && existing.doneCount > 0
+      && !confirm('Changer de programme ? Ta progression actuelle sera remise à zéro.')) return;
+  setProgramState({ programId: id, doneCount: 0, lastDate: null });
+  renderProgramHomeCard();
+  openProgramOverlay(id);
+}
+function restartProgram(id) {
+  setProgramState({ programId: id, doneCount: 0, lastDate: null });
+  renderProgramHomeCard();
+  openProgramOverlay(id);
+}
+
+function launchProgramDay() {
+  const state = getProgramState();
+  if (!state) return;
+  const p = findProgram(state.programId);
+  if (!p || state.doneCount >= p.days.length || !isProgramDayAvailable(state)) return;
+  const found = findSessionById(p.days[state.doneCount].sessionId);
+  if (!found) return;
+  programDayInProgress = { programId: state.programId, day: state.doneCount };
+  const { session, group } = found;
+  openVoiceOverlay(session.id, session.title, group.name, session.duration + ' min', session.file, session.fileFem || false, group.artwork);
+}
+
+// Appelée depuis le handler `ended` du player quand la séance jouée venait d'un
+// jour de programme. Avance d'un jour et pose la date du jour (soft-lock).
+function completeProgramDay() {
+  const state = getProgramState();
+  if (!state || !programDayInProgress || programDayInProgress.programId !== state.programId) return;
+  const p = findProgram(state.programId);
+  if (!p || state.doneCount >= p.days.length) return;
+  state.doneCount++;
+  state.lastDate = programToday();
+  setProgramState(state);
+  renderProgramHomeCard();
+  const ov = document.getElementById('program-overlay');
+  if (ov && ov.classList.contains('open')) renderProgramOverlayContent(state.programId);
+}
+
+function dayRowHTML(day, title, kind) {
+  const dot = kind === 'done'
+    ? '<span class="pday-dot done"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>'
+    : '<span class="pday-dot ' + kind + '"></span>';
+  const lock = kind === 'locked' ? '<div class="pday-lock">Disponible demain</div>' : '';
+  const dim = (kind === 'future' || kind === 'locked') ? ' dim' : '';
+  return `<div class="pday${dim}">${dot}<div class="pday-txt"><div class="pday-num">Jour ${day}</div><div class="pday-title">${escapeHtml(title)}</div>${lock}</div></div>`;
+}
+function dayTodayHTML(day, title, intro) {
+  return `<div class="pday-today"><div class="pday-today-row"><div class="pday-today-info"><div class="pday-today-eyebrow">Aujourd'hui · Jour ${day}</div><h3>${escapeHtml(title)}</h3><div class="pday-intro">${escapeHtml(intro || '')}</div></div><button class="pday-launch" onclick="launchProgramDay()">Lancer</button></div></div>`;
+}
+function dayTitleOf(sessionId) { const f = findSessionById(sessionId); return f ? f.session.title : ''; }
+
+function renderProgramOverlayContent(programId) {
+  const p = findProgram(programId);
+  if (!p) return;
+  const state = getProgramState();
+  const enrolled = !!(state && state.programId === programId);
+  const doneCount = enrolled ? state.doneCount : 0;
+  const available = enrolled ? isProgramDayAvailable(state) : true;
+  const total = p.days.length;
+
+  document.getElementById('program-hero-img').src = p.artwork || '';
+  document.getElementById('program-title').textContent = p.title;
+
+  let html = '';
+  if (!enrolled) {
+    html += `<p class="program-intro">${escapeHtml(p.subtitle || '')}</p>`;
+    html += `<button class="btn btn-primary program-start" onclick="enrollProgram('${p.id}')">Commencer ce programme</button>`;
+    html += '<div class="program-days">';
+    p.days.forEach((d, i) => { html += dayRowHTML(i + 1, dayTitleOf(d.sessionId), 'future'); });
+    html += '</div>';
+  } else if (doneCount >= total) {
+    html += `<div class="program-done"><div class="program-done-em">🌿</div><h2>Programme terminé</h2><p>Tu as traversé les ${total} jours. Tu peux le recommencer quand tu veux, ou en choisir un autre.</p><button class="btn btn-ghost" onclick="restartProgram('${p.id}')">↩ Recommencer</button></div>`;
+  } else {
+    html += `<div class="program-progress"><div class="program-progress-track"><div class="program-progress-fill" style="width:${doneCount / total * 100}%"></div></div><span class="program-progress-label">Jour ${doneCount + 1} sur ${total}</span></div>`;
+    html += '<div class="program-days">';
+    p.days.forEach((d, i) => {
+      const day = i + 1, title = dayTitleOf(d.sessionId);
+      if (day <= doneCount) html += dayRowHTML(day, title, 'done');
+      else if (day === doneCount + 1) html += available ? dayTodayHTML(day, title, d.intro) : dayRowHTML(day, title, 'locked');
+      else html += dayRowHTML(day, title, 'future');
+    });
+    html += '</div>';
+  }
+  document.getElementById('program-body').innerHTML = html;
+}
+
+function openProgramOverlay(programId) {
+  if (!findProgram(programId)) return;
+  renderProgramOverlayContent(programId);
+  const ov = document.getElementById('program-overlay');
+  if (!ov.classList.contains('open')) {
+    ov.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    registerOverlay('program', closeProgramOverlay);
+  }
+  window.scrollTo(0, 0);
+}
+function closeProgramOverlay() {
+  document.getElementById('program-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// Carte "Ton programme" sur l'accueil (affichée seulement si un programme est actif).
+function renderProgramHomeCard() {
+  const wrap = document.getElementById('program-home-card');
+  if (!wrap) return;
+  const state = getProgramState();
+  const p = state ? findProgram(state.programId) : null;
+  if (!p) { wrap.style.display = 'none'; wrap.innerHTML = ''; return; }
+  const total = p.days.length;
+  const finished = state.doneCount >= total;
+  const dayTitle = finished ? 'Programme terminé 🌿' : ('Jour ' + (state.doneCount + 1) + ' · ' + dayTitleOf(p.days[state.doneCount].sessionId));
+  let dots = '';
+  for (let i = 0; i < total; i++) dots += `<span class="${i < state.doneCount ? 'on' : ''}"></span>`;
+  wrap.innerHTML = `<button class="program-hc" onclick="openProgramOverlay('${p.id}')">`
+    + `<img class="program-hc-ill" src="${p.artwork}" alt="">`
+    + `<div class="program-hc-txt"><div class="program-hc-eyebrow">Ton programme</div>`
+    + `<div class="program-hc-title">${escapeHtml(dayTitle)}</div>`
+    + `<div class="program-hc-dots">${dots}</div></div>`
+    + `<span class="program-hc-go">›</span></button>`;
+  wrap.style.display = 'block';
+}
+
+// Section "Programmes" en haut d'Explorer.
+function renderProgramsSection() {
+  const grid = document.getElementById('programs-grid');
+  if (!grid) return;
+  const programs = getPrograms();
+  if (!programs.length) { grid.closest('.programs-section')?.style && (grid.closest('.programs-section').style.display = 'none'); return; }
+  grid.innerHTML = programs.map(p =>
+    `<button class="program-card" onclick="openProgramOverlay('${p.id}')">`
+    + `<img src="${p.artwork}" alt="">`
+    + `<div class="program-card-txt"><div class="program-card-eyebrow">${p.days.length} jours</div>`
+    + `<div class="program-card-title">${escapeHtml(p.title)}</div>`
+    + `<div class="program-card-sub">${escapeHtml(p.subtitle || '')}</div></div></button>`
+  ).join('');
+}
+
 function openParcoursOverlay(groupName) {
   if (!CATALOG) return;
   const group = CATALOG.groups.find(g => g.name === groupName);
@@ -3818,7 +3994,7 @@ const DATA_KEYS = [
   'serein-stats', 'serein-history', 'serein-feedback', 'serein-guide-session', 'serein-favoris',
   'serein-theme', 'serein-text-size', 'serein-speed', 'serein-bells', 'serein-wifi-only',
   'serein-ambiance-default', 'serein-ambiance-volume', 'serein-reminder-enabled', 'serein-reminder-time',
-  'serein-voice', 'serein-resume', 'serein-mood-log',
+  'serein-voice', 'serein-resume', 'serein-mood-log', 'serein-program',
   'serein_seances_terminees', 'serein_invitation_don_vue',
   // Flags "une seule fois" : sans eux, une restauration re-sollicite
   // l'utilisateur (proposition de rappel, avis store, bloc soutien).
@@ -3835,7 +4011,7 @@ const DATA_KEYS = [
 // plus résistant qu'une WebView à une purge de stockage. Écriture
 // fire-and-forget à chaque sauvegarde ; lecture seulement au démarrage,
 // et seulement pour restaurer si localStorage s'avère vide.
-const NATIVE_MIRROR_KEYS = ['serein-stats', 'serein-favoris', 'serein-history'];
+const NATIVE_MIRROR_KEYS = ['serein-stats', 'serein-favoris', 'serein-history', 'serein-program'];
 
 function mirrorToNative(key) {
   try {
