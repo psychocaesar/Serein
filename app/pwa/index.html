@@ -198,7 +198,10 @@
     /* ── Recherche Explorer ── */
     .explore-search { display: flex; align-items: center; gap: .6rem; background: var(--color-surface); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid var(--color-border); border-radius: 2rem; padding: .7rem 1rem; margin-top: 1rem; }
     .explore-search svg { width: 18px; height: 18px; flex-shrink: 0; stroke: var(--color-muted); fill: none; stroke-width: 2; }
-    .explore-search input { flex: 1; min-width: 0; background: none; border: none; color: var(--color-text); font-size: .95rem; font-family: inherit; outline: none; }
+    /* font-size >= 16px obligatoire : en dessous, iOS auto-zoome au focus du
+       champ (et le zoom reste bloqué). 1rem = 16px au format normal, et suit
+       le réglage de taille de texte pour les paliers Grand/Très grand. */
+    .explore-search input { flex: 1; min-width: 0; background: none; border: none; color: var(--color-text); font-size: 1rem; font-family: inherit; outline: none; }
     .explore-search input::placeholder { color: var(--color-muted); }
     .explore-search-clear { display: none; background: none; border: none; color: var(--color-muted); font-size: 1rem; cursor: pointer; padding: 0 .15rem; }
     .explore-search-clear.show { display: block; }
