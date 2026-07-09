@@ -77,8 +77,8 @@
       "name": "Anxiété",
       "artwork": "assets/illustrations/player-05.jpg",
       "sessions": [
-        { "id": "s11", "title": "SOS Anxiété — ancrage immédiat", "duration": 5, "file": "SOS Anxiété ancrage immédiat.mp3", "fileFem": null, "desc": "Un ancrage immédiat quand l'anxiété monte d'un coup." },
-        { "id": "s12", "title": "Accueillir l'anxiété sans la combattre", "duration": 10, "file": "Accueillir l'anxiété sans la combattre.mp3", "fileFem": null, "desc": "Laisser passer la vague plutôt que lutter contre elle." },
+        { "id": "s11", "title": "SOS Anxiété — ancrage immédiat", "duration": 5, "file": "SOS Anxiété ancrage immédiat.mp3", "fileFem": "SOS anxiété - ancrage immédiat.mp3", "desc": "Un ancrage immédiat quand l'anxiété monte d'un coup." },
+        { "id": "s12", "title": "Accueillir l'anxiété sans la combattre", "duration": 10, "file": "Accueillir l'anxiété sans la combattre.mp3", "fileFem": "Accueillir l-anxiété sans la combattre.mp3", "desc": "Laisser passer la vague plutôt que lutter contre elle." },
         { "id": "s13", "title": "Les sons autour de toi", "duration": 7, "file": "Les sons autour de toi.mp3", "fileFem": "Les sons autour de toi.mp3", "desc": "Recentrer l'attention par l'écoute pour apaiser le mental." },
         { "id": "s14", "title": "La pensée qui tourne en boucle", "duration": 8, "file": "La pensée qui tourne en boucle.mp3", "fileFem": "La pensée qui tourne en boucle.mp3", "desc": "Désamorcer les ruminations qui alimentent l'inquiétude." },
         { "id": "s24", "title": "Mon corps face à la peur", "duration": 5, "file": "Mon corps face à la peur.mp3", "fileFem": null, "desc": "Apprivoiser les sensations physiques de la peur." },
