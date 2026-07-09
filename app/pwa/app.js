@@ -103,6 +103,20 @@ function goBack() {
   try { history.back(); } catch(e) {}
 }
 
+// Bouton retour matériel Android : sans écouteur explicite, Capacitor quitte
+// l'app au lieu de suivre notre navigation (pushState/popstate maison). On le
+// branche donc sur goBack() : ferme sheet/overlay/écran secondaire du dessus,
+// et quitte seulement quand il n'y a plus rien à fermer (comportement standard
+// Android : back sur l'accueil = sortie).
+function setupAndroidBackButton() {
+  const App = window.Capacitor?.Plugins?.App;
+  if (!App || !App.addListener) return;
+  App.addListener('backButton', () => {
+    if (overlayStack.length > 0) goBack();
+    else App.exitApp();
+  });
+}
+
 window.addEventListener('popstate', () => {
   if (suppressPop > 0) { suppressPop--; return; }
   const top = overlayStack.pop();
@@ -4009,6 +4023,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   applyTheme();
   applyTextSize();
+  setupAndroidBackButton();
   loadSpeed();
   loadStats();
   loadPrefs();
