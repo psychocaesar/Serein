@@ -96,5 +96,50 @@
         { "id": "s33", "title": "Flow - entrer dans la zone", "duration": 10, "file": "Flow - entrer dans la zone.mp3", "fileFem": null, "desc": "Préparer les conditions de l'immersion totale." }
       ]
     }
+  ],
+  "programs": [
+    {
+      "id": "debuter-7j",
+      "title": "7 jours pour débuter",
+      "subtitle": "Une première semaine de pratique, pas à pas.",
+      "artwork": "assets/illustrations/player-01.jpg",
+      "days": [
+        { "sessionId": "s1", "intro": "On commence par le souffle, comme point d'appui." },
+        { "sessionId": "s2", "intro": "Apprendre à être là, sans rien avoir à faire." },
+        { "sessionId": "s3", "intro": "Regarder passer les pensées comme des nuages." },
+        { "sessionId": "s4", "intro": "Relâcher les tensions, des pieds à la tête." },
+        { "sessionId": "s16", "intro": "Un ancrage simple, pour revenir ici et maintenant." },
+        { "sessionId": "s17", "intro": "Poser un regard plus doux sur toi-même." },
+        { "sessionId": "s18", "intro": "Construire ton repère intérieur, à garder avec toi." }
+      ]
+    },
+    {
+      "id": "anxiete-7j",
+      "title": "7 jours pour apprivoiser l'anxiété",
+      "subtitle": "Laisser passer la vague, jour après jour.",
+      "artwork": "assets/illustrations/player-05.jpg",
+      "days": [
+        { "sessionId": "s12", "intro": "Accueillir l'anxiété plutôt que lutter contre elle." },
+        { "sessionId": "s9", "intro": "Réguler le système nerveux par la respiration." },
+        { "sessionId": "s13", "intro": "Recentrer l'attention par l'écoute de ce qui t'entoure." },
+        { "sessionId": "s14", "intro": "Désamorcer les pensées qui tournent en boucle." },
+        { "sessionId": "s24", "intro": "Apprivoiser les sensations physiques de la peur." },
+        { "sessionId": "s25", "intro": "Revenir au présent par les cinq sens." },
+        { "sessionId": "s11", "intro": "Un ancrage rapide, à garder pour les pics d'angoisse." }
+      ]
+    },
+    {
+      "id": "sommeil-5j",
+      "title": "5 jours vers un meilleur sommeil",
+      "subtitle": "Préparer la nuit, en douceur.",
+      "artwork": "assets/illustrations/player-03.jpg",
+      "days": [
+        { "sessionId": "s7", "intro": "Couper le fil de la journée avant la nuit." },
+        { "sessionId": "s20", "intro": "Une détente progressive pour glisser vers le sommeil." },
+        { "sessionId": "s19", "intro": "Se laisser porter par les sons jusqu'à l'endormissement." },
+        { "sessionId": "s8", "intro": "Retrouver le calme quand la nuit se fragmente." },
+        { "sessionId": "s21", "intro": "Émerger en douceur et bien commencer la journée." }
+      ]
+    }
   ]
 }

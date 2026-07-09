@@ -35,6 +35,20 @@ test('chaque séance a les champs requis', () => {
   }
 });
 
+test('chaque jour de programme référence une séance existante', () => {
+  const ids = new Set(allSessions().map(({ session }) => session.id));
+  assert.ok(Array.isArray(catalog.programs) && catalog.programs.length > 0, 'aucun programme dans le catalogue');
+  for (const p of catalog.programs) {
+    assert.match(p.id, /^[\w-]+$/, `id de programme invalide : ${JSON.stringify(p.id)}`);
+    assert.ok(typeof p.title === 'string' && p.title.length > 0, `titre manquant pour ${p.id}`);
+    assert.ok(Array.isArray(p.days) && p.days.length >= 3, `programme ${p.id} : au moins 3 jours attendus`);
+    for (const d of p.days) {
+      assert.ok(ids.has(d.sessionId), `programme ${p.id} : sessionId introuvable « ${d.sessionId} »`);
+      assert.ok(typeof d.intro === 'string' && d.intro.length > 0, `programme ${p.id} : intro manquante pour ${d.sessionId}`);
+    }
+  }
+});
+
 test('les ids de séances sont uniques', () => {
   const ids = allSessions().map(({ session }) => session.id);
   assert.strictEqual(new Set(ids).size, ids.length, 'ids dupliqués : ' + ids.filter((id, i) => ids.indexOf(id) !== i).join(', '));
