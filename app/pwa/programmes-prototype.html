@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Prototype — Programmes jour par jour · Serein</title>
+<style>
+  @font-face { font-family:'Bricolage Grotesque'; font-weight:400 700; font-display:swap; src:url('assets/fonts/bricolage-grotesque-latin.woff2') format('woff2'); }
+  @font-face { font-family:'Hanken Grotesk'; font-weight:300 700; font-display:swap; src:url('assets/fonts/hanken-grotesk-latin.woff2') format('woff2'); }
+
+  *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+  :root {
+    --color-bg:#0d1b15; --color-surface:rgba(28,49,39,0.6); --color-surface-2:#1c3127;
+    --color-primary:#93c9ac; --color-primary-2:#d8b78a; --color-primary-light:rgba(147,201,172,0.13);
+    --color-text:#f0f4f0; --color-muted:#93a89b; --color-border:rgba(255,255,255,0.08);
+    --radius:1.625rem; --radius-sm:1.125rem; --gradient:linear-gradient(120deg,#93c9ac,#d8b78a);
+  }
+  [data-theme="light"] {
+    --color-bg:#f4f2ec; --color-surface:#ffffff; --color-surface-2:#f0ede4;
+    --color-primary:#2f6b50; --color-primary-2:#c0883e; --color-primary-light:rgba(47,107,80,0.10);
+    --color-text:#1b2a20; --color-muted:#5d7066; --color-border:rgba(40,55,45,0.09);
+    --gradient:#2f6b50; --radius:1.5rem;
+  }
+  body { font-family:'Hanken Grotesk',system-ui,sans-serif; background:var(--color-bg); color:var(--color-text); min-height:100vh; -webkit-tap-highlight-color:transparent; }
+  .wrap { max-width:460px; margin:0 auto; padding:1rem 1.25rem 3rem; }
+
+  .proto-bar { display:flex; align-items:center; justify-content:space-between; gap:.75rem; background:var(--color-surface-2); border:1px solid var(--color-border); border-radius:14px; padding:.6rem .8rem; margin-bottom:1.25rem; font-size:.78rem; color:var(--color-muted); }
+  .proto-bar strong { color:var(--color-text); font-weight:600; }
+  .proto-bar button { background:none; border:1px solid var(--color-border); color:var(--color-text); border-radius:999px; padding:.35rem .7rem; font-size:.75rem; cursor:pointer; font-family:inherit; }
+
+  .hero { position:relative; height:210px; border-radius:var(--radius); overflow:hidden; margin-bottom:1.1rem; }
+  .hero img { width:100%; height:100%; object-fit:cover; object-position:center 20%; }
+  .hero::after { content:''; position:absolute; inset:0; background:linear-gradient(to top,var(--color-bg) 3%,rgba(13,27,21,.25) 55%,rgba(13,27,21,.5) 100%); }
+  [data-theme="light"] .hero::after { background:linear-gradient(to top,var(--color-bg) 3%,rgba(244,242,236,.4) 55%,rgba(244,242,236,.6) 100%); }
+  .hero-txt { position:absolute; left:1.1rem; right:1.1rem; bottom:.9rem; z-index:2; }
+  .hero-eyebrow { text-transform:uppercase; letter-spacing:.1em; font-size:.7rem; color:var(--color-primary); font-weight:700; margin-bottom:.3rem; }
+  .hero-txt h1 { font-family:'Bricolage Grotesque',sans-serif; font-size:1.7rem; font-weight:700; color:#fff; text-shadow:0 1px 8px rgba(0,0,0,.5); line-height:1.15; }
+  .hero-sub { color:rgba(255,255,255,.85); font-size:.85rem; margin-top:.25rem; text-shadow:0 1px 6px rgba(0,0,0,.5); }
+
+  .progress-row { display:flex; align-items:center; gap:.7rem; margin:0 .2rem 1.3rem; }
+  .progress-track { flex:1; height:6px; border-radius:999px; background:var(--color-primary-light); overflow:hidden; }
+  .progress-fill { height:100%; background:var(--gradient); border-radius:999px; transition:width .4s ease; }
+  .progress-label { font-size:.8rem; color:var(--color-muted); white-space:nowrap; }
+
+  .day { display:flex; align-items:center; gap:.85rem; padding:.7rem .3rem; }
+  .day-dot { width:24px; height:24px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+  .day-dot.done { background:var(--color-primary-light); color:var(--color-primary); }
+  .day-dot.done svg { width:13px; height:13px; stroke:currentColor; fill:none; stroke-width:3; stroke-linecap:round; stroke-linejoin:round; }
+  .day-dot.locked, .day-dot.future { border:1.5px solid var(--color-border); }
+  .day-num { font-size:.72rem; color:var(--color-muted); opacity:.8; }
+  .day-title { font-size:.95rem; color:var(--color-text); }
+  .day.dim .day-title { color:var(--color-muted); }
+  .day.dim { opacity:.6; }
+  .day-lockmsg { font-size:.72rem; color:var(--color-primary-2); margin-top:.05rem; }
+
+  .day-today { background:var(--color-surface); border:1px solid rgba(147,201,172,.35); border-radius:16px; padding:.9rem 1rem; margin:.4rem 0; }
+  [data-theme="light"] .day-today { background:#fff; box-shadow:0 6px 22px -16px rgba(30,50,40,.25); }
+  .day-today-row { display:flex; align-items:center; justify-content:space-between; gap:.8rem; }
+  .day-today-eyebrow { text-transform:uppercase; letter-spacing:.06em; font-size:.68rem; color:var(--color-primary); font-weight:700; margin-bottom:.25rem; }
+  .day-today h3 { font-family:inherit; font-size:1.02rem; font-weight:600; color:var(--color-text); }
+  .day-today .intro { font-size:.82rem; color:var(--color-muted); margin-top:.2rem; }
+  .btn-launch { background:var(--gradient); color:#0d1b15; font-weight:700; border:none; border-radius:999px; padding:.65rem 1.2rem; font-size:.9rem; cursor:pointer; white-space:nowrap; flex-shrink:0; font-family:inherit; }
+  [data-theme="light"] .btn-launch { color:#fff; }
+
+  .done-banner { text-align:center; padding:1.5rem 1rem; }
+  .done-banner .em { font-size:2.2rem; }
+  .done-banner h2 { font-family:'Bricolage Grotesque',sans-serif; font-size:1.3rem; margin:.5rem 0 .3rem; }
+  .done-banner p { color:var(--color-muted); font-size:.9rem; }
+
+  .toast { position:sticky; bottom:1rem; margin:1rem auto 0; max-width:320px; background:var(--color-surface-2); border:1px solid var(--color-border); border-radius:16px; padding:.75rem 1rem; font-size:.82rem; color:var(--color-text); text-align:center; box-shadow:0 8px 32px rgba(0,0,0,.35); display:none; }
+  .toast.show { display:block; animation:pop .25s ease; }
+  @keyframes pop { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+
+  .divider { border:none; border-top:1px solid var(--color-border); margin:2.2rem 0 1.4rem; }
+  .section-label { font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--color-muted); margin-bottom:.7rem; }
+
+  .home-card { background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius); padding:1rem 1.1rem; display:flex; align-items:center; gap:.9rem; }
+  [data-theme="light"] .home-card { background:#fff; box-shadow:0 6px 22px -16px rgba(30,50,40,.22); }
+  .home-card .hc-ill { width:52px; height:52px; border-radius:14px; object-fit:cover; flex-shrink:0; }
+  .home-card .hc-eyebrow { font-size:.66rem; text-transform:uppercase; letter-spacing:.08em; color:var(--color-primary); font-weight:700; }
+  .home-card h3 { font-size:.98rem; font-weight:600; margin:.15rem 0 .35rem; }
+  .hc-dots { display:flex; gap:4px; }
+  .hc-dots span { width:16px; height:4px; border-radius:2px; background:var(--color-border); }
+  .hc-dots span.on { background:var(--color-primary); }
+  .home-card .hc-go { margin-left:auto; align-self:center; color:var(--color-primary); font-size:1.2rem; }
+
+  .prog-grid { display:flex; flex-direction:column; gap:.7rem; }
+  .prog-card { position:relative; border-radius:var(--radius); overflow:hidden; min-height:110px; display:flex; align-items:flex-end; cursor:pointer; }
+  .prog-card img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  .prog-card::after { content:''; position:absolute; inset:0; background:linear-gradient(to right,rgba(0,0,0,.72),rgba(0,0,0,.15)); }
+  .prog-card .pc-txt { position:relative; z-index:1; padding:.9rem 1rem; }
+  .prog-card .pc-eyebrow { font-size:.62rem; text-transform:uppercase; letter-spacing:.08em; color:#bfe0cf; font-weight:700; }
+  .prog-card h3 { color:#fff; font-size:1rem; font-weight:700; margin:.15rem 0 .1rem; text-shadow:0 1px 6px rgba(0,0,0,.6); }
+  .prog-card .pc-meta { color:rgba(255,255,255,.85); font-size:.75rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="proto-bar">
+    <span>Prototype · <strong>Programmes jour par jour</strong></span>
+    <span>
+      <button onclick="simulateTomorrow()" id="tmrw-btn">⏭ Simuler le lendemain</button>
+      <button onclick="toggleTheme()">Thème</button>
+    </span>
+  </div>
+
+  <div class="hero">
+    <img src="assets/illustrations/player-01.jpg" alt="">
+    <div class="hero-txt">
+      <div class="hero-eyebrow">Programme en cours</div>
+      <h1>7 jours pour débuter</h1>
+      <div class="hero-sub">Une première semaine, pas à pas.</div>
+    </div>
+  </div>
+
+  <div class="progress-row">
+    <div class="progress-track"><div class="progress-fill" id="pfill"></div></div>
+    <span class="progress-label" id="plabel"></span>
+  </div>
+
+  <div id="days"></div>
+
+  <div class="toast" id="toast"></div>
+
+  <hr class="divider">
+  <div class="section-label">Sur l'accueil (une fois inscrit)</div>
+  <div class="home-card" id="home-card">
+    <img class="hc-ill" src="assets/illustrations/player-01.jpg" alt="">
+    <div>
+      <div class="hc-eyebrow">Ton programme</div>
+      <h3 id="hc-title">Jour 4 · Le scan corporel</h3>
+      <div class="hc-dots" id="hc-dots"></div>
+    </div>
+    <span class="hc-go">›</span>
+  </div>
+
+  <hr class="divider">
+  <div class="section-label">Dans Explorer · Programmes</div>
+  <div class="prog-grid">
+    <div class="prog-card">
+      <img src="assets/illustrations/player-01.jpg" alt="">
+      <div class="pc-txt"><div class="pc-eyebrow">7 jours</div><h3>Pour débuter</h3><div class="pc-meta">Une première semaine de pratique</div></div>
+    </div>
+    <div class="prog-card">
+      <img src="assets/illustrations/player-05.jpg" alt="">
+      <div class="pc-txt"><div class="pc-eyebrow">7 jours</div><h3>Apprivoiser l'anxiété</h3><div class="pc-meta">Laisser passer la vague, jour après jour</div></div>
+    </div>
+    <div class="prog-card">
+      <img src="assets/illustrations/player-03.jpg" alt="">
+      <div class="pc-txt"><div class="pc-eyebrow">5 jours</div><h3>Vers un meilleur sommeil</h3><div class="pc-meta">Préparer la nuit, en douceur</div></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const DAYS = [
+    { title:"Première respiration consciente", intro:"On commence par le souffle, simplement." },
+    { title:"S'asseoir, ne rien faire",         intro:"Apprendre à être là, sans objectif." },
+    { title:"Observer ses pensées",             intro:"Les laisser passer comme des nuages." },
+    { title:"Le scan corporel",                 intro:"Relâcher les tensions, des pieds à la tête." },
+    { title:"Revenir à l'instant présent",      intro:"Un ancrage simple, ici et maintenant." },
+    { title:"La bienveillance envers soi",      intro:"Poser un regard plus doux sur toi." },
+    { title:"Mon ancre personnelle",            intro:"Construire ton repère intérieur." },
+  ];
+
+  // Modèle de progression : soft-lock 1 jour / jour, SANS pénalité de gap.
+  // doneCount = jours validés. todayAvailable = le jour courant est-il lançable
+  // aujourd'hui (false juste après avoir terminé un jour → « disponible demain »).
+  let doneCount = 3;
+  let todayAvailable = true;
+
+  function render() {
+    const total = DAYS.length;
+    document.getElementById('pfill').style.width = (doneCount/total*100)+'%';
+    document.getElementById('plabel').textContent = doneCount>=total ? 'Terminé' : 'Jour '+(doneCount+1)+' sur '+total;
+
+    const c = document.getElementById('days');
+    if (doneCount >= total) {
+      c.innerHTML = '<div class="done-banner"><div class="em">🌿</div><h2>Programme terminé</h2><p>Tu as traversé les 7 jours. Tu peux le recommencer quand tu veux, ou en choisir un autre.</p></div>';
+      updateAside(); return;
+    }
+    let html = '';
+    DAYS.forEach((d, i) => {
+      const day = i+1;
+      if (day <= doneCount) {
+        html += `<div class="day"><span class="day-dot done"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><div><div class="day-num">Jour ${day}</div><div class="day-title">${d.title}</div></div></div>`;
+      } else if (day === doneCount+1) {
+        if (todayAvailable) {
+          html += `<div class="day-today"><div class="day-today-row"><div><div class="day-today-eyebrow">Aujourd'hui · Jour ${day}</div><h3>${d.title}</h3><div class="intro">${d.intro}</div></div><button class="btn-launch" onclick="completeDay()">Lancer</button></div></div>`;
+        } else {
+          html += `<div class="day"><span class="day-dot locked"></span><div><div class="day-num">Jour ${day}</div><div class="day-title">${d.title}</div><div class="day-lockmsg">Disponible demain</div></div></div>`;
+        }
+      } else {
+        html += `<div class="day dim"><span class="day-dot future"></span><div><div class="day-num">Jour ${day}</div><div class="day-title">${d.title}</div></div></div>`;
+      }
+    });
+    c.innerHTML = html;
+    updateAside();
+  }
+
+  function updateAside() {
+    const total = DAYS.length;
+    const next = Math.min(doneCount, total-1);
+    const t = document.getElementById('hc-title');
+    if (doneCount>=total) t.textContent = 'Programme terminé 🌿';
+    else t.textContent = 'Jour '+(doneCount+1)+' · '+DAYS[doneCount].title;
+    let dots=''; for(let i=0;i<total;i++) dots += `<span class="${i<doneCount?'on':''}"></span>`;
+    document.getElementById('hc-dots').innerHTML = dots;
+  }
+
+  function completeDay() {
+    doneCount++;
+    todayAvailable = false; // le jour suivant se débloque demain
+    render();
+    if (doneCount < DAYS.length) showToast('Jour '+doneCount+' terminé · à demain pour la suite 🌿');
+  }
+  function simulateTomorrow() {
+    if (!todayAvailable) { todayAvailable = true; render(); showToast('Nouveau jour : la séance du jour est disponible.'); }
+    else showToast('La séance du jour est déjà disponible.');
+  }
+  function showToast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg; el.classList.add('show');
+    clearTimeout(el._t); el._t = setTimeout(()=>el.classList.remove('show'), 3500);
+  }
+  function toggleTheme() {
+    const cur = document.documentElement.getAttribute('data-theme');
+    if (cur==='light') document.documentElement.removeAttribute('data-theme');
+    else document.documentElement.setAttribute('data-theme','light');
+  }
+  render();
+</script>
+</body>
+</html>
