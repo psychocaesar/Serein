@@ -177,6 +177,7 @@
     .mood-chips::-webkit-scrollbar { display: none; }
     .mood-chip { flex-shrink: 0; display: inline-flex; align-items: center; gap: .4rem; border: 1px solid var(--color-border); background: var(--color-surface); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); border-radius: 999px; padding: .5rem 1rem; font-size: .88rem; color: var(--color-text); cursor: pointer; transition: border-color .2s; }
     .mood-chip:hover, .mood-chip:focus-visible { border-color: var(--color-primary); }
+    .mood-lead { font-size: .82rem; color: var(--color-muted); line-height: 1.4; margin-bottom: .15rem; }
     [data-theme="light"] .mood-chip { backdrop-filter: none; -webkit-backdrop-filter: none; background: #fff; box-shadow: 0 6px 22px -16px rgba(30,50,40,0.22); }
 
     /* RAIL PARCOURS (accueil) : cartes compactes, scroll horizontal, la suivante dépasse pour inviter au swipe */
@@ -1090,15 +1091,6 @@
     <h1>Respirer, s'apaiser, se recentrer.</h1>
   </header>
 
-  <!-- Invitation au don : affichée une seule fois après SEUIL séances guidées (renderDonInvitation) -->
-  <section id="don-invitation-block" class="timer-block" style="display:none;margin-top:1.25rem;" role="region" aria-label="Soutenir Serein">
-    <article class="don-invitation-card">
-      <button class="don-invitation-close" id="don-invitation-close" type="button" aria-label="Fermer" onclick="dismissDonInvitation()">&times;</button>
-      <p class="don-invitation-text" id="don-invitation-text"></p>
-      <button class="btn btn-primary don-invitation-cta" type="button" onclick="supportFromInvitation()">Soutenir Serein</button>
-    </article>
-  </section>
-
   <!-- Welcome-block : visible par défaut pour nouveaux visiteurs, masqué par anti-flash JS si sessions > 0 -->
   <div id="welcome-block" class="welcome-block">
     <div class="welcome-inner">
@@ -1123,9 +1115,25 @@
     <button class="btn btn-primary welcome-cta" onclick="showScreen('explore')">Choisir une séance</button>
   </div>
 
+  <!-- Reprendre : rempli par renderResumeCard() si une séance est en cours (priorité : finir ce qu'on a commencé) -->
+  <section id="resume-block" class="timer-block" style="display:none;margin-top:1.25rem;" aria-label="Reprendre la séance en cours">
+    <p class="timer-block-label">Reprendre</p>
+    <article class="timer-card-horizontal" id="resume-card" role="button" tabindex="0">
+      <div class="timer-info-h">
+        <div class="timer-icon-wrap" aria-hidden="true"><svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polygon points="10 8.5 16 12 10 15.5 10 8.5"/></svg></div>
+        <div><h3 id="resume-title"></h3><p id="resume-meta"></p></div>
+      </div>
+      <span class="timer-cta">▶ Reprendre</span>
+    </article>
+  </section>
+
+  <!-- Ton programme en cours : rempli par renderProgramHomeCard() si un programme est actif -->
+  <div id="program-home-card" style="display:none;margin-top:1.25rem;"></div>
+
   <!-- Chips d'humeur : la première question du guide, directement sur l'accueil -->
   <section class="timer-block" aria-label="Comment tu te sens">
-    <p class="timer-block-label">Comment tu te sens, là ?</p>
+    <p class="timer-block-label" style="margin-bottom:.2rem;">Comment tu te sens, là ?</p>
+    <p class="mood-lead">Dis-le en un mot, je te propose la séance qui colle.</p>
     <div class="mood-chips">
       <button class="mood-chip" onclick="openGuideMood('stress')">😮‍💨 Stressé(e)</button>
       <button class="mood-chip" onclick="openGuideMood('anxiete')">😰 Anxieux/se</button>
@@ -1136,21 +1144,6 @@
       <button class="mood-chip" id="mood-chip-concentration" onclick="openGuideMood('concentration')">🎯 Concentration</button>
       <button class="mood-chip" onclick="openGuideMood('unknown')">🤷 Je ne sais pas</button>
     </div>
-  </section>
-
-  <!-- Ton programme en cours : rempli par renderProgramHomeCard() si un programme est actif -->
-  <div id="program-home-card" style="display:none;margin-top:1.25rem;"></div>
-
-  <!-- Reprendre : rempli par renderResumeCard() si une séance est en cours -->
-  <section id="resume-block" class="timer-block" style="display:none;margin-top:1.25rem;" aria-label="Reprendre la séance en cours">
-    <p class="timer-block-label">Reprendre</p>
-    <article class="timer-card-horizontal" id="resume-card" role="button" tabindex="0">
-      <div class="timer-info-h">
-        <div class="timer-icon-wrap" aria-hidden="true"><svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polygon points="10 8.5 16 12 10 15.5 10 8.5"/></svg></div>
-        <div><h3 id="resume-title"></h3><p id="resume-meta"></p></div>
-      </div>
-      <span class="timer-cta">▶ Reprendre</span>
-    </article>
   </section>
 
   <!-- Suggestion du moment : remplie par renderDailySuggestion() pour les utilisateurs réguliers -->
@@ -1219,6 +1212,17 @@
         <div><h3>Respirer</h3><p>Cohérence, boîte ou 4-7-8 · cercle guidé</p></div>
       </div>
       <span class="timer-cta">▶ Ouvrir</span>
+    </article>
+  </section>
+
+  <!-- Invitation au don : en bas de l'accueil, affichée une seule fois après SEUIL séances
+       (renderDonInvitation). EN PAUSE via DON_INVITATION_ACTIVE tant que Benevity/Goodstack
+       n'ont pas validé — reste masquée quoi qu'il arrive. -->
+  <section id="don-invitation-block" class="timer-block" style="display:none;margin-top:1.25rem;" role="region" aria-label="Soutenir Serein">
+    <article class="don-invitation-card">
+      <button class="don-invitation-close" id="don-invitation-close" type="button" aria-label="Fermer" onclick="dismissDonInvitation()">&times;</button>
+      <p class="don-invitation-text" id="don-invitation-text"></p>
+      <button class="btn btn-primary don-invitation-cta" type="button" onclick="supportFromInvitation()">Soutenir Serein</button>
     </article>
   </section>
 </section>
