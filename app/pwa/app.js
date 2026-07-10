@@ -117,6 +117,48 @@ function setupAndroidBackButton() {
   });
 }
 
+// ── ONBOARDING PREMIÈRE OUVERTURE ──
+// Carousel de 3 cartes affiché une seule fois (classe html.needs-onboarding
+// posée par le script anti-flash du <head>). À la fin, on lève le flag et on
+// retire la classe → l'app apparaît. La séquence normale (choix de voix au 1er
+// lancement d'une séance) reste intacte, elle vient plus tard.
+let onboardingIndex = 0;
+const ONBOARDING_TOTAL = 3;
+
+function renderOnboarding() {
+  const track = document.getElementById('ob-track');
+  if (track) track.style.transform = 'translateX(-' + (onboardingIndex * 100) + '%)';
+  const dots = document.getElementById('ob-dots');
+  if (dots) [...dots.children].forEach((d, k) => d.classList.toggle('on', k === onboardingIndex));
+  const next = document.getElementById('ob-next');
+  if (next) next.textContent = onboardingIndex === ONBOARDING_TOTAL - 1 ? 'Commencer' : 'Suivant';
+}
+function onboardingNext() {
+  if (onboardingIndex < ONBOARDING_TOTAL - 1) { onboardingIndex++; renderOnboarding(); }
+  else finishOnboarding();
+}
+function finishOnboarding() {
+  try { localStorage.setItem('serein-onboarding-vu', 'true'); } catch(_) {}
+  const root = document.documentElement;
+  root.classList.add('onboarding-leaving');
+  setTimeout(() => { root.classList.remove('needs-onboarding', 'onboarding-leaving'); }, 320);
+}
+function setupOnboarding() {
+  if (!document.documentElement.classList.contains('needs-onboarding')) return;
+  renderOnboarding();
+  const track = document.getElementById('ob-track');
+  if (!track) return;
+  let x0 = null;
+  track.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, { passive: true });
+  track.addEventListener('touchend', e => {
+    if (x0 === null) return;
+    const dx = e.changedTouches[0].clientX - x0;
+    if (dx < -45 && onboardingIndex < ONBOARDING_TOTAL - 1) { onboardingIndex++; renderOnboarding(); }
+    else if (dx > 45 && onboardingIndex > 0) { onboardingIndex--; renderOnboarding(); }
+    x0 = null;
+  }, { passive: true });
+}
+
 window.addEventListener('popstate', () => {
   if (suppressPop > 0) { suppressPop--; return; }
   const top = overlayStack.pop();
@@ -3999,7 +4041,8 @@ const DATA_KEYS = [
   // Flags "une seule fois" : sans eux, une restauration re-sollicite
   // l'utilisateur (proposition de rappel, avis store, bloc soutien).
   // serein-error-log exclu volontairement : diagnostic propre à l'appareil.
-  'serein-reminder-prompt-vue', 'serein-store-review-demande', 'serein-support-shown'
+  'serein-reminder-prompt-vue', 'serein-store-review-demande', 'serein-support-shown',
+  'serein-onboarding-vu'
 ];
 
 // ── SAUVEGARDE NATIVE (résilience) ──
@@ -4200,6 +4243,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   applyTheme();
   applyTextSize();
   setupAndroidBackButton();
+  setupOnboarding();
   loadSpeed();
   loadStats();
   loadPrefs();
