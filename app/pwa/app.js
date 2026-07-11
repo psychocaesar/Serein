@@ -658,6 +658,8 @@ function closePlayer() {
   // Séance de programme quittée sans aller au bout : ne pas valider le jour.
   if (!audio.ended) programDayInProgress = null;
 
+  clearSleepTimer(); // annule toute minuterie d'extinction en cours
+
   // Clean up timer if active
   if (timerInterval) { clearInterval(timerInterval); timerInterval = null; timerRunning = false; }
   const timerEngine = document.getElementById('timer-engine');
@@ -784,6 +786,7 @@ function launchPlayer(id, title, parcours, duration, filename, voice, artwork, r
   currentSession = { id, title, parcours, duration, filename, voice, artwork };
   currentOfflineFilename = filename;
   pendingResumeTime = (typeof resumeAt === 'number' && resumeAt > 0) ? resumeAt : null;
+  resetSleepTimer(); // nouvelle séance : repart sur « Illimité »
 
   // Artwork + fond flou
   const img = artwork || 'assets/logo-serein.png';
@@ -1241,6 +1244,64 @@ document.getElementById('ambiance-volume-slider').addEventListener('input', e =>
   setAmbianceVolume(e.target.value);
   try { localStorage.setItem('serein-ambiance-volume', e.target.value); } catch(_) {}
 });
+
+// ── MINUTERIE D'EXTINCTION (sommeil) ──
+// Arrête voix + ambiance après X minutes, avec un fondu de ~20 s. Sinon le fond
+// sonore boucle toute la nuit (la voix, elle, se termine seule mais l'ambiance
+// continue). Non persisté : réinitialisé à chaque nouvelle séance.
+let sleepTimerId = null;
+let sleepFadeId = null;
+
+function clearSleepTimer() {
+  if (sleepTimerId) { clearTimeout(sleepTimerId); sleepTimerId = null; }
+  if (sleepFadeId) { clearInterval(sleepFadeId); sleepFadeId = null; }
+}
+
+// Remet l'UI sur « Illimité » et annule tout timer en cours (appelé à
+// l'ouverture/fermeture d'une séance).
+function resetSleepTimer() {
+  clearSleepTimer();
+  const wrap = document.getElementById('sleep-timer-wrap');
+  if (wrap) {
+    wrap.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+    wrap.firstElementChild && wrap.firstElementChild.classList.add('active');
+  }
+}
+
+function setSleepTimer(minutes, btn) {
+  clearSleepTimer();
+  if (btn) {
+    document.querySelectorAll('#sleep-timer-wrap .speed-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  if (minutes > 0) sleepTimerId = setTimeout(sleepFadeOutAndStop, minutes * 60 * 1000);
+}
+
+function sleepFadeOutAndStop() {
+  clearTimeout(sleepTimerId); sleepTimerId = null;
+  const STEP = 500, STEPS = 40; // ~20 s
+  const startGain = ambianceGain ? ambianceGain.gain.value : ambianceAudio.volume;
+  const startVol = audio.volume;
+  let i = 0;
+  sleepFadeId = setInterval(() => {
+    i++;
+    const k = Math.max(0, 1 - i / STEPS);
+    if (ambianceGain) ambianceGain.gain.value = startGain * k; else ambianceAudio.volume = startGain * k;
+    audio.volume = startVol * k; // ignoré sur iOS (volume WebView), inoffensif
+    if (i >= STEPS) {
+      clearInterval(sleepFadeId); sleepFadeId = null;
+      audio.pause();
+      ambianceAudio.pause();
+      updatePlayIcon(false);
+      setMediaPlaybackState('paused');
+      notifyNativePlayback();
+      // Restaure les volumes pour une reprise éventuelle, puis remet l'UI à zéro.
+      if (ambianceGain) ambianceGain.gain.value = startGain; else ambianceAudio.volume = startGain;
+      audio.volume = startVol;
+      resetSleepTimer();
+    }
+  }, STEP);
+}
 
 function updateAmbianceTag(label) {
   const tag = document.getElementById('ambiance-settings-tag');
