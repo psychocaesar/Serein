@@ -2,4 +2,6 @@ Nouveau — Programmes jour par jour : un parcours guidé sur plusieurs jours, u
 
 Nouveau — Minuterie d'extinction des sons d'ambiance : ils s'arrêtent en douceur après 15, 30 ou 60 minutes, parfait pour s'endormir.
 
-Écran de bienvenue à la première ouverture, accueil réorganisé pour aller à l'essentiel, et corrections diverses.
+Le bouton retour Android suit enfin ta navigation au lieu de quitter l'app.
+
+Accueil réorganisé pour aller à l'essentiel, application nettement allégée, et corrections diverses.
