@@ -1,0 +1,5 @@
+Correction d'un bug où lancer une séance depuis un Parcours pouvait laisser l'écran de lecture invisible (le son démarrait, mais rien ne s'affichait).
+
+Le bouton retour Android suit enfin ta navigation au lieu de quitter l'app.
+
+Application nettement allégée.
