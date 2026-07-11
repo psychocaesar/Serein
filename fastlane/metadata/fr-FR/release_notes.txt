@@ -1,7 +1,5 @@
-Explorer repensé : tape sur un parcours pour l'ouvrir en plein écran avec une fiche explicative et ses séances.
+Nouveau — Programmes jour par jour : un parcours guidé sur plusieurs jours, une séance à la fois, à ton rythme et sans pression.
 
-8 fiches de psychoéducation TCC·ACT ajoutées (anxiété, stress, sommeil, respiration, émotions…), accessibles depuis Explorer et Apprendre.
+Nouveau — Minuterie d'extinction des sons d'ambiance : ils s'arrêtent en douceur après 15, 30 ou 60 minutes, parfait pour s'endormir.
 
-Interface allégée pour réduire la charge mentale.
-
-Les séances de respiration sont maintenant comptées dans tes stats.
+Écran de bienvenue à la première ouverture, accueil réorganisé pour aller à l'essentiel, et corrections diverses.

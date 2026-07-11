@@ -1,7 +1,9 @@
-Explorer repensé : tape sur un parcours pour l'ouvrir en plein écran avec une fiche explicative et ses séances.
+Nouveau geste : glisse depuis le bord gauche de l'écran pour revenir en arrière.
 
-8 fiches de psychoéducation TCC·ACT ajoutées (anxiété, stress, sommeil, respiration, émotions…), accessibles depuis Explorer et Apprendre.
+Corrections iOS : le volume des sons d'ambiance fonctionne enfin, et les séances téléchargées se lancent bien en mode avion.
 
-Interface allégée pour réduire la charge mentale.
+Cartes de séances plus aérées, cibles plus faciles à toucher, recherche qui ignore les accents.
 
-Les séances de respiration sont maintenant comptées dans tes stats.
+Nouveau réglage : taille du texte (Normal/Grand/Très grand) dans Apparence.
+
+Sauvegarde plus robuste de tes statistiques et de tes favoris.
