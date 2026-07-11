@@ -1081,6 +1081,13 @@
         <button class="speed-btn" onclick="setSpeed(0.9)">×0.9</button>
         <button class="speed-btn active" onclick="setSpeed(1.0)">×1.0</button>
       </div>
+      <p class="sheet-section-label">S'arrêter après</p>
+      <div class="speed-wrap" id="sleep-timer-wrap">
+        <button class="speed-btn active" onclick="setSleepTimer(0, this)">Illimité</button>
+        <button class="speed-btn" onclick="setSleepTimer(15, this)">15 min</button>
+        <button class="speed-btn" onclick="setSleepTimer(30, this)">30 min</button>
+        <button class="speed-btn" onclick="setSleepTimer(60, this)">60 min</button>
+      </div>
     </div>
   </div>
 </div>
