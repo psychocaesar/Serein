@@ -24,7 +24,7 @@
           "sessions": [
             { "id": "s5", "title": "SOS Stress en 6 minutes", "duration": 6, "file": "SOS Stress en 6 minutes.mp3", "fileFem": null, "desc": "Couper la montée de stress, rapide et ciblé." },
             { "id": "s31", "title": "Lâcher prise sur l'urgence", "duration": 7, "file": "Lacher prise sur lurgence.mp3", "fileFem": null, "desc": "Sortir du mode urgence quand tout semble pressé." },
-            { "id": "s6", "title": "La cohérence cardiaque guidée", "duration": 5, "file": "Cohérence cardiaque 5 minutes.mp3", "fileFem": null, "desc": "Réguler le système nerveux en quelques respirations." },
+            { "id": "s6", "title": "La cohérence cardiaque guidée", "duration": 5, "file": "Cohérence cardiaque 5 minutes.mp3", "fileFem": "Cohérence cardiaque 5 minutes.mp3", "desc": "Réguler le système nerveux en quelques respirations." },
             { "id": "s29", "title": "Le corps qui tient le stress", "duration": 10, "file": "Le corps qui tient le stress.mp3", "fileFem": null, "desc": "Relâcher les tensions que le corps accumule sous pression." },
             { "id": "s26", "title": "Fin de journée - déposer le poids", "duration": 10, "file": "Fin de journee - deposer le poids.mp3", "fileFem": null, "desc": "Déposer la charge de la journée avant de passer à autre chose." }
           ]
@@ -59,7 +59,7 @@
         { "id": "s7", "title": "Rituel de déconnexion", "duration": 10, "file": "Préparer le sommeil.mp3", "fileFem": null, "desc": "Couper le fil de la journée pour préparer la nuit." },
         { "id": "s20", "title": "Relâcher le corps, couche après couche", "duration": 8, "file": "Relâcher le corps, couche après couche.mp3", "fileFem": null, "desc": "Une détente progressive pour glisser vers le sommeil." },
         { "id": "s19", "title": "Sons & silence — endormissement profond", "duration": 12, "file": "Sons & silence - endormissement profond.mp3", "fileFem": null, "desc": "Te laisser porter par les sons jusqu'à l'endormissement." },
-        { "id": "s8", "title": "Réveils nocturnes — retrouver le calme", "duration": 18, "file": "Reveils nocturnes.mp3", "fileFem": null, "desc": "Retrouver le calme et te rendormir quand la nuit se fragmente." },
+        { "id": "s8", "title": "Réveils nocturnes — retrouver le calme", "duration": 18, "file": "Reveils nocturnes.mp3", "fileFem": "reveils nocturnes - retrouver le calme.mp3", "desc": "Retrouver le calme et te rendormir quand la nuit se fragmente." },
         { "id": "s21", "title": "Méditation du matin reposé", "duration": 10, "file": "Méditation du matin reposé.mp3", "fileFem": null, "desc": "Émerger en douceur et bien commencer la journée." }
       ]
     },
@@ -68,7 +68,7 @@
       "artwork": "assets/illustrations/player-04.jpg",
       "sessions": [
         { "id": "s22", "title": "La respiration naturelle", "duration": 5, "file": "La respiration naturelle.mp3", "fileFem": null, "desc": "Redécouvrir ton souffle tel qu'il est, sans le forcer." },
-        { "id": "s9", "title": "Cohérence cardiaque 5 minutes", "duration": 5, "file": "Cohérence cardiaque 5 minutes.mp3", "fileFem": null, "desc": "5 minutes pour synchroniser souffle et rythme cardiaque." },
+        { "id": "s9", "title": "Cohérence cardiaque 5 minutes", "duration": 5, "file": "Cohérence cardiaque 5 minutes.mp3", "fileFem": "Cohérence cardiaque 5 minutes.mp3", "desc": "5 minutes pour synchroniser souffle et rythme cardiaque." },
         { "id": "s10", "title": "Respiration 4-7-8 — calme profond", "duration": 6, "file": "Respiration 4-7-8 — Calme profond.mp3", "fileFem": null, "desc": "Une technique reconnue pour activer le calme profond." },
         { "id": "s23", "title": "Box breathing", "duration": 6, "file": "Box breathing.mp3", "fileFem": null, "desc": "La respiration carrée : retrouver stabilité et contrôle." }
       ]
@@ -81,8 +81,8 @@
         { "id": "s12", "title": "Accueillir l'anxiété sans la combattre", "duration": 10, "file": "Accueillir l'anxiété sans la combattre.mp3", "fileFem": "Accueillir l-anxiété sans la combattre.mp3", "desc": "Laisser passer la vague plutôt que lutter contre elle." },
         { "id": "s13", "title": "Les sons autour de toi", "duration": 7, "file": "Les sons autour de toi.mp3", "fileFem": "Les sons autour de toi.mp3", "desc": "Recentrer l'attention par l'écoute pour apaiser le mental." },
         { "id": "s14", "title": "La pensée qui tourne en boucle", "duration": 8, "file": "La pensée qui tourne en boucle.mp3", "fileFem": "La pensée qui tourne en boucle.mp3", "desc": "Désamorcer les ruminations qui alimentent l'inquiétude." },
-        { "id": "s24", "title": "Mon corps face à la peur", "duration": 5, "file": "Mon corps face à la peur.mp3", "fileFem": null, "desc": "Apprivoiser les sensations physiques de la peur." },
-        { "id": "s25", "title": "Technique 5-4-3-2-1 guidée", "duration": 5, "file": "Technique 5-4-3-2-1 guidée.mp3", "fileFem": null, "desc": "Les 5 sens pour revenir au présent en cas de pic d'angoisse." }
+        { "id": "s24", "title": "Mon corps face à la peur", "duration": 5, "file": "Mon corps face à la peur.mp3", "fileFem": "Mon corps face à la peur.mp3", "desc": "Apprivoiser les sensations physiques de la peur." },
+        { "id": "s25", "title": "Technique 5-4-3-2-1 guidée", "duration": 5, "file": "Technique 5-4-3-2-1 guidée.mp3", "fileFem": "Technique 5 4 3 2 1.mp3", "desc": "Les 5 sens pour revenir au présent en cas de pic d'angoisse." }
       ]
     },
     {
