@@ -220,7 +220,12 @@
     #parcours-body .emotion-top-disclaimer, #parcours-body .emotion-ressources { display: block; }
 
     /* ── Overlay détail de parcours ── */
-    .parcours-overlay { display: none; position: fixed; inset: 0; z-index: 250; background: var(--color-bg); overflow-y: auto; -webkit-overflow-scrolling: touch; }
+    /* overscroll-behavior: none supprime le rebond élastique iOS : sur un programme/
+       parcours dont le contenu tient dans l'écran, le geste faisait apparaître une
+       barre qui rebondissait sans que rien ne bouge (perçu comme un scroll cassé).
+       Le scroll interne reste normal quand le contenu déborde, et le chaining vers
+       l'arrière-plan est bloqué. */
+    .parcours-overlay { display: none; position: fixed; inset: 0; z-index: 250; background: var(--color-bg); overflow-y: auto; overscroll-behavior: none; -webkit-overflow-scrolling: touch; }
     .parcours-overlay.open { display: block; animation: fadeInBd .2s ease; }
     .parcours-hero { position: relative; height: 230px; overflow: hidden; }
     .parcours-hero img { width: 100%; height: 100%; object-fit: cover; object-position: center 30%; display: block; }
