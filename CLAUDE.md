@@ -23,7 +23,7 @@ Positionnement assumé : **pas de traduction prévue** — la niche est "LA méd
 - **iOS ignore `HTMLMediaElement.volume`** (restriction Apple, volume matériel only) : le volume d'ambiance passe par Web Audio API (`GainNode`), voir `ensureAmbianceGraph`/`setAmbianceVolume` dans `app.js`. Le volume principal (voix) reste au bouton matériel (Web Audio se suspend en arrière-plan sur iOS, risquerait de couper la lecture écran verrouillé).
 - **Offline iOS** : WKWebView + scheme `capacitor://` = pas de service worker actif en natif. `resolveAudioSrc` lit Cache Storage → blob URL pour contourner.
 - **CORS/tainted audio** : `crossOrigin="anonymous"` doit être posé sur les éléments `<audio>` AVANT toute src (sinon Web Audio sort du silence sur un flux CDN cross-origin). Le SW doit répécuter l'en-tête ACAO sur ses réponses 206 synthétisées.
-- **Keystore Android** (`app/android/release-key.keystore` + `keystore.properties`) : **irremplaçable**, non versionné. Sauvegardé dans Bitwarden. Nécessaire pour toute mise à jour Play Store — sans lui, plus jamais possible de publier sous la même app.
+- **Keystore Android** (`app/android/release-key.keystore` + `keystore.properties`) : **irremplaçable**, non versionné, sauvegardé hors du repo. Nécessaire pour toute mise à jour Play Store — sans lui, plus jamais possible de publier sous la même app.
 
 ## Conventions produit
 
@@ -39,14 +39,6 @@ Positionnement assumé : **pas de traduction prévue** — la niche est "LA méd
 - **Build iOS** : via Codemagic (`codemagic.yaml`).
 - **Hotfix isolé d'une version publiée** : partir du commit exact qui a produit le build live (vérifier versionCode/versionName dans l'historique de `build.gradle`, pas juste la branche `main` qui peut contenir du travail non publié), pas de `main` si `main` a divergé avec des features non finalisées.
 
-## Roadmap (juillet 2026, par priorité — voir aussi commits/changelogs pour l'état d'avancement réel)
+## Roadmap
 
-1. **Voix féminine sur toutes les séances** (contenu, César/Daïdrée enregistrent) — en cours, ~11/37 séances couvertes à ce jour.
-2. **Séances longues 15-20 min** (contenu) — pas commencé.
-3. **Programmes jour par jour** (code+UX) — fait (3 programmes : débuter 7j, anxiété 7j, sommeil 5j).
-4. **Parcours "Travail"** (contenu, différenciation psychologue du travail) — pas commencé.
-5. **Widget écran d'accueil Android** — pas commencé.
-6. **Passerelles inter-apps** (Serein ↔ TCC·ACT ↔ Sommeil CBTI) — bloqué tant que les 2 autres apps ne sont pas sorties.
-7. **Page "Pour les pros" + PDF patient** — fait, déployée sur sereinapp.fr/pro.
-
-Ne pas se fier à cette liste seule pour l'état exact : croiser avec `git log --oneline -20` et les fichiers `fastlane/metadata/*/changelogs/` pour voir ce qui a réellement été livré récemment.
+Ce repo est **public** : la feuille de route stratégique (priorités, raisonnement produit/concurrentiel) n'est volontairement pas versionnée ici. Elle vit dans `CLAUDE.local.md` (gitignoré, local à chaque machine — demander à César si absent). Pour situer rapidement l'état d'avancement réel sans ce fichier : `git log --oneline -20` et les fichiers `fastlane/metadata/*/changelogs/`.
