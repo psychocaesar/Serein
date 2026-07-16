@@ -2,6 +2,9 @@ node_modules/
 assets/audio/
 app/pwa/assets/audio/
 
+# Contexte Claude Code local (roadmap/stratégie — repo public, pas de sync)
+CLAUDE.local.md
+
 # Android signing — ne jamais commiter
 *.keystore
 *.jks
