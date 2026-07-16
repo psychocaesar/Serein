@@ -1,0 +1,26 @@
+# Normalise les fins de ligne : LF dans le dépôt, quel que soit l'OS.
+# Supprime le bruit CRLF/LF entre Windows et macOS (ex. fichiers générés par
+# `cap sync` qui réapparaissaient sans cesse comme « modifiés »).
+* text=auto eol=lf
+
+# Scripts Windows : doivent rester en CRLF
+*.bat  text eol=crlf
+*.cmd  text eol=crlf
+
+# Le wrapper Gradle doit rester en LF (exécutable Unix) ; sa version .bat en CRLF
+gradlew      text eol=lf
+gradlew.bat  text eol=crlf
+
+# Binaires : jamais de conversion de fins de ligne
+*.mp3      binary
+*.wav      binary
+*.pkf      binary
+*.png      binary
+*.jpg      binary
+*.jpeg     binary
+*.webp     binary
+*.woff2    binary
+*.ttf      binary
+*.pdf      binary
+*.jks      binary
+*.keystore binary
