@@ -1,6 +1,7 @@
 node_modules/
 assets/audio/
 app/pwa/assets/audio/
+.DS_Store
 
 # Contexte Claude Code local (roadmap/stratégie — repo public, pas de sync)
 CLAUDE.local.md

@@ -1,184 +1,108 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
-  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-
-  <!-- ═══════════════════════════════════════
-       CAPACITOR — NE PAS SUPPRIMER
-  ═══════════════════════════════════════ -->
-  <key>CAPACITOR_DEBUG</key>
-  <string>$(CAPACITOR_DEBUG)</string>
-
-  <!-- ═══════════════════════════════════════
-       IDENTITÉ DE L'APPLICATION
-  ═══════════════════════════════════════ -->
-  <key>CFBundleDevelopmentRegion</key>
-  <string>fr</string>
-
-  <key>CFBundleDisplayName</key>
-  <string>Serein</string>
-
-  <key>CFBundleExecutable</key>
-  <string>$(EXECUTABLE_NAME)</string>
-
-  <key>CFBundleIdentifier</key>
-  <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
-
-  <key>CFBundleInfoDictionaryVersion</key>
-  <string>6.0</string>
-
-  <key>CFBundleName</key>
-  <string>$(PRODUCT_NAME)</string>
-
-  <key>CFBundlePackageType</key>
-  <string>APPL</string>
-
-  <key>CFBundleShortVersionString</key>
-  <string>$(MARKETING_VERSION)</string>
-
-  <key>CFBundleVersion</key>
-  <string>$(CURRENT_PROJECT_VERSION)</string>
-
-  <!-- AJOUTÉ : icônes déclarées pour iOS 15+ -->
-  <key>CFBundleIcons</key>
-  <dict>
-    <key>CFBundlePrimaryIcon</key>
-    <dict>
-      <key>CFBundleIconFiles</key>
-      <array>
-        <string>AppIcon</string>
-      </array>
-      <key>UIPrerenderedIcon</key>
-      <false/>
-    </dict>
-  </dict>
-
-  <key>LSRequiresIPhoneOS</key>
-  <true/>
-
-  <!-- ═══════════════════════════════════════
-       INTERFACE & ORIENTATION
-  ═══════════════════════════════════════ -->
-  <key>UILaunchStoryboardName</key>
-  <string>LaunchScreen</string>
-
-  <key>UIMainStoryboardFile</key>
-  <string>Main</string>
-
-  <!-- CORRIGÉ : arm64 remplace armv7 (armv7 = iPhone 5 et avant, obsolète)
-       Capacitor 8 requiert iOS 14+ donc arm64 minimum -->
-  <key>UIRequiredDeviceCapabilities</key>
-  <array>
-    <string>arm64</string>
-  </array>
-
-  <key>UISupportedInterfaceOrientations</key>
-  <array>
-    <string>UIInterfaceOrientationPortrait</string>
-  </array>
-
-  <key>UISupportedInterfaceOrientations~ipad</key>
-  <array>
-    <string>UIInterfaceOrientationPortrait</string>
-    <string>UIInterfaceOrientationPortraitUpsideDown</string>
-  </array>
-
-  <!-- Désactive le multitasking iPad : l'app est portrait uniquement -->
-  <key>UIRequiresFullScreen</key>
-  <true/>
-
-  <key>UIViewControllerBasedStatusBarAppearance</key>
-  <true/>
-
-  <key>UIStatusBarStyle</key>
-  <string>UIStatusBarStyleLightContent</string>
-
-  <!-- AJOUTÉ : cache le status bar sur le splash screen -->
-  <key>UIStatusBarHidden</key>
-  <false/>
-
-  <!-- AJOUTÉ : couleur de fond pendant le chargement (évite le flash blanc) -->
-  <key>UILaunchScreen</key>
-  <dict>
-    <key>UIColorName</key>
-    <string>LaunchScreenBackground</string>
-  </dict>
-
-  <!-- ═══════════════════════════════════════
-       CYCLE DE VIE UISCENE (obligatoire à partir du SDK iOS 27,
-       sinon l'app crashe au lancement — voir SceneDelegate.swift)
-  ═══════════════════════════════════════ -->
-  <key>UIApplicationSceneManifest</key>
-  <dict>
-    <key>UIApplicationSupportsMultipleScenes</key>
-    <false/>
-    <key>UISceneConfigurations</key>
-    <dict>
-      <key>UIWindowSceneSessionRoleApplication</key>
-      <array>
-        <dict>
-          <key>UISceneConfigurationName</key>
-          <string>Default Configuration</string>
-          <key>UISceneDelegateClassName</key>
-          <string>$(PRODUCT_MODULE_NAME).SceneDelegate</string>
-          <key>UISceneStoryboardFile</key>
-          <string>Main</string>
-        </dict>
-      </array>
-    </dict>
-  </dict>
-
-  <!-- ═══════════════════════════════════════
-       AUDIO EN ARRIÈRE-PLAN
-       Indispensable pour la lecture écran verrouillé
-  ═══════════════════════════════════════ -->
-  <key>UIBackgroundModes</key>
-  <array>
-    <string>audio</string>
-  </array>
-
-  <!-- ═══════════════════════════════════════
-       NOTIFICATIONS LOCALES (rappel quotidien)
-       Fonction native : rappel de méditation programmé localement via
-       @capacitor/local-notifications (Réglages › Rappel quotidien).
-       La permission est demandée au runtime (UNUserNotificationCenter) —
-       aucune clé Info.plist requise pour les notifications locales.
-  ═══════════════════════════════════════ -->
-
-  <!-- ═══════════════════════════════════════
-       SÉCURITÉ RÉSEAU (ATS)
-       Force HTTPS, bloque les connexions non sécurisées
-  ═══════════════════════════════════════ -->
-  <key>NSAppTransportSecurity</key>
-  <dict>
-    <key>NSAllowsArbitraryLoads</key>
-    <false/>
-    <key>NSAllowsLocalNetworking</key>
-    <true/>
-  </dict>
-
-  <!-- ═══════════════════════════════════════
-       CAPACITOR WEBVIEW — DOMAINES AUTORISÉS
-       Restreint la navigation au domaine sereinapp.fr
-  ═══════════════════════════════════════ -->
-  <key>WKAppBoundDomains</key>
-  <array>
-    <string>sereinapp.fr</string>
-    <string>www.sereinapp.fr</string>
-    <!-- CDN des audios téléchargés par l'app native (voir app.js AUDIO_BASE_URL) -->
-    <string>audio.sereinapp.fr</string>
-  </array>
-
-  <!-- ═══════════════════════════════════════
-       APP STORE — CONFORMITÉ AU CHIFFREMENT
-       Déclare l'absence de chiffrement non exempté.
-       NB : les déclarations de confidentialité (données collectées,
-       tracking, APIs système) vivent UNIQUEMENT dans PrivacyInfo.xcprivacy ;
-       Apple ignore ces clés si elles sont placées dans Info.plist.
-  ═══════════════════════════════════════ -->
-  <key>ITSAppUsesNonExemptEncryption</key>
-  <false/>
-
+	<key>CAPACITOR_DEBUG</key>
+	<string>$(CAPACITOR_DEBUG)</string>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>fr</string>
+	<key>CFBundleDisplayName</key>
+	<string>Serein</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIcons</key>
+	<dict>
+		<key>CFBundlePrimaryIcon</key>
+		<dict>
+			<key>CFBundleIconFiles</key>
+			<array>
+				<string>AppIcon</string>
+			</array>
+			<key>UIPrerenderedIcon</key>
+			<false/>
+		</dict>
+	</dict>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<false/>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<false/>
+		<key>UISceneConfigurations</key>
+		<dict>
+			<key>UIWindowSceneSessionRoleApplication</key>
+			<array>
+				<dict>
+					<key>UISceneConfigurationName</key>
+					<string>Default Configuration</string>
+					<key>UISceneDelegateClassName</key>
+					<string>$(PRODUCT_MODULE_NAME).SceneDelegate</string>
+					<key>UISceneStoryboardFile</key>
+					<string>Main</string>
+				</dict>
+			</array>
+		</dict>
+	</dict>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+	</array>
+	<key>UILaunchScreen</key>
+	<dict>
+		<key>UIColorName</key>
+		<string>LaunchScreenBackground</string>
+	</dict>
+	<key>UILaunchStoryboardName</key>
+	<string>LaunchScreen</string>
+	<key>UIMainStoryboardFile</key>
+	<string>Main</string>
+	<key>UIRequiredDeviceCapabilities</key>
+	<array>
+		<string>arm64</string>
+	</array>
+	<key>UIRequiresFullScreen</key>
+	<true/>
+	<key>UIStatusBarHidden</key>
+	<false/>
+	<key>UIStatusBarStyle</key>
+	<string>UIStatusBarStyleLightContent</string>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+	</array>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+	</array>
+	<key>UIViewControllerBasedStatusBarAppearance</key>
+	<true/>
+	<key>WKAppBoundDomains</key>
+	<array>
+		<string>sereinapp.fr</string>
+		<string>www.sereinapp.fr</string>
+		<string>audio.sereinapp.fr</string>
+	</array>
 </dict>
 </plist>
