@@ -14,3 +14,6 @@ app/android/keystore.properties
 # Fichiers du site cesarbroche.fr (projet separe, ne pas committer ici)
 cesarbroche-theme/
 page-consultations.php
+
+# Config IDE Android Studio (JDK, device manager... varie par machine)
+app/android/.idea/
