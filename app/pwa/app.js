@@ -2321,6 +2321,17 @@ function openArticleFromParcours(slug) {
     const origin = articleOriginScreen;
     top.closeFn = () => {
       articleOriginScreen = null;
+      // showGuideView('comprendre') fait normalement ce ménage à la
+      // fermeture d'un article — notre closeFn le court-circuite (on va
+      // direct à la fiche parcours), donc on le refait ici à la main.
+      // Sans ça, #guide-article restait display:'' (visible) pour de bon :
+      // frontmostScreen() le retrouvait ensuite comme "écran au premier
+      // plan" pour N'IMPORTE QUEL swipe ailleurs dans l'app tant qu'aucun
+      // autre overlay .open+fixed n'était présent, cassant le swipe sur
+      // des écrans sans rapport avec l'article.
+      const article = document.getElementById('guide-article');
+      if (article) article.style.display = 'none';
+      currentGuideView = 'comprendre';
       if (origin) showScreen(origin);
       openParcoursOverlay(groupName);
     };
@@ -4180,13 +4191,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   }, { passive: true });
   document.addEventListener('touchend', e => {
     if (!edgeSwipeActive) { logSwipe('touchend ignoré (edgeSwipeActive=false)'); return; }
-    logSwipe('touchend reçu');
     edgeSwipeActive = false;
     const el = edgeSwipeEl;
     edgeSwipeEl = null;
     const dx = e.changedTouches[0].clientX - edgeSwipeStartX;
     const dy = Math.abs(e.changedTouches[0].clientY - edgeSwipeStartY);
     const shouldGoBack = dx > EDGE_SWIPE_THRESHOLD && dy < 50;
+    logSwipe('touchend reçu dx=' + Math.round(dx) + ' dy=' + Math.round(dy) + ' el=' + (el ? el.id : 'null') + ' shouldGoBack=' + shouldGoBack);
     if (!el) {
       // Rien à animer (ex. sous-vue comme l'article, pas un overlay plein
       // écran) : sans ça goBack() n'était plus jamais appelé du tout sur ces
