@@ -88,21 +88,18 @@ function handOverOverlay(name) {
   }
 }
 
-// Fermeture déclenchée par l'UI (bouton ✕, Annuler…) : on retire l'entrée
-// d'historique correspondante sans redéclencher la fermeture au popstate.
-function releaseOverlay(name) {
-  const idx = overlayStack.map(o => o.name).lastIndexOf(name);
-  if (idx === -1) return;
-  overlayStack.splice(idx, 1);
+// Recule d'une entrée d'historique en "consommant" le popstate qui devrait
+// suivre (suppressPop), pour que le handler principal ne referme pas un 2e
+// élément par-dessus une fermeture déjà faite côté JS. history.back() n'a
+// ici qu'un rôle de tenue à jour de l'historique du navigateur — jamais de
+// déclencheur d'action UI (voir goBack/releaseOverlay, seuls appelants).
+// Si ce history.back() précis ne déclenche aucun popstate (vécu en vrai sur
+// WebView iOS : plus rien vers quoi reculer dans l'historique réel), aucun
+// popstate n'arrive pour décrémenter suppressPop — sans filet, ce compteur
+// resterait bloqué au-dessus de 0 et avalerait silencieusement le PROCHAIN
+// popstate légitime. Le setTimeout(revert) est ce filet.
+function suppressedHistoryBack() {
   suppressPop++;
-  // history.back() suppose qu'un popstate va forcément arriver pour
-  // consommer ce suppressPop++ (voir le handler plus bas). S'il n'a plus
-  // rien vers quoi reculer dans l'historique réel du WebView, aucun
-  // popstate ne se déclenche : suppressPop reste bloqué au-dessus de 0 et
-  // avale silencieusement le PROCHAIN popstate légitime (un swipe/retour
-  // qui suit) — l'action correspondante semble alors ne plus rien faire,
-  // alors que rien n'a planté. Filet de sécurité symétrique à celui du
-  // swipe : redescend le compteur tout seul si rien n'arrive à temps.
   let consumed = false;
   const onPop = () => { consumed = true; window.removeEventListener('popstate', onPop); };
   window.addEventListener('popstate', onPop);
@@ -116,12 +113,34 @@ function releaseOverlay(name) {
   } catch(e) { revert(); }
 }
 
-// Point d'entrée unique pour "revenir en arrière" (bouton back Android, edge-swipe,
-// gestes internes comme l'article) : passe par history.back() pour rejouer le même
-// pop de pile que le popstate natif, plutôt que de coder en dur une destination.
+// Fermeture déclenchée par l'UI (bouton ✕, Annuler…) : on retire l'entrée
+// d'historique correspondante sans redéclencher la fermeture au popstate.
+function releaseOverlay(name) {
+  const idx = overlayStack.map(o => o.name).lastIndexOf(name);
+  if (idx === -1) return;
+  overlayStack.splice(idx, 1);
+  suppressedHistoryBack();
+}
+
+// Point d'entrée unique pour "revenir en arrière" (bouton back Android,
+// edge-swipe, gestes internes comme l'article). Ferme l'écran du dessus
+// IMMÉDIATEMENT ici plutôt que d'attendre le popstate déclenché par
+// history.back() : goBack() est TOUJOURS appelé directement par notre
+// propre code (jamais par une navigation navigateur externe — vérifié :
+// bouton Android, swipe, boutons UI passent tous par ici), donc rien ne
+// dépend d'un popstate "organique". Sur WebView iOS, ce popstate peut ne
+// jamais arriver (plus rien vers quoi reculer dans l'historique réel) —
+// avec l'ancienne version qui attendait ce popstate pour fermer, le swipe
+// semblait alors ne rien faire, sans la moindre erreur JS.
 function goBack() {
   if (overlayStack.length === 0) return; // déjà à la racine, rien à fermer
-  try { history.back(); } catch(e) {}
+  const top = overlayStack.pop();
+  if (top) top.closeFn();
+  else {
+    const home = document.getElementById('home');
+    if (home && !home.classList.contains('active')) showScreen('home');
+  }
+  suppressedHistoryBack();
 }
 
 // Bouton retour matériel Android : sans écouteur explicite, Capacitor quitte
@@ -180,13 +199,15 @@ function setupOnboarding() {
   }, { passive: true });
 }
 
+// goBack()/releaseOverlay() ferment déjà tout de façon synchrone et posent
+// suppressPop avant d'appeler history.back() — ce handler ne sert plus qu'à
+// consommer l'écho de ce history.back(), jamais à fermer quoi que ce soit
+// lui-même (tout passe par goBack(), jamais par une navigation navigateur
+// externe). Sans ce garde-fou, un popstate qui arrive après coup rejouerait
+// un pop sur un overlayStack déjà à jour, fermant potentiellement autre
+// chose que prévu.
 window.addEventListener('popstate', () => {
-  if (suppressPop > 0) { suppressPop--; return; }
-  const top = overlayStack.pop();
-  if (top) { top.closeFn(); return; }
-  // Pile vide : retour depuis un écran secondaire → accueil.
-  const home = document.getElementById('home');
-  if (home && !home.classList.contains('active')) showScreen('home');
+  if (suppressPop > 0) suppressPop--;
 });
 
 function showScreen(id) {
@@ -4490,26 +4511,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       // Termine la course jusqu'au bord puis ferme réellement l'écran.
       el.style.transform = 'translateX(100%)';
       setTimeout(() => {
-        // goBack() → history.back() est asynchrone (popstate arrive plus
-        // tard) : remettre transform à zéro ICI, dans le même tick, rendait
-        // l'écran visible AVANT sa fermeture réelle. On attendait donc le
-        // popstate réel pour nettoyer — mais si history.back() n'a plus
-        // rien vers quoi reculer (cas réel constaté sur device), popstate
-        // ne se déclenche jamais : swipeInFlight restait bloqué à true pour
-        // toujours, gelant tout swipe suivant. Filet de sécurité : nettoie
-        // via popstate SI il arrive, sinon au bout de 400ms de toute façon.
-        let cleaned = false;
-        const cleanup = () => {
-          if (cleaned) return;
-          cleaned = true;
-          window.removeEventListener('popstate', cleanup);
-          el.style.transition = '';
-          el.style.transform = '';
-          swipeInFlight = false;
-        };
-        window.addEventListener('popstate', cleanup);
-        setTimeout(cleanup, 400);
+        // goBack() ferme désormais l'écran de façon synchrone (plus besoin
+        // d'attendre un popstate qui, sur WebView iOS, pouvait ne jamais
+        // arriver et laissait auparavant swipeInFlight bloqué à true pour
+        // toujours). Une fois goBack() revenu, .open est déjà retiré :
+        // l'élément est display:none, son transform devient sans effet.
         goBack();
+        el.style.transition = '';
+        el.style.transform = '';
+        swipeInFlight = false;
       }, 220);
     } else {
       // Geste annulé : retour à sa place.
