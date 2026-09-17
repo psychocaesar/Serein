@@ -2424,10 +2424,13 @@ function ficheTeaserHTML(slug) {
 }
 
 function openArticleFromParcours(slug) {
-  // Retenu avant fermeture : permet de rouvrir la même fiche parcours (pas
-  // juste l'onglet d'origine) quand on revient de l'article.
+  // On NE ferme PAS la fiche parcours (pas de closeParcoursOverlay ici) :
+  // elle reste ouverte, visible en dessous, pour que le swipe retour donne
+  // un aperçu réel de la fiche pendant le glissement — pas juste le fond de
+  // l'app. #guide-article passe par-dessus via .article-peek-parcours (voir
+  // CSS), qui l'élève en overlay plein écran (z-index > la fiche parcours)
+  // le temps que l'article est affiché.
   const groupName = document.getElementById('parcours-title').textContent;
-  closeParcoursOverlay();
   // handOverOverlay (pas releaseOverlay) : releaseOverlay lance un
   // history.back() asynchrone, or openArticle() qui suit enchaîne aussitôt
   // sur un history.pushState() avant que ce back() ait eu le temps de se
@@ -2437,27 +2440,30 @@ function openArticleFromParcours(slug) {
   // d'historique du parcours au lieu d'en empiler une nouvelle.
   handOverOverlay('parcours');
   openArticle(slug);
+  document.getElementById('guide-article').classList.add('article-peek-parcours');
   // openArticle() vient de régler la fermeture pour revenir à l'onglet
-  // d'origine (Accueil/Explorer) — on la remplace pour rouvrir la fiche
-  // parcours elle-même, ce que l'utilisateur·rice attend réellement ici.
+  // d'origine (Accueil/Explorer) — on la remplace : la fiche parcours n'a
+  // jamais été fermée, juste retirer l'élévation de l'article suffit.
   const top = overlayStack[overlayStack.length - 1];
   if (top) {
     const origin = articleOriginScreen;
     top.closeFn = () => {
       articleOriginScreen = null;
       // showGuideView('comprendre') fait normalement ce ménage à la
-      // fermeture d'un article — notre closeFn le court-circuite (on va
-      // direct à la fiche parcours), donc on le refait ici à la main.
-      // Sans ça, #guide-article restait display:'' (visible) pour de bon :
-      // frontmostScreen() le retrouvait ensuite comme "écran au premier
-      // plan" pour N'IMPORTE QUEL swipe ailleurs dans l'app tant qu'aucun
-      // autre overlay .open+fixed n'était présent, cassant le swipe sur
-      // des écrans sans rapport avec l'article.
+      // fermeture d'un article — notre closeFn le court-circuite (on
+      // remonte directement sur la fiche parcours déjà ouverte en dessous),
+      // donc on le refait ici à la main. Sans ça, #guide-article restait
+      // display:'' (visible) pour de bon : frontmostScreen() le retrouvait
+      // ensuite comme "écran au premier plan" pour N'IMPORTE QUEL swipe
+      // ailleurs dans l'app tant qu'aucun autre overlay .open+fixed n'était
+      // présent, cassant le swipe sur des écrans sans rapport avec l'article.
       const article = document.getElementById('guide-article');
-      if (article) article.style.display = 'none';
+      if (article) {
+        article.style.display = 'none';
+        article.classList.remove('article-peek-parcours');
+      }
       currentGuideView = 'comprendre';
       if (origin) showScreen(origin);
-      openParcoursOverlay(groupName);
     };
   }
 }
@@ -4452,15 +4458,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   // besoin via le z-index calculé, ce qui reste valable quel que soit le
   // type d'écran ouvert (player, parcours, sheet…) sans les lister ici.
   function frontmostScreen() {
-    const candidates = Array.from(document.querySelectorAll('.open'))
+    // .article-peek-parcours (l'article élevé au-dessus d'une fiche parcours
+    // restée ouverte, voir openArticleFromParcours) n'a pas la classe .open
+    // des autres overlays — inclus explicitement pour entrer dans la même
+    // comparaison de z-index plutôt que d'être ignoré.
+    const candidates = Array.from(document.querySelectorAll('.open, #guide-article.article-peek-parcours'))
       .filter(el => getComputedStyle(el).position === 'fixed');
     if (candidates.length) {
       candidates.sort((a, b) => (parseInt(getComputedStyle(b).zIndex, 10) || 0) - (parseInt(getComputedStyle(a).zIndex, 10) || 0));
       return candidates[0];
     }
-    // Sous-vues sans classe .open/position fixed dédiée (ex. l'article du
-    // guide, affiché via style.display plutôt qu'un overlay) : pas de match
-    // ci-dessus, mais on veut quand même l'animation de swipe.
+    // Sous-vue sans classe .open/position fixed dédiée (article ouvert
+    // depuis l'onglet Apprendre, affiché via style.display plutôt qu'un
+    // overlay) : pas de match ci-dessus, mais on veut quand même l'animation
+    // de swipe.
     const article = document.getElementById('guide-article');
     if (article && getComputedStyle(article).display !== 'none') return article;
     return null;
