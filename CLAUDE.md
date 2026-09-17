@@ -36,7 +36,7 @@ Positionnement assumé : **pas de traduction prévue** — la niche est "LA méd
 
 - **Deux machines actives** : PC Windows (historique) + MacBook Pro M4 (depuis juillet 2026, iOS en local). Une seule modifie le repo à la fois. **`git pull` en début de session, `git push` en fin de session**, systématiquement.
 - **Build Android** : manuel via Android Studio (pas de CI Codemagic pour Android). `npm run release:android` = sync + strip + bump versionCode (**une fois par release**, pas à chaque build debug).
-- **Build iOS** : via Codemagic (`codemagic.yaml`).
+- **Build iOS** : via Xcode Cloud (`app/ios/App/ci_scripts/ci_post_clone.sh`), déclenché sur push vers `main`. Codemagic (`codemagic.yaml`) a été retiré (Mac local disponible depuis juillet 2026) — pour son historique, voir `git log -- codemagic.yaml` avant sa suppression.
 - **Hotfix isolé d'une version publiée** : partir du commit exact qui a produit le build live (vérifier versionCode/versionName dans l'historique de `build.gradle`, pas juste la branche `main` qui peut contenir du travail non publié), pas de `main` si `main` a divergé avec des features non finalisées.
 
 ## Roadmap
