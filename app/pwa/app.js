@@ -467,17 +467,21 @@ function updateVoiceSettingLabel() {
 }
 
 function openVoiceOverlay(id, title, parcours, duration, filenameMasc, filenameFem, artwork) {
+  console.log('[DEBUG openVoiceOverlay] entrée, overlayStack=', overlayStack.map(o => o.name).join(','));
   pendingSession = { id, title, parcours, duration, filenameMasc, filenameFem, artwork };
   if (!filenameFem) {
+    console.log('[DEBUG openVoiceOverlay] branche: pas de voix fém., launchPlayer direct');
     launchPlayer(id, title, parcours, duration, filenameMasc, 'masculine', artwork);
     return;
   }
   const saved = getSavedVoice();
   if (saved) {
+    console.log('[DEBUG openVoiceOverlay] branche: voix sauvegardée (' + saved + '), launchPlayer direct');
     const filename = saved === 'feminine' ? filenameFem : filenameMasc;
     launchPlayer(id, title, parcours, duration, filename, saved, artwork);
     return;
   }
+  console.log('[DEBUG openVoiceOverlay] branche: affiche la sheet de choix de voix');
   voiceOverlayMode = 'launch';
   selectedVoice = 'masculine';
   document.getElementById('voice-sheet-hint').style.display = '';
@@ -582,6 +586,12 @@ function openPlayerScreen() {
   document.body.style.overflow = 'hidden';
   if (!wasOpen) registerOverlay('player', closePlayer);
   else reuseOverlayEntry = false; // replay : déjà enregistré, rien à réutiliser
+  const cs = getComputedStyle(el);
+  console.log('[DEBUG openPlayerScreen] wasOpen=' + wasOpen
+    + ' className=' + el.className
+    + ' computedDisplay=' + cs.display
+    + ' computedZIndex=' + cs.zIndex
+    + ' overlayStack=' + overlayStack.map(o => o.name).join(','));
 }
 
 function closePlayer() {
