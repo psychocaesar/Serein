@@ -11,10 +11,22 @@ set -e
 cd "$CI_WORKSPACE"
 
 if ! command -v node >/dev/null 2>&1; then
-  brew install node
+  # Version figée (celle utilisée en local via nvm pour ce projet) plutôt
+  # que "brew install node" (dernière version Homebrew, non testée avec ce
+  # projet — un premier échec ici a coïncidé avec un brew install node qui a
+  # attrapé du 26.8.2 flambant neuf).
+  brew install node@24
+  brew link --force node@24
 fi
 
 npm install
+
+echo "--- diagnostic avant cap sync ios ---"
+node -v
+npm -v
+pwd
+cat capacitor.config.json
+ls node_modules/@capacitor/ios 2>&1 || echo "node_modules/@capacitor/ios introuvable"
 
 # app/ios/App/App/public/ est gitignoré (régénéré depuis app/pwa/ à chaque
 # sync), donc absent d'un clone propre — mais référencé comme ressource
