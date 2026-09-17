@@ -10,4 +10,8 @@ capacitor-cordova-ios-plugins
 
 # Generated Config files
 App/App/capacitor.config.json
-App/App/config.xml
+# App/App/config.xml n'est PAS régénéré par `cap sync` (contrairement à
+# capacitor.config.json ci-dessus) : stub statique créé une fois par
+# Capacitor, référencé comme ressource requise par le projet Xcode. Le
+# gitignore par défaut de Capacitor le classe à tort ici, ce qui le rendait
+# absent de tout clone propre et faisait échouer le link Xcode Cloud.
