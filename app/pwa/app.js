@@ -2361,6 +2361,14 @@ function openArticleFromParcours(slug) {
       }
       currentGuideView = 'comprendre';
       if (origin) showScreen(origin);
+      // La fiche parcours n'a jamais été fermée (voir plus haut) donc pas
+      // besoin de la rouvrir — mais handOverOverlay() l'avait retirée
+      // d'overlayStack sans jamais l'y remettre : un swipe/retour suivant
+      // ne trouvait plus rien à fermer et ne faisait plus rien, alors que
+      // la fiche restait bien visible à l'écran. On la réenregistre donc
+      // ici (juste la pile/l'historique, pas de re-rendu : le DOM est déjà
+      // correct puisqu'il n'a jamais bougé).
+      registerOverlay('parcours', closeParcoursOverlay);
     };
   }
 }
