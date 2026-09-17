@@ -267,8 +267,14 @@
     /* ── PLAYER IMMERSIF ── */
     /* z-index 260 : au-dessus des overlays de contenu (parcours / programme /
        respiration = 250) d'où l'on lance une séance, sinon le player s'ouvrait
-       DERRIÈRE l'overlay parcours (audio audible, player invisible). */
-    .player-screen { display: none; position: fixed; inset: 0; z-index: 260; background: #08150f; flex-direction: column; }
+       DERRIÈRE l'overlay parcours (audio audible, player invisible).
+       translateZ(0) : sur iOS/WebKit, un ancêtre avec -webkit-overflow-scrolling:
+       touch (.parcours-overlay) obtient sa propre couche de composition qui peut
+       s'afficher au-dessus d'un sibling malgré un z-index supérieur si ce dernier
+       ne compose pas lui-même — le z-index seul suffisait sur Android (Chromium)
+       mais pas ici. Force le player dans sa propre couche pour que l'ordre soit
+       respecté. */
+    .player-screen { display: none; position: fixed; inset: 0; z-index: 260; background: #08150f; flex-direction: column; -webkit-transform: translateZ(0); transform: translateZ(0); }
     .player-screen.open { display: flex; animation: fadeInPlayer .28s ease; }
     @keyframes fadeInPlayer { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
     .player-bg { position: absolute; inset: 0; filter: blur(60px) brightness(.5) saturate(1.2); transform: scale(1.15); z-index: 0; transition: background .4s; }
