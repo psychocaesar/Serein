@@ -15,3 +15,9 @@ if ! command -v node >/dev/null 2>&1; then
 fi
 
 npm install
+
+# app/ios/App/App/public/ est gitignoré (régénéré depuis app/pwa/ à chaque
+# sync), donc absent d'un clone propre — mais référencé comme ressource
+# requise par le projet Xcode : sans ce sync, le build échoue au link
+# ("public" couldn't be opened).
+npx cap sync ios
