@@ -2382,6 +2382,9 @@ function ficheTeaserHTML(slug) {
 }
 
 function openArticleFromParcours(slug) {
+  // Retenu avant fermeture : permet de rouvrir la même fiche parcours (pas
+  // juste l'onglet d'origine) quand on revient de l'article.
+  const groupName = document.getElementById('parcours-title').textContent;
   closeParcoursOverlay();
   // handOverOverlay (pas releaseOverlay) : releaseOverlay lance un
   // history.back() asynchrone, or openArticle() qui suit enchaîne aussitôt
@@ -2392,6 +2395,18 @@ function openArticleFromParcours(slug) {
   // d'historique du parcours au lieu d'en empiler une nouvelle.
   handOverOverlay('parcours');
   openArticle(slug);
+  // openArticle() vient de régler la fermeture pour revenir à l'onglet
+  // d'origine (Accueil/Explorer) — on la remplace pour rouvrir la fiche
+  // parcours elle-même, ce que l'utilisateur·rice attend réellement ici.
+  const top = overlayStack[overlayStack.length - 1];
+  if (top) {
+    const origin = articleOriginScreen;
+    top.closeFn = () => {
+      articleOriginScreen = null;
+      if (origin) showScreen(origin);
+      openParcoursOverlay(groupName);
+    };
+  }
 }
 
 // Vue détail d'un parcours : hero + fiche(s) de psychoéducation + séances
@@ -4419,11 +4434,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     edgeSwipeActive = false;
     const el = edgeSwipeEl;
     edgeSwipeEl = null;
-    if (!el) return;
     const dx = e.changedTouches[0].clientX - edgeSwipeStartX;
     const dy = Math.abs(e.changedTouches[0].clientY - edgeSwipeStartY);
+    const shouldGoBack = dx > EDGE_SWIPE_THRESHOLD && dy < 50;
+    if (!el) {
+      // Rien à animer (ex. sous-vue comme l'article, pas un overlay plein
+      // écran) : sans ça goBack() n'était plus jamais appelé du tout sur ces
+      // écrans-là, régression introduite avec l'animation.
+      if (shouldGoBack) goBack();
+      return;
+    }
     el.style.transition = 'transform .22s cubic-bezier(.16,1,.3,1)';
-    if (dx > EDGE_SWIPE_THRESHOLD && dy < 50) {
+    if (shouldGoBack) {
       // Termine la course jusqu'au bord puis ferme réellement l'écran.
       el.style.transform = 'translateX(100%)';
       setTimeout(() => {
