@@ -1,0 +1,26 @@
+#!/bin/sh
+# $1 = ancien HEAD, $2 = nouveau HEAD, $3 = 1 si changement de branche
+# (0 pour un simple `git checkout -- fichier`, à ignorer ici).
+#
+# Après un changement de branche, node_modules et les bundles natifs
+# (app/ios/.../public, app/android/.../assets/public, gitignorés) restent
+# calés sur l'ancienne branche : Package.swift peut référencer un paquet
+# absent de node_modules ("Missing package product"), ou Xcode/Android
+# Studio buildent un app.js/index.html périmé — un bug déjà corrigé dans
+# les commits peut alors sembler encore présent. Vécu plusieurs fois en
+# changeant entre main et une branche hotfix (2026-09-17).
+[ "$3" = "1" ] || exit 0
+
+cd "$(git rev-parse --show-toplevel)" || exit 0
+[ -f package.json ] || exit 0
+
+echo "post-checkout: npm install + cap sync (ios/android)"
+npm install --silent
+
+if [ -d app/ios ]; then
+  npx cap sync ios
+fi
+if [ -d app/android ]; then
+  npx cap sync android
+  node scripts/strip-native-audio.mjs
+fi

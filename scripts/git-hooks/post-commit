@@ -9,3 +9,10 @@ if [ -f package.json ] && [ -d app/android ]; then
   echo "post-commit: npx cap sync android"
   npx cap sync android
 fi
+if [ -f package.json ] && [ -d app/ios ]; then
+  # Manquait ici jusqu'au 2026-09-17 : seul Android était resynchronisé après
+  # commit, laissant Xcode builder un app.js/index.html périmé (le bug testé
+  # avait déjà été corrigé dans les commits, mais pas dans le bundle iOS).
+  echo "post-commit: npx cap sync ios"
+  npx cap sync ios
+fi
