@@ -4372,19 +4372,62 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Swipe depuis le bord gauche de l'écran pour revenir en arrière (équivalent
   // du geste système Android/iOS), unifié avec goBack() donc avec le bouton
   // back matériel : ferme sheet/overlay/écran secondaire actuellement ouvert.
+  // Suit le doigt en direct (comme le geste natif) au lieu d'un retour brut :
+  // l'écran du dessus glisse avec le doigt, puis termine sa course (fermeture)
+  // ou revient à sa place (annulation) selon la distance parcourue au lâcher.
   const EDGE_ZONE = 24;
-  let edgeSwipeActive = false, edgeSwipeStartX = 0, edgeSwipeStartY = 0;
+  const EDGE_SWIPE_THRESHOLD = 60;
+  let edgeSwipeActive = false, edgeSwipeStartX = 0, edgeSwipeStartY = 0, edgeSwipeEl = null;
+
+  // L'écran actuellement au premier plan n'est pas gardé dans une variable
+  // globale (chaque overlay gère son propre élément) — on le retrouve au
+  // besoin via le z-index calculé, ce qui reste valable quel que soit le
+  // type d'écran ouvert (player, parcours, sheet…) sans les lister ici.
+  function frontmostScreen() {
+    const candidates = Array.from(document.querySelectorAll('.open'))
+      .filter(el => getComputedStyle(el).position === 'fixed');
+    if (!candidates.length) return null;
+    candidates.sort((a, b) => (parseInt(getComputedStyle(b).zIndex, 10) || 0) - (parseInt(getComputedStyle(a).zIndex, 10) || 0));
+    return candidates[0];
+  }
+
   document.addEventListener('touchstart', e => {
     const t = e.touches[0];
     edgeSwipeActive = t.clientX <= EDGE_ZONE;
     edgeSwipeStartX = t.clientX;
     edgeSwipeStartY = t.clientY;
+    edgeSwipeEl = edgeSwipeActive ? frontmostScreen() : null;
+    if (edgeSwipeEl) edgeSwipeEl.style.transition = 'none';
+  }, { passive: true });
+  document.addEventListener('touchmove', e => {
+    if (!edgeSwipeActive || !edgeSwipeEl) return;
+    const t = e.touches[0];
+    const dx = Math.max(0, t.clientX - edgeSwipeStartX);
+    const dy = Math.abs(t.clientY - edgeSwipeStartY);
+    if (dy > 50) return; // dérive verticale : probablement un scroll, on laisse filer
+    edgeSwipeEl.style.transform = 'translateX(' + dx + 'px)';
   }, { passive: true });
   document.addEventListener('touchend', e => {
     if (!edgeSwipeActive) return;
     edgeSwipeActive = false;
+    const el = edgeSwipeEl;
+    edgeSwipeEl = null;
+    if (!el) return;
     const dx = e.changedTouches[0].clientX - edgeSwipeStartX;
     const dy = Math.abs(e.changedTouches[0].clientY - edgeSwipeStartY);
-    if (dx > 60 && dy < 50) goBack();
+    el.style.transition = 'transform .22s cubic-bezier(.16,1,.3,1)';
+    if (dx > EDGE_SWIPE_THRESHOLD && dy < 50) {
+      // Termine la course jusqu'au bord puis ferme réellement l'écran.
+      el.style.transform = 'translateX(100%)';
+      setTimeout(() => {
+        goBack();
+        el.style.transition = '';
+        el.style.transform = '';
+      }, 220);
+    } else {
+      // Geste annulé : retour à sa place.
+      el.style.transform = 'translateX(0)';
+      setTimeout(() => { el.style.transition = ''; el.style.transform = ''; }, 220);
+    }
   }, { passive: true });
 });
