@@ -64,6 +64,9 @@ let suppressPop = 0;
 // Enchaînement sheet → player : on réutilise l'entrée d'historique de la sheet
 // pour le player (un back() suivi d'un pushState immédiat se court-circuitent).
 let reuseOverlayEntry = false;
+// Debug temporaire (bugs de navigation en cours d'investigation) : inspecter
+// depuis la console Safari via __sereinNavDebug(). À retirer une fois stable.
+window.__sereinNavDebug = () => ({ overlayStack: overlayStack.map(o => o.name), suppressPop, historyLength: history.length });
 
 function registerOverlay(name, closeFn) {
   if (reuseOverlayEntry) {
@@ -92,7 +95,25 @@ function releaseOverlay(name) {
   if (idx === -1) return;
   overlayStack.splice(idx, 1);
   suppressPop++;
-  try { history.back(); } catch(e) { suppressPop--; }
+  // history.back() suppose qu'un popstate va forcément arriver pour
+  // consommer ce suppressPop++ (voir le handler plus bas). S'il n'a plus
+  // rien vers quoi reculer dans l'historique réel du WebView, aucun
+  // popstate ne se déclenche : suppressPop reste bloqué au-dessus de 0 et
+  // avale silencieusement le PROCHAIN popstate légitime (un swipe/retour
+  // qui suit) — l'action correspondante semble alors ne plus rien faire,
+  // alors que rien n'a planté. Filet de sécurité symétrique à celui du
+  // swipe : redescend le compteur tout seul si rien n'arrive à temps.
+  let consumed = false;
+  const onPop = () => { consumed = true; window.removeEventListener('popstate', onPop); };
+  window.addEventListener('popstate', onPop);
+  const revert = () => {
+    window.removeEventListener('popstate', onPop);
+    if (!consumed) suppressPop = Math.max(0, suppressPop - 1);
+  };
+  try {
+    history.back();
+    setTimeout(revert, 400);
+  } catch(e) { revert(); }
 }
 
 // Point d'entrée unique pour "revenir en arrière" (bouton back Android, edge-swipe,
