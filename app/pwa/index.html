@@ -205,7 +205,11 @@
 
     /* ── Fiche de psychoéducation (teaser, réutilise .article-hero) ── */
     .fiche-teaser { margin: 1.1rem 0; }
-    .fiche-teaser .fiche-lede { font-size: .82rem; color: rgba(255,255,255,.78); line-height: 1.55; margin: .35rem 0 .55rem; }
+    /* line-clamp : un parcours à sous-groupes (ex. Émotions) empile plusieurs
+       teasers avant la première séance — le lede complet (5-6 lignes) noyait
+       les séances sous du texte. Tronqué à 2 lignes, la carte reste cliquable
+       (role="button") pour lire l'article en entier. */
+    .fiche-teaser .fiche-lede { font-size: .82rem; color: rgba(255,255,255,.78); line-height: 1.55; margin: .35rem 0 .55rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     .parcours-sub-label { font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; margin: 1.6rem 0 .3rem; color: var(--color-muted); padding-left: .25rem; }
     /* Réutilise les blocs Émotions (disclaimer + ressources) hors de #session-list */
     #parcours-body .emotion-top-disclaimer, #parcours-body .emotion-ressources { display: block; }
