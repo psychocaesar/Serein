@@ -4378,19 +4378,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (delta > 60) toggleOptionsSheet();
   }, { passive: true });
 
-  // Swipe right to go back from article reader
-  const articleView = document.getElementById('guide-article');
-  let artSwipeX = 0, artSwipeY = 0;
-  articleView.addEventListener('touchstart', e => {
-    artSwipeX = e.touches[0].clientX;
-    artSwipeY = e.touches[0].clientY;
-  }, { passive: true });
-  articleView.addEventListener('touchend', e => {
-    const dx = e.changedTouches[0].clientX - artSwipeX;
-    const dy = Math.abs(e.changedTouches[0].clientY - artSwipeY);
-    if (dx > 60 && dy < 50) goBack();
-  }, { passive: true });
-
   // Swipe depuis le bord gauche de l'écran pour revenir en arrière (équivalent
   // du geste système Android/iOS), unifié avec goBack() donc avec le bouton
   // back matériel : ferme sheet/overlay/écran secondaire actuellement ouvert.
@@ -4400,6 +4387,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   const EDGE_ZONE = 24;
   const EDGE_SWIPE_THRESHOLD = 60;
   let edgeSwipeActive = false, edgeSwipeStartX = 0, edgeSwipeStartY = 0, edgeSwipeEl = null;
+  // Empêche un second swipe de démarrer tant que le premier n'a pas fini de
+  // se résoudre (animation + attente du popstate réel) : sans ça, deux
+  // swipes rapprochés empilaient deux goBack() qui se marchaient dessus et
+  // désynchronisaient overlayStack de l'historique réel — l'app finissait
+  // bloquée (plus rien de cliquable).
+  let swipeInFlight = false;
 
   // L'écran actuellement au premier plan n'est pas gardé dans une variable
   // globale (chaque overlay gère son propre élément) — on le retrouve au
@@ -4422,7 +4415,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.addEventListener('touchstart', e => {
     const t = e.touches[0];
-    edgeSwipeActive = t.clientX <= EDGE_ZONE;
+    edgeSwipeActive = t.clientX <= EDGE_ZONE && !swipeInFlight;
     edgeSwipeStartX = t.clientX;
     edgeSwipeStartY = t.clientY;
     edgeSwipeEl = edgeSwipeActive ? frontmostScreen() : null;
@@ -4453,6 +4446,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     el.style.transition = 'transform .22s cubic-bezier(.16,1,.3,1)';
     if (shouldGoBack) {
+      swipeInFlight = true;
       // Termine la course jusqu'au bord puis ferme réellement l'écran.
       el.style.transform = 'translateX(100%)';
       setTimeout(() => {
@@ -4465,13 +4459,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.addEventListener('popstate', () => {
           el.style.transition = '';
           el.style.transform = '';
+          swipeInFlight = false;
         }, { once: true });
         goBack();
       }, 220);
     } else {
       // Geste annulé : retour à sa place.
+      swipeInFlight = true;
       el.style.transform = 'translateX(0)';
-      setTimeout(() => { el.style.transition = ''; el.style.transform = ''; }, 220);
+      setTimeout(() => { el.style.transition = ''; el.style.transform = ''; swipeInFlight = false; }, 220);
     }
   }, { passive: true });
 });
