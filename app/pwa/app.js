@@ -4173,15 +4173,23 @@ document.addEventListener('DOMContentLoaded', async () => {
       setTimeout(() => {
         // goBack() → history.back() est asynchrone (popstate arrive plus
         // tard) : remettre transform à zéro ICI, dans le même tick, rendait
-        // l'écran visible AVANT sa fermeture réelle — l'animation semblait
-        // "planter" et laissait l'utilisateur bloqué dessus. On attend le
-        // popstate réel (déclenché après le nôtre, donc l'écran est déjà
-        // fermé — display:none — quand on nettoie le transform).
-        window.addEventListener('popstate', () => {
+        // l'écran visible AVANT sa fermeture réelle. On attendait donc le
+        // popstate réel pour nettoyer — mais si history.back() n'a plus
+        // rien vers quoi reculer (cas réel constaté sur device), popstate
+        // ne se déclenche jamais : swipeInFlight restait bloqué à true pour
+        // toujours, gelant tout swipe suivant. Filet de sécurité : nettoie
+        // via popstate SI il arrive, sinon au bout de 400ms de toute façon.
+        let cleaned = false;
+        const cleanup = () => {
+          if (cleaned) return;
+          cleaned = true;
+          window.removeEventListener('popstate', cleanup);
           el.style.transition = '';
           el.style.transform = '';
           swipeInFlight = false;
-        }, { once: true });
+        };
+        window.addEventListener('popstate', cleanup);
+        setTimeout(cleanup, 400);
         goBack();
       }, 220);
     } else {
