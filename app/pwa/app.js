@@ -4155,6 +4155,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     return null;
   }
 
+  // Journal temporaire (bug swipe en cours d'investigation) : consultable
+  // via __sereinNavDebug().swipeLog. Dit si touchend arrive vraiment, ou si
+  // iOS annule la séquence (touchcancel) avant. À retirer une fois stable.
+  const swipeLog = [];
+  const logSwipe = msg => { swipeLog.push(msg); if (swipeLog.length > 20) swipeLog.shift(); };
+
   document.addEventListener('touchstart', e => {
     const t = e.touches[0];
     edgeSwipeActive = t.clientX <= EDGE_ZONE && !swipeInFlight;
@@ -4162,6 +4168,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     edgeSwipeStartY = t.clientY;
     edgeSwipeEl = edgeSwipeActive ? frontmostScreen() : null;
     if (edgeSwipeEl) edgeSwipeEl.style.transition = 'none';
+    if (edgeSwipeActive) logSwipe('touchstart x=' + t.clientX + ' el=' + (edgeSwipeEl ? edgeSwipeEl.id : 'null'));
   }, { passive: true });
   document.addEventListener('touchmove', e => {
     if (!edgeSwipeActive || !edgeSwipeEl) return;
@@ -4172,7 +4179,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     edgeSwipeEl.style.transform = 'translateX(' + dx + 'px)';
   }, { passive: true });
   document.addEventListener('touchend', e => {
-    if (!edgeSwipeActive) return;
+    if (!edgeSwipeActive) { logSwipe('touchend ignoré (edgeSwipeActive=false)'); return; }
+    logSwipe('touchend reçu');
     edgeSwipeActive = false;
     const el = edgeSwipeEl;
     edgeSwipeEl = null;
@@ -4220,4 +4228,33 @@ document.addEventListener('DOMContentLoaded', async () => {
       setTimeout(() => { el.style.transition = ''; el.style.transform = ''; swipeInFlight = false; }, 220);
     }
   }, { passive: true });
+  // touchcancel (jamais géré jusqu'ici) : iOS peut annuler la séquence
+  // tactile en cours de route sur un geste au bord de l'écran pour se le
+  // réserver lui-même (geste système) — WebKit délivre alors touchcancel à
+  // la place de touchend, et notre swipe ne recevait plus AUCUN événement :
+  // l'écran restait figé à mi-course (transform partiel), edgeSwipeActive
+  // ne se réinitialisait jamais, sans la moindre erreur JS. Traité comme un
+  // geste annulé : pas de goBack(), juste un retour propre à la position de
+  // départ pour que l'app reste dans un état cohérent et réutilisable.
+  document.addEventListener('touchcancel', () => {
+    if (!edgeSwipeActive) { logSwipe('touchcancel ignoré (edgeSwipeActive=false)'); return; }
+    logSwipe('touchcancel reçu (geste annulé par le système ?)');
+    edgeSwipeActive = false;
+    const el = edgeSwipeEl;
+    edgeSwipeEl = null;
+    if (!el) return;
+    swipeInFlight = true;
+    el.style.transition = 'transform .22s cubic-bezier(.16,1,.3,1)';
+    el.style.transform = 'translateX(0)';
+    setTimeout(() => { el.style.transition = ''; el.style.transform = ''; swipeInFlight = false; }, 220);
+  }, { passive: true });
+
+  window.__sereinNavDebug = () => ({
+    overlayStack: overlayStack.map(o => o.name),
+    suppressPop,
+    historyLength: history.length,
+    edgeSwipeActive,
+    swipeInFlight,
+    swipeLog: swipeLog.slice()
+  });
 });
