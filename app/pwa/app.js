@@ -2383,7 +2383,14 @@ function ficheTeaserHTML(slug) {
 
 function openArticleFromParcours(slug) {
   closeParcoursOverlay();
-  releaseOverlay('parcours');
+  // handOverOverlay (pas releaseOverlay) : releaseOverlay lance un
+  // history.back() asynchrone, or openArticle() qui suit enchaîne aussitôt
+  // sur un history.pushState() avant que ce back() ait eu le temps de se
+  // résoudre — les deux s'entrechoquaient et cassaient le bouton retour et
+  // le swipe bord gauche pour un article ouvert depuis un parcours. Comme
+  // pour l'enchaînement sheet voix → player, on réutilise l'entrée
+  // d'historique du parcours au lieu d'en empiler une nouvelle.
+  handOverOverlay('parcours');
   openArticle(slug);
 }
 
