@@ -8,7 +8,14 @@
 # le clone, avant la résolution des paquets).
 set -e
 
-cd "$CI_WORKSPACE"
+# $CI_WORKSPACE ne pointait pas où attendu (constaté : `pwd` restait sur
+# app/ios/App/ci_scripts/ après ce cd, faisant échouer `cap sync ios` —
+# npm install "réussissait" quand même par chance, npm remontant tout seul
+# jusqu'au package.json). Racine du repo calculée depuis l'emplacement du
+# script lui-même (toujours app/ios/App/ci_scripts/ici) plutôt que de
+# dépendre d'une variable d'environnement Apple dont le comportement exact
+# n'est pas fiable.
+cd "$(dirname "$0")/../../../.."
 
 if ! command -v node >/dev/null 2>&1; then
   # Version figée (celle utilisée en local via nvm pour ce projet) plutôt
