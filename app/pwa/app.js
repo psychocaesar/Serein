@@ -4129,9 +4129,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   function frontmostScreen() {
     const candidates = Array.from(document.querySelectorAll('.open'))
       .filter(el => getComputedStyle(el).position === 'fixed');
-    if (!candidates.length) return null;
-    candidates.sort((a, b) => (parseInt(getComputedStyle(b).zIndex, 10) || 0) - (parseInt(getComputedStyle(a).zIndex, 10) || 0));
-    return candidates[0];
+    if (candidates.length) {
+      candidates.sort((a, b) => (parseInt(getComputedStyle(b).zIndex, 10) || 0) - (parseInt(getComputedStyle(a).zIndex, 10) || 0));
+      return candidates[0];
+    }
+    // Sous-vues sans classe .open/position fixed dédiée (ex. l'article du
+    // guide, affiché via style.display plutôt qu'un overlay) : pas de match
+    // ci-dessus, mais on veut quand même l'animation de swipe.
+    const article = document.getElementById('guide-article');
+    if (article && getComputedStyle(article).display !== 'none') return article;
+    return null;
   }
 
   document.addEventListener('touchstart', e => {
@@ -4170,9 +4177,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       // Termine la course jusqu'au bord puis ferme réellement l'écran.
       el.style.transform = 'translateX(100%)';
       setTimeout(() => {
+        // goBack() → history.back() est asynchrone (popstate arrive plus
+        // tard) : remettre transform à zéro ICI, dans le même tick, rendait
+        // l'écran visible AVANT sa fermeture réelle — l'animation semblait
+        // "planter" et laissait l'utilisateur bloqué dessus. On attend le
+        // popstate réel (déclenché après le nôtre, donc l'écran est déjà
+        // fermé — display:none — quand on nettoie le transform).
+        window.addEventListener('popstate', () => {
+          el.style.transition = '';
+          el.style.transform = '';
+        }, { once: true });
         goBack();
-        el.style.transition = '';
-        el.style.transform = '';
       }, 220);
     } else {
       // Geste annulé : retour à sa place.
