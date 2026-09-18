@@ -7,7 +7,7 @@
         { "id": "s1", "title": "Première respiration consciente", "duration": 5, "file": "Méditation Premiere Respiration Consciente.mp3", "fileFem": null, "desc": "Ta toute première séance : découvrir le souffle comme point d'appui." },
         { "id": "s2", "title": "S'asseoir, ne rien faire", "duration": 5, "file": "Revenir au souffle.mp3", "fileFem": null, "desc": "Apprendre à simplement être là, sans objectif ni pression." },
         { "id": "s3", "title": "Observer ses pensées sans les juger", "duration": 9, "file": "Observer ses pensées sans les juger.mp3", "fileFem": "Observer ses pensées sans les juger.mp3", "desc": "Regarder passer les pensées comme des nuages, sans t'y accrocher." },
-        { "id": "s4", "title": "Le scan corporel — découvrir ses sensations", "duration": 10, "file": "Le scan corporel.mp3", "fileFem": "Le scan corporel — découvrir ses sensations.mp3", "desc": "Parcourir le corps des pieds à la tête pour relâcher les tensions." },
+        { "id": "s4", "title": "Le scan corporel : découvrir ses sensations", "duration": 10, "file": "Le scan corporel.mp3", "fileFem": "Le scan corporel — découvrir ses sensations.mp3", "desc": "Parcourir le corps des pieds à la tête pour relâcher les tensions." },
         { "id": "s16", "title": "Revenir à l'instant présent", "duration": 5, "file": "Revenir à l'instant présent.mp3", "fileFem": null, "desc": "Un ancrage simple pour ramener l'attention ici et maintenant." },
         { "id": "s17", "title": "La bienveillance envers soi", "duration": 5, "file": "La bienveillance envers soi.mp3", "fileFem": null, "desc": "Cultiver un regard plus doux envers toi-même." },
         { "id": "s18", "title": "Mon ancre personnelle", "duration": 6, "file": "Mon ancre personnelle.mp3", "fileFem": null, "desc": "Construire ton repère intérieur, à retrouver quand ça secoue." }
@@ -58,8 +58,8 @@
       "sessions": [
         { "id": "s7", "title": "Rituel de déconnexion", "duration": 10, "file": "Préparer le sommeil.mp3", "fileFem": null, "desc": "Couper le fil de la journée pour préparer la nuit." },
         { "id": "s20", "title": "Relâcher le corps, couche après couche", "duration": 8, "file": "Relâcher le corps, couche après couche.mp3", "fileFem": null, "desc": "Une détente progressive pour glisser vers le sommeil." },
-        { "id": "s19", "title": "Sons & silence — endormissement profond", "duration": 12, "file": "Sons & silence - endormissement profond.mp3", "fileFem": null, "desc": "Te laisser porter par les sons jusqu'à l'endormissement." },
-        { "id": "s8", "title": "Réveils nocturnes — retrouver le calme", "duration": 18, "file": "Reveils nocturnes.mp3", "fileFem": "reveils nocturnes - retrouver le calme.mp3", "desc": "Retrouver le calme et te rendormir quand la nuit se fragmente." },
+        { "id": "s19", "title": "Sons & silence : endormissement profond", "duration": 12, "file": "Sons & silence - endormissement profond.mp3", "fileFem": null, "desc": "Te laisser porter par les sons jusqu'à l'endormissement." },
+        { "id": "s8", "title": "Réveils nocturnes : retrouver le calme", "duration": 18, "file": "Reveils nocturnes.mp3", "fileFem": "reveils nocturnes - retrouver le calme.mp3", "desc": "Retrouver le calme et te rendormir quand la nuit se fragmente." },
         { "id": "s21", "title": "Méditation du matin reposé", "duration": 10, "file": "Méditation du matin reposé.mp3", "fileFem": null, "desc": "Émerger en douceur et bien commencer la journée." }
       ]
     },
@@ -69,7 +69,7 @@
       "sessions": [
         { "id": "s22", "title": "La respiration naturelle", "duration": 5, "file": "La respiration naturelle.mp3", "fileFem": null, "desc": "Redécouvrir ton souffle tel qu'il est, sans le forcer." },
         { "id": "s9", "title": "Cohérence cardiaque 5 minutes", "duration": 5, "file": "Cohérence cardiaque 5 minutes.mp3", "fileFem": "Cohérence cardiaque 5 minutes.mp3", "desc": "5 minutes pour synchroniser souffle et rythme cardiaque." },
-        { "id": "s10", "title": "Respiration 4-7-8 — calme profond", "duration": 6, "file": "Respiration 4-7-8 — Calme profond.mp3", "fileFem": null, "desc": "Une technique reconnue pour activer le calme profond." },
+        { "id": "s10", "title": "Respiration 4-7-8 : calme profond", "duration": 6, "file": "Respiration 4-7-8 — Calme profond.mp3", "fileFem": null, "desc": "Une technique reconnue pour activer le calme profond." },
         { "id": "s23", "title": "Box breathing", "duration": 6, "file": "Box breathing.mp3", "fileFem": null, "desc": "La respiration carrée : retrouver stabilité et contrôle." }
       ]
     },
@@ -77,7 +77,7 @@
       "name": "Anxiété",
       "artwork": "assets/illustrations/player-05.jpg",
       "sessions": [
-        { "id": "s11", "title": "SOS Anxiété — ancrage immédiat", "duration": 5, "file": "SOS Anxiété ancrage immédiat.mp3", "fileFem": "SOS anxiété - ancrage immédiat.mp3", "desc": "Un ancrage immédiat quand l'anxiété monte d'un coup." },
+        { "id": "s11", "title": "SOS Anxiété : ancrage immédiat", "duration": 5, "file": "SOS Anxiété ancrage immédiat.mp3", "fileFem": "SOS anxiété - ancrage immédiat.mp3", "desc": "Un ancrage immédiat quand l'anxiété monte d'un coup." },
         { "id": "s12", "title": "Accueillir l'anxiété sans la combattre", "duration": 10, "file": "Accueillir l'anxiété sans la combattre.mp3", "fileFem": "Accueillir l-anxiété sans la combattre.mp3", "desc": "Laisser passer la vague plutôt que lutter contre elle." },
         { "id": "s13", "title": "Les sons autour de toi", "duration": 7, "file": "Les sons autour de toi.mp3", "fileFem": "Les sons autour de toi.mp3", "desc": "Recentrer l'attention par l'écoute pour apaiser le mental." },
         { "id": "s14", "title": "La pensée qui tourne en boucle", "duration": 8, "file": "La pensée qui tourne en boucle.mp3", "fileFem": "La pensée qui tourne en boucle.mp3", "desc": "Désamorcer les ruminations qui alimentent l'inquiétude." },
@@ -91,7 +91,7 @@
       "sessions": [
         { "id": "s15", "title": "Mise en route mentale", "duration": 7, "file": "Mise en route mentale.mp3", "fileFem": null, "desc": "Clarifier l'esprit avant de te lancer dans le travail." },
         { "id": "s27", "title": "Pleine conscience de la tâche", "duration": 10, "file": "Pleine conscience de la tache.mp3", "fileFem": null, "desc": "Faire une seule chose à la fois, pleinement." },
-        { "id": "s28", "title": "Concentration — maintenir le focus", "duration": 10, "file": "Concentration - maintenir le focus.mp3", "fileFem": null, "desc": "Entraîner l'attention à revenir quand elle s'échappe." },
+        { "id": "s28", "title": "Concentration : maintenir le focus", "duration": 10, "file": "Concentration - maintenir le focus.mp3", "fileFem": null, "desc": "Entraîner l'attention à revenir quand elle s'échappe." },
         { "id": "s32", "title": "Clarté mentale - faire le vide", "duration": 9, "file": "Clarté mentale - faire le vide.mp3", "fileFem": null, "desc": "Faire le tri dans le brouillard mental pour y voir clair." },
         { "id": "s33", "title": "Flow - entrer dans la zone", "duration": 10, "file": "Flow - entrer dans la zone.mp3", "fileFem": null, "desc": "Préparer les conditions de l'immersion totale." }
       ]
