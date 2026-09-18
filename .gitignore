@@ -2,6 +2,7 @@ node_modules/
 assets/audio/
 app/pwa/assets/audio/
 .DS_Store
+CLAUDE.local.md
 
 # Android signing — ne jamais commiter
 *.keystore
