@@ -1,12 +1,14 @@
 # Serein — contexte projet
 
-App de méditation guidée en français (PWA + Capacitor Android/iOS), alternative éthique/open source à Calm/Petit Bambou. Fondée et portée par César Broche Aguilar (psychologue, conçoit les séances, rédige tout le contenu) et son épouse Daïdrée (co-fondatrice, trésorière de l'association loi 1901 "Sereinapp Méditation", RNA W302023362 — et voix féminine de certains enregistrements). Ne pas présenter Daïdrée comme co-créatrice à parts égales du contenu produit.
+App de méditation guidée en français (Capacitor Android/iOS), alternative éthique/open source à Calm/Petit Bambou. Fondée et portée par César Broche Aguilar (psychologue, conçoit les séances, rédige tout le contenu) et son épouse Daïdrée (co-fondatrice, trésorière de l'association loi 1901 "Sereinapp Méditation", RNA W302023362 — et voix féminine de certains enregistrements). Ne pas présenter Daïdrée comme co-créatrice à parts égales du contenu produit.
+
+**La PWA n'est pas publiée publiquement** (pas de déploiement actif — le `CNAME` à la racine, `www.sereinapp.fr`, est un reste inerte tant que GitHub Pages n'est pas activé sur le repo). `app/pwa/` reste la source unique servie en dev local et packagée en natif, mais ce n'est pas un canal de distribution en soi : `AUDIO_BASE_URL` y pointe vers `assets/audio/` en local (jamais commité), donc un déploiement web en l'état serait cassé (aucune séance ne jouerait) sans rebrancher ce chemin sur le CDN comme le fait déjà le natif.
 
 Positionnement assumé : **pas de traduction prévue** — la niche est "LA méditation en français, par un psychologue français". Ne pas proposer d'internationalisation.
 
 ## Stack & structure
 
-- **`app/pwa/`** : le code source réel — vanilla JS, **pas de build step** (`index.html` + `app.js` + `sw.js`). C'est la source unique servie en web ET packagée en natif.
+- **`app/pwa/`** : le code source réel — vanilla JS, **pas de build step** (`index.html` + `app.js` + `sw.js`). C'est la source unique testée en local (serveur statique, ex. `npx serve app/pwa`) et packagée en natif — pas déployée publiquement en l'état (voir plus haut).
 - **`app/android/`** et **`app/ios/`** : projets Capacitor générés/gérés — `app/android/app/src/main/assets/public/` et l'équivalent iOS sont **gitignorés**, régénérés par `npx cap sync`.
 - **`app/pwa/assets/sessions.json`** : catalogue des séances (source de vérité). Champs clés : `file` (voix masculine, César), `fileFem` (voix féminine, Daïdrée, `null` si pas encore enregistrée), `desc` (requis par les tests).
 - **`app/pwa/assets/audio/{masculin,feminin,ambiance}/`** : MP3 **gitignorés**, jamais commités. En prod ils sont servis par un CDN externe (pas le repo, pas le device en dur) — voir `AUDIO_BASE_URL` dans `app.js`.
