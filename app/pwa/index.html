@@ -207,6 +207,10 @@
     /* font-size >= 16px obligatoire : en dessous, iOS auto-zoome au focus du
        champ (et le zoom reste bloqué). 1rem = 16px au format normal, et suit
        le réglage de taille de texte pour les paliers Grand/Très grand. */
+    /* outline: none sur l'input, mais l'anneau de focus est reporté sur le
+       conteneur via :focus-within — sinon le champ de recherche est le seul
+       contrôle de l'app sans aucun retour visuel au clavier (WCAG 2.4.7). */
+    .explore-search:focus-within { outline: 2px solid var(--color-primary); outline-offset: 2px; }
     .explore-search input { flex: 1; min-width: 0; background: none; border: none; color: var(--color-text); font-size: 1rem; font-family: inherit; outline: none; }
     .explore-search input::placeholder { color: var(--color-muted); }
     .explore-search-clear { display: none; background: none; border: none; color: var(--color-muted); font-size: 1rem; cursor: pointer; padding: 0 .15rem; }
@@ -753,10 +757,15 @@
     .about-author p { font-size: .78rem; color: var(--color-muted); margin-top: .15rem; line-height: 1.4; }
     .about-card .trust { margin-top: 1.25rem; }
 
-    /* Focus visible */
+    /* Focus visible — ces contrôles gardaient l'anneau par défaut du
+       navigateur (pas de reset global), donc accessibles mais visuellement
+       incohérents avec l'anneau maison ci-dessus. Alignés ici. */
     .btn:focus-visible, .tab:focus-visible, .chat-choice:focus-visible, .btn-offline:focus-visible,
     .path-card:focus-visible, .mood-chip:focus-visible, .rail-link:focus-visible, .timer-card-horizontal:focus-visible,
-    .article-hero:focus-visible, .article-mini-card:focus-visible, .progress-track:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+    .article-hero:focus-visible, .article-mini-card:focus-visible, .progress-track:focus-visible,
+    .btn-fav:focus-visible, .download-del:focus-visible, .program-card:focus-visible, .program-hc:focus-visible,
+    .pday-launch:focus-visible, .ambiance-btn:focus-visible, .speed-btn:focus-visible, .voice-option:focus-visible,
+    .faq-question:focus-visible, .toolbar-btn:focus-visible, .report-btn:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
 
     /* Responsive */
     @media (max-width:600px) { h1{font-size:1.5rem} }
@@ -769,7 +778,6 @@
 
     /* Dégradés player par parcours */
     .player-screen[data-parcours="premiers-pas"] .player-bg { background: linear-gradient(160deg, #ccecd5 0%, #669d7e 40%, #f7cc7d 100%); }
-    .player-screen[data-parcours="stress"] .player-bg { background: linear-gradient(160deg, #87929c 0%, #87929c 50%, #2f4845 100%); }
     .player-screen[data-parcours="sommeil"] .player-bg { background: linear-gradient(160deg, #33406a 0%, #1a3153 60%, #1a3153 100%); }
     .player-screen[data-parcours="respirer"] .player-bg { background: linear-gradient(160deg, #4c87c1 0%, #356476 50%, #356476 100%); }
     .player-screen[data-parcours="anxiete"] .player-bg { background: linear-gradient(160deg, #919ec0 0%, #95c8b5 50%, #1b2c26 100%); }
