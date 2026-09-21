@@ -28,6 +28,9 @@ window.addEventListener('unhandledrejection', e => {
 
 // ── GLOBALS ──
 let timerInterval = null;
+// Démarrage différé du décompte (le MP3 du minuteur commence par une cloche) :
+// gardé pour pouvoir l'annuler si le player est fermé avant qu'il ne parte.
+let timerStartTimeout = null;
 let timerSecondsLeft = 0;
 let timerTotalSeconds = 0;
 let timerRunning = false;
@@ -702,8 +705,14 @@ function closePlayer() {
 
   clearSleepTimer(); // annule toute minuterie d'extinction en cours
 
-  // Clean up timer if active
-  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; timerRunning = false; }
+  // Clean up timer if active. Le setTimeout de démarrage doit être annulé lui
+  // aussi : fermer le player dans la seconde et demie suivant le lancement
+  // laissait sinon ce timeout créer un setInterval APRÈS le nettoyage —
+  // minuteur fantôme qui continuait de tourner, puis sonnait la cloche et
+  // affichait l'écran de fin alors que l'utilisateur était ailleurs.
+  if (timerStartTimeout) { clearTimeout(timerStartTimeout); timerStartTimeout = null; }
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  timerRunning = false;
   const timerEngine = document.getElementById('timer-engine');
   if (timerEngine) { timerEngine.pause(); timerEngine.src = ''; }
   stopSilentSession();
@@ -829,6 +838,10 @@ function launchPlayer(id, title, parcours, duration, filename, voice, artwork, r
   currentOfflineFilename = filename;
   pendingResumeTime = (typeof resumeAt === 'number' && resumeAt > 0) ? resumeAt : null;
   resetSleepTimer(); // nouvelle séance : repart sur « Illimité »
+  // Sort du mode minuteur libre : sans ça, timerTotalSeconds gardait la durée
+  // du dernier minuteur pour toute la session, et « Rejouer » sur une séance
+  // guidée relançait un minuteur silencieux au lieu de la séance.
+  timerTotalSeconds = 0;
 
   // Artwork (le fond du player utilise un dégradé CSS par parcours, pas cette image — voir plus bas)
   const img = artwork || 'assets/logo-serein.png';
@@ -2871,6 +2884,7 @@ function findSessionById(id) {
 
 function recFromSession(session, group, sub, reason) {
   return {
+    id: session.id,
     title: session.title,
     parcours: group.name,
     duration: session.duration + ' min',
@@ -2999,7 +3013,7 @@ function showGuideResult(entry) {
     btn.style.width = '100%';
     btn.textContent = '▶ Lancer';
     btn.addEventListener('click', () => {
-      openVoiceOverlay('guide-rec', rec.title, rec.parcours, rec.duration, rec.file, rec.fileFem || false, rec.artwork);
+      openVoiceOverlay(rec.id, rec.title, rec.parcours, rec.duration, rec.file, rec.fileFem || false, rec.artwork);
     });
 
     card.appendChild(header);
@@ -4054,7 +4068,8 @@ function startTimer(minutes) {
     startSilentSession();
   });
 
-  setTimeout(() => {
+  timerStartTimeout = setTimeout(() => {
+    timerStartTimeout = null;
     timerRunning = true;
     timerStartTimestamp = Date.now();
     updatePlayIcon(true);

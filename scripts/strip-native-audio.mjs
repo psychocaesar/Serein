@@ -9,7 +9,7 @@
 // Android a AUSSI un filet côté Gradle (tâche stripBundledAudio dans
 // app/android/app/build.gradle) qui garantit un AAB propre même si ce script
 // n'a pas tourné. Ce script garde en plus l'arbre de travail léger et couvre
-// un build iOS local (Xcode), où Codemagic ne passe pas.
+// le build iOS, qui n'a pas d'équivalent de ce filet côté Xcode.
 import { rmSync, existsSync } from 'node:fs';
 
 const targets = [
