@@ -1202,7 +1202,7 @@ async function toolbarOffline() {
     const cache = await caches.open(AUDIO_CACHE);
     const url = AUDIO_BASE_URL + currentAudioFolder() + '/' + encodeURIComponent(currentOfflineFilename);
     const existing = await cache.match(url);
-    if (!existing && blockedByWifiOnly()) return;
+    if (!existing && await blockedByWifiOnly()) return;
     if (existing) {
       await cache.delete(url);
       btn.classList.remove('active');
@@ -1353,26 +1353,34 @@ function updateAmbianceTag(label) {
 }
 
 // ── OFFLINE CACHE (liste explore) ──
-// navigator.connection (Network Information API) : supporté sur Android/Chrome,
-// absent sur iOS (Safari/WKWebView ne l'ont jamais implémenté) — sur iOS ce
-// garde-fou est donc un no-op silencieux plutôt qu'un blocage à moitié fiable.
-function isOnCellular() {
+// @capacitor/network en natif (fiable, iOS inclus) ; navigator.connection en
+// repli sur le web (Network Information API — supporté sur Android/Chrome,
+// absent sur Safari desktop/macOS, mais la PWA web n'est de toute façon pas
+// la cible principale de ce réglage pensé pour la consommation de data mobile).
+async function isOnCellular() {
+  try {
+    const Net = window.Capacitor?.Plugins?.Network;
+    if (Net && window.Capacitor?.isNativePlatform?.()) {
+      const status = await Net.getStatus();
+      return status.connectionType === 'cellular';
+    }
+  } catch(e) {}
   const c = navigator.connection || navigator.webkitConnection || navigator.mozConnection;
   if (!c) return false;
   if (c.type) return c.type === 'cellular';
   return c.effectiveType === '2g' || c.effectiveType === '3g' || c.effectiveType === '4g';
 }
 
-function blockedByWifiOnly() {
+async function blockedByWifiOnly() {
   if (localStorage.getItem('serein-wifi-only') !== 'true') return false;
-  if (!isOnCellular()) return false;
+  if (!(await isOnCellular())) return false;
   alert('« Télécharger en Wi-Fi uniquement » est activé dans les Réglages — connecte-toi au Wi-Fi pour télécharger cette séance.');
   return true;
 }
 
 async function toggleOfflineCache(btn, filename) {
   if (!('caches' in window)) { alert('Cache non disponible sur ce navigateur.'); return; }
-  if (!btn.classList.contains('cached') && blockedByWifiOnly()) return;
+  if (!btn.classList.contains('cached') && await blockedByWifiOnly()) return;
   btn.classList.add('loading');
   try {
     const cache = await caches.open(AUDIO_CACHE);
