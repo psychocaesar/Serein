@@ -7,26 +7,10 @@ const assert = require('node:assert');
 const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
+const { createSandbox } = require('./harness');
 
 const PWA_DIR = path.join(__dirname, '..', 'app', 'pwa');
 const catalog = JSON.parse(fs.readFileSync(path.join(PWA_DIR, 'assets', 'sessions.json'), 'utf8'));
-
-// ── Stub universel : app.js manipule beaucoup le DOM au chargement.
-//    Un Proxy callable/indexable absorbe tout (getElementById().onclick = …,
-//    addEventListener, matchMedia, new Audio()…) sans rien casser.
-const noop = () => {};
-const stub = new Proxy(function () {}, {
-  get: (_t, p) => {
-    if (p === Symbol.toPrimitive || p === 'valueOf' || p === 'toString') return () => '';
-    if (p === Symbol.iterator) return function* () {};
-    if (p === 'length') return 0;
-    return stub;
-  },
-  apply: () => stub,
-  construct: () => stub,
-  set: () => true,
-  has: () => true,
-});
 
 // localStorage doit renvoyer null (pas le stub) : app.js fait
 // JSON.parse(localStorage.getItem(k) || '{}').
@@ -38,37 +22,7 @@ const localStorageStub = {
   clear: () => storage.clear(),
 };
 
-const sandbox = {
-  console,
-  document: stub,
-  navigator: stub,
-  location: stub,
-  history: stub,
-  localStorage: localStorageStub,
-  addEventListener: noop,
-  removeEventListener: noop,
-  matchMedia: () => stub,
-  setTimeout: () => 0,
-  clearTimeout: noop,
-  setInterval: () => 0,
-  clearInterval: noop,
-  requestAnimationFrame: () => 0,
-  cancelAnimationFrame: noop,
-  fetch: () => Promise.resolve(stub),
-  alert: noop,
-  confirm: () => true,
-  Audio: stub,
-  MediaMetadata: stub,
-  AudioContext: stub,
-  webkitAudioContext: stub,
-  IntersectionObserver: stub,
-  URL: stub,
-  Blob: stub,
-  FileReader: stub,
-};
-sandbox.window = sandbox; // window.addEventListener / window.matchMedia → sandbox
-sandbox.self = sandbox;
-sandbox.globalThis = sandbox;
+const { sandbox } = createSandbox({ localStorage: localStorageStub });
 
 // Shim ajouté en fin de fichier : expose les fonctions/données du guide
 // (closures sur le scope module de app.js) et permet d'injecter le catalogue.
@@ -80,6 +34,12 @@ const SHIM = `
   findSessionById: findSessionById,
   GUIDE_MAP: GUIDE_MAP,
   MOOD_PARCOURS: MOOD_PARCOURS,
+  recordGuidePlay: recordGuidePlay,
+  getRecentHistory: getRecentHistory,
+  getListenedTitles: getListenedTitles,
+  getIntensityBias: getIntensityBias,
+  HISTORY_KEY: HISTORY_KEY,
+  FEEDBACK_KEY: FEEDBACK_KEY,
 };`;
 
 const src = fs.readFileSync(path.join(PWA_DIR, 'app.js'), 'utf8');
@@ -118,6 +78,74 @@ test('chaque entrée GUIDE_MAP produit une fiche complète', () => {
 
 test('resolveRec renvoie null pour un id absent du catalogue', () => {
   assert.strictEqual(G.resolveRec({ id: 's_inexistant', reason: 'x' }), null);
+});
+
+// ── Historique d'écoute ──
+// Bug de septembre 2026 : recordGuidePlay() réécrivait dans le stockage le
+// tableau déjà filtré à 15 jours par getRecentHistory(). Chaque séance
+// terminée supprimait donc définitivement tout l'historique plus ancien — et
+// comme il est partagé avec getListenedTitles(), les coches « déjà écoutée »
+// et les compteurs de progression des parcours régressaient tout seuls.
+const JOUR = 24 * 60 * 60 * 1000;
+
+test('terminer une séance ne supprime pas l\'historique de plus de 15 jours', () => {
+  storage.clear();
+  storage.set(G.HISTORY_KEY, JSON.stringify([
+    { title: 'Séance ancienne', ts: Date.now() - 40 * JOUR },
+    { title: 'Séance récente', ts: Date.now() - 1000 },
+  ]));
+
+  G.recordGuidePlay('Nouvelle séance');
+
+  const titres = JSON.parse(storage.get(G.HISTORY_KEY)).map(e => e.title);
+  assert.deepStrictEqual(titres, ['Séance ancienne', 'Séance récente', 'Nouvelle séance'],
+    'l\'entrée de 40 jours doit survivre');
+  assert.ok(G.getListenedTitles().has('Séance ancienne'),
+    'les coches « déjà écoutée » doivent encore voir la séance ancienne');
+});
+
+test('le guide ne considère que les 15 derniers jours, sans toucher au stockage', () => {
+  storage.clear();
+  storage.set(G.HISTORY_KEY, JSON.stringify([
+    { title: 'Séance ancienne', ts: Date.now() - 40 * JOUR },
+    { title: 'Séance récente', ts: Date.now() - 1000 },
+  ]));
+
+  // Array.from : le tableau vient du realm du sandbox vm, et deepStrictEqual
+  // compare aussi les prototypes — sans ça la comparaison échoue alors que le
+  // contenu est identique.
+  const vus = Array.from(G.getRecentHistory().map(e => e.title));
+  assert.deepStrictEqual(vus, ['Séance récente'], 'la fenêtre du guide reste à 15 jours');
+  assert.strictEqual(JSON.parse(storage.get(G.HISTORY_KEY)).length, 2,
+    'lire la fenêtre ne doit rien supprimer du stockage');
+});
+
+// ── Biais d'intensité ──
+// Seuils resserrés (septembre 2026) : avant, 2 retours et 50 % suffisaient,
+// donc un seul « trop intense » accompagné d'un « bien » basculait déjà toute
+// la recommandation — trop réactif pour un signal aussi bruité.
+function biaisPour(ratings) {
+  storage.set(G.FEEDBACK_KEY, JSON.stringify(ratings.map(rating => ({
+    mood: 'stress', duration: 'court', context: 'corps', title: 't', rating, ts: Date.now(),
+  }))));
+  return G.getIntensityBias('stress', 'court', 'corps');
+}
+
+test('le biais d\'intensité ne se déclenche qu\'à partir de 3 retours concordants', () => {
+  storage.clear();
+  assert.strictEqual(biaisPour(['intense', 'ok']), null,
+    'deux retours ne suffisent plus à infléchir la recommandation');
+  assert.strictEqual(biaisPour(['intense', 'ok', 'ok']), null,
+    'un seul signal minoritaire ne doit rien déclencher');
+  assert.strictEqual(biaisPour(['intense', 'intense', 'ok']), 'softer',
+    'deux « trop intense » sur trois retours doivent adoucir');
+  assert.strictEqual(biaisPour(['doux', 'doux', 'ok']), 'harder',
+    'deux « trop doux » sur trois retours doivent approfondir');
+});
+
+test('des retours contradictoires à égalité ne tranchent pas', () => {
+  storage.clear();
+  assert.strictEqual(biaisPour(['intense', 'intense', 'doux', 'doux']), null);
 });
 
 test('MOOD_PARCOURS pointe vers des parcours/sous-parcours réels', () => {
