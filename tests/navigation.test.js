@@ -13,23 +13,13 @@ const assert = require('node:assert');
 const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
+const { createSandbox, createStub } = require('./harness');
 
 const PWA_DIR = path.join(__dirname, '..', 'app', 'pwa');
 
 // ── Stub universel pour tout ce qui n'est pas un des 4 écrans suivis ──
 const noop = () => {};
-const stub = new Proxy(function () {}, {
-  get: (_t, p) => {
-    if (p === Symbol.toPrimitive || p === 'valueOf' || p === 'toString') return () => '';
-    if (p === Symbol.iterator) return function* () {};
-    if (p === 'length') return 0;
-    return stub;
-  },
-  apply: () => stub,
-  construct: () => stub,
-  set: () => true,
-  has: () => true,
-});
+const stub = createStub();
 
 // ── Élément DOM minimal avec classList à état réel (Set), pour les 4 écrans ──
 const SCREEN_IDS = ['home', 'explore', 'guide', 'settings'];
@@ -78,38 +68,11 @@ const historyStub = {
   },
 };
 
-const sandbox = {
-  console,
+const { sandbox } = createSandbox({
   document: documentStub,
-  navigator: stub,
-  location: stub,
   history: historyStub,
   addEventListener: (type, fn) => { if (type === 'popstate') popstateHandler = fn; },
-  removeEventListener: noop,
-  matchMedia: () => stub,
-  setTimeout: () => 0,
-  clearTimeout: noop,
-  setInterval: () => 0,
-  clearInterval: noop,
-  requestAnimationFrame: () => 0,
-  cancelAnimationFrame: noop,
-  fetch: () => Promise.resolve(stub),
-  scrollTo: noop,
-  alert: noop,
-  confirm: () => true,
-  Audio: stub,
-  MediaMetadata: stub,
-  AudioContext: stub,
-  webkitAudioContext: stub,
-  IntersectionObserver: stub,
-  URL: stub,
-  Blob: stub,
-  FileReader: stub,
-  localStorage: { getItem: () => null, setItem: noop, removeItem: noop, clear: noop },
-};
-sandbox.window = sandbox;
-sandbox.self = sandbox;
-sandbox.globalThis = sandbox;
+});
 
 const SHIM = `
 ;globalThis.__nav = {
