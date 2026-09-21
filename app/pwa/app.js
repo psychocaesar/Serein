@@ -3163,11 +3163,20 @@ function getRecentHistory() {
   } catch(e) { return []; }
 }
 
+// Écrit sur l'historique COMPLET, jamais sur la fenêtre de 15 jours renvoyée
+// par getRecentHistory() : celle-ci ne sert qu'au guide (ne pas re-recommander
+// du déjà-écouté). Réécrire le tableau filtré supprimait définitivement tout
+// ce qui datait de plus de 15 jours à chaque séance terminée — or cet
+// historique est partagé avec getListenedTitles(), donc les coches « déjà
+// écoutée » et les compteurs de progression des parcours régressaient tout
+// seuls (« 5/7 » qui retombe à « 1/7 » après trois semaines d'absence).
+// La croissance est négligeable : {title, ts} par séance terminée.
 function recordGuidePlay(title) {
   try {
-    const history = getRecentHistory();
-    history.push({ title, ts: Date.now() });
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    const raw = localStorage.getItem(HISTORY_KEY);
+    const all = raw ? JSON.parse(raw) : [];
+    all.push({ title, ts: Date.now() });
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(all));
     mirrorToNative('serein-history');
   } catch(e) {}
 }
@@ -3259,16 +3268,23 @@ function getIntensityBias(mood, duration, context) {
       (e.context === context || !context) &&
       e.ts > cutoff
     );
-    if (relevant.length < 2) return null;
+    // Déclenchement progressif : il faut au moins 3 retours pertinents ET au
+    // moins 2 occurrences du même signal pour infléchir la recommandation.
+    // Avant, 2 retours suffisaient avec un seuil à 50 % : un seul « trop
+    // intense » accompagné d'un « bien » basculait déjà tout le résultat, sur
+    // un signal beaucoup trop bruité pour ça.
+    if (relevant.length < 3) return null;
 
     let intense = 0, doux = 0;
     for (const e of relevant) {
       if (e.rating === 'intense') intense++;
       else if (e.rating === 'doux') doux++;
     }
+    // Signaux contradictoires à égalité : on ne tranche pas.
+    if (intense === doux) return null;
     const total = relevant.length;
-    if (intense / total >= 0.5) return 'softer';
-    if (doux / total >= 0.5) return 'harder';
+    if (intense >= 2 && intense / total >= 0.5) return 'softer';
+    if (doux >= 2 && doux / total >= 0.5) return 'harder';
     return null;
   } catch(e) { return null; }
 }
