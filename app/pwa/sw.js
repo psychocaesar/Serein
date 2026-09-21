@@ -76,23 +76,30 @@ async function audioResponse(request) {
   if (!range) return response;
   const m = /bytes=(\d+)-(\d+)?/.exec(range);
   if (!m) return response;
-  const buf = await response.arrayBuffer();
+  // blob() + slice() plutôt qu'arrayBuffer() + slice() : Blob#slice() ne copie
+  // pas les octets, il crée juste une vue paresseuse sur le blob existant.
+  // Avec arrayBuffer(), chaque seek recopiait le fichier ENTIER en mémoire
+  // (jusqu'à ~17 Mo pour les séances longues) rien que pour en extraire
+  // quelques Ko — ici seule la portion demandée est effectivement lue.
+  const blob = await response.blob();
+  const total = blob.size;
   const start = Number(m[1]);
-  const end = m[2] ? Math.min(Number(m[2]), buf.byteLength - 1) : buf.byteLength - 1;
-  if (start >= buf.byteLength) {
-    return new Response(null, { status: 416, headers: { 'Content-Range': 'bytes */' + buf.byteLength } });
+  const end = m[2] ? Math.min(Number(m[2]), total - 1) : total - 1;
+  if (start >= total) {
+    return new Response(null, { status: 416, headers: { 'Content-Range': 'bytes */' + total } });
   }
   // Le média est désormais chargé avec crossOrigin="anonymous" (Web Audio, pour
   // régler le volume sur iOS) : la réponse 206 synthétisée doit rester
   // CORS-propre, sinon le son servi depuis le cache est « tainted » (silence).
   const acao = response.headers.get('Access-Control-Allow-Origin') || '*';
-  return new Response(buf.slice(start, end + 1), {
+  const contentType = response.headers.get('Content-Type') || 'audio/mpeg';
+  return new Response(blob.slice(start, end + 1, contentType), {
     status: 206,
     statusText: 'Partial Content',
     headers: {
-      'Content-Type': response.headers.get('Content-Type') || 'audio/mpeg',
+      'Content-Type': contentType,
       'Content-Length': String(end - start + 1),
-      'Content-Range': 'bytes ' + start + '-' + end + '/' + buf.byteLength,
+      'Content-Range': 'bytes ' + start + '-' + end + '/' + total,
       'Accept-Ranges': 'bytes',
       'Access-Control-Allow-Origin': acao
     }

@@ -64,9 +64,6 @@ let suppressPop = 0;
 // Enchaînement sheet → player : on réutilise l'entrée d'historique de la sheet
 // pour le player (un back() suivi d'un pushState immédiat se court-circuitent).
 let reuseOverlayEntry = false;
-// Debug temporaire (bugs de navigation en cours d'investigation) : inspecter
-// depuis la console Safari via __sereinNavDebug(). À retirer une fois stable.
-window.__sereinNavDebug = () => ({ overlayStack: overlayStack.map(o => o.name), suppressPop, historyLength: history.length });
 
 function registerOverlay(name, closeFn) {
   if (reuseOverlayEntry) {
@@ -303,10 +300,6 @@ function setExploreParcours(label) {
   applyFilters();
 }
 
-function exploreParcoursClick(label) {
-  setExploreParcours(activeThemeFilter === label ? null : label);
-}
-
 function filterParcours(label) {
   showScreen('explore');
   setExploreParcours(label);
@@ -398,12 +391,19 @@ function makeSessionCard(s, group, subgroupName) {
 
   const actions = document.createElement('div');
   actions.className = 'session-actions';
+  // Télécharge la voix qui sera effectivement jouée (voix choisie par
+  // l'utilisateur, avec repli sur la masculine si la séance n'a pas de
+  // voix féminine ou si aucun choix n'a encore été fait) — sinon le fichier
+  // mis en cache ne correspond pas à celui que "Lancer" joue hors ligne.
+  const dlVoice = (getSavedVoice() === 'feminine' && s.fileFem) ? 'feminine' : 'masculine';
+  const dlFile = dlVoice === 'feminine' ? s.fileFem : s.file;
   const dl = document.createElement('button');
   dl.className = 'btn-offline';
   dl.setAttribute('aria-label', 'Télécharger ' + s.title + ' pour écoute hors ligne');
-  dl.dataset.filename = s.file;
+  dl.dataset.filename = dlFile;
+  dl.dataset.voice = dlVoice;
   dl.textContent = '⬇';
-  dl.addEventListener('click', () => toggleOfflineCache(dl, s.file));
+  dl.addEventListener('click', () => toggleOfflineCache(dl, dlFile, dlVoice));
   const launch = document.createElement('button');
   launch.className = 'btn btn-primary';
   launch.setAttribute('aria-label', 'Lancer la séance ' + s.title + ', ' + group.name + ', ' + durationLabel);
@@ -830,10 +830,9 @@ function launchPlayer(id, title, parcours, duration, filename, voice, artwork, r
   pendingResumeTime = (typeof resumeAt === 'number' && resumeAt > 0) ? resumeAt : null;
   resetSleepTimer(); // nouvelle séance : repart sur « Illimité »
 
-  // Artwork + fond flou
+  // Artwork (le fond du player utilise un dégradé CSS par parcours, pas cette image — voir plus bas)
   const img = artwork || 'assets/logo-serein.png';
   document.getElementById('player-artwork-img').src = img;
-  document.getElementById('player-bg').style.backgroundImage = 'url(' + img + ')';
 
   // Infos
   document.getElementById('player-title').textContent = title;
@@ -860,7 +859,6 @@ function launchPlayer(id, title, parcours, duration, filename, voice, artwork, r
   // Set background color per parcours
   const parcoursMap = {
     'Premiers pas': 'premiers-pas',
-    'Calme & Stress': 'stress',
     'Sommeil': 'sommeil',
     'Respirer': 'respirer',
     'Anxiété': 'anxiete',
@@ -1159,7 +1157,10 @@ track.addEventListener('touchstart', e => { seeking = true; seekFromEvent(e); },
 track.addEventListener('touchmove', e => { if (seeking) seekFromEvent(e); }, { passive: true });
 track.addEventListener('touchend', () => { seeking = false; });
 
-document.getElementById('volume-slider').addEventListener('input', e => { audio.volume = e.target.value; });
+document.getElementById('volume-slider').addEventListener('input', e => {
+  audio.volume = e.target.value;
+  try { localStorage.setItem('serein-volume', e.target.value); } catch(_) {}
+});
 
 function fmt(s) {
   if (!s || isNaN(s)) return '0:00';
@@ -1201,6 +1202,7 @@ async function toolbarOffline() {
     const cache = await caches.open(AUDIO_CACHE);
     const url = AUDIO_BASE_URL + currentAudioFolder() + '/' + encodeURIComponent(currentOfflineFilename);
     const existing = await cache.match(url);
+    if (!existing && blockedByWifiOnly()) return;
     if (existing) {
       await cache.delete(url);
       btn.classList.remove('active');
@@ -1351,8 +1353,26 @@ function updateAmbianceTag(label) {
 }
 
 // ── OFFLINE CACHE (liste explore) ──
+// navigator.connection (Network Information API) : supporté sur Android/Chrome,
+// absent sur iOS (Safari/WKWebView ne l'ont jamais implémenté) — sur iOS ce
+// garde-fou est donc un no-op silencieux plutôt qu'un blocage à moitié fiable.
+function isOnCellular() {
+  const c = navigator.connection || navigator.webkitConnection || navigator.mozConnection;
+  if (!c) return false;
+  if (c.type) return c.type === 'cellular';
+  return c.effectiveType === '2g' || c.effectiveType === '3g' || c.effectiveType === '4g';
+}
+
+function blockedByWifiOnly() {
+  if (localStorage.getItem('serein-wifi-only') !== 'true') return false;
+  if (!isOnCellular()) return false;
+  alert('« Télécharger en Wi-Fi uniquement » est activé dans les Réglages — connecte-toi au Wi-Fi pour télécharger cette séance.');
+  return true;
+}
+
 async function toggleOfflineCache(btn, filename) {
   if (!('caches' in window)) { alert('Cache non disponible sur ce navigateur.'); return; }
+  if (!btn.classList.contains('cached') && blockedByWifiOnly()) return;
   btn.classList.add('loading');
   try {
     const cache = await caches.open(AUDIO_CACHE);
@@ -1714,6 +1734,14 @@ function loadPrefs() {
     const ambVol = localStorage.getItem('serein-ambiance-volume');
     const ambVolSlider = document.getElementById('ambiance-volume-slider');
     if (ambVol !== null && ambVolSlider) ambVolSlider.value = ambVol;
+    // Volume principal : sans effet sur iOS (audio.volume y est ignoré, voir
+    // hideMainVolumeSliderOnIos) mais persisté normalement sur Android/web.
+    const vol = localStorage.getItem('serein-volume');
+    const volSlider = document.getElementById('volume-slider');
+    if (vol !== null) {
+      if (volSlider) volSlider.value = vol;
+      audio.volume = parseFloat(vol);
+    }
     loadReminderPrefs();
   } catch(e) {}
 }
@@ -4145,7 +4173,8 @@ Envoyé depuis sereinapp.fr`;
   }
 
   const mailto = `mailto:serein@cesarbroche.fr?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  window.open(mailto, '_blank');
+  const isNative = typeof Capacitor !== 'undefined' && Capacitor.isNativePlatform && Capacitor.isNativePlatform();
+  window.open(mailto, isNative ? '_system' : '_blank');
 }
 
 
@@ -4168,6 +4197,18 @@ function hideDonationOnIos() {
   if (card) card.style.display = 'none';
 }
 
+// iOS ignore HTMLMediaElement.volume (voir en-tête du fichier) : le curseur
+// "Volume principal" y bougerait sans le moindre effet sur le son réellement
+// joué — un curseur qui ment plutôt qu'un réglage manquant. Masqué sur iOS
+// uniquement ; le volume y reste au bouton matériel.
+function hideMainVolumeSliderOnIos() {
+  if (!isIosNative()) return;
+  const label = document.getElementById('main-volume-label');
+  const wrap = document.getElementById('main-volume-wrap');
+  if (label) label.style.display = 'none';
+  if (wrap) wrap.style.display = 'none';
+}
+
 function openDon() {
   if (isIosNative()) return;
   const url = 'https://www.helloasso.com/associations/sereinapp/formulaires/1';
@@ -4184,7 +4225,7 @@ function openPrivacyPolicy() {
 // ── EXPORT / IMPORT DES DONNÉES (local-first, aucun serveur) ──
 const DATA_KEYS = [
   'serein-stats', 'serein-history', 'serein-feedback', 'serein-guide-session', 'serein-favoris',
-  'serein-theme', 'serein-text-size', 'serein-speed', 'serein-bells', 'serein-wifi-only',
+  'serein-theme', 'serein-text-size', 'serein-speed', 'serein-volume', 'serein-bells', 'serein-wifi-only',
   'serein-ambiance-default', 'serein-ambiance-volume', 'serein-reminder-enabled', 'serein-reminder-time',
   'serein-voice', 'serein-resume', 'serein-mood-log', 'serein-program',
   'serein_seances_terminees', 'serein_invitation_don_vue',
@@ -4398,6 +4439,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   loadStats();
   loadPrefs();
   hideDonationOnIos();
+  hideMainVolumeSliderOnIos();
   updateVoiceSettingLabel();
   renderResumeCard();
   updateMoodChips();
@@ -4485,12 +4527,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     return null;
   }
 
-  // Journal temporaire (bug swipe en cours d'investigation) : consultable
-  // via __sereinNavDebug().swipeLog. Dit si touchend arrive vraiment, ou si
-  // iOS annule la séquence (touchcancel) avant. À retirer une fois stable.
-  const swipeLog = [];
-  const logSwipe = msg => { swipeLog.push(msg); if (swipeLog.length > 20) swipeLog.shift(); };
-
   document.addEventListener('touchstart', e => {
     const t = e.touches[0];
     edgeSwipeActive = t.clientX <= EDGE_ZONE && !swipeInFlight;
@@ -4498,7 +4534,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     edgeSwipeStartY = t.clientY;
     edgeSwipeEl = edgeSwipeActive ? frontmostScreen() : null;
     if (edgeSwipeEl) edgeSwipeEl.style.transition = 'none';
-    if (edgeSwipeActive) logSwipe('touchstart x=' + t.clientX + ' el=' + (edgeSwipeEl ? edgeSwipeEl.id : 'null'));
   }, { passive: true });
   document.addEventListener('touchmove', e => {
     if (!edgeSwipeActive || !edgeSwipeEl) return;
@@ -4509,14 +4544,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     edgeSwipeEl.style.transform = 'translateX(' + dx + 'px)';
   }, { passive: true });
   document.addEventListener('touchend', e => {
-    if (!edgeSwipeActive) { logSwipe('touchend ignoré (edgeSwipeActive=false)'); return; }
+    if (!edgeSwipeActive) return;
     edgeSwipeActive = false;
     const el = edgeSwipeEl;
     edgeSwipeEl = null;
     const dx = e.changedTouches[0].clientX - edgeSwipeStartX;
     const dy = Math.abs(e.changedTouches[0].clientY - edgeSwipeStartY);
     const shouldGoBack = dx > EDGE_SWIPE_THRESHOLD && dy < 50;
-    logSwipe('touchend reçu dx=' + Math.round(dx) + ' dy=' + Math.round(dy) + ' el=' + (el ? el.id : 'null') + ' shouldGoBack=' + shouldGoBack);
     if (!el) {
       // Rien à animer (ex. sous-vue comme l'article, pas un overlay plein
       // écran) : sans ça goBack() n'était plus jamais appelé du tout sur ces
@@ -4556,8 +4590,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // geste annulé : pas de goBack(), juste un retour propre à la position de
   // départ pour que l'app reste dans un état cohérent et réutilisable.
   document.addEventListener('touchcancel', () => {
-    if (!edgeSwipeActive) { logSwipe('touchcancel ignoré (edgeSwipeActive=false)'); return; }
-    logSwipe('touchcancel reçu (geste annulé par le système ?)');
+    if (!edgeSwipeActive) return;
     edgeSwipeActive = false;
     const el = edgeSwipeEl;
     edgeSwipeEl = null;
@@ -4567,13 +4600,4 @@ document.addEventListener('DOMContentLoaded', async () => {
     el.style.transform = 'translateX(0)';
     setTimeout(() => { el.style.transition = ''; el.style.transform = ''; swipeInFlight = false; }, 220);
   }, { passive: true });
-
-  window.__sereinNavDebug = () => ({
-    overlayStack: overlayStack.map(o => o.name),
-    suppressPop,
-    historyLength: history.length,
-    edgeSwipeActive,
-    swipeInFlight,
-    swipeLog: swipeLog.slice()
-  });
 });
