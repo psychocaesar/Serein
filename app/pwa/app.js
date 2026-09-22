@@ -394,19 +394,19 @@ function makeSessionCard(s, group, subgroupName) {
 
   const actions = document.createElement('div');
   actions.className = 'session-actions';
-  // Télécharge la voix qui sera effectivement jouée (voix choisie par
-  // l'utilisateur, avec repli sur la masculine si la séance n'a pas de
-  // voix féminine ou si aucun choix n'a encore été fait) — sinon le fichier
-  // mis en cache ne correspond pas à celui que "Lancer" joue hors ligne.
-  const dlVoice = (getSavedVoice() === 'feminine' && s.fileFem) ? 'feminine' : 'masculine';
-  const dlFile = dlVoice === 'feminine' ? s.fileFem : s.file;
+  // Les DEUX fichiers sont portés par le bouton ; la voix est résolue au
+  // moment de l'action (offlineTargetFor), jamais ici. La liste des séances
+  // n'est rendue qu'au démarrage de l'app : figer la voix au rendu mettait en
+  // cache la mauvaise dès qu'on la changeait ensuite dans les Réglages — le
+  // fichier joué n'était alors pas celui téléchargé, et la lecture hors ligne
+  // échouait sur « Fichier audio introuvable ».
   const dl = document.createElement('button');
   dl.className = 'btn-offline';
   dl.setAttribute('aria-label', 'Télécharger ' + s.title + ' pour écoute hors ligne');
-  dl.dataset.filename = dlFile;
-  dl.dataset.voice = dlVoice;
+  dl.dataset.fileMasc = s.file;
+  if (s.fileFem) dl.dataset.fileFem = s.fileFem;
   dl.textContent = '⬇';
-  dl.addEventListener('click', () => toggleOfflineCache(dl, dlFile, dlVoice));
+  dl.addEventListener('click', () => toggleOfflineCache(dl));
   const launch = document.createElement('button');
   launch.className = 'btn btn-primary';
   launch.setAttribute('aria-label', 'Lancer la séance ' + s.title + ', ' + group.name + ', ' + durationLabel);
@@ -620,7 +620,13 @@ function confirmVoiceAndLaunch() {
   try { localStorage.setItem(VOICE_KEY, selectedVoice); } catch(e) {}
   updateVoiceSettingLabel();
   haptic('light');
-  if (voiceOverlayMode === 'settings' || !pendingSession) { closeVoiceOverlay(); return; }
+  if (voiceOverlayMode === 'settings' || !pendingSession) {
+    // Les ✓ de l'Explorer portent sur une voix précise : ils doivent refléter
+    // la nouvelle sélection tout de suite, sans attendre un redémarrage.
+    restoreOfflineButtons();
+    closeVoiceOverlay();
+    return;
+  }
   // Mode lancement : fermeture visuelle + l'entrée d'historique passe au player
   document.getElementById('voice-overlay').classList.remove('open');
   handOverOverlay('voice');
@@ -758,10 +764,21 @@ function showActionToast(id, labelText, buttons) {
   const existing = document.getElementById(id);
   if (existing) existing.remove();
 
+  // Le décalage bas dépend du contexte : au-dessus du player en plein écran
+  // il n'y a pas de barre de navigation à dégager, alors que sur les écrans
+  // normaux si (~80 px). Le 80 px fixe d'avant posait donc le toast à 26 px
+  // sous les boutons de l'écran de fin — il ressemblait à un bloc de la mise
+  // en page, pas à une notification flottante. env(safe-area-inset-bottom)
+  // évite en plus de passer sous la barre d'accueil iPhone.
+  const playerOpen = document.getElementById('player-screen').classList.contains('open');
+  const bottomOffset = playerOpen ? 24 : 80;
+
   const toast = document.createElement('div');
   toast.id = id;
   toast.style.cssText = [
-    'position:fixed', 'bottom:80px', 'left:50%', 'transform:translateX(-50%)',
+    'position:fixed',
+    'bottom:calc(env(safe-area-inset-bottom, 0px) + ' + bottomOffset + 'px)',
+    'left:50%', 'transform:translateX(-50%)',
     'background:var(--color-surface-2)', 'border:1px solid var(--color-border)',
     'border-radius:16px', 'padding:.85rem 1.1rem', 'z-index:9999',
     'display:flex', 'flex-direction:column', 'align-items:center', 'gap:.55rem',
@@ -1391,13 +1408,27 @@ async function blockedByWifiOnly() {
   return true;
 }
 
-async function toggleOfflineCache(btn, filename) {
+// Résout la voix à CHAQUE action plutôt qu'au rendu de la carte : changer de
+// voix dans les Réglages ne re-rend pas la liste des séances, donc toute
+// valeur figée au rendu devient fausse dès ce changement.
+function offlineTargetFor(btn) {
+  const fem = btn.dataset.fileFem;
+  const voice = (getSavedVoice() === 'feminine' && fem) ? 'feminine' : 'masculine';
+  return { voice, filename: voice === 'feminine' ? fem : btn.dataset.fileMasc };
+}
+
+function offlineUrlFor(btn) {
+  const { voice, filename } = offlineTargetFor(btn);
+  return AUDIO_BASE_URL + voiceFolder(voice) + '/' + encodeURIComponent(filename);
+}
+
+async function toggleOfflineCache(btn) {
   if (!('caches' in window)) { alert('Cache non disponible sur ce navigateur.'); return; }
   if (!btn.classList.contains('cached') && await blockedByWifiOnly()) return;
   btn.classList.add('loading');
   try {
     const cache = await caches.open(AUDIO_CACHE);
-    const url = AUDIO_BASE_URL + voiceFolder(btn.dataset.voice) + '/' + encodeURIComponent(filename);
+    const url = offlineUrlFor(btn);
     const existing = await cache.match(url);
     if (existing) {
       await cache.delete(url);
@@ -1527,12 +1558,13 @@ async function restoreOfflineButtons() {
   if (!('caches' in window)) return;
   try {
     const cache = await caches.open(AUDIO_CACHE);
-    const btns = Array.from(document.querySelectorAll('.btn-offline[data-filename]'));
+    const btns = Array.from(document.querySelectorAll('.btn-offline[data-file-masc]'));
     await Promise.all(btns.map(async btn => {
-      const fn = btn.dataset.filename;
-      if (!fn) return;
-      const match = await cache.match(AUDIO_BASE_URL + voiceFolder(btn.dataset.voice) + '/' + encodeURIComponent(fn));
-      if (match) { btn.classList.add('cached'); btn.textContent = '✓'; }
+      const match = await cache.match(offlineUrlFor(btn));
+      // toggle plutôt qu'add : après un changement de voix, un bouton marqué ✓
+      // pour la voix précédente doit repasser en ⬇ si l'autre n'est pas en cache.
+      btn.classList.toggle('cached', !!match);
+      btn.textContent = match ? '✓' : '⬇';
     }));
   } catch(e) { console.warn('[Serein cache]', e); }
 }
