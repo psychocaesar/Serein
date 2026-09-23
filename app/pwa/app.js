@@ -4580,9 +4580,12 @@ async function validerDon() {
     try {
       resultat = (await Stripe.presentPaymentSheet()).paymentResult;
     } finally {
-      // Voir initialiserDons : l'événement du plugin arrive aussi, en plus de
-      // cette promesse. Ce délai évite de traiter deux fois le même paiement.
-      setTimeout(() => { donPresentationActive = false; }, 3000);
+      // Voir initialiserDons : le plugin émet son événement AVANT de résoudre
+      // cette promesse (iOS comme Android), il est donc déjà écarté ici.
+      // Remise à false immédiate, surtout pas différée : un délai (3 s,
+      // première version) débordait sur la feuille suivante quand on la
+      // rouvrait vite, et son paiement était alors confirmé deux fois.
+      donPresentationActive = false;
     }
     traiterResultatDon(resultat, type, demande);
   } catch (e) {

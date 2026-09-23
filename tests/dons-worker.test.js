@@ -100,7 +100,9 @@ test('don ponctuel : client créé, paiement idempotent, seul le secret du paiem
     const params = new URLSearchParams(pi.corps);
     assert.strictEqual(params.get('amount'), '500');
     assert.strictEqual(params.get('currency'), 'eur');
-    assert.strictEqual(params.get('automatic_payment_methods[enabled]'), 'true');
+    assert.strictEqual(params.get('payment_method_types[0]'), 'card', 'carte uniquement (Apple Pay et Google Pay inclus)');
+    assert.strictEqual(params.has('payment_method_types[1]'), false, 'ni Link, ni MB WAY, ni autre moyen');
+    assert.strictEqual(params.has('automatic_payment_methods[enabled]'), false);
     assert.strictEqual(params.get('metadata[type_don]'), 'ponctuel');
     assert.strictEqual(params.get('customer'), 'cus_nouveau');
     assert.strictEqual(pi.headers['Idempotency-Key'], 'cle-test-12345678-paiement');
@@ -123,6 +125,8 @@ test('don mensuel : abonnement incomplet, secret lu dans confirmation_secret', a
     assert.strictEqual(params.get('items[0][price_data][recurring][interval]'), 'month');
     assert.strictEqual(params.get('payment_behavior'), 'default_incomplete');
     assert.strictEqual(params.get('payment_settings[save_default_payment_method]'), 'on_subscription');
+    assert.strictEqual(params.get('payment_settings[payment_method_types][0]'), 'card');
+    assert.strictEqual(params.has('payment_settings[payment_method_types][1]'), false);
     assert.strictEqual(params.get('expand[0]'), 'latest_invoice.confirmation_secret');
   } finally { faux.restaurer(); }
 });
