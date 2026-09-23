@@ -4,13 +4,15 @@ compatibility_date = "2026-09-01"
 
 [vars]
 # Identifiant du produit Stripe « Don mensuel » (prod_…). Public, pas un secret.
-STRIPE_PRODUCT_ID = "prod_VJSEvUHHU3IoK2"
+# Production depuis le 2026-09-24 (mode test : prod_VJSEvUHHU3IoK2).
+STRIPE_PRODUCT_ID = "prod_VJQxAuPc0hUey4"
 # Origines des apps natives Capacitor : iOS, puis Android.
 ORIGINES_AUTORISEES = "capacitor://localhost,https://localhost"
 
 # La clé secrète Stripe n'a RIEN à faire ici : ce dépôt est public.
 # Utiliser une clé restreinte (droits en écriture : Customers, PaymentIntents,
-# Subscriptions, Ephemeral keys, Prices), puis la déposer avec :
+# Subscriptions, Prices ; lecture : Invoices — pas de clé éphémère, voir
+# CLAUDE.md), puis la déposer avec :
 #   npx wrangler secret put STRIPE_SECRET_KEY
 
 # Limite de 10 demandes par minute et par IP, contre le « card testing »
