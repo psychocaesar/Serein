@@ -4259,7 +4259,7 @@ Envoyé depuis sereinapp.fr`;
 // aucune ne donne accès au compte Stripe.
 const DONS_CONFIG = {
   apiUrl: 'https://serein-dons.serein-dons.workers.dev', // URL du Worker de dons
-  stripePublishableKey: '', // pk_test_… pendant les essais, pk_live_… en production
+  stripePublishableKey: 'pk_test_51UInstRr5DAwL8012kileF1RzcwneJ04Xt2aT21nmNHejE6neff9ZEWArBkLQYfe1Utvlm4INUISOF8neUUFNyxk00eWc5QfCa', // pk_test_… pendant les essais, pk_live_… en production
   portailUrl: 'https://billing.stripe.com/p/login/test_7sY8wRcs43h22Cv2gB6Zy00', // lien de connexion au portail client Stripe (test)
   applePayMerchantId: '',   // ex. merchant.fr.sereinapp.app, une fois créé chez Apple
   googlePayTest: true,      // à passer à false en production
