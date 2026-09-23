@@ -4478,7 +4478,7 @@ function traiterResultatDon(resultat, type, demande) {
     markDonInvitationSeen();
     const montant = formatEuros(demande.montant);
     const texte = type === 'mensuel'
-      ? `Ton don de ${montant} par mois soutient Serein. Tu vas recevoir une confirmation par e-mail, et tu peux l’arrêter à tout moment depuis cet écran.`
+      ? `Ton don de ${montant} par mois soutient Serein. Tu vas recevoir une confirmation par e-mail, et tu peux l’arrêter à tout moment depuis Réglages › Soutenir le projet.`
       : `Ton don de ${montant} soutient Serein. Tu vas recevoir une confirmation par e-mail.`;
     document.getElementById('don-merci-texte').textContent = texte;
     document.getElementById('don-formulaire').hidden = true;
