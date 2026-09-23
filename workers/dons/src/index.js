@@ -5,8 +5,8 @@
 // secrète Stripe ne peut pas vivre dans l'app — elle est déposée ici via
 // `npx wrangler secret put STRIPE_SECRET_KEY`, jamais dans ce dépôt (public).
 //
-// Aucun webhook : Stripe confirme le paiement côté app, et les reçus fiscaux
-// sont émis une fois par an à partir de l'export Stripe (voir CerfApp).
+// Aucun webhook : Stripe confirme le paiement côté app et envoie lui-même la
+// confirmation par e-mail au donateur.
 
 const STRIPE_API = 'https://api.stripe.com/v1';
 
@@ -29,17 +29,12 @@ export const MONTANT_MAX = 100000;
 const MESSAGE_GENERIQUE = 'Le don n’a pas pu être préparé. Réessaie dans un instant.';
 const RE_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const RE_CLE = /^[A-Za-z0-9_-]{8,100}$/;
-const RE_CODE_POSTAL = /^[A-Za-z0-9 -]{2,10}$/;
-const RE_PAYS = /^[A-Z]{2}$/;
-
-function champTexte(valeur, max) {
-  if (typeof valeur !== 'string') return null;
-  const t = valeur.trim();
-  return t.length > 0 && t.length <= max ? t : null;
-}
 
 // Validation côté serveur : l'app valide aussi, mais seul ce contrôle compte
 // — n'importe qui peut appeler ce point d'accès directement.
+// Seul l'e-mail est accepté comme donnée personnelle : pas de reçu fiscal,
+// l'association n'étant pas reconnue d'intérêt général (en émettre serait
+// illégal). Tout autre champ envoyé est ignoré et n'atteint jamais Stripe.
 export function validerDemande(body) {
   if (!body || typeof body !== 'object') return { erreur: 'Requête invalide.' };
 
@@ -55,20 +50,7 @@ export function validerDemande(body) {
     return { erreur: 'Requête invalide.' };
   }
 
-  let recu = null;
-  if (body.recuFiscal === true) {
-    const nom = champTexte(body.nom, 100);
-    const adresse = champTexte(body.adresse, 200);
-    const codePostal = champTexte(body.codePostal, 10);
-    const ville = champTexte(body.ville, 100);
-    const pays = body.pays === undefined ? 'FR' : body.pays;
-    if (!nom || !adresse || !codePostal || !RE_CODE_POSTAL.test(codePostal) || !ville || !RE_PAYS.test(pays)) {
-      return { erreur: 'Les informations du reçu fiscal sont incomplètes.' };
-    }
-    recu = { nom, adresse, codePostal, ville, pays };
-  }
-
-  return { donnees: { montant, email, recu, cleIdempotence: body.cleIdempotence } };
+  return { donnees: { montant, email, cleIdempotence: body.cleIdempotence } };
 }
 
 // Encode un objet en corps de formulaire au format attendu par Stripe
@@ -119,40 +101,21 @@ async function appelStripe(env, methode, chemin, params, { idempotence, version 
 }
 
 // Réutilise le client Stripe de cette adresse s'il existe : le portail de
-// gestion des dons mensuels retrouve le donateur par son e-mail.
-// Nom et adresse ne sont posés QUE sur un client nouvellement créé : ce point
-// d'accès n'est pas authentifié, donc connaître l'e-mail de quelqu'un ne doit
-// pas permettre de réécrire ses données. Les informations du reçu voyagent
-// de toute façon avec chaque don (metadataDon).
+// gestion des dons mensuels retrouve le donateur par son e-mail. Un client
+// existant n'est jamais modifié : ce point d'accès n'est pas authentifié.
 async function clientPour(env, d) {
   const liste = await appelStripe(env, 'GET', '/customers', { email: d.email, limit: 1 });
   if (liste.data && liste.data.length > 0) return liste.data[0].id;
 
-  const params = { email: d.email, metadata: { source: 'app_serein' } };
-  if (d.recu) {
-    params.name = d.recu.nom;
-    params.address = {
-      line1: d.recu.adresse, postal_code: d.recu.codePostal, city: d.recu.ville, country: d.recu.pays,
-    };
-  }
-  const client = await appelStripe(env, 'POST', '/customers', params, { idempotence: `${d.cleIdempotence}-client` });
+  const client = await appelStripe(env, 'POST', '/customers', {
+    email: d.email,
+    metadata: { source: 'app_serein' },
+  }, { idempotence: `${d.cleIdempotence}-client` });
   return client.id;
 }
 
-// Les informations du reçu fiscal sont attachées à CHAQUE don : c'est ce que
-// l'export annuel vers CerfApp relit, don par don.
-function metadataDon(type, d) {
-  const m = { type_don: type, recu_fiscal: d.recu ? 'oui' : 'non', source: 'app_serein' };
-  if (d.recu) {
-    Object.assign(m, {
-      recu_nom: d.recu.nom,
-      recu_adresse: d.recu.adresse,
-      recu_code_postal: d.recu.codePostal,
-      recu_ville: d.recu.ville,
-      recu_pays: d.recu.pays,
-    });
-  }
-  return m;
+function metadataDon(type) {
+  return { type_don: type, source: 'app_serein' };
 }
 
 async function cleEphemere(env, clientId, d) {
@@ -173,7 +136,7 @@ export async function preparerPonctuel(env, d) {
     receipt_email: d.email,
     description: 'Don ponctuel à Sereinapp Méditation',
     automatic_payment_methods: { enabled: true },
-    metadata: metadataDon('ponctuel', d),
+    metadata: metadataDon('ponctuel'),
   }, { idempotence: `${d.cleIdempotence}-paiement` });
   return { clientSecret: paiement.client_secret, clientId, cleEphemere: cle };
 }
@@ -198,7 +161,7 @@ export async function preparerMensuel(env, d) {
     payment_behavior: 'default_incomplete',
     payment_settings: { save_default_payment_method: 'on_subscription' },
     description: 'Don mensuel à Sereinapp Méditation',
-    metadata: metadataDon('mensuel', d),
+    metadata: metadataDon('mensuel'),
     expand: ['latest_invoice.confirmation_secret'],
   }, { idempotence: `${d.cleIdempotence}-abonnement` });
 

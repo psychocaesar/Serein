@@ -674,10 +674,6 @@
     /* 1rem minimum : en dessous, iOS zoome au focus du champ (voir .explore-search). */
     .don-champ input { display: block; width: 100%; box-sizing: border-box; margin-top: .35rem; padding: .8rem .9rem; border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-surface); color: var(--color-text); font-size: 1rem; font-family: inherit; }
     .don-champ input:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
-    .don-recu { display: flex; align-items: center; gap: .6rem; margin: .2rem 0 .85rem; font-size: .9rem; color: var(--color-text); cursor: pointer; }
-    .don-recu input { width: 20px; height: 20px; accent-color: var(--color-primary); }
-    .don-recu-aide { font-size: .78rem; color: var(--color-muted); margin: -.35rem 0 .85rem; }
-    .don-ligne { display: grid; grid-template-columns: 7rem 1fr; gap: .6rem; }
     .don-erreur { text-align: center; font-size: .85rem; color: #e8a0a0; min-height: 1.2em; margin: .2rem 0 .6rem; }
     [data-theme="light"] .don-erreur { color: #a3322b; }
     .don-valider { width: 100%; }
@@ -1376,16 +1372,6 @@
       <label class="don-champ">Ton e-mail, pour la confirmation du don
         <input type="email" id="don-email" autocomplete="email" placeholder="toi@exemple.fr">
       </label>
-      <label class="don-recu"><input type="checkbox" id="don-recu" onchange="toggleDonRecu(this.checked)"> Je souhaite un reçu fiscal</label>
-      <div id="don-recu-champs" hidden>
-        <p class="don-recu-aide">Il t'est envoyé en début d'année suivante, pour l'ensemble de tes dons.</p>
-        <label class="don-champ">Nom et prénom <input type="text" id="don-nom" autocomplete="name"></label>
-        <label class="don-champ">Adresse <input type="text" id="don-adresse" autocomplete="street-address"></label>
-        <div class="don-ligne">
-          <label class="don-champ">Code postal <input type="text" id="don-cp" autocomplete="postal-code" inputmode="numeric"></label>
-          <label class="don-champ">Ville <input type="text" id="don-ville" autocomplete="address-level2"></label>
-        </div>
-      </div>
       <p class="don-erreur" id="don-erreur" role="alert"></p>
       <button class="btn btn-primary don-valider" id="don-valider" type="button" onclick="validerDon()">Donner</button>
       <p class="don-securite">Paiement sécurisé par Stripe. Serein ne voit jamais tes coordonnées bancaires.</p>

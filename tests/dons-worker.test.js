@@ -50,11 +50,11 @@ function requete(chemin, corps, { origine = ORIGINE_IOS, methode = 'POST' } = {}
 }
 
 // ── Validation ──
-test('validation : un don standard passe, sans reçu fiscal par défaut', () => {
+test('validation : un don standard passe', () => {
   const { erreur, donnees } = W.validerDemande(demandeValide());
   assert.strictEqual(erreur, undefined);
   assert.strictEqual(donnees.montant, 500);
-  assert.strictEqual(donnees.recu, null);
+  assert.strictEqual(donnees.email, 'donateur@exemple.fr');
 });
 
 test('validation : bornes du montant (3 € à 1 000 €, en centimes entiers)', () => {
@@ -70,17 +70,6 @@ test('validation : e-mail et clé d\'idempotence obligatoires', () => {
   assert.ok(W.validerDemande(demandeValide({ email: 'pas-un-email' })).erreur);
   assert.ok(W.validerDemande(demandeValide({ cleIdempotence: 'court' })).erreur);
   assert.ok(W.validerDemande(demandeValide({ cleIdempotence: 'avec espace invalide' })).erreur);
-});
-
-test('validation : reçu fiscal demandé → nom, adresse, code postal et ville exigés', () => {
-  const incomplet = demandeValide({ recuFiscal: true, nom: 'Camille Martin', adresse: '1 rue des Lilas', codePostal: '75011' });
-  assert.ok(W.validerDemande(incomplet).erreur, 'ville manquante refusée');
-
-  const complet = { ...incomplet, ville: 'Paris' };
-  const { erreur, donnees } = W.validerDemande(complet);
-  assert.strictEqual(erreur, undefined);
-  assert.strictEqual(donnees.recu.pays, 'FR', 'pays par défaut : France');
-  assert.strictEqual(donnees.recu.ville, 'Paris');
 });
 
 // ── Encodage des requêtes Stripe ──
@@ -116,7 +105,7 @@ test('don ponctuel : client créé, clé éphémère en version SDK mobile, paie
     assert.strictEqual(params.get('amount'), '500');
     assert.strictEqual(params.get('currency'), 'eur');
     assert.strictEqual(params.get('automatic_payment_methods[enabled]'), 'true');
-    assert.strictEqual(params.get('metadata[recu_fiscal]'), 'non');
+    assert.strictEqual(params.get('metadata[type_don]'), 'ponctuel');
     assert.strictEqual(pi.headers['Idempotency-Key'], 'cle-test-12345678-paiement');
     assert.strictEqual(pi.headers['Stripe-Version'], W.STRIPE_VERSION_SERVEUR);
     assert.strictEqual(pi.headers.Authorization, `Bearer ${CLE_SECRETE}`);
@@ -141,25 +130,28 @@ test('don mensuel : abonnement incomplet, secret lu dans confirmation_secret', a
   } finally { faux.restaurer(); }
 });
 
-test('reçu fiscal : les informations voyagent avec le don lui-même', async () => {
+test('collecte minimale : seul l\'e-mail atteint Stripe, même si on envoie plus', async () => {
+  // Pas de reçu fiscal (association non reconnue d'intérêt général) : aucune
+  // raison de transmettre un nom ou une adresse. Un client modifié ou
+  // malveillant qui en envoie quand même ne doit rien faire passer.
   const faux = installerFauxStripe();
   try {
-    const demande = demandeValide({ recuFiscal: true, nom: 'Camille Martin', adresse: '1 rue des Lilas', codePostal: '75011', ville: 'Paris' });
+    const demande = demandeValide({ recuFiscal: true, nom: 'Camille Martin', adresse: '1 rue des Lilas', ville: 'Paris' });
     await W.default.fetch(requete('/don/ponctuel', demande), ENV);
-    const params = new URLSearchParams(faux.appels.find(a => a.chemin === '/v1/payment_intents').corps);
-    assert.strictEqual(params.get('metadata[recu_fiscal]'), 'oui');
-    assert.strictEqual(params.get('metadata[recu_nom]'), 'Camille Martin');
-    assert.strictEqual(params.get('metadata[recu_ville]'), 'Paris');
+    const tout = faux.appels.map(a => decodeURIComponent(a.corps + a.recherche)).join(' ');
+    assert.ok(!tout.includes('Camille Martin'), 'le nom ne doit jamais être transmis');
+    assert.ok(!tout.includes('rue des Lilas'), 'l\'adresse ne doit jamais être transmise');
+    assert.ok(!tout.includes('recu_'), 'aucune trace de reçu fiscal');
+    assert.ok(tout.includes('donateur@exemple.fr'), 'l\'e-mail, lui, est bien transmis');
   } finally { faux.restaurer(); }
 });
 
-test('client existant : réutilisé, et ses données ne sont jamais réécrites', async () => {
+test('client existant : réutilisé, jamais modifié', async () => {
   // Le point d'accès n'est pas authentifié : connaître l'e-mail de quelqu'un
-  // ne doit pas permettre de modifier son nom ou son adresse chez Stripe.
+  // ne doit pas permettre de toucher à sa fiche chez Stripe.
   const faux = installerFauxStripe({ clientExistant: true });
   try {
-    const demande = demandeValide({ recuFiscal: true, nom: 'Usurpateur', adresse: 'x', codePostal: '00000', ville: 'y' });
-    const rep = await W.default.fetch(requete('/don/ponctuel', demande), ENV);
+    const rep = await W.default.fetch(requete('/don/ponctuel', demandeValide()), ENV);
     assert.strictEqual((await rep.json()).clientId, 'cus_existant');
     const ecritures = faux.appels.filter(a => a.chemin.startsWith('/v1/customers') && a.methode === 'POST');
     assert.strictEqual(ecritures.length, 0, 'aucune écriture sur un client existant');

@@ -4405,10 +4405,6 @@ function onDonAutreMontant(valeur) {
   renderDon();
 }
 
-function toggleDonRecu(coche) {
-  document.getElementById('don-recu-champs').hidden = !coche;
-}
-
 // Demande un paiement au serveur de dons, puis ouvre la feuille de paiement
 // native Stripe (Apple Pay sur iOS, Google Pay sur Android, carte partout).
 async function validerDon() {
@@ -4424,18 +4420,9 @@ async function validerDon() {
   }
 
   const type = donType;
-  const recuFiscal = document.getElementById('don-recu').checked;
-  const demande = { montant: donMontant, email, recuFiscal, cleIdempotence: nouvelleCleIdempotence() };
-  if (recuFiscal) {
-    demande.nom = document.getElementById('don-nom').value.trim();
-    demande.adresse = document.getElementById('don-adresse').value.trim();
-    demande.codePostal = document.getElementById('don-cp').value.trim();
-    demande.ville = document.getElementById('don-ville').value.trim();
-    if (!demande.nom || !demande.adresse || !demande.codePostal || !demande.ville) {
-      erreur.textContent = 'Complète ton nom et ton adresse pour recevoir le reçu fiscal.';
-      return;
-    }
-  }
+  // Pas de reçu fiscal : l'association n'est pas reconnue d'intérêt général,
+  // en émettre serait illégal. D'où aucune donnée au-delà de l'e-mail.
+  const demande = { montant: donMontant, email, cleIdempotence: nouvelleCleIdempotence() };
 
   const btn = document.getElementById('don-valider');
   btn.disabled = true;
@@ -4490,10 +4477,9 @@ function traiterResultatDon(resultat, type, demande) {
     haptic('success');
     markDonInvitationSeen();
     const montant = formatEuros(demande.montant);
-    let texte = type === 'mensuel'
+    const texte = type === 'mensuel'
       ? `Ton don de ${montant} par mois soutient Serein. Tu vas recevoir une confirmation par e-mail, et tu peux l’arrêter à tout moment depuis cet écran.`
       : `Ton don de ${montant} soutient Serein. Tu vas recevoir une confirmation par e-mail.`;
-    if (demande.recuFiscal) texte += ' Ton reçu fiscal te sera envoyé en début d’année prochaine.';
     document.getElementById('don-merci-texte').textContent = texte;
     document.getElementById('don-formulaire').hidden = true;
     document.getElementById('don-merci').hidden = false;
