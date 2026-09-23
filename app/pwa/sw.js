@@ -119,6 +119,22 @@ self.addEventListener('fetch', event => {
   // Le reste : uniquement les ressources de l'app elle-même.
   if (url.origin !== self.location.origin) return;
 
+  // App native Android (https://localhost) et dev local : le « réseau », ce sont
+  // les fichiers embarqués, toujours disponibles. On les lit en premier, sinon
+  // le premier lancement après une mise à jour de l'APK sert l'ancien app.js
+  // resté en cache (tant que CACHE_VERSION ne change pas, rien ne le purge).
+  if (self.location.hostname === 'localhost') {
+    event.respondWith(
+      caches.open(STATIC_CACHE).then(cache =>
+        fetch(event.request).then(response => {
+          if (response && response.ok) cache.put(event.request, response.clone());
+          return response;
+        }).catch(() => cache.match(event.request))
+      )
+    );
+    return;
+  }
+
   event.respondWith(
     caches.open(STATIC_CACHE).then(cache =>
       cache.match(event.request).then(cached => {
