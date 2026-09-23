@@ -142,7 +142,7 @@
     .lead { font-size: 1.05rem; color: var(--color-muted); line-height: 1.6; max-width: 55ch; margin-bottom: 1.5rem; }
 
     /* BUTTONS */
-    .btn { display: inline-flex; align-items: center; justify-content: center; padding: .85rem 1.4rem; border-radius: 999px; border: none; font-size: 1rem; cursor: pointer; transition: opacity .2s; text-decoration: none; font-weight: 600; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; padding: .85rem 1.4rem; border-radius: 999px; border: none; font-size: 1rem; cursor: pointer; transition: opacity .2s; text-decoration: none; font-weight: 600; font-family: inherit; }
     .btn:hover { opacity: .88; }
     .btn-primary { background: var(--gradient); color: #0d1b15; font-weight: 700; }
     [data-theme="light"] .btn-primary { color: #fff; }
@@ -1381,7 +1381,7 @@
       <div class="don-merci-icone" aria-hidden="true">🌿</div>
       <h2 class="don-titre">Merci</h2>
       <p class="don-intro" id="don-merci-texte"></p>
-      <button class="btn btn-primary don-valider" type="button" onclick="closeDonOverlay();releaseOverlay('don')">Revenir à l'app</button>
+      <button class="btn btn-primary don-valider" type="button" onclick="closeDonOverlay();releaseOverlay('don')">Revenir à l’app</button>
     </div>
   </div>
 </div>
