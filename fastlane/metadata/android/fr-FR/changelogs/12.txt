@@ -1,7 +1,9 @@
-Nouveau — Programmes jour par jour : un parcours guidé sur plusieurs jours, une séance à la fois, à ton rythme et sans pression.
+Nouveau — Programmes jour par jour : une séance à la fois, à ton rythme.
 
-Nouveau — Minuterie d'extinction des sons d'ambiance : ils s'arrêtent en douceur après 15, 30 ou 60 minutes, parfait pour s'endormir.
+Nouveau — Ta pratique : tes jours de pratique du mois et tes dernières séances, à relancer d'un geste.
 
-Le bouton retour Android suit enfin ta navigation au lieu de quitter l'app.
+Nouveau — Fais un don ponctuel ou mensuel dans l'app, avec Google Pay ou ta carte.
 
-Accueil réorganisé pour aller à l'essentiel, application nettement allégée, et corrections diverses.
+Nouveau — Les sons d'ambiance s'éteignent en douceur après 15, 30 ou 60 minutes.
+
+Le bouton retour suit ta navigation au lieu de quitter l'app. Accueil et réglages épurés, app allégée, corrections diverses.

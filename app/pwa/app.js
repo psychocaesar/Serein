@@ -1570,12 +1570,13 @@ async function restoreOfflineButtons() {
 }
 
 // ── STATS ──
-function isYesterday(dateStr) {
-  if (!dateStr) return false;
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  return dateStr === yesterday.toLocaleDateString('fr-CA');
-}
+// Des jours de pratique plutôt qu'une série de jours d'affilée : un jour
+// manqué ne fait rien perdre. Une série qui retombe à zéro culpabilise, et
+// c'est souvent le jour où elle casse qu'on abandonne — l'inverse de
+// l'auto-compassion que les séances enseignent. Choix de César (sept. 2026).
+const JOURS_CONSERVES = 62; // de quoi couvrir le mois en cours et le précédent
+
+function dateLocale(d) { return d.toLocaleDateString('fr-CA'); } // AAAA-MM-JJ
 
 function getStats() {
   try {
@@ -1588,25 +1589,44 @@ function loadStats() {
   const hasSession = (s.sessions || 0) > 0;
   const welcomeBlock = document.getElementById('welcome-block');
   if (welcomeBlock) welcomeBlock.style.display = hasSession ? 'none' : 'block';
-  document.getElementById('stat-sessions').textContent = s.sessions || 0;
-  document.getElementById('stat-time').textContent = (s.minutes || 0) + ' min';
-  document.getElementById('stat-streak').textContent = s.streak || 0;
+  const pratiqueBtn = document.getElementById('pratique-btn');
+  if (pratiqueBtn) pratiqueBtn.hidden = !hasSession;
+}
+
+// Point d'entrée commun des séances guidées, du minuteur et de la respiration.
+function enregistrerPratique(minutes) {
+  const s = getStats();
+  s.sessions = (s.sessions || 0) + 1;
+  s.minutes = (s.minutes || 0) + (minutes || 0);
+  const today = dateLocale(new Date());
+  const jours = Array.isArray(s.jours) ? s.jours : [];
+  if (!jours.includes(today)) jours.push(today);
+  s.jours = jours.slice(-JOURS_CONSERVES);
+  s.lastDate = today;
+  localStorage.setItem('serein-stats', JSON.stringify(s));
+  mirrorToNative('serein-stats');
+  loadStats();
+}
+
+function joursDePratiqueCeMois() {
+  const mois = dateLocale(new Date()).slice(0, 7);
+  const s = getStats();
+  const jours = new Set((Array.isArray(s.jours) ? s.jours : []).filter(j => j.startsWith(mois)));
+  if (s.lastDate && s.lastDate.startsWith(mois)) jours.add(s.lastDate);
+  // Séances terminées avant l'apparition de s.jours : l'historique les date.
+  try {
+    JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]').forEach(e => {
+      const j = dateLocale(new Date(e.ts));
+      if (j.startsWith(mois)) jours.add(j);
+    });
+  } catch(e) {}
+  return jours.size;
 }
 
 function recordCompletion() {
   try {
-    const s = getStats();
-    s.sessions = (s.sessions || 0) + 1;
     const dur = currentSession ? (parseFloat(currentSession.duration) || Math.round((audio.duration || 0) / 60)) : 0;
-    s.minutes = (s.minutes || 0) + dur;
-    const today = new Date().toLocaleDateString('fr-CA');
-    if (s.lastDate !== today) {
-      s.streak = isYesterday(s.lastDate) ? (s.streak || 0) + 1 : 1;
-    }
-    s.lastDate = today;
-    localStorage.setItem('serein-stats', JSON.stringify(s));
-    mirrorToNative('serein-stats');
-    loadStats();
+    enregistrerPratique(dur);
     // Historique partagé : alimente les coches « déjà écoutée », la progression
     // des parcours et les recommandations du guide.
     if (currentSession && currentSession.id !== 'intro' && currentSession.id !== 'observation') {
@@ -1616,6 +1636,126 @@ function recordCompletion() {
       incrementDonCounter();
     }
   } catch(e) { console.warn('[Serein stats]', e); }
+}
+
+// ── TA PRATIQUE ──
+// Ouverte depuis le bouton rond de l'accueil : les chiffres ne s'affichent
+// que si on vient les chercher. L'historique permet de relancer une séance.
+const PRATIQUE_HISTORIQUE_MAX = 10;
+
+function findSessionByTitle(title) {
+  if (!CATALOG) return null;
+  for (const group of CATALOG.groups) {
+    const sessions = group.subgroups
+      ? group.subgroups.flatMap(sub => sub.sessions || [])
+      : (group.sessions || []);
+    const session = sessions.find(s => s.title === title);
+    if (session) return { session, group };
+  }
+  return null;
+}
+
+function formatDureePratique(minutes) {
+  if (minutes < 60) return minutes + ' min';
+  const m = minutes % 60;
+  return Math.floor(minutes / 60) + ' h' + (m ? ' ' + String(m).padStart(2, '0') : '');
+}
+
+function formatJourRelatif(ts) {
+  const jour = dateLocale(new Date(ts));
+  const maintenant = new Date();
+  if (jour === dateLocale(maintenant)) return 'Aujourd’hui';
+  const hier = new Date(maintenant);
+  hier.setDate(hier.getDate() - 1);
+  if (jour === dateLocale(hier)) return 'Hier';
+  return new Date(ts).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
+}
+
+// Les séances distinctes les plus récentes (une séance réécoutée remonte).
+function dernieresSeances() {
+  let all = [];
+  try { all = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); } catch(e) {}
+  const vues = new Set();
+  const out = [];
+  for (let i = all.length - 1; i >= 0 && out.length < PRATIQUE_HISTORIQUE_MAX; i--) {
+    const e = all[i];
+    if (!e || !e.title || vues.has(e.title)) continue;
+    vues.add(e.title);
+    out.push(e);
+  }
+  return out;
+}
+
+function renderPratique() {
+  const s = getStats();
+  document.getElementById('stat-jours-mois').textContent = joursDePratiqueCeMois();
+  document.getElementById('stat-sessions').textContent = s.sessions || 0;
+  document.getElementById('stat-time').textContent = formatDureePratique(s.minutes || 0);
+
+  const liste = document.getElementById('pratique-historique');
+  liste.textContent = '';
+  const entrees = dernieresSeances();
+  document.getElementById('pratique-historique-vide').hidden = entrees.length > 0;
+  entrees.forEach(e => {
+    // Une séance retirée du catalogue reste listée, mais sans relance.
+    const trouve = findSessionByTitle(e.title);
+    const ligne = document.createElement(trouve ? 'button' : 'div');
+    ligne.className = 'pratique-seance';
+    const info = document.createElement('span');
+    info.className = 'pratique-seance-info';
+    const titre = document.createElement('span');
+    titre.className = 'pratique-seance-titre';
+    titre.textContent = e.title;
+    const meta = document.createElement('span');
+    meta.className = 'pratique-seance-meta';
+    meta.textContent = formatJourRelatif(e.ts) + (trouve ? ' · ' + trouve.group.name : '');
+    info.appendChild(titre);
+    info.appendChild(meta);
+    ligne.appendChild(info);
+    if (trouve) {
+      ligne.type = 'button';
+      ligne.setAttribute('aria-label', 'Relancer ' + e.title);
+      const play = document.createElement('span');
+      play.className = 'pratique-seance-play';
+      play.setAttribute('aria-hidden', 'true');
+      play.innerHTML = '<svg class="icon-svg" viewBox="0 0 24 24"><polygon points="7 4 20 12 7 20 7 4"/></svg>';
+      ligne.appendChild(play);
+      ligne.addEventListener('click', () => relancerDepuisPratique(trouve));
+    }
+    const li = document.createElement('li');
+    li.appendChild(ligne);
+    liste.appendChild(li);
+  });
+}
+
+function openPratique() {
+  renderPratique();
+  const ov = document.getElementById('pratique-overlay');
+  ov.classList.add('open');
+  ov.scrollTop = 0;
+  document.body.style.overflow = 'hidden';
+  registerOverlay('pratique', closePratiqueOverlay);
+}
+
+function closePratiqueOverlay() {
+  document.getElementById('pratique-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// Même passage de relais que la sheet de voix → player : l'entrée
+// d'historique de « Ta pratique » sert à ce qui s'ouvre ensuite.
+function relancerDepuisPratique({ session: s, group }) {
+  closePratiqueOverlay();
+  handOverOverlay('pratique');
+  openVoiceOverlay(s.id, s.title, group.name, s.duration + ' min', s.file, s.fileFem || false, group.artwork);
+}
+
+// ── TIROIRS DES RÉGLAGES ──
+// Hors ligne et Avancé : repliés par défaut, pour un écran calme.
+function toggleTiroir(btn) {
+  const ouvert = btn.getAttribute('aria-expanded') === 'true';
+  btn.setAttribute('aria-expanded', String(!ouvert));
+  document.getElementById(btn.getAttribute('aria-controls')).hidden = ouvert;
 }
 
 // ── INVITATION AU DON ──
@@ -3851,22 +3991,12 @@ let breathCounted = false; // garde-fou : 1 seul incrément de stats par run
 const BREATH_RING_CIRC = 2 * Math.PI * 100; // r=100 sur le cercle SVG
 const BREATH_MIN_CYCLES = 4; // en deçà, trop court pour compter comme une séance
 
-// Compte la respiration dans les stats (séances/minutes/série), comme le
+// Compte la respiration dans les stats (séances/minutes/jours), comme le
 // minuteur libre (recordTimerCompletion). Pas d'historique ni de compteur de
 // don : ce n'est pas une séance du catalogue.
 function recordBreathCompletion(minutes) {
   try {
-    const s = getStats();
-    s.sessions = (s.sessions || 0) + 1;
-    s.minutes = (s.minutes || 0) + (minutes || 0);
-    const today = new Date().toLocaleDateString('fr-CA');
-    if (s.lastDate !== today) {
-      s.streak = isYesterday(s.lastDate) ? (s.streak || 0) + 1 : 1;
-      s.lastDate = today;
-    }
-    localStorage.setItem('serein-stats', JSON.stringify(s));
-    mirrorToNative('serein-stats');
-    loadStats();
+    enregistrerPratique(minutes);
   } catch(e) { console.warn('[Serein stats]', e); }
 }
 
@@ -4160,17 +4290,7 @@ function updateTimerDisplay() {
 
 function recordTimerCompletion() {
   try {
-    const s = getStats();
-    s.sessions = (s.sessions || 0) + 1;
-    s.minutes = (s.minutes || 0) + Math.round(timerTotalSeconds / 60);
-    const today = new Date().toLocaleDateString('fr-CA');
-    if (s.lastDate !== today) {
-      s.streak = isYesterday(s.lastDate) ? (s.streak || 0) + 1 : 1;
-      s.lastDate = today;
-    }
-    localStorage.setItem('serein-stats', JSON.stringify(s));
-    mirrorToNative('serein-stats');
-    loadStats();
+    enregistrerPratique(Math.round(timerTotalSeconds / 60));
   } catch(e) { console.warn('[Serein stats]', e); }
 }
 
@@ -4308,7 +4428,11 @@ function donsDisponibles() {
 
 function appliquerDisponibiliteDons() {
   const carte = document.getElementById('settings-don-card');
-  if (carte) carte.style.display = donsDisponibles() ? '' : 'none';
+  if (carte) {
+    const dispo = donsDisponibles();
+    carte.style.display = dispo ? '' : 'none';
+    carte.parentElement.classList.toggle('sans-don', !dispo);
+  }
   const portail = document.getElementById('don-portail');
   if (portail) portail.hidden = !DONS_CONFIG.portailUrl;
 }
@@ -4476,7 +4600,7 @@ function traiterResultatDon(resultat, type, demande) {
     markDonInvitationSeen();
     const montant = formatEuros(demande.montant);
     const texte = type === 'mensuel'
-      ? `Ton don de ${montant} par mois soutient Serein. Tu vas recevoir une confirmation par e-mail, et tu peux l’arrêter à tout moment depuis Réglages › Soutenir le projet.`
+      ? `Ton don de ${montant} par mois soutient Serein. Tu vas recevoir une confirmation par e-mail, et tu peux l’arrêter à tout moment depuis Réglages › Faire un don.`
       : `Ton don de ${montant} soutient Serein. Tu vas recevoir une confirmation par e-mail.`;
     document.getElementById('don-merci-texte').textContent = texte;
     document.getElementById('don-formulaire').hidden = true;
