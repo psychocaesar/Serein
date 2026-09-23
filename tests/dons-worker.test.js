@@ -88,17 +88,13 @@ test('encodage : clés imbriquées au format Stripe', () => {
 });
 
 // ── Flux complets ──
-test('don ponctuel : client créé, clé éphémère en version SDK mobile, paiement idempotent', async () => {
+test('don ponctuel : client créé, paiement idempotent, seul le secret du paiement revient', async () => {
   const faux = installerFauxStripe();
   try {
     const rep = await W.default.fetch(requete('/don/ponctuel', demandeValide()), ENV);
     assert.strictEqual(rep.status, 200);
     const corps = await rep.json();
-    assert.deepStrictEqual(corps, { clientSecret: 'pi_test_secret', clientId: 'cus_nouveau', cleEphemere: 'ek_test_secret' });
-
-    const ek = faux.appels.find(a => a.chemin === '/v1/ephemeral_keys');
-    assert.strictEqual(ek.headers['Stripe-Version'], W.STRIPE_VERSION_SDK_MOBILE,
-      'la clé éphémère doit être créée dans la version attendue par le SDK mobile');
+    assert.deepStrictEqual(corps, { clientSecret: 'pi_test_secret' });
 
     const pi = faux.appels.find(a => a.chemin === '/v1/payment_intents');
     const params = new URLSearchParams(pi.corps);
@@ -106,6 +102,7 @@ test('don ponctuel : client créé, clé éphémère en version SDK mobile, paie
     assert.strictEqual(params.get('currency'), 'eur');
     assert.strictEqual(params.get('automatic_payment_methods[enabled]'), 'true');
     assert.strictEqual(params.get('metadata[type_don]'), 'ponctuel');
+    assert.strictEqual(params.get('customer'), 'cus_nouveau');
     assert.strictEqual(pi.headers['Idempotency-Key'], 'cle-test-12345678-paiement');
     assert.strictEqual(pi.headers['Stripe-Version'], W.STRIPE_VERSION_SERVEUR);
     assert.strictEqual(pi.headers.Authorization, `Bearer ${CLE_SECRETE}`);
@@ -152,10 +149,26 @@ test('client existant : réutilisé, jamais modifié', async () => {
   const faux = installerFauxStripe({ clientExistant: true });
   try {
     const rep = await W.default.fetch(requete('/don/ponctuel', demandeValide()), ENV);
-    assert.strictEqual((await rep.json()).clientId, 'cus_existant');
+    assert.strictEqual(rep.status, 200);
+    const pi = faux.appels.find(a => a.chemin === '/v1/payment_intents');
+    assert.strictEqual(new URLSearchParams(pi.corps).get('customer'), 'cus_existant');
     const ecritures = faux.appels.filter(a => a.chemin.startsWith('/v1/customers') && a.methode === 'POST');
     assert.strictEqual(ecritures.length, 0, 'aucune écriture sur un client existant');
   } finally { faux.restaurer(); }
+});
+
+test('cartes enregistrées : jamais exposées à l\'app', async () => {
+  // Sans authentification, une clé éphémère ou l'identifiant du client
+  // permettraient à quiconque connaît l'e-mail d'un donateur de voir ses
+  // cartes enregistrées dans la feuille de paiement, et de payer avec.
+  for (const type of ['ponctuel', 'mensuel']) {
+    const faux = installerFauxStripe({ clientExistant: true });
+    try {
+      const rep = await W.default.fetch(requete('/don/' + type, demandeValide()), ENV);
+      assert.deepStrictEqual(Object.keys(await rep.json()), ['clientSecret'], type);
+      assert.ok(!faux.appels.some(a => a.chemin === '/v1/ephemeral_keys'), type + ' : aucune clé éphémère');
+    } finally { faux.restaurer(); }
+  }
 });
 
 // ── Ce qui ne doit jamais arriver ──

@@ -16,11 +16,6 @@ const STRIPE_API = 'https://api.stripe.com/v1';
 // version par défaut du compte Stripe.
 export const STRIPE_VERSION_SERVEUR = '2025-06-30.basil';
 
-// Version attendue par les SDK mobiles Stripe embarqués par
-// @capacitor-community/stripe (stripe-ios 26.x) : une clé éphémère créée avec
-// une autre version est rejetée par la feuille de paiement.
-export const STRIPE_VERSION_SDK_MOBILE = '2020-08-27';
-
 // En centimes. Le minimum limite le poids des frais fixes Stripe (0,25 €) et
 // décourage le « card testing » (tests de cartes volées par petits montants).
 export const MONTANT_MIN = 300;
@@ -70,10 +65,10 @@ export function encoderFormulaire(objet) {
   return params.toString();
 }
 
-async function appelStripe(env, methode, chemin, params, { idempotence, version } = {}) {
+async function appelStripe(env, methode, chemin, params, { idempotence } = {}) {
   const headers = {
     Authorization: `Bearer ${env.STRIPE_SECRET_KEY}`,
-    'Stripe-Version': version || STRIPE_VERSION_SERVEUR,
+    'Stripe-Version': STRIPE_VERSION_SERVEUR,
   };
   let url = STRIPE_API + chemin;
   const init = { method: methode, headers };
@@ -103,6 +98,11 @@ async function appelStripe(env, methode, chemin, params, { idempotence, version 
 // Réutilise le client Stripe de cette adresse s'il existe : le portail de
 // gestion des dons mensuels retrouve le donateur par son e-mail. Un client
 // existant n'est jamais modifié : ce point d'accès n'est pas authentifié.
+//
+// Pour la même raison, l'app ne reçoit ni l'identifiant du client ni de clé
+// éphémère : la feuille de paiement afficherait (et laisserait utiliser) les
+// cartes enregistrées du donateur à quiconque saisit son e-mail. Elle ne
+// reçoit que le secret du paiement en cours.
 async function clientPour(env, d) {
   const liste = await appelStripe(env, 'GET', '/customers', { email: d.email, limit: 1 });
   if (liste.data && liste.data.length > 0) return liste.data[0].id;
@@ -118,17 +118,8 @@ function metadataDon(type) {
   return { type_don: type, source: 'app_serein' };
 }
 
-async function cleEphemere(env, clientId, d) {
-  const cle = await appelStripe(env, 'POST', '/ephemeral_keys', { customer: clientId }, {
-    version: STRIPE_VERSION_SDK_MOBILE,
-    idempotence: `${d.cleIdempotence}-cle`,
-  });
-  return cle.secret;
-}
-
 export async function preparerPonctuel(env, d) {
   const clientId = await clientPour(env, d);
-  const cle = await cleEphemere(env, clientId, d);
   const paiement = await appelStripe(env, 'POST', '/payment_intents', {
     amount: d.montant,
     currency: 'eur',
@@ -138,7 +129,7 @@ export async function preparerPonctuel(env, d) {
     automatic_payment_methods: { enabled: true },
     metadata: metadataDon('ponctuel'),
   }, { idempotence: `${d.cleIdempotence}-paiement` });
-  return { clientSecret: paiement.client_secret, clientId, cleEphemere: cle };
+  return { clientSecret: paiement.client_secret };
 }
 
 // Un abonnement à montant libre : le prix est créé à la volée (price_data)
@@ -147,7 +138,6 @@ export async function preparerPonctuel(env, d) {
 export async function preparerMensuel(env, d) {
   if (!env.STRIPE_PRODUCT_ID) throw new Error('STRIPE_PRODUCT_ID manquant');
   const clientId = await clientPour(env, d);
-  const cle = await cleEphemere(env, clientId, d);
   const abonnement = await appelStripe(env, 'POST', '/subscriptions', {
     customer: clientId,
     items: [{
@@ -169,7 +159,7 @@ export async function preparerMensuel(env, d) {
     && abonnement.latest_invoice.confirmation_secret
     && abonnement.latest_invoice.confirmation_secret.client_secret;
   if (!secret) throw new Error('confirmation_secret absent de la réponse Stripe');
-  return { clientSecret: secret, clientId, cleEphemere: cle };
+  return { clientSecret: secret };
 }
 
 function reponseJson(corps, statut, cors) {
