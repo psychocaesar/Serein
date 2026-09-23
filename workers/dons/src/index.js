@@ -114,6 +114,10 @@ async function clientPour(env, d) {
   return client.id;
 }
 
+// Carte uniquement (Apple Pay et Google Pay en font partie), fixé ici plutôt
+// que dans les réglages Stripe : ceux-ci diffèrent entre test et production
+// et ont laissé passer MB WAY. Écarte aussi Link, qui demande un numéro de
+// téléphone alors que la politique de confidentialité promet l'e-mail seul.
 function metadataDon(type) {
   return { type_don: type, source: 'app_serein' };
 }
@@ -126,7 +130,7 @@ export async function preparerPonctuel(env, d) {
     customer: clientId,
     receipt_email: d.email,
     description: 'Don ponctuel à Sereinapp Méditation',
-    automatic_payment_methods: { enabled: true },
+    payment_method_types: ['card'],
     metadata: metadataDon('ponctuel'),
   }, { idempotence: `${d.cleIdempotence}-paiement` });
   return { clientSecret: paiement.client_secret };
@@ -149,7 +153,10 @@ export async function preparerMensuel(env, d) {
       },
     }],
     payment_behavior: 'default_incomplete',
-    payment_settings: { save_default_payment_method: 'on_subscription' },
+    payment_settings: {
+      save_default_payment_method: 'on_subscription',
+      payment_method_types: ['card'],
+    },
     description: 'Don mensuel à Sereinapp Méditation',
     metadata: metadataDon('mensuel'),
     expand: ['latest_invoice.confirmation_secret'],
