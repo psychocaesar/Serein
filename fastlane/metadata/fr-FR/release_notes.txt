@@ -2,4 +2,8 @@ Nouveau — Programmes jour par jour : un parcours guidé sur plusieurs jours, u
 
 Nouveau — Minuterie d'extinction des sons d'ambiance : ils s'arrêtent en douceur après 15, 30 ou 60 minutes, parfait pour s'endormir.
 
-Écran de bienvenue à la première ouverture, accueil réorganisé pour aller à l'essentiel, et corrections diverses.
+Nouveau — Ta pratique : touche la feuille en haut de l'accueil pour retrouver tes jours de pratique du mois et relancer tes dernières séances. Un jour manqué ne te fait rien perdre.
+
+Nouveau — Soutenir Serein : fais un don ponctuel ou mensuel directement dans l'app, avec Apple Pay ou ta carte. Serein reste gratuit, sans pub et sans abonnement.
+
+Écran de bienvenue à la première ouverture, accueil et réglages réorganisés pour aller à l'essentiel, et corrections diverses.

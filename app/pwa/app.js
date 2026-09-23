@@ -1570,12 +1570,13 @@ async function restoreOfflineButtons() {
 }
 
 // ── STATS ──
-function isYesterday(dateStr) {
-  if (!dateStr) return false;
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  return dateStr === yesterday.toLocaleDateString('fr-CA');
-}
+// Des jours de pratique plutôt qu'une série de jours d'affilée : un jour
+// manqué ne fait rien perdre. Une série qui retombe à zéro culpabilise, et
+// c'est souvent le jour où elle casse qu'on abandonne — l'inverse de
+// l'auto-compassion que les séances enseignent. Choix de César (sept. 2026).
+const JOURS_CONSERVES = 62; // de quoi couvrir le mois en cours et le précédent
+
+function dateLocale(d) { return d.toLocaleDateString('fr-CA'); } // AAAA-MM-JJ
 
 function getStats() {
   try {
@@ -1588,25 +1589,44 @@ function loadStats() {
   const hasSession = (s.sessions || 0) > 0;
   const welcomeBlock = document.getElementById('welcome-block');
   if (welcomeBlock) welcomeBlock.style.display = hasSession ? 'none' : 'block';
-  document.getElementById('stat-sessions').textContent = s.sessions || 0;
-  document.getElementById('stat-time').textContent = (s.minutes || 0) + ' min';
-  document.getElementById('stat-streak').textContent = s.streak || 0;
+  const pratiqueBtn = document.getElementById('pratique-btn');
+  if (pratiqueBtn) pratiqueBtn.hidden = !hasSession;
+}
+
+// Point d'entrée commun des séances guidées, du minuteur et de la respiration.
+function enregistrerPratique(minutes) {
+  const s = getStats();
+  s.sessions = (s.sessions || 0) + 1;
+  s.minutes = (s.minutes || 0) + (minutes || 0);
+  const today = dateLocale(new Date());
+  const jours = Array.isArray(s.jours) ? s.jours : [];
+  if (!jours.includes(today)) jours.push(today);
+  s.jours = jours.slice(-JOURS_CONSERVES);
+  s.lastDate = today;
+  localStorage.setItem('serein-stats', JSON.stringify(s));
+  mirrorToNative('serein-stats');
+  loadStats();
+}
+
+function joursDePratiqueCeMois() {
+  const mois = dateLocale(new Date()).slice(0, 7);
+  const s = getStats();
+  const jours = new Set((Array.isArray(s.jours) ? s.jours : []).filter(j => j.startsWith(mois)));
+  if (s.lastDate && s.lastDate.startsWith(mois)) jours.add(s.lastDate);
+  // Séances terminées avant l'apparition de s.jours : l'historique les date.
+  try {
+    JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]').forEach(e => {
+      const j = dateLocale(new Date(e.ts));
+      if (j.startsWith(mois)) jours.add(j);
+    });
+  } catch(e) {}
+  return jours.size;
 }
 
 function recordCompletion() {
   try {
-    const s = getStats();
-    s.sessions = (s.sessions || 0) + 1;
     const dur = currentSession ? (parseFloat(currentSession.duration) || Math.round((audio.duration || 0) / 60)) : 0;
-    s.minutes = (s.minutes || 0) + dur;
-    const today = new Date().toLocaleDateString('fr-CA');
-    if (s.lastDate !== today) {
-      s.streak = isYesterday(s.lastDate) ? (s.streak || 0) + 1 : 1;
-    }
-    s.lastDate = today;
-    localStorage.setItem('serein-stats', JSON.stringify(s));
-    mirrorToNative('serein-stats');
-    loadStats();
+    enregistrerPratique(dur);
     // Historique partagé : alimente les coches « déjà écoutée », la progression
     // des parcours et les recommandations du guide.
     if (currentSession && currentSession.id !== 'intro' && currentSession.id !== 'observation') {
@@ -1618,16 +1638,137 @@ function recordCompletion() {
   } catch(e) { console.warn('[Serein stats]', e); }
 }
 
+// ── TA PRATIQUE ──
+// Ouverte depuis le bouton rond de l'accueil : les chiffres ne s'affichent
+// que si on vient les chercher. L'historique permet de relancer une séance.
+const PRATIQUE_HISTORIQUE_MAX = 10;
+
+function findSessionByTitle(title) {
+  if (!CATALOG) return null;
+  for (const group of CATALOG.groups) {
+    const sessions = group.subgroups
+      ? group.subgroups.flatMap(sub => sub.sessions || [])
+      : (group.sessions || []);
+    const session = sessions.find(s => s.title === title);
+    if (session) return { session, group };
+  }
+  return null;
+}
+
+function formatDureePratique(minutes) {
+  if (minutes < 60) return minutes + ' min';
+  const m = minutes % 60;
+  return Math.floor(minutes / 60) + ' h' + (m ? ' ' + String(m).padStart(2, '0') : '');
+}
+
+function formatJourRelatif(ts) {
+  const jour = dateLocale(new Date(ts));
+  const maintenant = new Date();
+  if (jour === dateLocale(maintenant)) return 'Aujourd’hui';
+  const hier = new Date(maintenant);
+  hier.setDate(hier.getDate() - 1);
+  if (jour === dateLocale(hier)) return 'Hier';
+  return new Date(ts).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
+}
+
+// Les séances distinctes les plus récentes (une séance réécoutée remonte).
+function dernieresSeances() {
+  let all = [];
+  try { all = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); } catch(e) {}
+  const vues = new Set();
+  const out = [];
+  for (let i = all.length - 1; i >= 0 && out.length < PRATIQUE_HISTORIQUE_MAX; i--) {
+    const e = all[i];
+    if (!e || !e.title || vues.has(e.title)) continue;
+    vues.add(e.title);
+    out.push(e);
+  }
+  return out;
+}
+
+function renderPratique() {
+  const s = getStats();
+  document.getElementById('stat-jours-mois').textContent = joursDePratiqueCeMois();
+  document.getElementById('stat-sessions').textContent = s.sessions || 0;
+  document.getElementById('stat-time').textContent = formatDureePratique(s.minutes || 0);
+
+  const liste = document.getElementById('pratique-historique');
+  liste.textContent = '';
+  const entrees = dernieresSeances();
+  document.getElementById('pratique-historique-vide').hidden = entrees.length > 0;
+  entrees.forEach(e => {
+    // Une séance retirée du catalogue reste listée, mais sans relance.
+    const trouve = findSessionByTitle(e.title);
+    const ligne = document.createElement(trouve ? 'button' : 'div');
+    ligne.className = 'pratique-seance';
+    const info = document.createElement('span');
+    info.className = 'pratique-seance-info';
+    const titre = document.createElement('span');
+    titre.className = 'pratique-seance-titre';
+    titre.textContent = e.title;
+    const meta = document.createElement('span');
+    meta.className = 'pratique-seance-meta';
+    meta.textContent = formatJourRelatif(e.ts) + (trouve ? ' · ' + trouve.group.name : '');
+    info.appendChild(titre);
+    info.appendChild(meta);
+    ligne.appendChild(info);
+    if (trouve) {
+      ligne.type = 'button';
+      ligne.setAttribute('aria-label', 'Relancer ' + e.title);
+      const play = document.createElement('span');
+      play.className = 'pratique-seance-play';
+      play.setAttribute('aria-hidden', 'true');
+      play.innerHTML = '<svg class="icon-svg" viewBox="0 0 24 24"><polygon points="7 4 20 12 7 20 7 4"/></svg>';
+      ligne.appendChild(play);
+      ligne.addEventListener('click', () => relancerDepuisPratique(trouve));
+    }
+    const li = document.createElement('li');
+    li.appendChild(ligne);
+    liste.appendChild(li);
+  });
+}
+
+function openPratique() {
+  renderPratique();
+  const ov = document.getElementById('pratique-overlay');
+  ov.classList.add('open');
+  ov.scrollTop = 0;
+  document.body.style.overflow = 'hidden';
+  registerOverlay('pratique', closePratiqueOverlay);
+}
+
+function closePratiqueOverlay() {
+  document.getElementById('pratique-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// Même passage de relais que la sheet de voix → player : l'entrée
+// d'historique de « Ta pratique » sert à ce qui s'ouvre ensuite.
+function relancerDepuisPratique({ session: s, group }) {
+  closePratiqueOverlay();
+  handOverOverlay('pratique');
+  openVoiceOverlay(s.id, s.title, group.name, s.duration + ' min', s.file, s.fileFem || false, group.artwork);
+}
+
+// ── TIROIRS DES RÉGLAGES ──
+// Hors ligne et Avancé : repliés par défaut, pour un écran calme.
+function toggleTiroir(btn) {
+  const ouvert = btn.getAttribute('aria-expanded') === 'true';
+  btn.setAttribute('aria-expanded', String(!ouvert));
+  document.getElementById(btn.getAttribute('aria-controls')).hidden = ouvert;
+}
+
 // ── INVITATION AU DON ──
 // Déclenchée par l'usage local (aucun réseau, aucun tracker) : après SEUIL
 // séances guidées terminées, une carte discrète et dismissable apparaît UNE
-// SEULE FOIS sur l'accueil. Réutilise openDon() pour l'ouverture HelloAsso.
-// EN PAUSE (juillet 2026) : invitation désactivée en attendant la validation
-// de l'association par Benevity (exigée par Apple) et Goodstack (exigée par
-// Google Play) pour la sollicitation de dons in-app. Le compteur local
-// continue de tourner : repasser DON_INVITATION_ACTIVE à true suffit à
-// réactiver (les utilisateurs au-dessus du seuil la verront à ce moment-là).
-const DON_INVITATION_ACTIVE = false;
+// SEULE FOIS sur l'accueil, et ouvre l'écran de don (openDon).
+// RÉACTIVÉE le 2026-09-23 : l'association est validée par Benevity (exigée
+// par Apple) ET par Goodstack (exigée par Google Play), ce qui lève la raison
+// de la pause de juillet 2026. N'apparaît que si le don est réellement
+// disponible (donsDisponibles : serveur configuré, Apple Pay sur iOS).
+// Le compteur ayant tourné pendant toute la pause, les utilisateurs déjà
+// au-dessus du seuil verront l'invitation dès leur prochain lancement.
+const DON_INVITATION_ACTIVE = true;
 const DON_INVITATION_SEUIL = 7;            // ← seuil facile à modifier
 const DON_COUNT_KEY = 'serein_seances_terminees';
 const DON_SEEN_KEY = 'serein_invitation_don_vue';
@@ -1642,8 +1783,7 @@ function incrementDonCounter() {
 function renderDonInvitation() {
   const block = document.getElementById('don-invitation-block');
   if (!block) return;
-  if (!DON_INVITATION_ACTIVE) { block.style.display = 'none'; return; } // en pause (voir flag ci-dessus)
-  if (isIosNative()) { block.style.display = 'none'; return; } // dons retirés du build iOS (App Store 3.1.1)
+  if (!DON_INVITATION_ACTIVE || !donsDisponibles()) { block.style.display = 'none'; return; }
   let n = 0, seen = false;
   try {
     n = parseInt(localStorage.getItem(DON_COUNT_KEY), 10) || 0;
@@ -3851,22 +3991,12 @@ let breathCounted = false; // garde-fou : 1 seul incrément de stats par run
 const BREATH_RING_CIRC = 2 * Math.PI * 100; // r=100 sur le cercle SVG
 const BREATH_MIN_CYCLES = 4; // en deçà, trop court pour compter comme une séance
 
-// Compte la respiration dans les stats (séances/minutes/série), comme le
+// Compte la respiration dans les stats (séances/minutes/jours), comme le
 // minuteur libre (recordTimerCompletion). Pas d'historique ni de compteur de
 // don : ce n'est pas une séance du catalogue.
 function recordBreathCompletion(minutes) {
   try {
-    const s = getStats();
-    s.sessions = (s.sessions || 0) + 1;
-    s.minutes = (s.minutes || 0) + (minutes || 0);
-    const today = new Date().toLocaleDateString('fr-CA');
-    if (s.lastDate !== today) {
-      s.streak = isYesterday(s.lastDate) ? (s.streak || 0) + 1 : 1;
-      s.lastDate = today;
-    }
-    localStorage.setItem('serein-stats', JSON.stringify(s));
-    mirrorToNative('serein-stats');
-    loadStats();
+    enregistrerPratique(minutes);
   } catch(e) { console.warn('[Serein stats]', e); }
 }
 
@@ -4160,17 +4290,7 @@ function updateTimerDisplay() {
 
 function recordTimerCompletion() {
   try {
-    const s = getStats();
-    s.sessions = (s.sessions || 0) + 1;
-    s.minutes = (s.minutes || 0) + Math.round(timerTotalSeconds / 60);
-    const today = new Date().toLocaleDateString('fr-CA');
-    if (s.lastDate !== today) {
-      s.streak = isYesterday(s.lastDate) ? (s.streak || 0) + 1 : 1;
-      s.lastDate = today;
-    }
-    localStorage.setItem('serein-stats', JSON.stringify(s));
-    mirrorToNative('serein-stats');
-    loadStats();
+    enregistrerPratique(Math.round(timerTotalSeconds / 60));
   } catch(e) { console.warn('[Serein stats]', e); }
 }
 
@@ -4249,9 +4369,32 @@ Envoyé depuis sereinapp.fr`;
 }
 
 
-// ── DON ──
-// Les dons sont retirés du build iOS (conformité App Store, guideline 3.1.1).
-// La PWA et l'app Android conservent le don HelloAsso.
+// ── DON (Stripe, dans l'app) ──
+// L'association est reconnue « approved nonprofit » par Apple (via Benevity)
+// et validée par Goodstack côté Google : le don se fait DANS l'app, ce que la
+// guideline 3.2.1(vi) autorise à condition de proposer Apple Pay sur iOS.
+// Paiement : feuille native Stripe (@capacitor-community/stripe). Chaque
+// paiement est préparé par le serveur de dons (workers/dons), seul détenteur
+// de la clé secrète. Les valeurs ci-dessous sont publiques par conception :
+// aucune ne donne accès au compte Stripe.
+const DONS_CONFIG = {
+  apiUrl: 'https://serein-dons.serein-dons.workers.dev', // URL du Worker de dons
+  stripePublishableKey: 'pk_test_51UInstRr5DAwL8012kileF1RzcwneJ04Xt2aT21nmNHejE6neff9ZEWArBkLQYfe1Utvlm4INUISOF8neUUFNyxk00eWc5QfCa', // pk_test_… pendant les essais, pk_live_… en production
+  portailUrl: 'https://billing.stripe.com/p/login/test_7sY8wRcs43h22Cv2gB6Zy00', // lien de connexion au portail client Stripe (test)
+  applePayMerchantId: 'merchant.fr.sereinapp.app', // doit correspondre à App/App.entitlements (iOS)
+  googlePayTest: true,      // à passer à false en production
+};
+// En centimes. Minimum 3 € : les frais fixes Stripe (0,25 €) pèsent trop
+// lourd en dessous. Les mêmes bornes sont revérifiées par le serveur.
+const DON_PALIERS = { mensuel: [300, 500, 1000, 2000], ponctuel: [500, 1000, 2000, 5000] };
+const DON_MONTANT_MIN = 300;
+const DON_MONTANT_MAX = 100000;
+
+let donType = 'mensuel';
+let donMontant = DON_PALIERS.mensuel[1];
+let donMontantLibre = false;
+let donPresentationActive = false;
+
 function isIosNative() {
   try {
     return typeof Capacitor !== 'undefined'
@@ -4260,12 +4403,252 @@ function isIosNative() {
   } catch(e) { return false; }
 }
 
-// Masque les points d'entrée du don sur iOS (carte Réglages ; l'invitation et
-// openDon sont gardées séparément).
-function hideDonationOnIos() {
-  if (!isIosNative()) return;
-  const card = document.getElementById('settings-don-card');
-  if (card) card.style.display = 'none';
+function isAndroidNative() {
+  try {
+    return typeof Capacitor !== 'undefined'
+      && typeof Capacitor.getPlatform === 'function'
+      && Capacitor.getPlatform() === 'android';
+  } catch(e) { return false; }
+}
+
+function stripePlugin() {
+  return window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Stripe;
+}
+
+// Sans Apple Pay configuré, iOS ne propose PAS le don : c'est une condition
+// de la guideline 3.2.1(vi), et un don sans Apple Pay risquerait un rejet de
+// l'app entière. Même logique si le serveur ou la clé ne sont pas renseignés :
+// mieux vaut aucun bouton qu'un bouton qui échoue.
+function donsDisponibles() {
+  if (!DONS_CONFIG.apiUrl || !DONS_CONFIG.stripePublishableKey) return false;
+  if (!stripePlugin()) return false;
+  if (isIosNative() && !DONS_CONFIG.applePayMerchantId) return false;
+  return true;
+}
+
+function appliquerDisponibiliteDons() {
+  const carte = document.getElementById('settings-don-card');
+  if (carte) {
+    const dispo = donsDisponibles();
+    carte.style.display = dispo ? '' : 'none';
+    carte.parentElement.classList.toggle('sans-don', !dispo);
+  }
+  const portail = document.getElementById('don-portail');
+  if (portail) portail.hidden = !DONS_CONFIG.portailUrl;
+}
+
+function formatEuros(centimes) {
+  return new Intl.NumberFormat('fr-FR', {
+    style: 'currency', currency: 'EUR',
+    minimumFractionDigits: centimes % 100 ? 2 : 0, maximumFractionDigits: 2,
+  }).format(centimes / 100);
+}
+
+// « 4,50 », « 4.50 », « 12 », « 12 € » → centimes entiers ; null si illisible.
+function parseMontantSaisi(texte) {
+  const t = String(texte).replace(/[\s €]/g, '').replace(',', '.');
+  if (!/^\d+(\.\d{1,2})?$/.test(t)) return null;
+  return Math.round(parseFloat(t) * 100);
+}
+
+function nouvelleCleIdempotence() {
+  if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  // crypto.randomUUID n'existe qu'à partir d'iOS 15.4 ; l'app cible iOS 15.0.
+  return Array.from(crypto.getRandomValues(new Uint8Array(16)), b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function montantDonValide() {
+  return donMontant !== null && donMontant >= DON_MONTANT_MIN && donMontant <= DON_MONTANT_MAX;
+}
+
+function openDon() {
+  if (!donsDisponibles()) return;
+  donType = 'mensuel';
+  donMontant = DON_PALIERS.mensuel[1];
+  donMontantLibre = false;
+  document.getElementById('don-autre').value = '';
+  document.getElementById('don-erreur').textContent = '';
+  document.getElementById('don-formulaire').hidden = false;
+  document.getElementById('don-merci').hidden = true;
+  renderDon();
+  const ov = document.getElementById('don-overlay');
+  ov.classList.add('open');
+  ov.scrollTop = 0;
+  document.body.style.overflow = 'hidden';
+  registerOverlay('don', closeDonOverlay);
+}
+
+function closeDonOverlay() {
+  document.getElementById('don-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function renderDon() {
+  document.getElementById('don-type-mensuel').classList.toggle('active', donType === 'mensuel');
+  document.getElementById('don-type-ponctuel').classList.toggle('active', donType === 'ponctuel');
+
+  const grille = document.getElementById('don-montants');
+  grille.textContent = '';
+  DON_PALIERS[donType].forEach(centimes => {
+    const actif = !donMontantLibre && centimes === donMontant;
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'don-montant' + (actif ? ' active' : '');
+    b.setAttribute('aria-pressed', String(actif));
+    b.textContent = formatEuros(centimes);
+    b.addEventListener('click', () => {
+      donMontant = centimes;
+      donMontantLibre = false;
+      document.getElementById('don-autre').value = '';
+      renderDon();
+    });
+    grille.appendChild(b);
+  });
+
+  const valide = montantDonValide();
+  document.getElementById('don-equivalent').textContent =
+    donType === 'mensuel' && valide ? `Soit ${formatEuros(donMontant * 12)} par an.` : '';
+  document.getElementById('don-valider').textContent = !valide ? 'Donner'
+    : donType === 'mensuel' ? `Donner ${formatEuros(donMontant)} par mois` : `Donner ${formatEuros(donMontant)}`;
+}
+
+function selectDonType(type) {
+  donType = type;
+  if (!donMontantLibre) donMontant = DON_PALIERS[type][1];
+  renderDon();
+}
+
+function onDonAutreMontant(valeur) {
+  if (!valeur.trim()) {
+    donMontantLibre = false;
+    donMontant = DON_PALIERS[donType][1];
+  } else {
+    donMontantLibre = true;
+    donMontant = parseMontantSaisi(valeur);
+  }
+  renderDon();
+}
+
+// Demande un paiement au serveur de dons, puis ouvre la feuille de paiement
+// native Stripe (Apple Pay sur iOS, Google Pay sur Android, carte partout).
+async function validerDon() {
+  const erreur = document.getElementById('don-erreur');
+  erreur.textContent = '';
+  if (donMontant === null || donMontant < DON_MONTANT_MIN) { erreur.textContent = 'Le don minimum est de 3 €.'; return; }
+  if (donMontant > DON_MONTANT_MAX) { erreur.textContent = 'Pour un don de plus de 1 000 €, écris-nous : serein@cesarbroche.fr.'; return; }
+
+  const email = document.getElementById('don-email').value.trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    erreur.textContent = 'Indique ton adresse e-mail, pour recevoir la confirmation du don.';
+    return;
+  }
+
+  const type = donType;
+  // Pas de reçu fiscal : l'association n'est pas reconnue d'intérêt général,
+  // en émettre serait illégal. D'où aucune donnée au-delà de l'e-mail.
+  const demande = { montant: donMontant, email, cleIdempotence: nouvelleCleIdempotence() };
+
+  const btn = document.getElementById('don-valider');
+  btn.disabled = true;
+  btn.textContent = 'Préparation…';
+  try {
+    const rep = await fetch(DONS_CONFIG.apiUrl.replace(/\/$/, '') + '/don/' + type, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(demande),
+    });
+    const corps = await rep.json().catch(() => ({}));
+    // Seuls les messages du serveur de dons (en français, pensés pour
+    // l'utilisateur) sont affichés tels quels.
+    if (!rep.ok) { erreur.textContent = corps.erreur || 'Le don n’a pas pu être préparé. Réessaie dans un instant.'; return; }
+
+    const Stripe = stripePlugin();
+    await Stripe.createPaymentSheet({
+      paymentIntentClientSecret: corps.clientSecret,
+      merchantDisplayName: 'Serein',
+      countryCode: 'FR',
+      currencyCode: 'EUR',
+      enableApplePay: isIosNative(),
+      applePayMerchantId: DONS_CONFIG.applePayMerchantId || undefined,
+      enableGooglePay: isAndroidNative(),
+      GooglePayIsTesting: DONS_CONFIG.googlePayTest,
+      defaultBillingDetails: { email },
+    });
+
+    donPresentationActive = true;
+    let resultat;
+    try {
+      resultat = (await Stripe.presentPaymentSheet()).paymentResult;
+    } finally {
+      // Voir initialiserDons : le plugin émet son événement AVANT de résoudre
+      // cette promesse (iOS comme Android), il est donc déjà écarté ici.
+      // Remise à false immédiate, surtout pas différée : un délai (3 s,
+      // première version) débordait sur la feuille suivante quand on la
+      // rouvrait vite, et son paiement était alors confirmé deux fois.
+      donPresentationActive = false;
+    }
+    traiterResultatDon(resultat, type, demande);
+  } catch (e) {
+    console.warn('[Serein dons]', e);
+    erreur.textContent = 'Le don n’a pas pu aboutir. Vérifie ta connexion et réessaie.';
+  } finally {
+    btn.disabled = false;
+    renderDon();
+  }
+}
+
+function traiterResultatDon(resultat, type, demande) {
+  if (resultat === 'paymentSheetCompleted') {
+    haptic('success');
+    markDonInvitationSeen();
+    const montant = formatEuros(demande.montant);
+    const texte = type === 'mensuel'
+      ? `Ton don de ${montant} par mois soutient Serein. Tu vas recevoir une confirmation par e-mail, et tu peux l’arrêter à tout moment depuis Réglages › Faire un don.`
+      : `Ton don de ${montant} soutient Serein. Tu vas recevoir une confirmation par e-mail.`;
+    document.getElementById('don-merci-texte').textContent = texte;
+    document.getElementById('don-formulaire').hidden = true;
+    document.getElementById('don-merci').hidden = false;
+    document.getElementById('don-overlay').scrollTop = 0;
+  } else if (resultat === 'paymentSheetFailed') {
+    document.getElementById('don-erreur').textContent = 'Le paiement n’a pas abouti. Tu peux réessayer.';
+  }
+  // paymentSheetCanceled : la personne a refermé la feuille, rien à signaler.
+}
+
+// Android peut recréer l'Activity — et donc tout le JavaScript — pendant que
+// la feuille de paiement est ouverte. La promesse d'origine est alors perdue,
+// et le plugin retient le résultat jusqu'à ce qu'un écouteur existe : d'où ces
+// écouteurs posés dès le démarrage. En temps normal l'événement arrive AUSSI,
+// en plus de la promesse ; donPresentationActive l'écarte dans ce cas.
+async function initialiserDons() {
+  appliquerDisponibiliteDons();
+  const Stripe = stripePlugin();
+  if (!Stripe || !DONS_CONFIG.stripePublishableKey) return;
+  try {
+    await Stripe.initialize({ publishableKey: DONS_CONFIG.stripePublishableKey });
+  } catch (e) { console.warn('[Serein dons]', e); return; }
+
+  const recupererResultat = resultat => {
+    if (donPresentationActive) return;
+    const ok = [{ label: 'OK', onClick: toast => toast.remove() }];
+    if (resultat === 'paymentSheetCompleted') {
+      haptic('success');
+      markDonInvitationSeen();
+      showActionToast('don-merci-toast', 'Merci pour ton don 🌿 Une confirmation t’a été envoyée par e-mail.', ok);
+    } else if (resultat === 'paymentSheetFailed') {
+      showActionToast('don-echec-toast', 'Ton paiement n’a pas abouti. Tu peux réessayer depuis les Réglages.', ok);
+    }
+  };
+  ['paymentSheetCompleted', 'paymentSheetCanceled', 'paymentSheetFailed']
+    .forEach(evt => Stripe.addListener(evt, () => recupererResultat(evt)));
+}
+
+function ouvrirPortailDons() {
+  if (!DONS_CONFIG.portailUrl) return;
+  // La résiliation n'est pas une collecte de fonds : l'ouvrir hors de l'app
+  // ne pose aucun problème, et c'est Stripe qui y vérifie l'identité par e-mail.
+  const isNative = typeof Capacitor !== 'undefined' && Capacitor.isNativePlatform && Capacitor.isNativePlatform();
+  window.open(DONS_CONFIG.portailUrl, isNative ? '_system' : '_blank', 'noopener,noreferrer');
 }
 
 // iOS ignore HTMLMediaElement.volume (voir en-tête du fichier) : le curseur
@@ -4278,13 +4661,6 @@ function hideMainVolumeSliderOnIos() {
   const wrap = document.getElementById('main-volume-wrap');
   if (label) label.style.display = 'none';
   if (wrap) wrap.style.display = 'none';
-}
-
-function openDon() {
-  if (isIosNative()) return;
-  const url = 'https://www.helloasso.com/associations/sereinapp/formulaires/1';
-  const isNative = typeof Capacitor !== 'undefined' && Capacitor.isNativePlatform && Capacitor.isNativePlatform();
-  window.open(url, isNative ? '_system' : '_blank', 'noopener,noreferrer');
 }
 
 function openPrivacyPolicy() {
@@ -4509,8 +4885,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   loadSpeed();
   loadStats();
   loadPrefs();
-  hideDonationOnIos();
   hideMainVolumeSliderOnIos();
+  initialiserDons();
   updateVoiceSettingLabel();
   renderResumeCard();
   updateMoodChips();

@@ -64,6 +64,8 @@
 			</array>
 		</dict>
 	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>Uniquement si tu choisis de scanner ta carte bancaire pendant un don. La carte est lue sur ton iPhone : aucune image n’est enregistrée ni envoyée.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>audio</string>
