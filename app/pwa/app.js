@@ -1622,12 +1622,14 @@ function recordCompletion() {
 // Déclenchée par l'usage local (aucun réseau, aucun tracker) : après SEUIL
 // séances guidées terminées, une carte discrète et dismissable apparaît UNE
 // SEULE FOIS sur l'accueil. Réutilise openDon() pour l'ouverture HelloAsso.
-// EN PAUSE (juillet 2026) : invitation désactivée en attendant la validation
-// de l'association par Benevity (exigée par Apple) et Goodstack (exigée par
-// Google Play) pour la sollicitation de dons in-app. Le compteur local
-// continue de tourner : repasser DON_INVITATION_ACTIVE à true suffit à
-// réactiver (les utilisateurs au-dessus du seuil la verront à ce moment-là).
-const DON_INVITATION_ACTIVE = false;
+// RÉACTIVÉE le 2026-09-23 : l'association est validée par Benevity (exigée
+// par Apple) ET par Goodstack (exigée par Google Play), ce qui lève la raison
+// de la pause de juillet 2026. Le don passe par le formulaire HelloAsso ouvert
+// dans le navigateur système (voir openDon) : pas d'achat intégré, et Apple
+// Pay y est disponible puisqu'on atterrit dans Safari.
+// Le compteur ayant tourné pendant toute la pause, les utilisateurs déjà
+// au-dessus du seuil verront l'invitation dès leur prochain lancement.
+const DON_INVITATION_ACTIVE = true;
 const DON_INVITATION_SEUIL = 7;            // ← seuil facile à modifier
 const DON_COUNT_KEY = 'serein_seances_terminees';
 const DON_SEEN_KEY = 'serein_invitation_don_vue';
@@ -1642,8 +1644,7 @@ function incrementDonCounter() {
 function renderDonInvitation() {
   const block = document.getElementById('don-invitation-block');
   if (!block) return;
-  if (!DON_INVITATION_ACTIVE) { block.style.display = 'none'; return; } // en pause (voir flag ci-dessus)
-  if (isIosNative()) { block.style.display = 'none'; return; } // dons retirés du build iOS (App Store 3.1.1)
+  if (!DON_INVITATION_ACTIVE) { block.style.display = 'none'; return; }
   let n = 0, seen = false;
   try {
     n = parseInt(localStorage.getItem(DON_COUNT_KEY), 10) || 0;
@@ -4250,22 +4251,17 @@ Envoyé depuis sereinapp.fr`;
 
 
 // ── DON ──
-// Les dons sont retirés du build iOS (conformité App Store, guideline 3.1.1).
-// La PWA et l'app Android conservent le don HelloAsso.
+// Le don est désormais proposé sur toutes les plateformes, iOS compris :
+// l'association est validée par Benevity et Goodstack (2026-09-23). Le
+// formulaire HelloAsso s'ouvre dans le navigateur système — pas d'achat
+// intégré, donc pas de guideline 3.1.1 à opposer, et Apple Pay reste
+// disponible puisque la page s'ouvre dans Safari.
 function isIosNative() {
   try {
     return typeof Capacitor !== 'undefined'
       && typeof Capacitor.getPlatform === 'function'
       && Capacitor.getPlatform() === 'ios';
   } catch(e) { return false; }
-}
-
-// Masque les points d'entrée du don sur iOS (carte Réglages ; l'invitation et
-// openDon sont gardées séparément).
-function hideDonationOnIos() {
-  if (!isIosNative()) return;
-  const card = document.getElementById('settings-don-card');
-  if (card) card.style.display = 'none';
 }
 
 // iOS ignore HTMLMediaElement.volume (voir en-tête du fichier) : le curseur
@@ -4281,7 +4277,6 @@ function hideMainVolumeSliderOnIos() {
 }
 
 function openDon() {
-  if (isIosNative()) return;
   const url = 'https://www.helloasso.com/associations/sereinapp/formulaires/1';
   const isNative = typeof Capacitor !== 'undefined' && Capacitor.isNativePlatform && Capacitor.isNativePlatform();
   window.open(url, isNative ? '_system' : '_blank', 'noopener,noreferrer');
@@ -4509,7 +4504,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   loadSpeed();
   loadStats();
   loadPrefs();
-  hideDonationOnIos();
   hideMainVolumeSliderOnIos();
   updateVoiceSettingLabel();
   renderResumeCard();

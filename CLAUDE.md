@@ -32,7 +32,7 @@ Positionnement assumé : **pas de traduction prévue** — la niche est "LA méd
 
 - **Ton éditorial : tutoiement partout**, sans exception.
 - **Guide conversationnel sans LLM** : choix déontologique et de confidentialité assumé. Ne jamais ajouter de saisie libre ou d'appel à un modèle de langage dans le guide — c'est un arbre de questions fermé (`GUIDE_MAP` → `resolveEntry`/`resolveRec` dans `app.js`), résolu depuis `sessions.json`.
-- **Invitation aux dons désactivée** (`DON_INVITATION_ACTIVE = false` dans `app.js`) en attendant la validation de l'association par **Benevity** (Apple) et **Goodstack** (Google Play). Ne pas réactiver sans confirmation explicite de César.
+- **Dons actifs depuis le 2026-09-23** (`DON_INVITATION_ACTIVE = true` dans `app.js`), l'association étant validée par **Benevity** (exigé par Apple) et **Goodstack** (exigé par Google Play). Le don passe par le **formulaire HelloAsso ouvert dans le navigateur système** (`openDon`) : pas d'achat intégré, donc pas de guideline 3.1.1 à opposer, et Apple Pay reste disponible puisqu'on atterrit dans Safari. HelloAsso ne prélève aucune commission — ne pas migrer vers un prestataire payant (Stripe & co.) sans arbitrage explicite, les frais pèsent lourd sur des dons de 2-3 €. L'invitation apparaît **une seule fois**, sur l'accueil, après `DON_INVITATION_SEUIL` séances terminées, et reste rejetable.
 - **z-index des overlays** (`index.html`) : onboarding (300) > modales ouvertes depuis le player — voix/minuteur/ambiance/signalement (270) > player (260) > overlays de contenu — parcours/programme/respiration (250). Respecter cette hiérarchie pour tout nouvel overlay.
 
 ## Workflow
