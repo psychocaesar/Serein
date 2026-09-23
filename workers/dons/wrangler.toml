@@ -4,7 +4,7 @@ compatibility_date = "2026-09-01"
 
 [vars]
 # Identifiant du produit Stripe « Don mensuel » (prod_…). Public, pas un secret.
-STRIPE_PRODUCT_ID = ""
+STRIPE_PRODUCT_ID = "prod_VJSEvUHHU3IoK2"
 # Origines des apps natives Capacitor : iOS, puis Android.
 ORIGINES_AUTORISEES = "capacitor://localhost,https://localhost"
 

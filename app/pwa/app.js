@@ -4258,9 +4258,9 @@ Envoyé depuis sereinapp.fr`;
 // de la clé secrète. Les valeurs ci-dessous sont publiques par conception :
 // aucune ne donne accès au compte Stripe.
 const DONS_CONFIG = {
-  apiUrl: '',               // URL du Worker de dons
+  apiUrl: 'https://serein-dons.serein-dons.workers.dev', // URL du Worker de dons
   stripePublishableKey: '', // pk_test_… pendant les essais, pk_live_… en production
-  portailUrl: '',           // lien de connexion au portail client Stripe
+  portailUrl: 'https://billing.stripe.com/p/login/test_7sY8wRcs43h22Cv2gB6Zy00', // lien de connexion au portail client Stripe (test)
   applePayMerchantId: '',   // ex. merchant.fr.sereinapp.app, une fois créé chez Apple
   googlePayTest: true,      // à passer à false en production
 };
