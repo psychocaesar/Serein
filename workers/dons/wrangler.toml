@@ -1,0 +1,25 @@
+name = "serein-dons"
+main = "src/index.js"
+compatibility_date = "2026-09-01"
+
+[vars]
+# Identifiant du produit Stripe « Don mensuel » (prod_…). Public, pas un secret.
+STRIPE_PRODUCT_ID = ""
+# Origines des apps natives Capacitor : iOS, puis Android.
+ORIGINES_AUTORISEES = "capacitor://localhost,https://localhost"
+
+# La clé secrète Stripe n'a RIEN à faire ici : ce dépôt est public.
+# Utiliser une clé restreinte (droits en écriture : Customers, PaymentIntents,
+# Subscriptions, Ephemeral keys, Prices), puis la déposer avec :
+#   npx wrangler secret put STRIPE_SECRET_KEY
+
+# Limite de 10 demandes par minute et par IP, contre le « card testing »
+# (tests de cartes volées sur les formulaires de don). Le code s'en passe si
+# la liaison est absente — la retirer si l'offre Cloudflare ne la permet pas.
+[[ratelimits]]
+name = "LIMITEUR"
+namespace_id = "1001"
+
+  [ratelimits.simple]
+  limit = 10
+  period = 60

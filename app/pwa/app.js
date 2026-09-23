@@ -1621,12 +1621,11 @@ function recordCompletion() {
 // ── INVITATION AU DON ──
 // Déclenchée par l'usage local (aucun réseau, aucun tracker) : après SEUIL
 // séances guidées terminées, une carte discrète et dismissable apparaît UNE
-// SEULE FOIS sur l'accueil. Réutilise openDon() pour l'ouverture HelloAsso.
+// SEULE FOIS sur l'accueil, et ouvre l'écran de don (openDon).
 // RÉACTIVÉE le 2026-09-23 : l'association est validée par Benevity (exigée
 // par Apple) ET par Goodstack (exigée par Google Play), ce qui lève la raison
-// de la pause de juillet 2026. Le don passe par le formulaire HelloAsso ouvert
-// dans le navigateur système (voir openDon) : pas d'achat intégré, et Apple
-// Pay y est disponible puisqu'on atterrit dans Safari.
+// de la pause de juillet 2026. N'apparaît que si le don est réellement
+// disponible (donsDisponibles : serveur configuré, Apple Pay sur iOS).
 // Le compteur ayant tourné pendant toute la pause, les utilisateurs déjà
 // au-dessus du seuil verront l'invitation dès leur prochain lancement.
 const DON_INVITATION_ACTIVE = true;
@@ -1644,7 +1643,7 @@ function incrementDonCounter() {
 function renderDonInvitation() {
   const block = document.getElementById('don-invitation-block');
   if (!block) return;
-  if (!DON_INVITATION_ACTIVE) { block.style.display = 'none'; return; }
+  if (!DON_INVITATION_ACTIVE || !donsDisponibles()) { block.style.display = 'none'; return; }
   let n = 0, seen = false;
   try {
     n = parseInt(localStorage.getItem(DON_COUNT_KEY), 10) || 0;
@@ -4250,18 +4249,295 @@ Envoyé depuis sereinapp.fr`;
 }
 
 
-// ── DON ──
-// Le don est désormais proposé sur toutes les plateformes, iOS compris :
-// l'association est validée par Benevity et Goodstack (2026-09-23). Le
-// formulaire HelloAsso s'ouvre dans le navigateur système — pas d'achat
-// intégré, donc pas de guideline 3.1.1 à opposer, et Apple Pay reste
-// disponible puisque la page s'ouvre dans Safari.
+// ── DON (Stripe, dans l'app) ──
+// L'association est reconnue « approved nonprofit » par Apple (via Benevity)
+// et validée par Goodstack côté Google : le don se fait DANS l'app, ce que la
+// guideline 3.2.1(vi) autorise à condition de proposer Apple Pay sur iOS.
+// Paiement : feuille native Stripe (@capacitor-community/stripe). Chaque
+// paiement est préparé par le serveur de dons (workers/dons), seul détenteur
+// de la clé secrète. Les valeurs ci-dessous sont publiques par conception :
+// aucune ne donne accès au compte Stripe.
+const DONS_CONFIG = {
+  apiUrl: '',               // URL du Worker de dons
+  stripePublishableKey: '', // pk_test_… pendant les essais, pk_live_… en production
+  portailUrl: '',           // lien de connexion au portail client Stripe
+  applePayMerchantId: '',   // ex. merchant.fr.sereinapp.app, une fois créé chez Apple
+  googlePayTest: true,      // à passer à false en production
+};
+// En centimes. Minimum 3 € : les frais fixes Stripe (0,25 €) pèsent trop
+// lourd en dessous. Les mêmes bornes sont revérifiées par le serveur.
+const DON_PALIERS = { mensuel: [300, 500, 1000, 2000], ponctuel: [500, 1000, 2000, 5000] };
+const DON_MONTANT_MIN = 300;
+const DON_MONTANT_MAX = 100000;
+
+let donType = 'mensuel';
+let donMontant = DON_PALIERS.mensuel[1];
+let donMontantLibre = false;
+let donPresentationActive = false;
+
 function isIosNative() {
   try {
     return typeof Capacitor !== 'undefined'
       && typeof Capacitor.getPlatform === 'function'
       && Capacitor.getPlatform() === 'ios';
   } catch(e) { return false; }
+}
+
+function isAndroidNative() {
+  try {
+    return typeof Capacitor !== 'undefined'
+      && typeof Capacitor.getPlatform === 'function'
+      && Capacitor.getPlatform() === 'android';
+  } catch(e) { return false; }
+}
+
+function stripePlugin() {
+  return window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Stripe;
+}
+
+// Sans Apple Pay configuré, iOS ne propose PAS le don : c'est une condition
+// de la guideline 3.2.1(vi), et un don sans Apple Pay risquerait un rejet de
+// l'app entière. Même logique si le serveur ou la clé ne sont pas renseignés :
+// mieux vaut aucun bouton qu'un bouton qui échoue.
+function donsDisponibles() {
+  if (!DONS_CONFIG.apiUrl || !DONS_CONFIG.stripePublishableKey) return false;
+  if (!stripePlugin()) return false;
+  if (isIosNative() && !DONS_CONFIG.applePayMerchantId) return false;
+  return true;
+}
+
+function appliquerDisponibiliteDons() {
+  const carte = document.getElementById('settings-don-card');
+  if (carte) carte.style.display = donsDisponibles() ? '' : 'none';
+  const portail = document.getElementById('don-portail');
+  if (portail) portail.hidden = !DONS_CONFIG.portailUrl;
+}
+
+function formatEuros(centimes) {
+  return new Intl.NumberFormat('fr-FR', {
+    style: 'currency', currency: 'EUR',
+    minimumFractionDigits: centimes % 100 ? 2 : 0, maximumFractionDigits: 2,
+  }).format(centimes / 100);
+}
+
+// « 4,50 », « 4.50 », « 12 », « 12 € » → centimes entiers ; null si illisible.
+function parseMontantSaisi(texte) {
+  const t = String(texte).replace(/[\s €]/g, '').replace(',', '.');
+  if (!/^\d+(\.\d{1,2})?$/.test(t)) return null;
+  return Math.round(parseFloat(t) * 100);
+}
+
+function nouvelleCleIdempotence() {
+  if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  // crypto.randomUUID n'existe qu'à partir d'iOS 15.4 ; l'app cible iOS 15.0.
+  return Array.from(crypto.getRandomValues(new Uint8Array(16)), b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function montantDonValide() {
+  return donMontant !== null && donMontant >= DON_MONTANT_MIN && donMontant <= DON_MONTANT_MAX;
+}
+
+function openDon() {
+  if (!donsDisponibles()) return;
+  donType = 'mensuel';
+  donMontant = DON_PALIERS.mensuel[1];
+  donMontantLibre = false;
+  document.getElementById('don-autre').value = '';
+  document.getElementById('don-erreur').textContent = '';
+  document.getElementById('don-formulaire').hidden = false;
+  document.getElementById('don-merci').hidden = true;
+  renderDon();
+  const ov = document.getElementById('don-overlay');
+  ov.classList.add('open');
+  ov.scrollTop = 0;
+  document.body.style.overflow = 'hidden';
+  registerOverlay('don', closeDonOverlay);
+}
+
+function closeDonOverlay() {
+  document.getElementById('don-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function renderDon() {
+  document.getElementById('don-type-mensuel').classList.toggle('active', donType === 'mensuel');
+  document.getElementById('don-type-ponctuel').classList.toggle('active', donType === 'ponctuel');
+
+  const grille = document.getElementById('don-montants');
+  grille.textContent = '';
+  DON_PALIERS[donType].forEach(centimes => {
+    const actif = !donMontantLibre && centimes === donMontant;
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'don-montant' + (actif ? ' active' : '');
+    b.setAttribute('aria-pressed', String(actif));
+    b.textContent = formatEuros(centimes);
+    b.addEventListener('click', () => {
+      donMontant = centimes;
+      donMontantLibre = false;
+      document.getElementById('don-autre').value = '';
+      renderDon();
+    });
+    grille.appendChild(b);
+  });
+
+  const valide = montantDonValide();
+  document.getElementById('don-equivalent').textContent =
+    donType === 'mensuel' && valide ? `Soit ${formatEuros(donMontant * 12)} par an.` : '';
+  document.getElementById('don-valider').textContent = !valide ? 'Donner'
+    : donType === 'mensuel' ? `Donner ${formatEuros(donMontant)} par mois` : `Donner ${formatEuros(donMontant)}`;
+}
+
+function selectDonType(type) {
+  donType = type;
+  if (!donMontantLibre) donMontant = DON_PALIERS[type][1];
+  renderDon();
+}
+
+function onDonAutreMontant(valeur) {
+  if (!valeur.trim()) {
+    donMontantLibre = false;
+    donMontant = DON_PALIERS[donType][1];
+  } else {
+    donMontantLibre = true;
+    donMontant = parseMontantSaisi(valeur);
+  }
+  renderDon();
+}
+
+function toggleDonRecu(coche) {
+  document.getElementById('don-recu-champs').hidden = !coche;
+}
+
+// Demande un paiement au serveur de dons, puis ouvre la feuille de paiement
+// native Stripe (Apple Pay sur iOS, Google Pay sur Android, carte partout).
+async function validerDon() {
+  const erreur = document.getElementById('don-erreur');
+  erreur.textContent = '';
+  if (donMontant === null || donMontant < DON_MONTANT_MIN) { erreur.textContent = 'Le don minimum est de 3 €.'; return; }
+  if (donMontant > DON_MONTANT_MAX) { erreur.textContent = 'Pour un don de plus de 1 000 €, écris-nous : serein@cesarbroche.fr.'; return; }
+
+  const email = document.getElementById('don-email').value.trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    erreur.textContent = 'Indique ton adresse e-mail, pour recevoir la confirmation du don.';
+    return;
+  }
+
+  const type = donType;
+  const recuFiscal = document.getElementById('don-recu').checked;
+  const demande = { montant: donMontant, email, recuFiscal, cleIdempotence: nouvelleCleIdempotence() };
+  if (recuFiscal) {
+    demande.nom = document.getElementById('don-nom').value.trim();
+    demande.adresse = document.getElementById('don-adresse').value.trim();
+    demande.codePostal = document.getElementById('don-cp').value.trim();
+    demande.ville = document.getElementById('don-ville').value.trim();
+    if (!demande.nom || !demande.adresse || !demande.codePostal || !demande.ville) {
+      erreur.textContent = 'Complète ton nom et ton adresse pour recevoir le reçu fiscal.';
+      return;
+    }
+  }
+
+  const btn = document.getElementById('don-valider');
+  btn.disabled = true;
+  btn.textContent = 'Préparation…';
+  try {
+    const rep = await fetch(DONS_CONFIG.apiUrl.replace(/\/$/, '') + '/don/' + type, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(demande),
+    });
+    const corps = await rep.json().catch(() => ({}));
+    // Seuls les messages du serveur de dons (en français, pensés pour
+    // l'utilisateur) sont affichés tels quels.
+    if (!rep.ok) { erreur.textContent = corps.erreur || 'Le don n’a pas pu être préparé. Réessaie dans un instant.'; return; }
+
+    const Stripe = stripePlugin();
+    await Stripe.createPaymentSheet({
+      paymentIntentClientSecret: corps.clientSecret,
+      customerId: corps.clientId,
+      customerEphemeralKeySecret: corps.cleEphemere,
+      merchantDisplayName: 'Serein',
+      countryCode: 'FR',
+      currencyCode: 'EUR',
+      enableApplePay: isIosNative(),
+      applePayMerchantId: DONS_CONFIG.applePayMerchantId || undefined,
+      enableGooglePay: isAndroidNative(),
+      GooglePayIsTesting: DONS_CONFIG.googlePayTest,
+      defaultBillingDetails: { email },
+    });
+
+    donPresentationActive = true;
+    let resultat;
+    try {
+      resultat = (await Stripe.presentPaymentSheet()).paymentResult;
+    } finally {
+      // Voir initialiserDons : l'événement du plugin arrive aussi, en plus de
+      // cette promesse. Ce délai évite de traiter deux fois le même paiement.
+      setTimeout(() => { donPresentationActive = false; }, 3000);
+    }
+    traiterResultatDon(resultat, type, demande);
+  } catch (e) {
+    console.warn('[Serein dons]', e);
+    erreur.textContent = 'Le don n’a pas pu aboutir. Vérifie ta connexion et réessaie.';
+  } finally {
+    btn.disabled = false;
+    renderDon();
+  }
+}
+
+function traiterResultatDon(resultat, type, demande) {
+  if (resultat === 'paymentSheetCompleted') {
+    haptic('success');
+    markDonInvitationSeen();
+    const montant = formatEuros(demande.montant);
+    let texte = type === 'mensuel'
+      ? `Ton don de ${montant} par mois soutient Serein. Tu vas recevoir une confirmation par e-mail, et tu peux l’arrêter à tout moment depuis cet écran.`
+      : `Ton don de ${montant} soutient Serein. Tu vas recevoir une confirmation par e-mail.`;
+    if (demande.recuFiscal) texte += ' Ton reçu fiscal te sera envoyé en début d’année prochaine.';
+    document.getElementById('don-merci-texte').textContent = texte;
+    document.getElementById('don-formulaire').hidden = true;
+    document.getElementById('don-merci').hidden = false;
+    document.getElementById('don-overlay').scrollTop = 0;
+  } else if (resultat === 'paymentSheetFailed') {
+    document.getElementById('don-erreur').textContent = 'Le paiement n’a pas abouti. Tu peux réessayer.';
+  }
+  // paymentSheetCanceled : la personne a refermé la feuille, rien à signaler.
+}
+
+// Android peut recréer l'Activity — et donc tout le JavaScript — pendant que
+// la feuille de paiement est ouverte. La promesse d'origine est alors perdue,
+// et le plugin retient le résultat jusqu'à ce qu'un écouteur existe : d'où ces
+// écouteurs posés dès le démarrage. En temps normal l'événement arrive AUSSI,
+// en plus de la promesse ; donPresentationActive l'écarte dans ce cas.
+async function initialiserDons() {
+  appliquerDisponibiliteDons();
+  const Stripe = stripePlugin();
+  if (!Stripe || !DONS_CONFIG.stripePublishableKey) return;
+  try {
+    await Stripe.initialize({ publishableKey: DONS_CONFIG.stripePublishableKey });
+  } catch (e) { console.warn('[Serein dons]', e); return; }
+
+  const recupererResultat = resultat => {
+    if (donPresentationActive) return;
+    const ok = [{ label: 'OK', onClick: toast => toast.remove() }];
+    if (resultat === 'paymentSheetCompleted') {
+      haptic('success');
+      markDonInvitationSeen();
+      showActionToast('don-merci-toast', 'Merci pour ton don 🌿 Une confirmation t’a été envoyée par e-mail.', ok);
+    } else if (resultat === 'paymentSheetFailed') {
+      showActionToast('don-echec-toast', 'Ton paiement n’a pas abouti. Tu peux réessayer depuis les Réglages.', ok);
+    }
+  };
+  ['paymentSheetCompleted', 'paymentSheetCanceled', 'paymentSheetFailed']
+    .forEach(evt => Stripe.addListener(evt, () => recupererResultat(evt)));
+}
+
+function ouvrirPortailDons() {
+  if (!DONS_CONFIG.portailUrl) return;
+  // La résiliation n'est pas une collecte de fonds : l'ouvrir hors de l'app
+  // ne pose aucun problème, et c'est Stripe qui y vérifie l'identité par e-mail.
+  const isNative = typeof Capacitor !== 'undefined' && Capacitor.isNativePlatform && Capacitor.isNativePlatform();
+  window.open(DONS_CONFIG.portailUrl, isNative ? '_system' : '_blank', 'noopener,noreferrer');
 }
 
 // iOS ignore HTMLMediaElement.volume (voir en-tête du fichier) : le curseur
@@ -4274,12 +4550,6 @@ function hideMainVolumeSliderOnIos() {
   const wrap = document.getElementById('main-volume-wrap');
   if (label) label.style.display = 'none';
   if (wrap) wrap.style.display = 'none';
-}
-
-function openDon() {
-  const url = 'https://www.helloasso.com/associations/sereinapp/formulaires/1';
-  const isNative = typeof Capacitor !== 'undefined' && Capacitor.isNativePlatform && Capacitor.isNativePlatform();
-  window.open(url, isNative ? '_system' : '_blank', 'noopener,noreferrer');
 }
 
 function openPrivacyPolicy() {
@@ -4505,6 +4775,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   loadStats();
   loadPrefs();
   hideMainVolumeSliderOnIos();
+  initialiserDons();
   updateVoiceSettingLabel();
   renderResumeCard();
   updateMoodChips();

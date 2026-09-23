@@ -656,6 +656,36 @@
     .don-invitation-close:hover { background: var(--color-surface-2); color: var(--color-text); }
     .don-invitation-close:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
     [data-theme="light"] .don-invitation-card { backdrop-filter: none; -webkit-backdrop-filter: none; background: #fff; box-shadow: 0 6px 22px -16px rgba(30,50,40,0.22); }
+
+    /* Écran de don : overlay de contenu (250), même famille que parcours/programme */
+    .don-overlay { display: none; position: fixed; inset: 0; z-index: 250; background: var(--color-bg); overflow-y: auto; overscroll-behavior: none; -webkit-overflow-scrolling: touch; }
+    .don-overlay.open { display: block; animation: fadeInBd .2s ease; }
+    .don-overlay .back { position: absolute; top: max(.9rem, env(safe-area-inset-top)); left: .9rem; z-index: 3; background: var(--color-surface); border: 1px solid var(--color-border); color: var(--color-text); border-radius: 2rem; padding: .45rem .9rem; font-size: .85rem; cursor: pointer; }
+    .don-body { max-width: 520px; margin: 0 auto; padding: calc(max(.9rem, env(safe-area-inset-top)) + 3.5rem) 1.25rem calc(2rem + env(safe-area-inset-bottom)); }
+    .don-eyebrow { text-align: center; font-size: .72rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--color-primary); }
+    .don-titre { text-align: center; font-size: 1.55rem; line-height: 1.2; margin: .5rem 0 .75rem; }
+    .don-intro { text-align: center; font-size: .92rem; line-height: 1.6; color: var(--color-muted); margin-bottom: 1.4rem; }
+    .don-frequence { width: max-content; margin: 0 auto 1rem; }
+    .don-montants { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; }
+    .don-montant { border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text); border-radius: 14px; padding: .95rem; font-size: 1.05rem; font-weight: 600; font-family: inherit; cursor: pointer; transition: border-color .18s, box-shadow .18s; }
+    .don-montant.active { border-color: var(--color-primary); box-shadow: inset 0 0 0 1px var(--color-primary); }
+    .don-equivalent { text-align: center; font-size: .82rem; color: var(--color-muted); margin: .7rem 0 1.1rem; min-height: 1.2em; }
+    .don-champ { display: block; margin-bottom: .85rem; font-size: .82rem; color: var(--color-muted); }
+    /* 1rem minimum : en dessous, iOS zoome au focus du champ (voir .explore-search). */
+    .don-champ input { display: block; width: 100%; box-sizing: border-box; margin-top: .35rem; padding: .8rem .9rem; border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-surface); color: var(--color-text); font-size: 1rem; font-family: inherit; }
+    .don-champ input:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+    .don-recu { display: flex; align-items: center; gap: .6rem; margin: .2rem 0 .85rem; font-size: .9rem; color: var(--color-text); cursor: pointer; }
+    .don-recu input { width: 20px; height: 20px; accent-color: var(--color-primary); }
+    .don-recu-aide { font-size: .78rem; color: var(--color-muted); margin: -.35rem 0 .85rem; }
+    .don-ligne { display: grid; grid-template-columns: 7rem 1fr; gap: .6rem; }
+    .don-erreur { text-align: center; font-size: .85rem; color: #e8a0a0; min-height: 1.2em; margin: .2rem 0 .6rem; }
+    [data-theme="light"] .don-erreur { color: #a3322b; }
+    .don-valider { width: 100%; }
+    .don-valider:disabled { opacity: .6; cursor: default; }
+    .don-securite { text-align: center; font-size: .75rem; line-height: 1.5; color: var(--color-muted); margin-top: .8rem; }
+    .don-portail { display: block; margin: 1.2rem auto 0; background: none; border: none; color: var(--color-primary); font-size: .85rem; font-family: inherit; text-decoration: underline; cursor: pointer; }
+    .don-merci { text-align: center; padding-top: 2rem; }
+    .don-merci-icone { font-size: 2.5rem; }
     @media (prefers-reduced-motion: no-preference) {
       #don-invitation-block { animation: donFadeIn .4s ease; }
       @keyframes donFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
@@ -765,7 +795,8 @@
     .article-hero:focus-visible, .article-mini-card:focus-visible, .progress-track:focus-visible,
     .btn-fav:focus-visible, .download-del:focus-visible, .program-card:focus-visible, .program-hc:focus-visible,
     .pday-launch:focus-visible, .ambiance-btn:focus-visible, .speed-btn:focus-visible, .voice-option:focus-visible,
-    .faq-question:focus-visible, .toolbar-btn:focus-visible, .report-btn:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+    .faq-question:focus-visible, .toolbar-btn:focus-visible, .report-btn:focus-visible,
+    .don-montant:focus-visible, .don-portail:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
 
     /* Responsive */
     @media (max-width:600px) { h1{font-size:1.5rem} }
@@ -1323,6 +1354,50 @@
     <div class="parcours-hero-txt"><h1 id="program-title"></h1></div>
   </div>
   <div class="parcours-overlay-body" id="program-body"></div>
+</div>
+
+<!-- Écran de don (paiement Stripe dans l'app) : overlay de contenu, z-index 250 -->
+<div class="don-overlay" id="don-overlay" role="dialog" aria-modal="true" aria-labelledby="don-titre">
+  <button class="back" onclick="closeDonOverlay();releaseOverlay('don')" aria-label="Fermer">‹ Retour</button>
+  <div class="don-body">
+    <div id="don-formulaire">
+      <p class="don-eyebrow">Soutenir Serein</p>
+      <h2 class="don-titre" id="don-titre">Garder la méditation gratuite pour tout le monde</h2>
+      <p class="don-intro">Serein est porté par une association, sans pub ni abonnement. Tes dons couvrent l'hébergement et l'enregistrement de nouvelles séances.</p>
+      <div class="theme-seg don-frequence" role="group" aria-label="Fréquence du don">
+        <button class="seg-btn" id="don-type-mensuel" type="button" onclick="selectDonType('mensuel')">Mensuel</button>
+        <button class="seg-btn" id="don-type-ponctuel" type="button" onclick="selectDonType('ponctuel')">Ponctuel</button>
+      </div>
+      <div class="don-montants" id="don-montants" role="group" aria-label="Montant du don"></div>
+      <p class="don-equivalent" id="don-equivalent"></p>
+      <label class="don-champ">Autre montant (3 € minimum)
+        <input type="text" inputmode="decimal" id="don-autre" placeholder="€" autocomplete="off" oninput="onDonAutreMontant(this.value)">
+      </label>
+      <label class="don-champ">Ton e-mail, pour la confirmation du don
+        <input type="email" id="don-email" autocomplete="email" placeholder="toi@exemple.fr">
+      </label>
+      <label class="don-recu"><input type="checkbox" id="don-recu" onchange="toggleDonRecu(this.checked)"> Je souhaite un reçu fiscal</label>
+      <div id="don-recu-champs" hidden>
+        <p class="don-recu-aide">Il t'est envoyé en début d'année suivante, pour l'ensemble de tes dons.</p>
+        <label class="don-champ">Nom et prénom <input type="text" id="don-nom" autocomplete="name"></label>
+        <label class="don-champ">Adresse <input type="text" id="don-adresse" autocomplete="street-address"></label>
+        <div class="don-ligne">
+          <label class="don-champ">Code postal <input type="text" id="don-cp" autocomplete="postal-code" inputmode="numeric"></label>
+          <label class="don-champ">Ville <input type="text" id="don-ville" autocomplete="address-level2"></label>
+        </div>
+      </div>
+      <p class="don-erreur" id="don-erreur" role="alert"></p>
+      <button class="btn btn-primary don-valider" id="don-valider" type="button" onclick="validerDon()">Donner</button>
+      <p class="don-securite">Paiement sécurisé par Stripe. Serein ne voit jamais tes coordonnées bancaires.</p>
+      <button class="don-portail" id="don-portail" type="button" onclick="ouvrirPortailDons()">Gérer ou arrêter mon don mensuel</button>
+    </div>
+    <div class="don-merci" id="don-merci" hidden>
+      <div class="don-merci-icone" aria-hidden="true">🌿</div>
+      <h2 class="don-titre">Merci</h2>
+      <p class="don-intro" id="don-merci-texte"></p>
+      <button class="btn btn-primary don-valider" type="button" onclick="closeDonOverlay();releaseOverlay('don')">Revenir à l'app</button>
+    </div>
+  </div>
 </div>
 
 <!-- EXPLORER -->

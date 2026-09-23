@@ -1,0 +1,11 @@
+{
+  "name": "serein-dons",
+  "private": true,
+  "type": "module",
+  "description": "Serveur de dons de Serein (Cloudflare Worker) — prépare les paiements Stripe pour l'app.",
+  "scripts": {
+    "dev": "npx wrangler dev",
+    "deploy": "npx wrangler deploy",
+    "logs": "npx wrangler tail"
+  }
+}
