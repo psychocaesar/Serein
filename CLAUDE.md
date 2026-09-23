@@ -41,7 +41,9 @@ Positionnement assumé : **pas de traduction prévue** — la niche est "LA méd
   - **Pas de reçu fiscal** : l'association n'est pas reconnue d'intérêt général, et émettre des reçus sans l'être est illégal (amende fiscale). Ne rien ajouter qui en promette un ou évoque une réduction d'impôt. Seule donnée personnelle collectée : l'e-mail. Si l'association obtient un jour un rescrit fiscal, le mécanisme (reçu optionnel, nom et adresse seulement si demandé) est dans l'historique git de `workers/dons` et de l'écran de don.
   - Minimum 3 € (frais fixes Stripe par transaction). Résiliation du mensuel : portail client hébergé par Stripe (connexion par e-mail).
   - L'invitation (`DON_INVITATION_ACTIVE`) apparaît **une seule fois**, sur l'accueil, après `DON_INVITATION_SEUIL` séances terminées, et reste rejetable. La politique de confidentialité (`privacy.html`) décrit les données collectées pour les dons : la tenir à jour à chaque changement de ce flux.
-- **z-index des overlays** (`index.html`) : onboarding (300) > modales ouvertes depuis le player — voix/minuteur/ambiance/signalement (270) > player (260) > overlays de contenu — parcours/programme/respiration (250). Respecter cette hiérarchie pour tout nouvel overlay.
+- **Épure avant tout** : on vient se détendre, pas être assailli d'informations. Les statistiques ne s'affichent que si on vient les chercher (« Ta pratique », bouton rond de l'accueil, masqué tant qu'aucune séance n'est terminée). Dans les Réglages, les actions rares ou délicates restent repliées dans le tiroir « Avancé ».
+- **Pas de série de jours d'affilée** : « Ta pratique » compte les **jours de pratique du mois** (`joursDePratiqueCeMois`) ; un jour manqué ne fait rien perdre. Choix clinique de César : une série qui retombe à zéro culpabilise et précède souvent l'abandon. Ne pas réintroduire de compteur qui se remet à zéro.
+- **z-index des overlays** (`index.html`) : onboarding (300) > modales ouvertes depuis le player — voix/minuteur/ambiance/signalement (270) > player (260) > overlays de contenu — parcours/programme/respiration/don/pratique (250). Respecter cette hiérarchie pour tout nouvel overlay.
 
 ## Workflow
 
