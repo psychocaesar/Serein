@@ -4383,6 +4383,10 @@ const DONS_CONFIG = {
   portailUrl: 'https://billing.stripe.com/p/login/6oU00c0brb1a4On6rGg7e00', // lien de connexion au portail client Stripe (production)
   applePayMerchantId: 'merchant.fr.sereinapp.app', // doit correspondre à App/App.entitlements (iOS)
   googlePayTest: false,     // Google Pay en production
+  // Google Pay en production exige l'accord de Google (Google Pay & Wallet
+  // Console, intégration « Gateway ») : sans lui, le bouton mène à une erreur.
+  // Masqué jusqu'à l'accord ; la carte reste disponible sur Android.
+  googlePayActif: false,
 };
 // En centimes. Minimum 3 € : les frais fixes Stripe (0,25 €) pèsent trop
 // lourd en dessous. Les mêmes bornes sont revérifiées par le serveur.
@@ -4571,7 +4575,7 @@ async function validerDon() {
       currencyCode: 'EUR',
       enableApplePay: isIosNative(),
       applePayMerchantId: DONS_CONFIG.applePayMerchantId || undefined,
-      enableGooglePay: isAndroidNative(),
+      enableGooglePay: isAndroidNative() && DONS_CONFIG.googlePayActif,
       GooglePayIsTesting: DONS_CONFIG.googlePayTest,
       defaultBillingDetails: { email },
     });
