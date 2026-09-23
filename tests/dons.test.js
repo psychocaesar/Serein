@@ -21,6 +21,8 @@ const SHIM = `
   DONS_CONFIG: DONS_CONFIG,
   DON_PALIERS: DON_PALIERS,
   DON_MONTANT_MIN: DON_MONTANT_MIN,
+  initialiserDons: initialiserDons,
+  demarrerStripe: demarrerStripe,
 };`;
 
 const src = fs.readFileSync(path.join(PWA_DIR, 'app.js'), 'utf8');
@@ -91,4 +93,24 @@ test('Android : don disponible dès que serveur et clé sont configurés', () =>
 test('sans le plugin Stripe (web, build ancien) : don masqué', () => {
   configurer({ plateforme: 'android', plugin: false, config: COMPLET });
   assert.strictEqual(D.donsDisponibles(), false);
+});
+
+test('Stripe n\'est pas démarré au lancement, seulement au moment d\'un don', async () => {
+  // Son SDK contacte les serveurs de Stripe dès l'initialisation : pour qui
+  // médite sans jamais donner, rien ne doit quitter l'appareil.
+  configurer({ plateforme: 'android', config: COMPLET });
+  const appels = { initialize: 0, ecouteurs: [] };
+  sandbox.Capacitor.Plugins.Stripe = {
+    initialize: async () => { appels.initialize++; },
+    addListener: evt => { appels.ecouteurs.push(evt); },
+  };
+  await D.initialiserDons();
+  assert.strictEqual(appels.initialize, 0, 'aucune initialisation au lancement');
+  assert.deepStrictEqual(Array.from(appels.ecouteurs).sort(),
+    ['paymentSheetCanceled', 'paymentSheetCompleted', 'paymentSheetFailed'],
+    'les écouteurs restent posés au lancement (Android peut recréer l\'Activity)');
+
+  await D.demarrerStripe(sandbox.Capacitor.Plugins.Stripe);
+  await D.demarrerStripe(sandbox.Capacitor.Plugins.Stripe);
+  assert.strictEqual(appels.initialize, 1, 'une seule initialisation, au premier don');
 });

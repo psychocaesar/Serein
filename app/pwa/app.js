@@ -4563,6 +4563,7 @@ async function validerDon() {
     if (!rep.ok) { erreur.textContent = corps.erreur || 'Le don n’a pas pu être préparé. Réessaie dans un instant.'; return; }
 
     const Stripe = stripePlugin();
+    await demarrerStripe(Stripe);
     await Stripe.createPaymentSheet({
       paymentIntentClientSecret: corps.clientSecret,
       merchantDisplayName: 'Serein',
@@ -4624,9 +4625,6 @@ async function initialiserDons() {
   appliquerDisponibiliteDons();
   const Stripe = stripePlugin();
   if (!Stripe || !DONS_CONFIG.stripePublishableKey) return;
-  try {
-    await Stripe.initialize({ publishableKey: DONS_CONFIG.stripePublishableKey });
-  } catch (e) { console.warn('[Serein dons]', e); return; }
 
   const recupererResultat = resultat => {
     if (donPresentationActive) return;
@@ -4641,6 +4639,19 @@ async function initialiserDons() {
   };
   ['paymentSheetCompleted', 'paymentSheetCanceled', 'paymentSheetFailed']
     .forEach(evt => Stripe.addListener(evt, () => recupererResultat(evt)));
+}
+
+// Stripe n'est démarré qu'au moment d'un don, jamais au lancement : son SDK
+// contacte les serveurs de Stripe dès qu'il est initialisé, et la politique
+// de confidentialité promet que rien ne quitte l'appareil pour méditer.
+// Les écouteurs d'initialiserDons n'en ont pas besoin (Android relance).
+let stripeDemarre = null;
+function demarrerStripe(Stripe) {
+  if (!stripeDemarre) {
+    stripeDemarre = Stripe.initialize({ publishableKey: DONS_CONFIG.stripePublishableKey })
+      .catch(e => { stripeDemarre = null; throw e; });
+  }
+  return stripeDemarre;
 }
 
 function ouvrirPortailDons() {
