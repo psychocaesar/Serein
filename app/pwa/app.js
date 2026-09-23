@@ -4379,10 +4379,10 @@ Envoyé depuis sereinapp.fr`;
 // aucune ne donne accès au compte Stripe.
 const DONS_CONFIG = {
   apiUrl: 'https://serein-dons.serein-dons.workers.dev', // URL du Worker de dons
-  stripePublishableKey: 'pk_test_51UInstRr5DAwL8012kileF1RzcwneJ04Xt2aT21nmNHejE6neff9ZEWArBkLQYfe1Utvlm4INUISOF8neUUFNyxk00eWc5QfCa', // pk_test_… pendant les essais, pk_live_… en production
-  portailUrl: 'https://billing.stripe.com/p/login/test_7sY8wRcs43h22Cv2gB6Zy00', // lien de connexion au portail client Stripe (test)
+  stripePublishableKey: 'pk_live_51UInsi2NrLvFsJhgXDcPRwEhBMBgbkBGPdGlccB9dBQYcqwhLH2Ivc7S53n2NK6Qbis87qBRNDZB4YT0XQJGGLIP008LDRdXyP', // production
+  portailUrl: 'https://billing.stripe.com/p/login/6oU00c0brb1a4On6rGg7e00', // lien de connexion au portail client Stripe (production)
   applePayMerchantId: 'merchant.fr.sereinapp.app', // doit correspondre à App/App.entitlements (iOS)
-  googlePayTest: true,      // à passer à false en production
+  googlePayTest: false,     // Google Pay en production
 };
 // En centimes. Minimum 3 € : les frais fixes Stripe (0,25 €) pèsent trop
 // lourd en dessous. Les mêmes bornes sont revérifiées par le serveur.
