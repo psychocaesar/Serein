@@ -89,6 +89,13 @@
             android:exported="false"
             android:foregroundServiceType="mediaPlayback" />
 
+        <!-- ── Google Pay dans la feuille de paiement Stripe (écran de don) ──
+             Exigé par Stripe pour proposer Google Pay ; sans lui, seule la
+             carte bancaire apparaît. -->
+        <meta-data
+            android:name="com.google.android.gms.wallet.api.enabled"
+            android:value="true" />
+
         <!-- ── Receiver pour reprogrammer les alarmes après redémarrage ── -->
         <receiver
             android:name="com.capacitorjs.plugins.localnotifications.LocalNotificationRestoreReceiver"
