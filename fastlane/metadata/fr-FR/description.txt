@@ -1,4 +1,4 @@
-Serein propose des séances de méditation guidée en français, entièrement gratuites, sans publicité, sans compte et sans collecte de données.
+Serein propose des séances de méditation guidée en français, entièrement gratuites, sans publicité et sans compte. Pour méditer, aucune donnée ne quitte ton appareil.
 
 L'application est conçue par un psychologue du travail spécialisé en thérapies cognitivo-comportementales (TCC) et en thérapie d'acceptation et d'engagement (ACT). Les séances couvrent l'anxiété, le stress, le sommeil, la respiration, l'attention et la régulation émotionnelle.
 
@@ -6,8 +6,9 @@ Fonctionnalités :
 * Plus de 35 séances guidées réparties en parcours thématiques
 * Minuteur de méditation libre et exercice de respiration visuelle
 * Guide conversationnel qui recommande une séance selon le ressenti du moment
+* Programmes jour par jour et « Ta pratique » pour suivre ta régularité, sans pression
 * Écoute hors ligne (téléchargement des séances)
 * Aucun compte, aucune publicité, aucun tracker
 * Code source ouvert sous licence AGPL-3.0
 
-Serein est porté par une association loi 1901 à but non lucratif. L'application restera gratuite.
+Serein est porté par une association loi 1901 à but non lucratif. L'application restera gratuite : si tu le souhaites, tu peux la soutenir par un don, ponctuel ou mensuel, directement dans l'app.
