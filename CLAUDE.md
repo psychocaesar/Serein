@@ -27,6 +27,7 @@ Positionnement assumé : **pas de traduction prévue** — la niche est "LA méd
 - **Offline iOS** : WKWebView + scheme `capacitor://` = pas de service worker actif en natif. `resolveAudioSrc` lit Cache Storage → blob URL pour contourner.
 - **CORS/tainted audio** : `crossOrigin="anonymous"` doit être posé sur les éléments `<audio>` AVANT toute src (sinon Web Audio sort du silence sur un flux CDN cross-origin). Le SW doit répécuter l'en-tête ACAO sur ses réponses 206 synthétisées.
 - **Plugins Capacitor et AGP 9** : certains plugins référencent `getDefaultProguardFile('proguard-android.txt')`, que l'AGP 9 refuse — le build Android échoue à la configuration du plugin. `scripts/patch-plugins-proguard.mjs` (lancé en `postinstall`) les corrige dans `node_modules` ; y ajouter tout nouveau plugin qui casse de la même façon (aujourd'hui `in-app-review` et `stripe`).
+- **iPad (l'app est déclarée iPhone + iPad)** : App Review teste sur iPad. Un élément `position: fixed` ne doit jamais porter de `max-width` : il laisserait voir l'app de part et d'autre (refus guideline 4 en septembre 2026, sur l'onboarding). Fond plein écran, contenu centré dans une colonne (`max-width` sur un enfant, ou `padding-inline: max(…, calc((100% - Npx) / 2))`). Vérifier tout nouvel écran à 1024×1366.
 - **Keystore Android** (`app/android/release-key.keystore` + `keystore.properties`) : **irremplaçable**, non versionné, sauvegardé hors du repo. Nécessaire pour toute mise à jour Play Store — sans lui, plus jamais possible de publier sous la même app.
 
 ## Conventions produit
