@@ -130,15 +130,18 @@
     },
     {
       "id": "sommeil-5j",
-      "title": "5 jours vers un meilleur sommeil",
-      "subtitle": "Préparer la nuit, en douceur.",
+      "title": "7 jours vers un meilleur sommeil",
+      "subtitle": "Relâcher la lutte avec la nuit, en douceur.",
+      "note": "Si tes difficultés de sommeil reviennent au moins trois nuits par semaine depuis plus de trois mois, ou si tu ronfles fort et te réveilles fatigué·e, parles-en à ton médecin. Une thérapie cognitive et comportementale de l'insomnie (TCC-I) est le traitement recommandé.",
       "artwork": "assets/illustrations/player-03.jpg",
       "days": [
-        { "sessionId": "s7", "intro": "Couper le fil de la journée avant la nuit." },
-        { "sessionId": "s20", "intro": "Une détente progressive pour glisser vers le sommeil." },
-        { "sessionId": "s19", "intro": "Se laisser porter par les sons jusqu'à l'endormissement." },
-        { "sessionId": "s8", "intro": "Retrouver le calme quand la nuit se fragmente." },
-        { "sessionId": "s21", "intro": "Émerger en douceur et bien commencer la journée." }
+        { "sessionId": "s2", "intro": "Cette semaine, on ne cherche pas à dormir : on apprend à relâcher la lutte avec la nuit. Aujourd'hui, pratique en journée, à un moment calme, sans rien attendre." },
+        { "sessionId": "s7", "intro": "En début de soirée, note d'abord ce qui te préoccupe et, pour chaque chose, la prochaine petite étape. Ce qui est sur le papier n'a plus besoin de tourner cette nuit." },
+        { "sessionId": "s20", "intro": "Relâcher le corps, simplement. Si le sommeil vient, tant mieux ; sinon, tu auras quand même pris ce temps de repos." },
+        { "sessionId": "s14", "intro": "Le soir, les pensées semblent plus lourdes et plus urgentes. On apprend à les regarder passer plutôt qu'à les résoudre." },
+        { "sessionId": "s19", "intro": "Tu n'as rien à faire, pas même t'endormir. Laisse les sons venir à toi, et reviens à eux quand ton esprit s'échappe." },
+        { "sessionId": "s8", "intro": "Se réveiller la nuit est normal. Si tu t'agites et que ça dure, tu as le droit de te lever un moment, puis de revenir quand le sommeil se fait sentir." },
+        { "sessionId": "s21", "intro": "Quelle qu'ait été ta nuit, lève-toi à peu près à la même heure et va chercher la lumière du jour : c'est le matin que se prépare la nuit suivante." }
       ]
     }
   ]

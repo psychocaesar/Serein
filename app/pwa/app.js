@@ -2796,6 +2796,7 @@ function renderProgramOverlayContent(programId) {
   let html = '';
   if (!enrolled) {
     html += `<p class="program-intro">${escapeHtml(p.subtitle || '')}</p>`;
+    if (p.note) html += `<p class="program-note">${escapeHtml(p.note)}</p>`;
     html += `<button class="btn btn-primary program-start" onclick="enrollProgram('${p.id}')">Commencer ce programme</button>`;
     html += '<div class="program-days">';
     p.days.forEach((d, i) => { html += dayRowHTML(i + 1, dayTitleOf(d.sessionId), 'future'); });
