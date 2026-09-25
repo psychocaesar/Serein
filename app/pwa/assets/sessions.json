@@ -107,9 +107,9 @@
       "days": [
         { "sessionId": "s1", "intro": "Aujourd'hui, le souffle sert de point d'appui. S'il te met mal à l'aise, pose plutôt ton attention sur tes pieds ou sur les sons : c'est tout aussi juste." },
         { "sessionId": "s16", "intro": "Ton esprit va partir ailleurs, c'est normal. Méditer, c'est justement remarquer qu'il est parti, et revenir." },
-        { "sessionId": "s4", "intro": "L'attention voyage dans le corps, des pieds à la tête. Pas besoin de sentir quelque chose de particulier : remarquer « rien » compte aussi." },
+        { "sessionId": "s4", "intro": "Aujourd'hui, on remarque les sensations du corps et on les nomme au passage : chaleur, picotement, tension. Pas besoin de sentir quelque chose de particulier : remarquer « rien » compte aussi." },
         { "sessionId": "s18", "intro": "Tu as essayé plusieurs points d'appui. Aujourd'hui, choisis le tien : celui que tu pourras retrouver partout." },
-        { "sessionId": "s3", "intro": "Depuis ton ancre, tu peux regarder passer les pensées sans les suivre. Si tu te fais emporter, reviens simplement à ton point d'appui." },
+        { "sessionId": "s3", "intro": "Aujourd'hui, pas de point fixe : tu observes ce qui passe, les sons, les sensations, les pensées. Si tu te fais emporter, tu sais maintenant où revenir." },
         { "sessionId": "s17", "intro": "Tu t'es peut-être dit « je n'y arrive pas ». Aujourd'hui, on pose sur toi le regard que tu aurais pour un ami qui débute." },
         { "sessionId": "s2", "intro": "Dernier jour : plus de point d'appui obligatoire. Simplement être là, et revenir à ton ancre quand tu en as besoin." }
       ]
