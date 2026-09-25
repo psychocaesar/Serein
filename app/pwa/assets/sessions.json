@@ -47,7 +47,7 @@
         }
       ],
       "resources": [
-        { "name": "Mon parcours psy", "desc": "Consulter un·e psychologue remboursé·e par l'Assurance Maladie - sans avance de frais.", "url": "https://www.ameli.fr/assure/remboursements/rembourse/remboursement-seance-psychologue-mon-soutien-psy" },
+        { "name": "Mon soutien psy", "desc": "Consulter un·e psychologue remboursé·e par l'Assurance Maladie - sans avance de frais.", "url": "https://www.ameli.fr/assure/remboursements/rembourse/remboursement-seance-psychologue-mon-soutien-psy" },
         { "name": "Psycom", "desc": "Guide indépendant sur la santé mentale : comprendre, trouver de l'aide, orienter ses proches.", "url": "https://www.psycom.org" },
         { "name": "3114 - Numéro national de prévention du suicide", "desc": "Disponible 24h/24, 7j/7. Des professionnels de santé à l'écoute en cas de crise.", "url": "https://3114.fr" }
       ]
@@ -102,30 +102,32 @@
       "id": "debuter-7j",
       "title": "7 jours pour débuter",
       "subtitle": "Une première semaine de pratique, pas à pas.",
+      "note": "Si une séance fait remonter un malaise intense, tu peux ouvrir les yeux, changer de point d'appui ou t'arrêter. Si ce malaise persiste, parles-en à un·e professionnel·le de santé.",
       "artwork": "assets/illustrations/player-01.jpg",
       "days": [
-        { "sessionId": "s1", "intro": "On commence par le souffle, comme point d'appui." },
-        { "sessionId": "s2", "intro": "Apprendre à être là, sans rien avoir à faire." },
-        { "sessionId": "s3", "intro": "Regarder passer les pensées comme des nuages." },
-        { "sessionId": "s4", "intro": "Relâcher les tensions, des pieds à la tête." },
-        { "sessionId": "s16", "intro": "Un ancrage simple, pour revenir ici et maintenant." },
-        { "sessionId": "s17", "intro": "Poser un regard plus doux sur toi-même." },
-        { "sessionId": "s18", "intro": "Construire ton repère intérieur, à garder avec toi." }
+        { "sessionId": "s1", "intro": "Aujourd'hui, le souffle sert de point d'appui. S'il te met mal à l'aise, pose plutôt ton attention sur tes pieds ou sur les sons : c'est tout aussi juste." },
+        { "sessionId": "s16", "intro": "Ton esprit va partir ailleurs, c'est normal. Méditer, c'est justement remarquer qu'il est parti, et revenir." },
+        { "sessionId": "s4", "intro": "L'attention voyage dans le corps, des pieds à la tête. Pas besoin de sentir quelque chose de particulier : remarquer « rien » compte aussi." },
+        { "sessionId": "s18", "intro": "Tu as essayé plusieurs points d'appui. Aujourd'hui, choisis le tien : celui que tu pourras retrouver partout." },
+        { "sessionId": "s3", "intro": "Depuis ton ancre, tu peux regarder passer les pensées sans les suivre. Si tu te fais emporter, reviens simplement à ton point d'appui." },
+        { "sessionId": "s17", "intro": "Tu t'es peut-être dit « je n'y arrive pas ». Aujourd'hui, on pose sur toi le regard que tu aurais pour un ami qui débute." },
+        { "sessionId": "s2", "intro": "Dernier jour : plus de point d'appui obligatoire. Simplement être là, et revenir à ton ancre quand tu en as besoin." }
       ]
     },
     {
       "id": "anxiete-7j",
       "title": "7 jours pour apprivoiser l'anxiété",
       "subtitle": "Laisser passer la vague, jour après jour.",
+      "note": "Si l'anxiété t'empêche de vivre normalement depuis plusieurs semaines (sommeil, travail, sorties), ou si tu fais des attaques de panique à répétition, parles-en à ton médecin ou à un·e psychologue : les thérapies cognitives et comportementales font partie des traitements recommandés. En cas d'idées suicidaires, appelle le 3114, 24 h/24.",
       "artwork": "assets/illustrations/player-05.jpg",
       "days": [
-        { "sessionId": "s12", "intro": "Accueillir l'anxiété plutôt que lutter contre elle." },
-        { "sessionId": "s9", "intro": "Réguler le système nerveux par la respiration." },
-        { "sessionId": "s13", "intro": "Recentrer l'attention par l'écoute de ce qui t'entoure." },
-        { "sessionId": "s14", "intro": "Désamorcer les pensées qui tournent en boucle." },
-        { "sessionId": "s24", "intro": "Apprivoiser les sensations physiques de la peur." },
-        { "sessionId": "s25", "intro": "Revenir au présent par les cinq sens." },
-        { "sessionId": "s11", "intro": "Un ancrage rapide, à garder pour les pics d'angoisse." }
+        { "sessionId": "s12", "intro": "Cette semaine, le but n'est pas de faire disparaître l'anxiété, mais de lui faire de la place pour qu'elle prenne moins de place dans ta vie." },
+        { "sessionId": "s13", "intro": "Quand l'esprit s'emballe, les sons offrent un appui simple, hors de toi. Écoute, sans chercher à te calmer." },
+        { "sessionId": "s9", "intro": "Un rythme de souffle qui aide le corps à se poser. C'est un appui pour traverser le moment, pas un bouton pour éteindre l'anxiété : si elle reste, c'est normal." },
+        { "sessionId": "s14", "intro": "L'inquiétude se présente comme une urgence à résoudre. Aujourd'hui, on la regarde comme une pensée parmi d'autres." },
+        { "sessionId": "s24", "intro": "Cœur qui s'accélère, souffle court : ces sensations sont désagréables mais pas dangereuses. On apprend à rester avec elles, doucement." },
+        { "sessionId": "s25", "intro": "Tes cinq sens te ramènent ici et maintenant. Tu pourras utiliser cet ancrage n'importe où, même les yeux ouverts." },
+        { "sessionId": "s17", "intro": "L'anxiété s'accompagne souvent d'une voix dure envers soi. Pour finir la semaine, on lui oppose un peu de douceur. Et pour les moments difficiles, « SOS Anxiété » reste dans le parcours." }
       ]
     },
     {
