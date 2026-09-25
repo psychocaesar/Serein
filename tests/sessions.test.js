@@ -49,6 +49,15 @@ test('chaque jour de programme référence une séance existante', () => {
   }
 });
 
+test('le programme Sommeil oriente vers un professionnel', () => {
+  // Garde-fou clinique : la méditation n'est pas le traitement de l'insomnie
+  // chronique (TCC-I en première intention) — voir CLAUDE.md.
+  const p = catalog.programs.find(x => x.id === 'sommeil-5j');
+  assert.ok(p, 'programme sommeil-5j introuvable');
+  assert.match(p.note || '', /médecin/, 'note d\'orientation manquante');
+  assert.match(p.note || '', /TCC-I/, 'la note doit nommer le traitement recommandé');
+});
+
 test('les ids de séances sont uniques', () => {
   const ids = allSessions().map(({ session }) => session.id);
   assert.strictEqual(new Set(ids).size, ids.length, 'ids dupliqués : ' + ids.filter((id, i) => ids.indexOf(id) !== i).join(', '));
