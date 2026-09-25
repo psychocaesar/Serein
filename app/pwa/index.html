@@ -123,6 +123,11 @@
 
     * { touch-action: manipulation; }
     body { font-family: 'Hanken Grotesk', system-ui, -apple-system, sans-serif; background: var(--color-bg); color: var(--color-text); min-height: 100vh; padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)); -webkit-tap-highlight-color: transparent; }
+    /* Comme une app native : un appui long ne sélectionne pas le texte des cartes et ne soulève pas les images
+       (sur iOS, la sélection faisait bouger les visuels d'Explorer). Le texte à lire reste sélectionnable. */
+    body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+    img { -webkit-user-drag: none; }
+    input, textarea, .article-reader, .faq-answer { -webkit-user-select: text; user-select: text; -webkit-touch-callout: default; }
 
     /* NAV */
     .nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(13,27,21,0.88); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-top: 1px solid var(--color-border); display: flex; justify-content: space-around; align-items: center; padding: .75rem 0 calc(.75rem + env(safe-area-inset-bottom, 0px)); z-index: 100; }
