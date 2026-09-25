@@ -49,13 +49,15 @@ test('chaque jour de programme référence une séance existante', () => {
   }
 });
 
-test('le programme Sommeil oriente vers un professionnel', () => {
-  // Garde-fou clinique : la méditation n'est pas le traitement de l'insomnie
-  // chronique (TCC-I en première intention) — voir CLAUDE.md.
-  const p = catalog.programs.find(x => x.id === 'sommeil-5j');
-  assert.ok(p, 'programme sommeil-5j introuvable');
-  assert.match(p.note || '', /médecin/, 'note d\'orientation manquante');
-  assert.match(p.note || '', /TCC-I/, 'la note doit nommer le traitement recommandé');
+test('chaque programme porte une note d\'orientation', () => {
+  // Garde-fou clinique : la méditation ne remplace pas un soin — voir CLAUDE.md.
+  for (const p of catalog.programs) {
+    assert.ok(typeof p.note === 'string' && p.note.length > 0, `programme ${p.id} : note d'orientation manquante`);
+  }
+  const sommeil = catalog.programs.find(x => x.id === 'sommeil-5j');
+  assert.match(sommeil.note, /TCC-I/, 'Sommeil : la note doit nommer le traitement recommandé');
+  const anxiete = catalog.programs.find(x => x.id === 'anxiete-7j');
+  assert.match(anxiete.note, /3114/, 'Anxiété : la note doit donner le numéro de prévention du suicide');
 });
 
 test('les ids de séances sont uniques', () => {
