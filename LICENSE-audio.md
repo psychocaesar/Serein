@@ -17,7 +17,7 @@ sont publiés sous licence **Creative Commons Attribution — Pas d'Utilisation 
 
 - **Attribution** — Tu dois créditer Serein de la manière suivante :
 
-  > Audio : « [Titre de la séance] » — Serein (https://serein.fr) — CC BY-NC-ND 4.0
+  > Audio : « [Titre de la séance] » — Serein (https://sereinapp.fr) — CC BY-NC-ND 4.0
 
 - **Pas d'utilisation commerciale** — Aucun usage à des fins commerciales ou financières,
   directes ou indirectes, sans accord écrit préalable.
