@@ -2976,29 +2976,31 @@ const GUIDE_MAP = {
   },
   'anxiete': {
     'court': {
-      'soudaine': { main: { id: 's11', reason: "Technique d'ancrage pour calmer l'agitation vite" }, alts: [{ id: 's10', reason: "Active le système parasympathique rapidement" }] },
-      'fond':     { main: { id: 's16', reason: "Pour sortir du flot de pensées anxieuses de fond" }, alts: [{ id: 's11', reason: "Ancrage sensoriel pour calmer le fond d'inquiétude" }] },
-      'default':  { main: { id: 's11', reason: "Technique d'ancrage pour calmer l'agitation vite" }, alts: [{ id: 's16', reason: 'Pour sortir du flot de pensées anxieuses' }] }
+      'soudaine': { main: { id: 's11', reason: "Un ancrage par les sens, pour traverser la vague" }, alts: [{ id: 's25', reason: "Tes cinq sens comme points d'appui, même les yeux ouverts" }] },
+      'fond':     { main: { id: 's16', reason: "Pour sortir un moment du flot de pensées inquiètes" }, alts: [{ id: 's11', reason: "Un ancrage sensoriel quand l'inquiétude insiste" }] },
+      'default':  { main: { id: 's11', reason: "Un ancrage par les sens, pour traverser la vague" }, alts: [{ id: 's25', reason: "Tes cinq sens comme points d'appui, même les yeux ouverts" }] }
     },
     'moyen': {
-      'soudaine': { main: { id: 's10', reason: "La respiration 4-7-8 active le système parasympathique" }, alts: [{ id: 's13', reason: "Recentre l'attention sur le présent par les sens" }] },
-      'fond':     { main: { id: 's13', reason: "Ancrage sensoriel pour sortir du fond d'inquiétude" }, alts: [{ id: 's10', reason: "Régule le souffle pour apaiser l'inquiétude chronique" }] },
-      'default':  { main: { id: 's10', reason: "La respiration 4-7-8 active le système parasympathique" }, alts: [{ id: 's13', reason: "Recentre l'attention sur le présent par les sens" }] }
+      'soudaine': { main: { id: 's24', reason: "Rester avec les sensations de la peur, sans les combattre" }, alts: [{ id: 's13', reason: "Un appui hors de toi quand l'esprit s'emballe" }] },
+      'fond':     { main: { id: 's14', reason: "Regarder l'inquiétude comme une pensée, pas comme une urgence" }, alts: [{ id: 's12', reason: "Faire de la place à l'anxiété plutôt que lutter contre elle" }] },
+      'default':  { main: { id: 's12', reason: "Faire de la place à l'anxiété plutôt que lutter contre elle" }, alts: [{ id: 's13', reason: "Un appui hors de toi quand l'esprit s'emballe" }] }
     }
   },
+  // Sommeil : aucune promesse d'endormissement (voir CLAUDE.md), test à l'appui.
   'sommeil': {
     'court': {
-      'precoucher': { main: { id: 's7', reason: "Prépare le corps et l'esprit au coucher" }, alts: [{ id: 's6', reason: "Pour calmer le système nerveux avant de dormir" }] },
-      'reveil':     { main: { id: 's8', reason: "Spécialement conçu pour les réveils en pleine nuit" }, alts: [{ id: 's10', reason: 'Technique reconnue pour se rendormir rapidement' }] },
-      'default':    { main: { id: 's7', reason: "Prépare le corps et l'esprit au coucher" }, alts: [{ id: 's6', reason: "Pour calmer le système nerveux avant de dormir" }] }
+      'precoucher': { main: { id: 's22', reason: "Observer le souffle sans rien lui demander, pour ralentir avant la nuit" }, alts: [{ id: 's2', reason: "Ne rien faire, sans objectif : une transition douce vers la nuit" }] },
+      'nuit':       { main: { id: 's22', reason: "Revenir au souffle, sans chercher à te rendormir" }, alts: [{ id: 's9', reason: "Un rythme de souffle régulier, sans rien exiger du corps" }] },
+      'matin':      { main: { id: 's16', reason: "Un ancrage simple pour démarrer la journée" }, alts: [{ id: 's9', reason: "Un rythme de souffle régulier pour te mettre en route" }] },
+      'default':    { main: { id: 's22', reason: "Observer le souffle sans rien lui demander, pour ralentir avant la nuit" }, alts: [{ id: 's2', reason: "Ne rien faire, sans objectif : une transition douce vers la nuit" }] }
     },
     'moyen': {
-      'precoucher': { main: { id: 's7', reason: "Coupe le flux mental de la journée" }, alts: [{ id: 's20', reason: "Relaxation progressive pour glisser vers le sommeil" }] },
-      'reveil':     { main: { id: 's8', reason: "Spécialement conçu pour les réveils à 3h du matin" }, alts: [{ id: 's7', reason: "Pour se recoucher sereinement" }] },
-      'default':    { main: { id: 's7', reason: "Coupe le flux mental de la journée" }, alts: [{ id: 's10', reason: "Technique reconnue pour faciliter l'endormissement" }] }
+      'precoucher': { main: { id: 's7', reason: "Couper le fil de la journée avant d'aller au lit" }, alts: [{ id: 's20', reason: "Détendre le corps, sans chercher à t'endormir" }] },
+      'nuit':       { main: { id: 's20', reason: "Relâcher le corps, que le sommeil revienne ou non" }, alts: [{ id: 's14', reason: "Si ce sont les pensées qui te tiennent éveillé·e" }] },
+      'matin':      { main: { id: 's21', reason: "Émerger en douceur et commencer la journée posé·e" }, alts: [{ id: 's18', reason: "Un point d'appui à garder pour la journée" }] },
+      'default':    { main: { id: 's7', reason: "Couper le fil de la journée avant d'aller au lit" }, alts: [{ id: 's20', reason: "Détendre le corps, sans chercher à t'endormir" }] }
     }
   },
-  // Humeurs sans Q3 — structure plate conservée
   'fatigue': {
     'court': { 'default': { main: { id: 's16', reason: 'Court et doux pour recharger sans effort' }, alts: [{ id: 's1', reason: 'Idéal pour une première pause dans la journée' }] } },
     'moyen': { 'default': { main: { id: 's17', reason: 'Pour se recharger en douceur sans se juger' }, alts: [{ id: 's4', reason: 'Relâche les tensions physiques accumulées' }, { id: 's45', reason: "Quand la fatigue vient d'une perte d'élan intérieur" }] } }
@@ -3008,15 +3010,15 @@ const GUIDE_MAP = {
     'moyen': { 'default': { main: { id: 's3', reason: "Prendre du recul sur le flux mental" }, alts: [{ id: 's15', reason: "Pour clarifier l'esprit et retrouver le focus" }, { id: 's45', reason: "Quand le brouillard cache une perte d'envie ou d'élan" }] } }
   },
   'concentration': {
-    'court': { 'default': { main: { id: 's15', reason: "Clarifie l'esprit avant une tâche importante" }, alts: [{ id: 's16', reason: 'Plus court, pour une mise en route rapide' }] } },
-    'moyen': { 'default': { main: { id: 's15', reason: "Prépare le mental à entrer dans la zone" }, alts: [{ id: 's3', reason: "Pour vider le mental avant de se concentrer" }] } }
+    'court': { 'default': { main: { id: 's16', reason: "Un ancrage court pour te mettre en route" }, alts: [{ id: 's23', reason: "La respiration au carré pour rassembler l'attention" }] } },
+    'moyen': { 'default': { main: { id: 's15', reason: "Clarifier l'esprit avant de te lancer" }, alts: [{ id: 's28', reason: "Entraîner l'attention à revenir quand elle s'échappe" }, { id: 's27', reason: "Faire une seule chose à la fois, pleinement" }] } }
   },
   'colere': {
-    'court': { 'default': { main: { id: 's37', reason: "Décharger l'énergie de la colère immédiatement, sans l'alimenter" }, alts: [{ id: 's44', reason: "Quand l'irritation couve plutôt qu'elle n'éclate" }] } },
+    'court': { 'default': { main: { id: 's37', reason: "Décharger l'énergie de la colère immédiatement, sans l'alimenter" }, alts: [{ id: 's9', reason: "Un rythme de souffle régulier pour laisser redescendre la pression" }] } },
     'moyen': { 'default': { main: { id: 's44', reason: "Pour traverser l'irritation et revenir au calme" }, alts: [{ id: 's37', reason: "Pour une décharge rapide si la colère remonte" }] } }
   },
   'tristesse': {
-    'court': { 'default': { main: { id: 's40', reason: "Accueillir l'humeur difficile sans la combattre" }, alts: [{ id: 's17', reason: "Pour s'accompagner avec douceur dans les moments durs" }] } },
+    'court': { 'default': { main: { id: 's17', reason: "Pour s'accompagner avec douceur dans les moments durs" }, alts: [{ id: 's22', reason: "Juste respirer, sans rien avoir à réparer" }] } },
     'moyen': { 'default': { main: { id: 's40', reason: "Traverser la tristesse ou la mauvaise humeur avec douceur" }, alts: [{ id: 's45', reason: "Réamorcer l'élan quand tout semble terne" }] } }
   }
 };
@@ -3371,10 +3373,11 @@ const CONTEXT_QUESTIONS = {
     ]
   },
   sommeil: {
-    question: 'Tu te prépares à dormir ou tu viens de te réveiller ?',
+    question: 'Où en es-tu ?',
     choices: [
       { label: '🌙 Je me prépare à dormir', value: 'precoucher' },
-      { label: '😳 Je viens de me réveiller', value: 'reveil' }
+      { label: '🌑 Je suis réveillé·e en pleine nuit', value: 'nuit' },
+      { label: "☀️ C'est le matin", value: 'matin' }
     ]
   }
 };
@@ -3383,7 +3386,7 @@ function onContextChoice(value) {
   const contextLabels = {
     corps: 'Dans le corps', tete: 'Dans la tête',
     soudaine: 'Agitation soudaine', fond: "Fond d'inquiétude persistant",
-    precoucher: 'Je me prépare à dormir', reveil: 'Je viens de me réveiller'
+    precoucher: 'Je me prépare à dormir', nuit: 'Réveillé·e en pleine nuit', matin: "C'est le matin"
   };
   guideContext = value;
   saveSessionSnapshot();
