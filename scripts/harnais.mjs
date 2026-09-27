@@ -1,6 +1,7 @@
 // Harnais de vérification : à passer avant toute mise en ligne.
 //   npm run harnais               tout (tests, règles, audio sur le CDN)
-//   npm run harnais -- --sans-reseau
+//   npm run harnais -- --sans-reseau     (ni CDN ni captures)
+//   npm run harnais -- --sans-captures
 // Lancé automatiquement avant chaque `git push` (scripts/git-hooks/pre-push),
 // par Xcode Cloud (ci_post_clone.sh : le build s'arrête s'il échoue) et par
 // `npm run release:android`. Voir la section « Harnais » de CLAUDE.md.
@@ -11,6 +12,7 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const sansReseau = process.argv.includes('--sans-reseau');
+const sansCaptures = sansReseau || process.argv.includes('--sans-captures');
 const echecs = [];
 
 function etape(titre) { console.log(`\n── ${titre} ──`); }
@@ -66,6 +68,26 @@ if (sansReseau) {
     echecs.push(`${manquants.length} fichier(s) audio introuvable(s) sur le CDN`);
   } else {
     console.log('  ✔ tous présents');
+  }
+}
+
+// 3. Captures de chaque écran (iPhone, iPad, Android) et contrôles de mise
+// en page. Sur la machine de développement seulement : Xcode Cloud et GitHub
+// n'ont pas les navigateurs Playwright (et n'en ont pas besoin, le verrou
+// local passe avant chaque push).
+if (sansCaptures || process.env.CI) {
+  etape('Captures : ignorées' + (process.env.CI ? ' (CI)' : ''));
+} else {
+  etape('Captures iPhone, iPad, Android');
+  const { lancerCaptures, navigateursInstalles } = await import('./captures.mjs');
+  if (!(await navigateursInstalles())) {
+    console.log('  ⚠ navigateurs absents, captures non faites : npx playwright install webkit chromium');
+  } else {
+    const problemes = await lancerCaptures();
+    problemes.forEach(p => console.log(`  ✖ ${p}`));
+    if (problemes.length) echecs.push(`${problemes.length} problème(s) de mise en page`);
+    else console.log('  ✔ aucune anomalie détectée');
+    console.log('  Planche : captures/index.html (ou npm run captures pour refaire et ouvrir)');
   }
 }
 

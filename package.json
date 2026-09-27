@@ -10,6 +10,7 @@
     "postinstall": "node scripts/setup-git-hooks.mjs && node scripts/patch-plugins-proguard.mjs",
     "test": "node --test \"tests/*.test.js\"",
     "harnais": "node scripts/harnais.mjs",
+    "captures": "node scripts/captures.mjs --ouvrir",
     "bump:android": "node scripts/bump-android-version.mjs",
     "sync:android": "npx cap sync android && node scripts/strip-native-audio.mjs",
     "release:android": "npm run harnais && npm run sync:android && npm run bump:android"
@@ -38,5 +39,8 @@
     "@capacitor/local-notifications": "^8.1.0",
     "@capacitor/network": "^8.0.1",
     "@capacitor/preferences": "^8.0.1"
+  },
+  "devDependencies": {
+    "playwright": "^1.63.0"
   }
 }
