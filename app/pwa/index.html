@@ -169,7 +169,6 @@
 
     /* PATH CARDS */
     .path-card { cursor: pointer; position: relative; overflow: hidden; padding: 0; border: none; border-radius: var(--radius); min-height: 200px; display: flex; flex-direction: column; justify-content: flex-end; transition: transform .2s, box-shadow .2s; }
-    .path-card:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,.4); }
     .path-card .card-illustration { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; display: block; }
     .path-card::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 20%, rgba(0,0,0,.72) 100%); border-radius: var(--radius); pointer-events: none; }
     .path-card .card-content { position: relative; z-index: 1; padding: 1rem 1rem .9rem; color: #fff; }
@@ -330,6 +329,19 @@
     .ob-dots span.on { background: var(--color-primary); width: 22px; border-radius: 999px; }
     .ob-next { width: 100%; background: var(--gradient); color: #0d1b15; font-weight: 700; border: none; border-radius: 999px; padding: 1rem; font-size: 1rem; cursor: pointer; font-family: inherit; }
     [data-theme="light"] .ob-next { color: #fff; }
+
+    /* Effets de survol réservés aux vraies souris. Sur écran tactile, un doigt
+       posé déclenche :hover ; soulever une carte (transform) à la coupure des
+       deux colonnes d'Explorer la faisait disparaître (bug WebKit, carte
+       Respirer), et la carte restait soulevée après un tap. */
+    @media (hover: hover) and (pointer: fine) {
+      .path-card:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,.4); }
+      .article-hero:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(0,0,0,.35); }
+      .article-mini-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.25); }
+      .chat-choice:hover { border-color: var(--color-primary); background: var(--color-primary-light); transform: translateY(-1px); }
+      .timer-card-horizontal:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.3); }
+      .timer-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.3); }
+    }
 
     /* ICÔNES SVG — même trait que la nav (les emojis restent réservés à l'expressif : humeurs, ambiances) */
     .icon-svg { stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
@@ -580,7 +592,6 @@
     .article-hero { position: relative; border-radius: var(--radius); overflow: hidden; min-height: 175px; cursor: pointer; background: linear-gradient(140deg, #1a4535 0%, #0e2820 60%, #162d22 100%); display: flex; flex-direction: column; justify-content: flex-end; margin-top: 1.5rem; transition: transform .2s, box-shadow .2s; border: 1px solid var(--color-border); }
     .article-hero-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 30%; opacity: .35; pointer-events: none; }
     .article-hero-content { position: relative; z-index: 1; }
-    .article-hero:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(0,0,0,.35); }
     .article-hero-content { padding: 1.25rem; color: #fff; }
     .article-hero-badge { display: inline-block; font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--color-primary); background: var(--color-primary-light); border-radius: 4px; padding: .2rem .5rem; margin-bottom: .6rem; }
     .article-hero h3 { font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-size: 1.2rem; font-weight: 700; line-height: 1.3; margin-bottom: .4rem; color: #fff; }
@@ -588,7 +599,6 @@
     .article-section-label { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--color-muted); margin: 1.25rem 0 .65rem; }
     .article-mini-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: .75rem; }
     .article-mini-card { background: var(--color-surface); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: 1rem; cursor: pointer; transition: transform .2s, box-shadow .2s; display: flex; flex-direction: column; gap: .45rem; }
-    .article-mini-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.25); }
     .article-mini-icon { font-size: 1.2rem; line-height: 1; }
     .article-mini-title { font-size: .9rem; font-weight: 700; line-height: 1.3; }
     .article-mini-desc { font-size: .75rem; color: var(--color-muted); line-height: 1.4; }
@@ -627,7 +637,6 @@
     [data-theme="light"] .chat-bubble.user { color: #fff; }
     .chat-choices { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: .25rem; padding-left: 2.4rem; }
     .chat-choice { background: var(--color-surface); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); border: 1.5px solid var(--color-border); border-radius: 999px; padding: .5rem 1rem; font-size: .88rem; cursor: pointer; text-align: left; transition: border-color .18s, background .18s, transform .15s; color: var(--color-text); }
-    .chat-choice:hover { border-color: var(--color-primary); background: var(--color-primary-light); transform: translateY(-1px); }
     .guide-result { margin-top: 1.25rem; }
     .guide-result-card { background: var(--color-surface); backdrop-filter: blur(8px); border: 2px solid var(--color-primary); border-radius: var(--radius); padding: 1.25rem; text-align: center; animation: bubbleIn .3s ease; }
     .guide-result-card .result-emoji { font-size: 2.2rem; margin-bottom: .5rem; }
@@ -656,7 +665,6 @@
     .timer-block { margin-top: 1.5rem; }
     .timer-block-label { font-size: .85rem; font-weight: 600; color: var(--color-muted); margin-bottom: .5rem; }
     .timer-card-horizontal { background: var(--color-surface); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid var(--color-border); border-radius: var(--radius); padding: 1rem 1.1rem; display: flex; justify-content: space-between; align-items: center; gap: .75rem; cursor: pointer; color: var(--color-text); transition: transform .15s, box-shadow .2s; }
-    .timer-card-horizontal:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.3); }
     /* Invitation au don (carte discrète, affichée une seule fois après SEUIL séances) */
     .don-invitation-card { position: relative; background: var(--color-surface); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid var(--color-border); border-radius: var(--radius); padding: 1.25rem 1.25rem 1.1rem; }
     .don-invitation-text { font-size: .92rem; line-height: 1.6; color: var(--color-text); margin-bottom: 1rem; padding-right: 1.75rem; }
@@ -860,7 +868,6 @@
 
     /* MINUTEUR */
     .timer-card { cursor: pointer; position: relative; overflow: hidden; padding: 0; border: 1px solid var(--color-border); border-radius: var(--radius); min-height: 120px; display: flex; align-items: center; justify-content: center; background: var(--color-surface); backdrop-filter: blur(8px); transition: transform .2s, box-shadow .2s; grid-column: 1 / -1; }
-    .timer-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.3); }
     .timer-card-inner { text-align: center; color: var(--color-text); padding: 1.25rem; }
     .timer-card-icon { font-size: 2rem; margin-bottom: .4rem; }
     .timer-card-inner h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: .2rem; }
