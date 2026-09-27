@@ -2953,6 +2953,10 @@ function confirmResetProgress() {
 
 // ── GUIDE CHATBOT ──
 // Chaque entrée = une recommandation principale + des alternatives.
+// Deux durées seulement (« 5 minutes » / « 5 à 10 minutes ») : le catalogue
+// n'a presque rien au-delà de 10 min. Une recommandation doit respecter la
+// durée annoncée (test dans guide.test.js) ; remettre « Plus de 10 minutes »
+// quand les séances longues existeront.
 // Format : { main: { id, reason }, alts: [{ id, reason }] } — seul l'id de la
 // séance est stocké : titre, fichier, durée, parcours et artwork sont résolus
 // depuis le catalogue (sessions.json) au moment de l'affichage, ce qui évite
@@ -2968,11 +2972,6 @@ const GUIDE_MAP = {
       'corps':   { main: { id: 's4', reason: "Relâche les tensions physiques stockées dans le corps" }, alts: [{ id: 's6', reason: "Régule le système nerveux rapidement" }] },
       'tete':    { main: { id: 's6', reason: 'Régule le système nerveux en quelques minutes' }, alts: [{ id: 's31', reason: "Pour sortir du mode urgence mental" }] },
       'default': { main: { id: 's6', reason: 'Régule le système nerveux en quelques minutes' }, alts: [{ id: 's31', reason: "Pour sortir du mode urgence" }] }
-    },
-    'long': {
-      'corps':   { main: { id: 's4', reason: "Pour relâcher en profondeur les tensions physiques" }, alts: [{ id: 's29', reason: "Travaille directement sur les tensions corporelles du stress" }] },
-      'tete':    { main: { id: 's31', reason: "Pour déposer le mental en mode urgence" }, alts: [{ id: 's4', reason: "Redescendre dans le corps pour sortir du mental" }] },
-      'default': { main: { id: 's6', reason: 'Régule le système nerveux en profondeur' }, alts: [{ id: 's4', reason: 'Pour relâcher les tensions physiques du stress' }] }
     }
   },
   'anxiete': {
@@ -2985,11 +2984,6 @@ const GUIDE_MAP = {
       'soudaine': { main: { id: 's10', reason: "La respiration 4-7-8 active le système parasympathique" }, alts: [{ id: 's13', reason: "Recentre l'attention sur le présent par les sens" }] },
       'fond':     { main: { id: 's13', reason: "Ancrage sensoriel pour sortir du fond d'inquiétude" }, alts: [{ id: 's10', reason: "Régule le souffle pour apaiser l'inquiétude chronique" }] },
       'default':  { main: { id: 's10', reason: "La respiration 4-7-8 active le système parasympathique" }, alts: [{ id: 's13', reason: "Recentre l'attention sur le présent par les sens" }] }
-    },
-    'long': {
-      'soudaine': { main: { id: 's24', reason: "Travailler directement la réaction physique à l'anxiété soudaine" }, alts: [{ id: 's14', reason: "Pour travailler sur les ruminations qui alimentent l'anxiété" }] },
-      'fond':     { main: { id: 's14', reason: 'Pour travailler directement sur les ruminations de fond' }, alts: [{ id: 's12', reason: 'Approche douce, laisser passer plutôt que résister' }] },
-      'default':  { main: { id: 's14', reason: 'Pour travailler directement sur les ruminations' }, alts: [{ id: 's12', reason: 'Approche douce, laisser passer plutôt que résister' }] }
     }
   },
   'sommeil': {
@@ -3002,38 +2996,28 @@ const GUIDE_MAP = {
       'precoucher': { main: { id: 's7', reason: "Coupe le flux mental de la journée" }, alts: [{ id: 's20', reason: "Relaxation progressive pour glisser vers le sommeil" }] },
       'reveil':     { main: { id: 's8', reason: "Spécialement conçu pour les réveils à 3h du matin" }, alts: [{ id: 's7', reason: "Pour se recoucher sereinement" }] },
       'default':    { main: { id: 's7', reason: "Coupe le flux mental de la journée" }, alts: [{ id: 's10', reason: "Technique reconnue pour faciliter l'endormissement" }] }
-    },
-    'long': {
-      'precoucher': { main: { id: 's19', reason: "Accompagne doucement vers un endormissement profond" }, alts: [{ id: 's8', reason: "Pour une nuit complète apaisée" }] },
-      'reveil':     { main: { id: 's8', reason: 'Pour les nuits agitées et les réveils à 3h' }, alts: [{ id: 's7', reason: 'Prépare en douceur un endormissement profond' }] },
-      'default':    { main: { id: 's8', reason: 'Pour les nuits agitées et les réveils à 3h' }, alts: [{ id: 's7', reason: 'Prépare en douceur un endormissement profond' }] }
     }
   },
   // Humeurs sans Q3 — structure plate conservée
   'fatigue': {
     'court': { 'default': { main: { id: 's16', reason: 'Court et doux pour recharger sans effort' }, alts: [{ id: 's1', reason: 'Idéal pour une première pause dans la journée' }] } },
-    'moyen': { 'default': { main: { id: 's17', reason: 'Pour se recharger en douceur sans se juger' }, alts: [{ id: 's4', reason: 'Relâche les tensions physiques accumulées' }, { id: 's45', reason: "Quand la fatigue vient d'une perte d'élan intérieur" }] } },
-    'long':  { 'default': { main: { id: 's8', reason: "Si la fatigue vient d'un sommeil perturbé" }, alts: [{ id: 's18', reason: 'Pour trouver un point de stabilité dans la journée' }, { id: 's45', reason: "Quand la fatigue cache une perte de sens ou d'envie" }] } }
+    'moyen': { 'default': { main: { id: 's17', reason: 'Pour se recharger en douceur sans se juger' }, alts: [{ id: 's4', reason: 'Relâche les tensions physiques accumulées' }, { id: 's45', reason: "Quand la fatigue vient d'une perte d'élan intérieur" }] } }
   },
   'brouillard': {
     'court': { 'default': { main: { id: 's2', reason: "Parfois s'arrêter suffit à y voir plus clair" }, alts: [{ id: 's16', reason: "Pour sortir du flou en se recentrant sur le souffle" }] } },
-    'moyen': { 'default': { main: { id: 's3', reason: "Prendre du recul sur le flux mental" }, alts: [{ id: 's15', reason: "Pour clarifier l'esprit et retrouver le focus" }, { id: 's45', reason: "Quand le brouillard cache une perte d'envie ou d'élan" }] } },
-    'long':  { 'default': { main: { id: 's18', reason: "Construire un point de stabilité mental durable" }, alts: [{ id: 's3', reason: "Pour observer le brouillard sans s'y perdre" }] } }
+    'moyen': { 'default': { main: { id: 's3', reason: "Prendre du recul sur le flux mental" }, alts: [{ id: 's15', reason: "Pour clarifier l'esprit et retrouver le focus" }, { id: 's45', reason: "Quand le brouillard cache une perte d'envie ou d'élan" }] } }
   },
   'concentration': {
     'court': { 'default': { main: { id: 's15', reason: "Clarifie l'esprit avant une tâche importante" }, alts: [{ id: 's16', reason: 'Plus court, pour une mise en route rapide' }] } },
-    'moyen': { 'default': { main: { id: 's15', reason: "Prépare le mental à entrer dans la zone" }, alts: [{ id: 's3', reason: "Pour vider le mental avant de se concentrer" }] } },
-    'long':  { 'default': { main: { id: 's33', reason: 'Pour atteindre un état de concentration profonde' }, alts: [{ id: 's32', reason: "Prépare l'esprit avant une session de travail intense" }] } }
+    'moyen': { 'default': { main: { id: 's15', reason: "Prépare le mental à entrer dans la zone" }, alts: [{ id: 's3', reason: "Pour vider le mental avant de se concentrer" }] } }
   },
   'colere': {
     'court': { 'default': { main: { id: 's37', reason: "Décharger l'énergie de la colère immédiatement, sans l'alimenter" }, alts: [{ id: 's44', reason: "Quand l'irritation couve plutôt qu'elle n'éclate" }] } },
-    'moyen': { 'default': { main: { id: 's44', reason: "Pour traverser l'irritation et revenir au calme" }, alts: [{ id: 's37', reason: "Pour une décharge rapide si la colère remonte" }] } },
-    'long':  { 'default': { main: { id: 's44', reason: "Pour aller en profondeur dans ce que l'irritabilité exprime" }, alts: [{ id: 's26', reason: "Déposer la tension et la colère accumulées sur la journée" }] } }
+    'moyen': { 'default': { main: { id: 's44', reason: "Pour traverser l'irritation et revenir au calme" }, alts: [{ id: 's37', reason: "Pour une décharge rapide si la colère remonte" }] } }
   },
   'tristesse': {
     'court': { 'default': { main: { id: 's40', reason: "Accueillir l'humeur difficile sans la combattre" }, alts: [{ id: 's17', reason: "Pour s'accompagner avec douceur dans les moments durs" }] } },
-    'moyen': { 'default': { main: { id: 's40', reason: "Traverser la tristesse ou la mauvaise humeur avec douceur" }, alts: [{ id: 's45', reason: "Réamorcer l'élan quand tout semble terne" }] } },
-    'long':  { 'default': { main: { id: 's45', reason: "Réamorcer l'élan quand la tristesse ou le vide s'installe" }, alts: [{ id: 's40', reason: "Pour traverser une tristesse de fond avec douceur" }] } }
+    'moyen': { 'default': { main: { id: 's40', reason: "Traverser la tristesse ou la mauvaise humeur avec douceur" }, alts: [{ id: 's45', reason: "Réamorcer l'élan quand tout semble terne" }] } }
   }
 };
 
@@ -3092,7 +3076,7 @@ let guideInitialized = false;
 // Vérifie que toutes les combinaisons mood × duration sont bien couvertes
 if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
   (function validateGuideMap() {
-    const durations = ['court', 'moyen', 'long'];
+    const durations = ['court', 'moyen'];
     const warnings = [];
     for (const mood of Object.keys(GUIDE_MAP)) {
       for (const dur of durations) {
@@ -3201,7 +3185,7 @@ function showGuideResult(entry) {
 
   const labelMain = document.createElement('p');
   labelMain.className = 'guide-result-label';
-  labelMain.textContent = 'Notre suggestion';
+  labelMain.textContent = 'Ma suggestion';
   wrap.appendChild(labelMain);
   wrap.appendChild(makeCard(entry.main, true));
 
@@ -3414,8 +3398,7 @@ async function askDuration() {
   await delay(400);
   addChoices([
     { label: '⚡ 5 minutes', value: 'court' },
-    { label: '🌿 5–10 minutes', value: 'moyen' },
-    { label: '🌊 Plus de 10 minutes', value: 'long' }
+    { label: '🌿 5 à 10 minutes', value: 'moyen' }
   ], onDurationChoice);
 }
 
@@ -3641,6 +3624,9 @@ function launchObservationSession(cb) {
 
   const onEnded = async () => {
     audio.removeEventListener('ended', onEnded);
+    // Pause quittée avant la fin : l'écouteur survivait et se déclenchait à
+    // la fin de la séance suivante (lecteur refermé, question hors sujet).
+    if (!currentSession || currentSession.id !== 'observation') return;
     guideMood = prevMood; // restaurer pour ne pas bloquer showGuideFeedback si besoin
 
     await delay(800);
@@ -3651,7 +3637,7 @@ function launchObservationSession(cb) {
     addChoices([
       { label: '💪 Corps tendu, besoin de relâcher',   value: 'stress_corps' },
       { label: '🧠 Tête agitée, pensées qui tournent', value: 'stress_tete'  },
-      { label: '😴 Fatigué(e), besoin de repos',       value: 'fatigue'      },
+      { label: '😴 Fatigué·e, besoin de repos',        value: 'fatigue'      },
       { label: '🌿 Ça va, je n\'ai plus besoin',       value: 'done'         },
     ], async (v) => {
       clearChoices();
@@ -3676,7 +3662,7 @@ function launchObservationSession(cb) {
       const labels = {
         stress_corps: 'Corps tendu',
         stress_tete:  'Tête agitée',
-        fatigue:      'Fatigué(e)',
+        fatigue:      'Fatigué·e',
       };
       addUserBubble(labels[v]);
       askDuration();
@@ -3779,11 +3765,11 @@ async function startFreshGuide() {
 
 function showMoodChoices() {
   const choices = [
-    { label: '😮‍💨 Stressé(e)',                value: 'stress'        },
-    { label: '😰 Anxieux/se',                 value: 'anxiete'       },
+    { label: '😮‍💨 Stressé·e',                 value: 'stress'        },
+    { label: '😰 Anxieux·se',                 value: 'anxiete'       },
     { label: '😤 En colère / irritable',       value: 'colere'        },
     { label: '😔 Mauvaise humeur / tristesse', value: 'tristesse'     },
-    { label: '😴 Fatigué(e)',                 value: 'fatigue'       },
+    { label: '😴 Fatigué·e',                  value: 'fatigue'       },
     { label: '😶 Brouillard mental',           value: 'brouillard'    },
     { label: '🌙 Difficultés à dormir',        value: 'sommeil'       },
     { label: '🎯 Besoin de concentration',     value: 'concentration' },
@@ -3800,7 +3786,7 @@ function showMoodChoices() {
 
 async function onMoodChoice(value) {
   const labels = {
-    stress: 'Stressé(e)', anxiete: 'Anxieux/se', fatigue: 'Fatigué(e)',
+    stress: 'Stressé·e', anxiete: 'Anxieux·se', fatigue: 'Fatigué·e',
     brouillard: 'Brouillard mental', sommeil: 'Difficultés à dormir',
     concentration: 'Besoin de concentration', unknown: 'Je ne sais pas vraiment',
     colere: 'En colère / irritable', tristesse: 'Mauvaise humeur / tristesse'
@@ -3835,7 +3821,7 @@ async function onMoodChoice(value) {
   // Bloquer Concentration après 22h
   if (value === 'concentration' && isConcentrationBlocked()) {
     await delay(400);
-    addBotBubble("À cette heure-ci, une séance de concentration risque de te tenir éveillé(e). Tu ne veux pas plutôt essayer quelque chose de plus doux ?");
+    addBotBubble("À cette heure-ci, une séance de concentration risque de te tenir éveillé·e. Tu ne veux pas plutôt essayer quelque chose de plus doux ?");
     await delay(400);
     addChoices([
       { label: '🌙 Plutôt du sommeil',                            value: 'sommeil'              },
@@ -3881,7 +3867,7 @@ async function showRestartError() {
 
 async function onDurationChoice(value) {
   guideDuration = value;
-  addUserBubble({ court: '5 minutes', moyen: '5–10 minutes', long: 'Plus de 10 minutes' }[value]);
+  addUserBubble({ court: '5 minutes', moyen: '5 à 10 minutes' }[value]);
   clearChoices();
 
   const moodMap = GUIDE_MAP[guideMood];
