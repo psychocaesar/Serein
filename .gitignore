@@ -17,3 +17,6 @@ page-consultations.php
 
 # Config IDE Android Studio (JDK, device manager... varie par machine)
 app/android/.idea/
+
+# Planche de captures du harnais (npm run captures)
+captures/
