@@ -28,6 +28,10 @@ fi
 
 npm install
 
+# Harnais (voir CLAUDE.md) : s'il échoue, le build s'arrête ici et rien
+# n'arrive sur TestFlight.
+npm run harnais
+
 echo "--- diagnostic avant cap sync ios ---"
 node -v
 npm -v
