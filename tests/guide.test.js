@@ -158,3 +158,32 @@ test('MOOD_PARCOURS pointe vers des parcours/sous-parcours réels', () => {
     }
   }
 });
+
+test('chaque recommandation respecte la durée choisie', () => {
+  // « 5 minutes » tolère 6 min ; « 5 à 10 minutes » = 5 à 10 min.
+  const tranche = { court: d => d <= 6, moyen: d => d >= 5 && d <= 10 };
+  for (const { at, entry } of leaves(G.GUIDE_MAP)) {
+    const dur = at.split('/')[1];
+    assert.ok(tranche[dur], `durée inconnue (${at}) : remettre le choix dans askDuration avant de l'utiliser`);
+    const rec = G.resolveEntry(entry);
+    for (const r of [rec.main, ...rec.alts]) {
+      assert.ok(tranche[dur](parseInt(r.duration, 10)), `${at} : « ${r.title} » dure ${r.duration}`);
+    }
+  }
+});
+
+test('le guide Sommeil ne promet pas l\'endormissement', () => {
+  // Chercher à dormir entretient l'insomnie (voir CLAUDE.md, convention Sommeil).
+  for (const { at, entry } of leaves({ sommeil: G.GUIDE_MAP.sommeil })) {
+    for (const r of [entry.main, ...entry.alts]) {
+      // « sans chercher à t'endormir » est justement le bon cadrage : seule la
+      // promesse est refusée.
+      assert.doesNotMatch(r.reason, /(?<!sans chercher à (?:te |t'))\b(?:r?endorm)|glisser vers le sommeil/i, `${at} : « ${r.reason} »`);
+    }
+  }
+});
+
+test('le guide affiche en permanence le numéro de prévention du suicide', () => {
+  const html = fs.readFileSync(path.join(PWA_DIR, 'index.html'), 'utf8');
+  assert.match(html, /class="guide-aide"[^>]*>[^<]*<a href="tel:3114">3114<\/a>/);
+});

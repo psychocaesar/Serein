@@ -615,6 +615,8 @@
     .guide-divider-label { font-size: .75rem; color: var(--color-muted); white-space: nowrap; font-weight: 500; }
     /* Guide */
     .guide-wrap { max-width: 480px; margin: 0 auto; }
+    .guide-aide { margin: 1.5rem auto 0; max-width: 42ch; text-align: center; font-size: .78rem; line-height: 1.5; color: var(--color-muted); }
+    .guide-aide a { color: inherit; font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
     .chat-window { display: flex; flex-direction: column; gap: .75rem; margin-top: 1.5rem; min-height: 120px; }
     .chat-bubble { max-width: 85%; padding: .75rem 1rem; border-radius: 1.25rem; font-size: .95rem; line-height: 1.5; animation: bubbleIn .22s ease; }
     @keyframes bubbleIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
@@ -1653,6 +1655,7 @@
     <div class="guide-wrap">
       <div class="chat-window" id="chat-window"></div>
       <div id="guide-result" class="guide-result" style="display:none"></div>
+      <p class="guide-aide">Si tu te sens en danger ou as des idées suicidaires, appelle le <a href="tel:3114">3114</a> (24 h/24, gratuit). En cas d'urgence : <a href="tel:15">15</a> ou <a href="tel:112">112</a>.</p>
     </div>
   </div>
 
