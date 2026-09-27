@@ -2969,7 +2969,7 @@ const GUIDE_MAP = {
       'default': { main: { id: 's5', reason: 'Rapide et ciblé pour couper le stress net' }, alts: [{ id: 's16', reason: "Pour ancrer l'attention ici et maintenant" }] }
     },
     'moyen': {
-      'corps':   { main: { id: 's4', reason: "Relâche les tensions physiques stockées dans le corps" }, alts: [{ id: 's6', reason: "Régule le système nerveux rapidement" }] },
+      'corps':   { main: { id: 's4', reason: "Relâche les tensions physiques stockées dans le corps" }, alts: [{ id: 's6', reason: "Régule le système nerveux rapidement" }, { id: 's29', reason: "Travaille directement sur les tensions corporelles du stress" }] },
       'tete':    { main: { id: 's6', reason: 'Régule le système nerveux en quelques minutes' }, alts: [{ id: 's31', reason: "Pour sortir du mode urgence mental" }] },
       'default': { main: { id: 's6', reason: 'Régule le système nerveux en quelques minutes' }, alts: [{ id: 's31', reason: "Pour sortir du mode urgence" }] }
     }
@@ -3007,15 +3007,15 @@ const GUIDE_MAP = {
   },
   'brouillard': {
     'court': { 'default': { main: { id: 's2', reason: "Parfois s'arrêter suffit à y voir plus clair" }, alts: [{ id: 's16', reason: "Pour sortir du flou en se recentrant sur le souffle" }] } },
-    'moyen': { 'default': { main: { id: 's3', reason: "Prendre du recul sur le flux mental" }, alts: [{ id: 's15', reason: "Pour clarifier l'esprit et retrouver le focus" }, { id: 's45', reason: "Quand le brouillard cache une perte d'envie ou d'élan" }] } }
+    'moyen': { 'default': { main: { id: 's3', reason: "Prendre du recul sur le flux mental" }, alts: [{ id: 's32', reason: "Faire le tri dans le brouillard mental pour y voir clair" }, { id: 's45', reason: "Quand le brouillard cache une perte d'envie ou d'élan" }] } }
   },
   'concentration': {
     'court': { 'default': { main: { id: 's16', reason: "Un ancrage court pour te mettre en route" }, alts: [{ id: 's23', reason: "La respiration au carré pour rassembler l'attention" }] } },
-    'moyen': { 'default': { main: { id: 's15', reason: "Clarifier l'esprit avant de te lancer" }, alts: [{ id: 's28', reason: "Entraîner l'attention à revenir quand elle s'échappe" }, { id: 's27', reason: "Faire une seule chose à la fois, pleinement" }] } }
+    'moyen': { 'default': { main: { id: 's15', reason: "Clarifier l'esprit avant de te lancer" }, alts: [{ id: 's28', reason: "Entraîner l'attention à revenir quand elle s'échappe" }, { id: 's27', reason: "Faire une seule chose à la fois, pleinement" }, { id: 's33', reason: "Pour atteindre un état de concentration profonde" }] } }
   },
   'colere': {
     'court': { 'default': { main: { id: 's37', reason: "Décharger l'énergie de la colère immédiatement, sans l'alimenter" }, alts: [{ id: 's9', reason: "Un rythme de souffle régulier pour laisser redescendre la pression" }] } },
-    'moyen': { 'default': { main: { id: 's44', reason: "Pour traverser l'irritation et revenir au calme" }, alts: [{ id: 's37', reason: "Pour une décharge rapide si la colère remonte" }] } }
+    'moyen': { 'default': { main: { id: 's44', reason: "Pour traverser l'irritation et revenir au calme" }, alts: [{ id: 's37', reason: "Pour une décharge rapide si la colère remonte" }, { id: 's26', reason: "Déposer la tension et la colère accumulées sur la journée" }] } }
   },
   'tristesse': {
     'court': { 'default': { main: { id: 's17', reason: "Pour s'accompagner avec douceur dans les moments durs" }, alts: [{ id: 's22', reason: "Juste respirer, sans rien avoir à réparer" }] } },
