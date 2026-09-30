@@ -1,7 +1,5 @@
 Nouveau — Google Pay pour faire un don en un geste.
 
-Programmes repensés avec l'appui de la recherche : le programme Sommeil passe à 7 jours, Débuter et Anxiété suivent une progression plus douce.
-
 Guide revu : des suggestions qui respectent le temps dont tu disposes, une réponse adaptée au soir, à la nuit ou au matin, et le numéro d'écoute 3114 toujours visible.
 
-App plus légère et corrections d'affichage.
+Le rappel quotidien a enfin sa propre icône. App plus légère, affichage corrigé sur tablette et corrections diverses.
