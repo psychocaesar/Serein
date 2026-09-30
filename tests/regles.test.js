@@ -154,3 +154,29 @@ test('fiches des stores dans les limites de longueur', () => {
     assert.ok(longueur <= max, `${fichier} : ${longueur} caractères pour ${max} autorisés`);
   }
 });
+
+// ── Android : ressources appelées par leur nom depuis le JavaScript ──
+
+test('Android : chaque icône de notification existe et est protégée de R8', () => {
+  // Le rappel quotidien demandait « ic_notification », absente du projet :
+  // Android affichait une icône de secours. Et R8 (shrinkResources) supprime
+  // toute ressource qu'il ne voit appelée que par son nom depuis le JS.
+  const RES = 'app/android/app/src/main/res';
+  const keep = fs.existsSync(path.join(ROOT, RES, 'raw/keep.xml')) ? lire(`${RES}/raw/keep.xml`) : '';
+  const icones = [...new Set([...appJs.matchAll(/smallIcon:\s*'([a-z0-9_]+)'/g)].map(m => m[1]))];
+  assert.ok(icones.length > 0, 'aucune smallIcon trouvée dans app.js : règle à revoir');
+  for (const nom of icones) {
+    const existe = fs.readdirSync(path.join(ROOT, RES)).some(d => d.startsWith('drawable')
+      && fs.readdirSync(path.join(ROOT, RES, d)).some(f => f.replace(/\.(xml|png|webp)$/, '') === nom));
+    assert.ok(existe, `icône « ${nom} » absente de ${RES}/drawable*`);
+    assert.match(keep, new RegExp(`@drawable/${nom}\\b`), `« ${nom} » non protégée dans ${RES}/raw/keep.xml`);
+  }
+});
+
+test('Android : la notification de lecture n\'a pas le même id qu\'une notification locale', () => {
+  const service = lire('app/android/app/src/main/java/fr/sereinapp/app/AudioPlaybackService.java');
+  const idService = Number(service.match(/NOTIFICATION_ID\s*=\s*(\d+)/)[1]);
+  const idsLocaux = [...appJs.matchAll(/\bid:\s*(\d{3,})\b/g)].map(m => Number(m[1]));
+  assert.ok(idsLocaux.length > 0, 'aucun id de notification locale trouvé dans app.js : règle à revoir');
+  assert.ok(!idsLocaux.includes(idService), `id ${idService} partagé entre le service de lecture et une notification locale`);
+});
