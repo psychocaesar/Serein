@@ -180,3 +180,9 @@ test('Android : la notification de lecture n\'a pas le même id qu\'une notifica
   assert.ok(idsLocaux.length > 0, 'aucun id de notification locale trouvé dans app.js : règle à revoir');
   assert.ok(!idsLocaux.includes(idService), `id ${idService} partagé entre le service de lecture et une notification locale`);
 });
+
+test('aucun fichier CNAME : le dépôt ne revendique pas le domaine du site', () => {
+  // GitHub Pages était resté actif avec ce CNAME et republiait l'app web,
+  // cassée hors de l'app native, sous www.sereinapp.fr à chaque push.
+  assert.ok(!fs.existsSync(path.join(ROOT, 'CNAME')), 'CNAME à la racine : voir CLAUDE.md, GitHub Pages doit rester désactivé');
+});
