@@ -14,7 +14,10 @@ import androidx.core.app.NotificationCompat;
 public class AudioPlaybackService extends Service {
 
     private static final String CHANNEL_ID = "serein_playback_channel";
-    private static final int NOTIFICATION_ID = 1001;
+    // Distinct de tout id de notification locale (rappel quotidien : 1001) :
+    // le même id faisait remplacer « lecture en cours » par le rappel.
+    // Vérifié par tests/regles.test.js.
+    private static final int NOTIFICATION_ID = 4201;
 
     /**
      * Démarre le service. Depuis Android 12, le système peut refuser le
