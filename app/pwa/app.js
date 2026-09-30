@@ -4375,8 +4375,8 @@ const DONS_CONFIG = {
   googlePayTest: false,     // Google Pay en production
   // Google Pay en production exige l'accord de Google (Google Pay & Wallet
   // Console, intégration « Gateway ») : sans lui, le bouton mène à une erreur.
-  // Masqué jusqu'à l'accord ; la carte reste disponible sur Android.
-  googlePayActif: false,
+  // Accord obtenu le 2026-09-30.
+  googlePayActif: true,
 };
 // En centimes. Minimum 3 € : les frais fixes Stripe (0,25 €) pèsent trop
 // lourd en dessous. Les mêmes bornes sont revérifiées par le serveur.
