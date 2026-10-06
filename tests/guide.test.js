@@ -40,6 +40,8 @@ const SHIM = `
   getIntensityBias: getIntensityBias,
   HISTORY_KEY: HISTORY_KEY,
   FEEDBACK_KEY: FEEDBACK_KEY,
+  TITRES_RENOMMES: TITRES_RENOMMES,
+  migrerTitresRenommes: migrerTitresRenommes,
 };`;
 
 const src = fs.readFileSync(path.join(PWA_DIR, 'app.js'), 'utf8');
@@ -186,4 +188,18 @@ test('le guide Sommeil ne promet pas l\'endormissement', () => {
 test('le guide affiche en permanence le numéro de prévention du suicide', () => {
   const html = fs.readFileSync(path.join(PWA_DIR, 'index.html'), 'utf8');
   assert.match(html, /class="guide-aide"[^>]*>[^<]*<a href="tel:3114">3114<\/a>/);
+});
+
+test('séance renommée : l\'historique suit le nouveau titre, rien n\'est perdu', () => {
+  storage.clear();
+  const titres = new Set(catalog.groups.flatMap(g => g.sessions || (g.subgroups || []).flatMap(s => s.sessions)).map(s => s.title));
+  for (const [ancien, nouveau] of Object.entries(G.TITRES_RENOMMES)) {
+    assert.ok(titres.has(nouveau), `nouveau titre absent du catalogue : « ${nouveau} »`);
+    assert.ok(!titres.has(ancien), `l'ancien titre est encore au catalogue : « ${ancien} »`);
+    storage.set(G.HISTORY_KEY, JSON.stringify([{ title: ancien, ts: Date.now() }]));
+    storage.set(G.FEEDBACK_KEY, JSON.stringify([{ title: ancien, rating: 'ok', ts: Date.now() }]));
+    G.migrerTitresRenommes();
+    assert.ok(G.getListenedTitles().has(nouveau), 'la coche « déjà écoutée » doit suivre le renommage');
+    assert.strictEqual(JSON.parse(storage.get(G.FEEDBACK_KEY))[0].title, nouveau);
+  }
 });

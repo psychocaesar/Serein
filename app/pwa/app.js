@@ -3233,6 +3233,31 @@ function isConcentrationBlocked() {
 
 const HISTORY_KEY = 'serein-history';
 const FEEDBACK_KEY = 'serein-feedback';
+
+// Séances renommées : l'historique et les retours enregistrent les séances par
+// leur titre (coches « déjà écoutée », progression des parcours, Ta pratique,
+// guide). Sans cette conversion, renommer une séance effaçait ces traces chez
+// tous ceux qui l'avaient écoutée. Ajouter ici tout futur renommage ; le
+// harnais vérifie que chaque nouveau titre existe dans le catalogue.
+const TITRES_RENOMMES = {
+  'Sons & silence : endormissement profond': 'Sons & silence : laisser venir la nuit',
+};
+
+function migrerTitresRenommes() {
+  for (const cle of [HISTORY_KEY, FEEDBACK_KEY]) {
+    try {
+      const liste = JSON.parse(localStorage.getItem(cle) || '[]');
+      let change = false;
+      for (const e of liste) {
+        if (e && TITRES_RENOMMES[e.title]) { e.title = TITRES_RENOMMES[e.title]; change = true; }
+      }
+      if (change) {
+        localStorage.setItem(cle, JSON.stringify(liste));
+        if (cle === HISTORY_KEY) mirrorToNative(HISTORY_KEY);
+      }
+    } catch (e) {}
+  }
+}
 const MOOD_LOG_KEY = 'serein-mood-log';
 const SUPPORT_SHOWN_KEY = 'serein-support-shown';
 
@@ -4878,6 +4903,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Restaure stats/favoris/historique depuis le stockage natif si localStorage
   // est vide (purge WebView) : à faire AVANT tout ce qui les lit ci-dessous.
   await restoreFromNativeIfMissing();
+  migrerTitresRenommes();
   // Stockage persistant : évite que le navigateur purge les séances
   // téléchargées hors ligne sous pression de stockage.
   if (navigator.storage && navigator.storage.persist) {

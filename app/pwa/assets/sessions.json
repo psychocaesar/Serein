@@ -58,7 +58,7 @@
       "sessions": [
         { "id": "s7", "title": "Rituel de déconnexion", "duration": 10, "file": "Préparer le sommeil.mp3", "fileFem": null, "desc": "Couper le fil de la journée pour préparer la nuit." },
         { "id": "s20", "title": "Relâcher le corps, couche après couche", "duration": 8, "file": "Relâcher le corps, couche après couche.mp3", "fileFem": null, "desc": "Une détente progressive pour glisser vers le sommeil." },
-        { "id": "s19", "title": "Sons & silence : endormissement profond", "duration": 12, "file": "Sons & silence - endormissement profond.mp3", "fileFem": null, "desc": "Te laisser porter par les sons jusqu'à l'endormissement." },
+        { "id": "s19", "title": "Sons & silence : laisser venir la nuit", "duration": 12, "file": "Sons & silence - endormissement profond.mp3", "fileFem": null, "desc": "Te laisser porter par les sons et le silence, sans chercher à dormir." },
         { "id": "s8", "title": "Réveils nocturnes : retrouver le calme", "duration": 18, "file": "Reveils nocturnes.mp3", "fileFem": "reveils nocturnes - retrouver le calme.mp3", "desc": "Retrouver le calme et te rendormir quand la nuit se fragmente." },
         { "id": "s21", "title": "Méditation du matin reposé", "duration": 10, "file": "Méditation du matin reposé.mp3", "fileFem": null, "desc": "Émerger en douceur et bien commencer la journée." }
       ]
