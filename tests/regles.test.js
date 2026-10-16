@@ -106,6 +106,27 @@ test('la FAQ informe des effets indésirables possibles et des précautions', ()
   }
 });
 
+function faqReponse(id) {
+  const m = indexHtml.match(new RegExp(`<div class="faq-item" id="${id}">[\\s\\S]*?<div class="faq-answer">([\\s\\S]*?)<\\/div>`));
+  assert.ok(m, `entrée #${id} absente de la FAQ`);
+  return m[1];
+}
+
+test('FAQ sommeil : la méditation n\'est pas présentée comme un moyen de s\'endormir', () => {
+  // Chercher à dormir entretient l'insomnie (Espie 2006) : voir CLAUDE.md.
+  const r = faqReponse('faq-lit');
+  assert.doesNotMatch(r, /si c'est ton objectif|pour (mieux )?(t'endormir|dormir|trouver le sommeil)\b(?! :)/i, r);
+  assert.match(r, /laisse le sommeil venir/);
+});
+
+test('FAQ confidentialité : ne prétend pas qu\'aucune donnée n\'est collectée', () => {
+  // Depuis les dons, l'e-mail du donateur est collecté.
+  const r = faqReponse('faq-donnees');
+  assert.doesNotMatch(r, /aucune donnée/i, r);
+  assert.match(r, /don/);
+  assert.match(r, /e-mail/);
+});
+
 // ── Dons ──
 
 test('aucune promesse de reçu fiscal ou de réduction d\'impôt', () => {
