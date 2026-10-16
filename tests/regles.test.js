@@ -93,6 +93,19 @@ test('écriture inclusive au point médian, pas de « (e) » ni de « /se »', (
   }
 });
 
+// ── Sécurité de la pratique ──
+
+test('la FAQ informe des effets indésirables possibles et des précautions', () => {
+  // Effets indésirables documentés (Farias 2020, Goldberg 2022, Britton 2021) :
+  // transparence demandée par les auteurs, et risque accru en cas de trauma,
+  // d'antécédents psychotiques ou bipolaires. Veille d'octobre 2026.
+  const faq = indexHtml.match(/<div class="faq-item" id="faq-mal">[\s\S]*?<\/div>\s*<\/div>/);
+  assert.ok(faq, 'entrée « La méditation peut-elle mal se passer ? » absente de la FAQ');
+  for (const motif of [/t'arrêter/, /traumatisme/, /psychotique/, /psychologue|médecin/]) {
+    assert.match(faq[0], motif, `la réponse ne mentionne plus ${motif}`);
+  }
+});
+
 // ── Dons ──
 
 test('aucune promesse de reçu fiscal ou de réduction d\'impôt', () => {
