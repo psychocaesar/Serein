@@ -1,6 +1,6 @@
 Serein propose des séances de méditation guidée en français, entièrement gratuites, sans publicité, sans compte et sans collecte de données.
 
-L'application est conçue par un psychologue du travail spécialisé en thérapies cognitivo-comportementales (TCC) et en thérapie d'acceptation et d'engagement (ACT). Les séances couvrent l'anxiété, le stress, le sommeil, la respiration, l'attention et la régulation émotionnelle.
+L'application est conçue par un psychologue du travail formé aux thérapies cognitives et comportementales (TCC). Les séances couvrent l'anxiété, le stress, le sommeil, la respiration, l'attention et la régulation émotionnelle.
 
 Fonctionnalités :
 * Plus de 35 séances guidées réparties en parcours thématiques
