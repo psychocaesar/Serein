@@ -7,7 +7,7 @@
   - Permissions minimales (privacy-first)
   - Notifications locales (rappel quotidien uniquement — pas de push serveur)
   - Lecture audio en arrière-plan (écran verrouillé)
-  - Compatible Android 8+ (API 26)
+  - Compatible Android 7+ (API 24, voir minSdkVersion dans variables.gradle)
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">

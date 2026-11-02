@@ -96,6 +96,10 @@ public class AudioPlaybackService extends Service {
     }
 
     private void createNotificationChannel() {
+        // NotificationChannel n'existe qu'à partir d'Android 8 : sans cette
+        // garde, l'app plantait sur Android 7 (minSdk 24) dès la mise en
+        // arrière-plan pendant une lecture. Vérifié par tests/regles.test.js.
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return;
         NotificationChannel channel = new NotificationChannel(
             CHANNEL_ID,
             "Lecture Serein",

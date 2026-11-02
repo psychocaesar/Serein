@@ -215,6 +215,40 @@ test('Android : la notification de lecture n\'a pas le même id qu\'une notifica
   assert.ok(!idsLocaux.includes(idService), `id ${idService} partagé entre le service de lecture et une notification locale`);
 });
 
+// NotificationChannel (Android 8, API 26) appelé sans garde de version faisait
+// planter l'app sur Android 7 (minSdk 24) dès la mise en arrière-plan.
+function canauxSansGarde(java) {
+  const signatures = [...java.matchAll(/\b(?:public|private|protected|static|void)\b[^;{}()]*\([^)]*\)\s*\{/g)].map(s => s.index);
+  const fautifs = [];
+  for (const m of java.matchAll(/new NotificationChannel\(/g)) {
+    const debut = Math.max(0, ...signatures.filter(i => i < m.index));
+    if (!/SDK_INT[\s\S]*VERSION_CODES\.O\b/.test(java.slice(debut, m.index))) fautifs.push(m.index);
+  }
+  return fautifs;
+}
+
+test('le détecteur de NotificationChannel sans garde attrape bien le cas fautif', () => {
+  const sansGarde = 'void creer() {\n  NotificationChannel c = new NotificationChannel("a", "b", 2);\n}';
+  const avecGarde = 'void creer() {\n  if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return;\n  NotificationChannel c = new NotificationChannel("a", "b", 2);\n}';
+  assert.strictEqual(canauxSansGarde(sansGarde).length, 1);
+  assert.strictEqual(canauxSansGarde(avecGarde).length, 0);
+});
+
+test('Android : NotificationChannel toujours protégé par une garde de version', () => {
+  const minSdk = Number(lire('app/android/variables.gradle').match(/minSdkVersion\s*=\s*(\d+)/)[1]);
+  if (minSdk >= 26) return;
+  const dossier = 'app/android/app/src/main/java/fr/sereinapp/app';
+  for (const f of fs.readdirSync(path.join(ROOT, dossier)).filter(f => f.endsWith('.java'))) {
+    assert.strictEqual(canauxSansGarde(lire(`${dossier}/${f}`)).length, 0,
+      `${f} : new NotificationChannel sans « if (Build.VERSION.SDK_INT … VERSION_CODES.O) » alors que minSdk = ${minSdk}`);
+  }
+});
+
+test('aucun prototype dans app/pwa : tout ce dossier part dans les apps natives', () => {
+  const protos = fs.readdirSync(path.join(ROOT, 'app/pwa')).filter(f => /prototype/i.test(f));
+  assert.deepStrictEqual(protos, [], 'prototype à sortir de app/pwa (il serait embarqué dans les apps et publié)');
+});
+
 test('aucun fichier CNAME : le dépôt ne revendique pas le domaine du site', () => {
   // GitHub Pages était resté actif avec ce CNAME et republiait l'app web,
   // cassée hors de l'app native, sous www.sereinapp.fr à chaque push.

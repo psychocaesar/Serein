@@ -973,19 +973,10 @@ function updatePlayIcon(playing) {
   notifyNativePlayback();
 }
 
-// Vitesse avec cycle depuis toolbar
 const SPEEDS = [0.7, 0.8, 0.9, 1.0];
-let currentSpeedIdx = 3;
-
-function cycleSpeed() {
-  currentSpeedIdx = (currentSpeedIdx + 1) % SPEEDS.length;
-  setSpeed(SPEEDS[currentSpeedIdx]);
-}
 
 function setSpeed(s) {
   audio.playbackRate = s;
-  currentSpeedIdx = SPEEDS.indexOf(s);
-  if (currentSpeedIdx === -1) currentSpeedIdx = 3;
   const label = s === 1.0 ? '1×' : s + '×';
   const sd = document.getElementById('speed-display');
   if (sd) sd.textContent = label;
@@ -4701,7 +4692,7 @@ function openPrivacyPolicy() {
 
 // ── EXPORT / IMPORT DES DONNÉES (local-first, aucun serveur) ──
 const DATA_KEYS = [
-  'serein-stats', 'serein-history', 'serein-feedback', 'serein-guide-session', 'serein-favoris',
+  'serein-stats', 'serein-history', 'serein-feedback', 'serein-favoris',
   'serein-theme', 'serein-text-size', 'serein-speed', 'serein-volume', 'serein-bells', 'serein-wifi-only',
   'serein-ambiance-default', 'serein-ambiance-volume', 'serein-reminder-enabled', 'serein-reminder-time',
   'serein-voice', 'serein-resume', 'serein-mood-log', 'serein-program',
@@ -4715,9 +4706,9 @@ const DATA_KEYS = [
 
 // ── SAUVEGARDE NATIVE (résilience) ──
 // localStorage reste la source de vérité, lue de façon synchrone partout
-// dans l'app (aucun autre endroit n'est touché par ce qui suit). Ces 3 clés
-// — les plus coûteuses à perdre pour l'utilisateur (progression, favoris,
-// séances déjà écoutées) — sont EN PLUS mirror-ées vers le stockage natif
+// dans l'app (aucun autre endroit n'est touché par ce qui suit). Ces 4 clés
+// — les plus coûteuses à perdre pour l'utilisateur (statistiques, favoris,
+// séances déjà écoutées, programme en cours) — sont EN PLUS mirror-ées vers le stockage natif
 // Capacitor Preferences (UserDefaults iOS / SharedPreferences Android),
 // plus résistant qu'une WebView à une purge de stockage. Écriture
 // fire-and-forget à chaque sauvegarde ; lecture seulement au démarrage,
