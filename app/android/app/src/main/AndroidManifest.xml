@@ -105,6 +105,21 @@
             android:name="com.google.android.gms.wallet.api.enabled"
             android:value="true" />
 
+        <!-- ── Widget d'écran d'accueil (SereinWidget) ──
+             Jour de programme ou séance du jour + bouton Respirer ; chaque
+             toucher ouvre un lien serein:// (voir l'intent-filter ci-dessus). -->
+        <receiver
+            android:name=".SereinWidget"
+            android:exported="false"
+            android:label="@string/widget_nom">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_serein_info" />
+        </receiver>
+
         <!-- ── Receiver pour reprogrammer les alarmes après redémarrage ── -->
         <receiver
             android:name="com.capacitorjs.plugins.localnotifications.LocalNotificationRestoreReceiver"

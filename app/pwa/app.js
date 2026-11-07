@@ -1280,18 +1280,25 @@ const SUGGESTION_ICONS = {
   soleil: '<svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>'
 };
 
-function pickSuggestion() {
-  if (!CATALOG) return null;
+// Séances candidates à la « séance du jour » : celles pas encore écoutées,
+// ou toutes. Partagé avec le widget d'écran d'accueil, qui refait le même
+// tirage (jour UTC modulo la taille) sans ouvrir l'app.
+function poolSeanceDuJour() {
+  if (!CATALOG) return [];
   const allSessions = [];
   CATALOG.groups.forEach(function(group) {
     const sessions = group.sessions
       || (group.subgroups ? group.subgroups.flatMap(function(sg) { return sg.sessions; }) : []);
     sessions.forEach(function(s) { allSessions.push({ session: s, group: group }); });
   });
-  if (!allSessions.length) return null;
   const listened = getListenedTitles();
   const fresh = allSessions.filter(function(e) { return !listened.has(e.session.title); });
-  const pool = fresh.length ? fresh : allSessions;
+  return fresh.length ? fresh : allSessions;
+}
+
+function pickSuggestion() {
+  const pool = poolSeanceDuJour();
+  if (!pool.length) return null;
   const dayIdx = Math.floor(Date.now() / 86400000) % pool.length;
   const pick = pool[dayIdx];
   return { session: pick.session, group: pick.group, icon: "soleil", label: "Séance du jour" };
@@ -1802,6 +1809,7 @@ function recordCompletion(session = currentSession, quand = new Date(), minutes 
     // des parcours et les recommandations du guide.
     if (session && session.id !== 'intro' && session.id !== 'observation') {
       recordGuidePlay(session.title, quand);
+      publierEtatWidget();
       updateSessionChecks();
       updatePathCardCounts();
       incrementDonCounter();
@@ -2913,6 +2921,7 @@ function setProgramState(state) {
     else localStorage.removeItem(PROGRAM_KEY);
   } catch(e) {}
   mirrorToNative(PROGRAM_KEY);
+  publierEtatWidget();
 }
 // Soft-lock : le jour du moment est lançable tant qu'aucun jour n'a été complété
 // AUJOURD'HUI. Aucune pénalité de gap : sauter des jours ne verrouille rien.
@@ -4919,6 +4928,44 @@ const DATA_KEYS = [
 // et seulement pour restaurer si localStorage s'avère vide.
 const NATIVE_MIRROR_KEYS = ['serein-stats', 'serein-favoris', 'serein-history', 'serein-program'];
 
+// ── WIDGET D'ÉCRAN D'ACCUEIL ──
+// L'app publie un petit état dans le stockage natif (Capacitor Preferences :
+// SharedPreferences « CapacitorStorage » sur Android) ; le widget le lit et
+// recalcule seul la date du jour (jour de programme déjà fait ou non, séance
+// du jour), pour rester juste même si l'app n'est pas rouverte. Aucune donnée
+// ne quitte l'appareil. Lu par SereinWidget.java.
+const WIDGET_KEY = 'serein-widget';
+
+function etatWidget() {
+  let programme = null;
+  const state = getProgramState();
+  const p = state && findProgram(state.programId);
+  if (p) {
+    const termine = state.doneCount >= p.days.length;
+    const prochain = termine ? null : findSessionById(p.days[state.doneCount].sessionId);
+    programme = {
+      nom: p.title,
+      jour: Math.min(state.doneCount + 1, p.days.length),
+      total: p.days.length,
+      titre: prochain ? prochain.session.title : '',
+      duree: prochain ? Number(prochain.session.duration) || null : null,
+      derniereDate: state.lastDate || null,
+      termine
+    };
+  }
+  const seances = poolSeanceDuJour().map(e => ({ id: e.session.id, t: e.session.title, d: Number(e.session.duration) || null }));
+  return { v: 1, programme, seances };
+}
+
+function publierEtatWidget() {
+  try {
+    if (!CATALOG) return;
+    const plugin = window.Capacitor?.Plugins?.Preferences;
+    if (!plugin) return;
+    plugin.set({ key: WIDGET_KEY, value: JSON.stringify(etatWidget()) }).catch(() => {});
+  } catch(e) {}
+}
+
 function mirrorToNative(key) {
   try {
     const plugin = window.Capacitor?.Plugins?.Preferences;
@@ -5134,6 +5181,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   rattraperFinEnAttente(); // séance fermée au tout dernier moment la fois d'avant
   initialiserLiensProfonds();
   executerLienEnAttente(); // lien arrivé avant le chargement du catalogue
+  publierEtatWidget();
   restoreOfflineButtons();
   updateOfflineCount();
 

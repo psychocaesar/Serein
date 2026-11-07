@@ -4,4 +4,11 @@
     <string name="title_activity_main">SereinApp Méditation</string>
     <string name="package_name">fr.sereinapp.app</string>
     <string name="custom_url_scheme">fr.sereinapp.app</string>
+    <!-- Widget d'écran d'accueil (SereinWidget) -->
+    <string name="widget_nom">Serein</string>
+    <string name="widget_description">Ta séance du jour ou ton programme, et la respiration guidée en un geste.</string>
+    <string name="widget_surtitre_defaut">Serein</string>
+    <string name="widget_titre_defaut">Prendre un moment</string>
+    <string name="widget_respirer">Respirer</string>
+    <string name="widget_respirer_description">Respirer : ouvrir la respiration guidée</string>
 </resources>

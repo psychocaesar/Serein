@@ -17,6 +17,8 @@ public class MainActivity extends BridgeActivity {
         // Service de premier plan uniquement si une lecture est en cours,
         // sinon notification "Lecture en cours…" fantôme à chaque sortie.
         PlaybackStatePlugin.setAppBackgrounded(this, true);
+        // Le widget reflète ce qui vient de se passer dans l'app (jour fait…).
+        SereinWidget.rafraichir(this);
     }
 
     @Override

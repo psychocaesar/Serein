@@ -6,7 +6,7 @@
 // par Xcode Cloud (ci_post_clone.sh : le build s'arrête s'il échoue) et par
 // `npm run release:android`. Voir la section « Harnais » de CLAUDE.md.
 import { spawnSync, execSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -68,6 +68,30 @@ if (sansReseau) {
     echecs.push(`${manquants.length} fichier(s) audio introuvable(s) sur le CDN`);
   } else {
     console.log('  ✔ tous présents');
+  }
+}
+
+// Tests unitaires natifs Android (JUnit, app/android/app/src/test) : logique
+// du widget d'écran d'accueil. Machines de développement seulement (Xcode
+// Cloud et GitHub n'ont pas le SDK Android) ; JDK d'Android Studio par défaut.
+function jdk() {
+  if (process.env.JAVA_HOME && existsSync(process.env.JAVA_HOME)) return process.env.JAVA_HOME;
+  return ['/Applications/Android Studio.app/Contents/jbr/Contents/Home',
+    'C:\\Program Files\\Android\\Android Studio\\jbr'].find(p => existsSync(p)) || null;
+}
+if (process.env.CI) {
+  etape('Tests natifs Android : ignorés (CI)');
+} else {
+  etape('Tests natifs Android (JUnit)');
+  const javaHome = jdk();
+  if (!javaHome) {
+    console.log('  ⚠ aucun JDK trouvé (Android Studio absent ?) : tests natifs non lancés');
+  } else {
+    const android = join(ROOT, 'app/android');
+    const gradlew = process.platform === 'win32' ? 'gradlew.bat' : './gradlew';
+    const r = spawnSync(gradlew, [':app:testDebugUnitTest', '-q'], { cwd: android, env: { ...process.env, JAVA_HOME: javaHome }, stdio: 'inherit', shell: process.platform === 'win32' });
+    if (r.status !== 0) echecs.push('des tests natifs Android échouent (détail ci-dessus)');
+    else console.log('  ✔ tests natifs passés');
   }
 }
 
