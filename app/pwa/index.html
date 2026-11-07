@@ -486,8 +486,20 @@
     input[type=range].volume-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #fff; cursor: pointer; }
 
     /* Ecran de fin */
-    .complete-screen { display: none; flex-direction: column; align-items: center; justify-content: center; flex: 1; text-align: center; padding: 2rem 2rem 1rem; color: #fff; }
+    .complete-screen { display: none; flex-direction: column; align-items: center; justify-content: flex-start; flex: 1; min-height: 0; overflow-y: auto; text-align: center; padding: 2rem 2rem 1rem; color: #fff; }
     .complete-screen.visible { display: flex; }
+    /* Centré quand il y a la place, défilable depuis le haut sinon (un
+       justify-content: center couperait le haut sans pouvoir y remonter). */
+    .complete-screen > :first-child { margin-top: auto; }
+    .complete-screen > :last-child { margin-bottom: auto; }
+    /* Petits écrans (iPhone SE) avec l'invitation au don : tout doit tenir. */
+    @media (max-height: 740px) {
+      .complete-screen.avec-don { padding-top: 1rem; }
+      .complete-screen.avec-don .complete-icon { font-size: 2.5rem; margin-bottom: .5rem; }
+      .complete-screen.avec-don .complete-subtitle { margin-bottom: 1rem; }
+      .complete-screen.avec-don .complete-don { margin-top: .9rem; padding: .85rem 1rem; }
+      .complete-screen.avec-don .complete-actions { margin-top: .9rem; }
+    }
     .player-main.hidden { display: none; }
     .complete-icon { font-size: 4rem; margin-bottom: 1.25rem; animation: pop .4s ease; }
     @keyframes pop { 0%{transform:scale(.5);opacity:0} 80%{transform:scale(1.15)} 100%{transform:scale(1);opacity:1} }
@@ -666,13 +678,11 @@
     .timer-block-label { font-size: .85rem; font-weight: 600; color: var(--color-muted); margin-bottom: .5rem; }
     .timer-card-horizontal { background: var(--color-surface); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid var(--color-border); border-radius: var(--radius); padding: 1rem 1.1rem; display: flex; justify-content: space-between; align-items: center; gap: .75rem; cursor: pointer; color: var(--color-text); transition: transform .15s, box-shadow .2s; }
     /* Invitation au don (carte discrète, affichée une seule fois après SEUIL séances) */
-    .don-invitation-card { position: relative; background: var(--color-surface); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid var(--color-border); border-radius: var(--radius); padding: 1.25rem 1.25rem 1.1rem; }
-    .don-invitation-text { font-size: .92rem; line-height: 1.6; color: var(--color-text); margin-bottom: 1rem; padding-right: 1.75rem; }
-    .don-invitation-cta { width: 100%; }
-    .don-invitation-close { position: absolute; top: .5rem; right: .5rem; width: 32px; height: 32px; border: none; background: none; color: var(--color-muted); font-size: 1.5rem; line-height: 1; cursor: pointer; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background .18s, color .18s; }
-    .don-invitation-close:hover { background: var(--color-surface-2); color: var(--color-text); }
-    .don-invitation-close:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
-    [data-theme="light"] .don-invitation-card { backdrop-filter: none; -webkit-backdrop-filter: none; background: #fff; box-shadow: 0 6px 22px -16px rgba(30,50,40,0.22); }
+    .complete-don { width: 100%; margin-top: 1.25rem; padding: 1rem 1.1rem; border: 1px solid rgba(255,255,255,.18); border-radius: 18px; background: rgba(255,255,255,.06); }
+    .complete-don-text { font-size: .85rem; line-height: 1.55; color: rgba(255,255,255,.8); margin-bottom: .85rem; }
+    .complete-don-actions { display: flex; gap: .6rem; justify-content: center; flex-wrap: wrap; }
+    .complete-don-actions .btn-white { padding: .65rem 1.25rem; font-size: .85rem; }
+    .complete-don-later { background: none; border: none; color: rgba(255,255,255,.55); font-size: .85rem; font-family: inherit; padding: .65rem .9rem; cursor: pointer; }
 
     /* Accueil : bouton rond « Ta pratique » */
     #home header h1 { padding-right: 3.25rem; }
@@ -738,7 +748,7 @@
     .don-merci { text-align: center; padding-top: 2rem; }
     .don-merci-icone { font-size: 2.5rem; }
     @media (prefers-reduced-motion: no-preference) {
-      #don-invitation-block { animation: donFadeIn .4s ease; }
+      .complete-don { animation: donFadeIn .4s ease; }
       @keyframes donFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
     }
     .timer-card-horizontal .timer-info-h { display: flex; gap: .85rem; align-items: center; }
@@ -1170,10 +1180,19 @@
 
     <!-- Écran de fin -->
     <div class="complete-screen" id="complete-screen">
-      <div class="complete-icon">🌿</div>
+      <div class="complete-icon" aria-hidden="true">🌿</div>
       <h2>Séance terminée</h2>
       <p id="complete-title"></p>
       <p class="complete-subtitle">Prends un instant avant de continuer.<br>Comment tu te sens ?</p>
+      <!-- Invitation au don : une seule fois, à la fin de la DON_INVITATION_SEUIL-ième
+           séance terminée (afficherInvitationDon). Jamais à l'ouverture de l'app. -->
+      <div class="complete-don" id="complete-don" style="display:none;" role="region" aria-label="Soutenir Serein">
+        <p class="complete-don-text" id="complete-don-text"></p>
+        <div class="complete-don-actions">
+          <button class="btn-white" type="button" onclick="supportFromInvitation()">Soutenir Serein</button>
+          <button class="complete-don-later" type="button" onclick="dismissDonInvitation()">Plus tard</button>
+        </div>
+      </div>
       <div class="complete-actions">
         <button class="btn-white" onclick="closePlayer()">Explorer les séances</button>
         <button class="btn-outline-white" onclick="replaySession()" aria-label="Rejouer la séance">↩ Rejouer</button>
@@ -1340,16 +1359,6 @@
     </article>
   </section>
 
-  <!-- Invitation au don : en bas de l'accueil, affichée une seule fois après SEUIL séances
-       (renderDonInvitation). EN PAUSE via DON_INVITATION_ACTIVE tant que Benevity/Goodstack
-       n'ont pas validé — reste masquée quoi qu'il arrive. -->
-  <section id="don-invitation-block" class="timer-block" style="display:none;margin-top:1.25rem;" role="region" aria-label="Soutenir Serein">
-    <article class="don-invitation-card">
-      <button class="don-invitation-close" id="don-invitation-close" type="button" aria-label="Fermer" onclick="dismissDonInvitation()">&times;</button>
-      <p class="don-invitation-text" id="don-invitation-text"></p>
-      <button class="btn btn-primary don-invitation-cta" type="button" onclick="supportFromInvitation()">Soutenir Serein</button>
-    </article>
-  </section>
 </section>
 
 <!-- Overlay Respiration guidée (feature autonome, portée de Serein TCC) -->

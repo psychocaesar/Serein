@@ -230,7 +230,6 @@ function showScreen(id) {
     renderResumeCard();
     renderDailySuggestion();
     updateMoodChips();
-    renderDonInvitation();
   } else if (id === 'settings') {
     updateOfflineCount();
     renderDownloadsManager();
@@ -714,6 +713,7 @@ function closePlayer() {
   // Séance de programme quittée sans aller au bout : ne pas valider le jour.
   if (!audio.ended) programDayInProgress = null;
   oublierFinEnAttente();
+  if (audio.ended) demanderAvisAuRetour(); else avisAuRetour = false;
 
   clearSleepTimer(); // annule toute minuterie d'extinction en cours
 
@@ -1057,9 +1057,10 @@ audio.addEventListener('ended', () => {
   // Feedback de fin pour toutes les séances (sauf la mini-séance d'observation
   // du guide, qui enchaîne sur sa propre conversation).
   if (currentSession && currentSession.id !== 'observation') showCompletionFeedback();
+  if (currentSession && currentSession.id !== 'observation' && currentSession.id !== 'intro') afficherInvitationDon();
   if (programDayInProgress) { completeProgramDay(); programDayInProgress = null; }
   maybeShowReminderPrompt();
-  maybeRequestStoreReview();
+  preparerDemandeAvis(); // la fenêtre s'ouvrira au retour à l'accueil (closePlayer)
 });
 
 // ── REPRISE DE LECTURE ──
@@ -1829,14 +1830,15 @@ function toggleTiroir(btn) {
 
 // ── INVITATION AU DON ──
 // Déclenchée par l'usage local (aucun réseau, aucun tracker) : après SEUIL
-// séances guidées terminées, une carte discrète et dismissable apparaît UNE
-// SEULE FOIS sur l'accueil, et ouvre l'écran de don (openDon).
+// séances guidées terminées, une carte discrète apparaît UNE SEULE FOIS, sur
+// l'écran de fin de séance (jamais à l'ouverture de l'app), et ouvre l'écran
+// de don (openDon).
 // RÉACTIVÉE le 2026-09-23 : l'association est validée par Benevity (exigée
 // par Apple) ET par Goodstack (exigée par Google Play), ce qui lève la raison
 // de la pause de juillet 2026. N'apparaît que si le don est réellement
 // disponible (donsDisponibles : serveur configuré, Apple Pay sur iOS).
-// Le compteur ayant tourné pendant toute la pause, les utilisateurs déjà
-// au-dessus du seuil verront l'invitation dès leur prochain lancement.
+// Les utilisateurs déjà au-dessus du seuil qui ne l'ont jamais vue la
+// verront à la fin de leur prochaine séance.
 const DON_INVITATION_ACTIVE = true;
 const DON_INVITATION_SEUIL = 7;            // ← seuil facile à modifier
 const DON_COUNT_KEY = 'serein_seances_terminees';
@@ -1849,27 +1851,36 @@ function incrementDonCounter() {
   } catch(e) {}
 }
 
-function renderDonInvitation() {
-  const block = document.getElementById('don-invitation-block');
-  if (!block) return;
-  if (!DON_INVITATION_ACTIVE || !donsDisponibles()) { block.style.display = 'none'; return; }
-  let n = 0, seen = false;
+// Affichée sur l'écran de fin, au moment où la séance vient de se terminer,
+// plutôt qu'à l'ouverture de l'app, quand on vient pour méditer. Comptée comme
+// vue dès qu'elle apparaît : elle ne revient jamais.
+function invitationDonDue() {
+  if (!DON_INVITATION_ACTIVE || !donsDisponibles()) return false;
   try {
-    n = parseInt(localStorage.getItem(DON_COUNT_KEY), 10) || 0;
-    seen = localStorage.getItem(DON_SEEN_KEY) === 'true';
-  } catch(e) {}
-  if (seen || n < DON_INVITATION_SEUIL) { block.style.display = 'none'; return; }
-  const text = document.getElementById('don-invitation-text');
+    const n = parseInt(localStorage.getItem(DON_COUNT_KEY), 10) || 0;
+    return n >= DON_INVITATION_SEUIL && localStorage.getItem(DON_SEEN_KEY) !== 'true';
+  } catch(e) { return false; }
+}
+
+function afficherInvitationDon() {
+  const block = document.getElementById('complete-don');
+  if (!block) return;
+  const ecran = document.getElementById('complete-screen');
+  const due = invitationDonDue();
+  if (ecran && ecran.classList) ecran.classList.toggle('avec-don', due); // version compacte sur petit écran
+  if (!due) { block.style.display = 'none'; return; }
+  const n = parseInt(localStorage.getItem(DON_COUNT_KEY), 10) || 0;
   // Apostrophes françaises → template literal obligatoire (quotes simples = crash).
-  if (text) text.textContent = `Serein t'a accompagné·e sur ${n} séances. C'est gratuit et sans pub parce que d'autres soutiennent le projet. Tu peux faire pareil.`;
-  block.style.display = 'block';
+  document.getElementById('complete-don-text').textContent = `Serein t'a accompagné·e sur ${n} séances. C'est gratuit et sans pub parce que d'autres soutiennent le projet. Tu peux faire pareil.`;
+  block.style.display = '';
+  markDonInvitationSeen(false);
 }
 
 // Marque l'invitation comme vue : elle ne réapparaîtra plus jamais.
-function markDonInvitationSeen() {
+function markDonInvitationSeen(masquer = true) {
   try { localStorage.setItem(DON_SEEN_KEY, 'true'); } catch(e) {}
-  const block = document.getElementById('don-invitation-block');
-  if (block) block.style.display = 'none';
+  const block = document.getElementById('complete-don');
+  if (block && masquer) block.style.display = 'none';
 }
 
 function dismissDonInvitation() {
@@ -1881,12 +1892,6 @@ function supportFromInvitation() {
   openDon();
 }
 
-// Fermeture au clavier (Échap) quand l'invitation est visible.
-document.addEventListener('keydown', e => {
-  if (e.key !== 'Escape') return;
-  const block = document.getElementById('don-invitation-block');
-  if (block && block.style.display !== 'none') dismissDonInvitation();
-});
 
 // ── THÈME ──
 // Trois modes : light / dark / auto (par défaut, suit prefers-color-scheme).
@@ -2144,19 +2149,36 @@ function showReminderPromptToast() {
 // ne retombe). Plugin natif in-app review (pas de redirection vers le store) :
 // Apple/Google gèrent eux-mêmes leurs propres quotas d'affichage, notre seul
 // rôle est de ne pas re-solliciter une fois que c'est fait.
+// Moment : au RETOUR à l'accueil après la séance, jamais sur l'écran de fin,
+// où la fenêtre recouvrait « Cette séance était… ». Et jamais liée à la
+// réponse donnée : Google interdit de poser une question d'opinion avant la
+// fenêtre d'avis. Pas la même séance que l'invitation au don (une demande à
+// la fois) : elle attend alors la séance suivante.
 const STORE_REVIEW_SEUIL = 5;
 const STORE_REVIEW_SEEN_KEY = 'serein-store-review-demande';
+let avisAuRetour = false;
 
-async function maybeRequestStoreReview() {
+function preparerDemandeAvis() {
+  avisAuRetour = false;
   try {
     if (localStorage.getItem(STORE_REVIEW_SEEN_KEY)) return; // une seule fois, jamais relancée
     if (!(typeof Capacitor !== 'undefined' && Capacitor.isNativePlatform())) return;
+    if (!window.Capacitor?.Plugins?.InAppReview) return; // build pas encore synchronisé : no-op
+    if ((getStats().sessions || 0) < STORE_REVIEW_SEUIL) return;
+    const don = document.getElementById('complete-don');
+    if (don && don.style.display !== 'none') return; // invitation au don affichée : séance suivante
+    avisAuRetour = true;
+  } catch(e) {}
+}
+
+function demanderAvisAuRetour() {
+  if (!avisAuRetour) return;
+  avisAuRetour = false;
+  try {
     const plugin = window.Capacitor?.Plugins?.InAppReview;
-    if (!plugin) return; // plugin non disponible (build pas encore synchronisé) : no-op silencieux
-    const s = getStats();
-    if ((s.sessions || 0) < STORE_REVIEW_SEUIL) return;
+    if (!plugin) return;
     localStorage.setItem(STORE_REVIEW_SEEN_KEY, 'true');
-    setTimeout(() => { plugin.requestReview().catch(() => {}); }, 2500);
+    setTimeout(() => { plugin.requestReview().catch(() => {}); }, 800); // une fois l'accueil affiché
   } catch(e) {}
 }
 
@@ -3697,7 +3719,7 @@ function showCompletionFeedback() {
   wrap.appendChild(btns);
 
   // Insérer avant les boutons d'action existants
-  const completeActions = completeScreen.querySelector('.complete-actions');
+  const completeActions = completeScreen.querySelector('.complete-don') || completeScreen.querySelector('.complete-actions');
   if (completeActions) {
     completeScreen.insertBefore(wrap, completeActions);
   } else {

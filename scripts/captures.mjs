@@ -5,7 +5,8 @@
 // iPhone et iPad passent par WebKit (le moteur de Safari et de l'app iOS),
 // Android par Chromium (celui de la WebView Android).
 // Vérifications bloquantes : défilement horizontal, écran plein écran qui ne
-// couvre pas toute la largeur (le refus iPad de sept. 2026), erreur JavaScript.
+// couvre pas toute la largeur (le refus iPad de sept. 2026), erreur JavaScript,
+// bouton de l'écran de fin hors de l'écran (iPhone SE avec l'invitation au don).
 // Prérequis, une fois par machine : npx playwright install webkit chromium
 import { createServer } from 'node:http';
 import { readFile, mkdir, writeFile, rm } from 'node:fs/promises';
@@ -20,6 +21,8 @@ const SORTIE = join(ROOT, 'captures');
 
 const APPAREILS = [
   { id: 'iphone', nom: 'iPhone 15', moteur: webkit, largeur: 393, hauteur: 852, dpr: 3, mobile: true },
+  // Le plus petit écran encore courant : c'est là que l'écran de fin débordait.
+  { id: 'iphonese', nom: 'iPhone SE', moteur: webkit, largeur: 375, hauteur: 667, dpr: 2, mobile: true },
   { id: 'ipad', nom: 'iPad Air 11"', moteur: webkit, largeur: 820, hauteur: 1180, dpr: 2, mobile: true },
   { id: 'ipad13', nom: 'iPad Pro 13"', moteur: webkit, largeur: 1024, hauteur: 1366, dpr: 2, mobile: true },
   { id: 'android', nom: 'Android (Pixel 7)', moteur: chromium, largeur: 412, hauteur: 915, dpr: 2.625, mobile: true },
@@ -37,6 +40,8 @@ const ECRANS = [
   { id: 'parcours', nom: 'Fiche parcours', action: `openParcoursOverlay('Premiers pas')` },
   { id: 'programme', nom: 'Programme', action: `openProgramOverlay('sommeil-5j')` },
   { id: 'lecteur', nom: 'Lecteur de séance', action: `(() => { const f = findSessionById('s1'); launchPlayer('s1', f.session.title, f.group.name, f.session.duration + ' min', f.session.file, 'masculine', f.group.artwork); })()`, attente: 1200 },
+  // Écran de fin le plus chargé : retour de séance + invitation au don (seuil atteint).
+  { id: 'fin', nom: 'Fin de séance (invitation au don)', action: `(() => { localStorage.setItem('serein_seances_terminees', String(DON_INVITATION_SEUIL - 1)); localStorage.removeItem('serein_invitation_don_vue'); donsDisponibles = () => true; const f = findSessionById('s1'); launchPlayer('s1', f.session.title, f.group.name, f.session.duration + ' min', f.session.file, 'masculine', f.group.artwork); setTimeout(() => audio.dispatchEvent(new Event('ended')), 300); })()`, attente: 1500 },
   { id: 'pratique', nom: 'Ta pratique', action: `openPratique()` },
   { id: 'respiration', nom: 'Respiration guidée', action: `openBreathing()` },
   { id: 'minuteur', nom: 'Minuteur', action: `openTimerSheet()` },
@@ -77,6 +82,11 @@ const CONTROLES = `(() => {
     if (r.left > 0.5 || r.right < L - 0.5) {
       pb.push('écran plein écran trop étroit : ' + (el.id ? '#' + el.id : el.className || el.tagName) + ' (' + Math.round(r.width) + ' px sur ' + L + ')');
     }
+  }
+  // Écran de fin : ses boutons doivent se voir sans défiler, même sur iPhone SE.
+  for (const b of document.querySelectorAll('.complete-screen.visible button')) {
+    const r = b.getBoundingClientRect();
+    if (r.height && r.bottom > H + 1) pb.push('écran de fin : « ' + b.textContent.trim() + ' » hors écran (' + Math.round(r.bottom) + ' px sur ' + H + ')');
   }
   return pb;
 })()`;
