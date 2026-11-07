@@ -1435,7 +1435,7 @@ async function toggleOfflineCache(btn) {
   } catch(e) {
     btn.classList.remove('loading');
     console.warn('[Serein cache]', e);
-    alert('Erreur lors de la mise en cache. Vérifiez l\'espace disponible.');
+    alert("Le téléchargement n'a pas abouti. Vérifie l'espace libre sur ton téléphone.");
   }
 }
 

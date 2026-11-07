@@ -79,10 +79,39 @@ test('tactile : aucun effet de survol qui déplace un élément hors souris', ()
 
 // ── Ton et écriture ──
 
-test('tutoiement partout : ni « vous » ni « votre » dans les textes', () => {
+// Vouvoiement : « vous/votre/vos », mais aussi les verbes en -ez (« Vérifiez
+// l'espace disponible » était passé inaperçu dans une alerte de app.js).
+const MOTS_EN_EZ_ADMIS = new Set(['chez', 'assez', 'nez', 'rez', 'translatez']);
+function vouvoiement(texte) {
+  const t = texte.replace(/rendez-vous/gi, '').replace(/translateZ/g, '');
+  const m = t.match(/[^.\n]{0,40}\b(vous|votre|vos)\b[^.\n]{0,20}/i)
+    || [...t.matchAll(/[^.\n]{0,40}\b([a-zà-ÿ]{2,}ez)\b[^.\n]{0,20}/gi)].find(x => !MOTS_EN_EZ_ADMIS.has(x[1].toLowerCase()));
+  return m ? m[0].trim() : null;
+}
+
+// Chaînes littérales de app.js qui ressemblent à du texte (au moins deux mots).
+function chainesDeTexte(js) {
+  const sansCommentaires = js.replace(/^\s*\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '');
+  return [...sansCommentaires.matchAll(/'((?:[^'\\\n]|\\.)*)'|"((?:[^"\\\n]|\\.)*)"|`((?:[^`\\]|\\.)*)`/g)]
+    .map(m => m[1] ?? m[2] ?? m[3])
+    .filter(s => /[a-zà-ÿ]{3,} [a-zà-ÿ]/i.test(s));
+}
+
+test('le détecteur de vouvoiement attrape bien les cas fautifs', () => {
+  assert.ok(vouvoiement("Vérifiez l'espace disponible."));
+  assert.ok(vouvoiement('Merci pour votre don'));
+  assert.strictEqual(vouvoiement("Vérifie l'espace, chez toi, assez vite. Rendez-vous demain."), null);
+  assert.deepStrictEqual(chainesDeTexte("alert('Erreur. Vérifiez ceci.'); // Notez bien\nconst a = 'id';"), ['Erreur. Vérifiez ceci.']);
+});
+
+test('tutoiement partout : ni « vous » ni « votre » ni verbe en -ez dans les textes', () => {
   for (const [fichier, texte] of Object.entries(textesVisibles)) {
-    const trouve = texte.replace(/rendez-vous/gi, '').match(/[^.\n]{0,40}\b(vous|votre|vos)\b[^.\n]{0,20}/i);
-    assert.ok(!trouve, `${fichier} : « ${trouve && trouve[0].trim()} »`);
+    const trouve = vouvoiement(texte);
+    assert.ok(!trouve, `${fichier} : « ${trouve} »`);
+  }
+  for (const chaine of chainesDeTexte(appJs)) {
+    const trouve = vouvoiement(chaine);
+    assert.ok(!trouve, `app.js : « ${trouve} »`);
   }
 });
 
