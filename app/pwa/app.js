@@ -713,6 +713,7 @@ function closePlayer() {
 
   // Séance de programme quittée sans aller au bout : ne pas valider le jour.
   if (!audio.ended) programDayInProgress = null;
+  oublierFinEnAttente();
 
   clearSleepTimer(); // annule toute minuterie d'extinction en cours
 
@@ -868,6 +869,7 @@ async function resolveAudioSrc(voice, filename) {
 
 function launchPlayer(id, title, parcours, duration, filename, voice, artwork, resumeAt) {
   currentSession = { id, title, parcours, duration, filename, voice, artwork };
+  finEnAttenteNotee = false;
   currentOfflineFilename = filename;
   pendingResumeTime = (typeof resumeAt === 'number' && resumeAt > 0) ? resumeAt : null;
   resetSleepTimer(); // nouvelle séance : repart sur « Illimité »
@@ -1020,6 +1022,7 @@ audio.addEventListener('timeupdate', () => {
   document.getElementById('time-current').textContent = fmt(audio.currentTime);
   document.getElementById('progress-track').setAttribute('aria-valuenow', Math.round(pct));
   saveResumePoint();
+  if (!audio.ended) suivreFinEnAttente(audio.currentTime, audio.duration);
   if ('mediaSession' in navigator && navigator.mediaSession.setPositionState) {
     try {
       navigator.mediaSession.setPositionState({
@@ -1041,6 +1044,7 @@ audio.addEventListener('loadedmetadata', () => {
 });
 
 audio.addEventListener('ended', () => {
+  oublierFinEnAttente(); // la fin est enregistrée ici, normalement
   updatePlayIcon(false);
   playBell();
   haptic('success');
@@ -1080,6 +1084,53 @@ function saveResumePoint() {
       ts: now
     }));
   } catch(e) {}
+}
+
+// ── SÉANCE FERMÉE DANS SES DERNIÈRES SECONDES ──
+// Si l'app est fermée (balayée, tuée par le système) pendant le silence
+// final, l'événement « ended » ne part jamais : la séance n'était ni comptée
+// ni validée pour le programme, et l'accueil proposait « Reprendre · 20 s
+// restantes ». Passé 95 % d'écoute, on note la séance ; au lancement suivant,
+// une note restée là est comptée comme terminée, à sa date. Une fermeture
+// volontaire du player (closePlayer) efface la note : c'est un choix.
+const FIN_EN_ATTENTE_KEY = 'serein-fin-en-attente';
+const FIN_EN_ATTENTE_SEUIL = 0.95;
+let finEnAttenteNotee = false;
+
+function suivreFinEnAttente(position, duree) {
+  if (!currentSession || !duree) return;
+  const auBout = position >= duree * FIN_EN_ATTENTE_SEUIL;
+  if (auBout && !finEnAttenteNotee) {
+    finEnAttenteNotee = true;
+    try {
+      localStorage.setItem(FIN_EN_ATTENTE_KEY, JSON.stringify({
+        session: currentSession,
+        minutes: minutesDeSeance(currentSession),
+        programDay: programDayInProgress,
+        ts: Date.now()
+      }));
+    } catch(e) {}
+  } else if (!auBout && finEnAttenteNotee) {
+    oublierFinEnAttente(); // retour en arrière : la séance n'est plus au bout
+  }
+}
+
+function oublierFinEnAttente() {
+  finEnAttenteNotee = false;
+  try { localStorage.removeItem(FIN_EN_ATTENTE_KEY); } catch(e) {}
+}
+
+function rattraperFinEnAttente() {
+  let note = null;
+  try { note = JSON.parse(localStorage.getItem(FIN_EN_ATTENTE_KEY) || 'null'); } catch(e) {}
+  oublierFinEnAttente();
+  if (!note || !note.session || !note.ts) return false;
+  if (Date.now() - note.ts > 14 * 24 * 3600 * 1000) return false; // trop ancienne
+  const quand = new Date(note.ts);
+  recordCompletion(note.session, quand, note.minutes);
+  if (note.programDay) completeProgramDay(note.programDay, quand.toLocaleDateString('fr-CA'));
+  clearResumePoint();
+  return true;
 }
 
 function clearResumePoint() {
@@ -1609,15 +1660,15 @@ function loadStats() {
 }
 
 // Point d'entrée commun des séances guidées, du minuteur et de la respiration.
-function enregistrerPratique(minutes) {
+function enregistrerPratique(minutes, quand = new Date()) {
   const s = getStats();
   s.sessions = (s.sessions || 0) + 1;
   s.minutes = (s.minutes || 0) + (minutes || 0);
-  const today = dateLocale(new Date());
+  const jour = dateLocale(quand);
   const jours = Array.isArray(s.jours) ? s.jours : [];
-  if (!jours.includes(today)) jours.push(today);
-  s.jours = jours.slice(-JOURS_CONSERVES);
-  s.lastDate = today;
+  if (!jours.includes(jour)) jours.push(jour);
+  s.jours = jours.sort().slice(-JOURS_CONSERVES);
+  if (!s.lastDate || jour > s.lastDate) s.lastDate = jour;
   localStorage.setItem('serein-stats', JSON.stringify(s));
   mirrorToNative('serein-stats');
   loadStats();
@@ -1638,14 +1689,17 @@ function joursDePratiqueCeMois() {
   return jours.size;
 }
 
-function recordCompletion() {
+function minutesDeSeance(session) {
+  return session ? (parseFloat(session.duration) || Math.round((audio.duration || 0) / 60)) : 0;
+}
+
+function recordCompletion(session = currentSession, quand = new Date(), minutes = minutesDeSeance(session)) {
   try {
-    const dur = currentSession ? (parseFloat(currentSession.duration) || Math.round((audio.duration || 0) / 60)) : 0;
-    enregistrerPratique(dur);
+    enregistrerPratique(minutes, quand);
     // Historique partagé : alimente les coches « déjà écoutée », la progression
     // des parcours et les recommandations du guide.
-    if (currentSession && currentSession.id !== 'intro' && currentSession.id !== 'observation') {
-      recordGuidePlay(currentSession.title);
+    if (session && session.id !== 'intro' && session.id !== 'observation') {
+      recordGuidePlay(session.title, quand);
       updateSessionChecks();
       updatePathCardCounts();
       incrementDonCounter();
@@ -2770,13 +2824,13 @@ function launchProgramDay() {
 
 // Appelée depuis le handler `ended` du player quand la séance jouée venait d'un
 // jour de programme. Avance d'un jour et pose la date du jour (soft-lock).
-function completeProgramDay() {
+function completeProgramDay(jour = programDayInProgress, date = programToday()) {
   const state = getProgramState();
-  if (!state || !programDayInProgress || programDayInProgress.programId !== state.programId) return;
+  if (!state || !jour || jour.programId !== state.programId || jour.day !== state.doneCount) return;
   const p = findProgram(state.programId);
   if (!p || state.doneCount >= p.days.length) return;
   state.doneCount++;
-  state.lastDate = programToday();
+  state.lastDate = date;
   setProgramState(state);
   renderProgramHomeCard();
   const ov = document.getElementById('program-overlay');
@@ -3372,11 +3426,11 @@ function getRecentHistory() {
 // écoutée » et les compteurs de progression des parcours régressaient tout
 // seuls (« 5/7 » qui retombe à « 1/7 » après trois semaines d'absence).
 // La croissance est négligeable : {title, ts} par séance terminée.
-function recordGuidePlay(title) {
+function recordGuidePlay(title, quand = new Date()) {
   try {
     const raw = localStorage.getItem(HISTORY_KEY);
     const all = raw ? JSON.parse(raw) : [];
-    all.push({ title, ts: Date.now() });
+    all.push({ title, ts: quand.getTime() });
     localStorage.setItem(HISTORY_KEY, JSON.stringify(all));
     mirrorToNative('serein-history');
   } catch(e) {}
@@ -4954,6 +5008,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderResumeCard();
   updateMoodChips();
   await renderSessionList();
+  rattraperFinEnAttente(); // séance fermée au tout dernier moment la fois d'avant
   restoreOfflineButtons();
   updateOfflineCount();
 
