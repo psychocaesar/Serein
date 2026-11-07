@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Icône des notifications (rappel quotidien) : la feuille de Serein, en
+<!-- Icône des notifications (rappel quotidien, lecture en cours) : la feuille de Serein, en
      blanc sur transparent comme l'exige Android. Appelée par son nom depuis
      app.js (smallIcon: 'ic_notification') : protégée de la réduction des
      ressources par res/raw/keep.xml. -->

@@ -86,7 +86,10 @@ public class AudioPlaybackService extends Service {
         return new NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("Serein")
             .setContentText("Lecture en cours…")
-            .setSmallIcon(R.mipmap.ic_launcher)
+            // Android ne garde que la silhouette (canal alpha) des petites icônes :
+            // l'icône de l'app, pleine, donnait un carré gris. Même icône que le
+            // rappel quotidien. Vérifié par tests/regles.test.js.
+            .setSmallIcon(R.drawable.ic_notification)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
             .setSilent(true)

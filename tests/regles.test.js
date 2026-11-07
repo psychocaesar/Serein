@@ -215,6 +215,26 @@ test('Android : la notification de lecture n\'a pas le même id qu\'une notifica
   assert.ok(!idsLocaux.includes(idService), `id ${idService} partagé entre le service de lecture et une notification locale`);
 });
 
+// La notification de lecture utilisait l'icône de l'app (R.mipmap.ic_launcher) :
+// Android ne garde que la silhouette des petites icônes, d'où un carré gris.
+test('Android : les petites icônes de notification natives sont des silhouettes de res/drawable', () => {
+  const RES = 'app/android/app/src/main/res';
+  const dossier = 'app/android/app/src/main/java/fr/sereinapp/app';
+  const icones = [];
+  for (const f of fs.readdirSync(path.join(ROOT, dossier)).filter(f => f.endsWith('.java'))) {
+    for (const m of lire(`${dossier}/${f}`).matchAll(/setSmallIcon\(\s*([\w.]+)\s*\)/g)) icones.push([f, m[1]]);
+  }
+  assert.ok(icones.length > 0, 'aucun setSmallIcon trouvé dans le code natif : règle à revoir');
+  for (const [f, ref] of icones) {
+    const nom = (ref.match(/^R\.drawable\.(\w+)$/) || [])[1];
+    assert.ok(nom, `${f} : setSmallIcon(${ref}) — utiliser une icône de res/drawable (silhouette blanche sur transparent), jamais l'icône de l'app`);
+    assert.ok(fs.existsSync(path.join(ROOT, RES, `drawable/${nom}.xml`)), `${f} : res/drawable/${nom}.xml introuvable`);
+    const xml = lire(`${RES}/drawable/${nom}.xml`);
+    const couleurs = [...xml.matchAll(/android:(?:fill|stroke)Color="#(?:FF)?([0-9A-F]{6})"/gi)].map(m => m[1].toUpperCase());
+    assert.ok(couleurs.length > 0 && couleurs.every(c => c === 'FFFFFF'), `${nom}.xml : la silhouette doit être blanche sur transparent`);
+  }
+});
+
 // NotificationChannel (Android 8, API 26) appelé sans garde de version faisait
 // planter l'app sur Android 7 (minSdk 24) dès la mise en arrière-plan.
 function canauxSansGarde(java) {
