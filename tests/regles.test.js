@@ -122,6 +122,90 @@ test('écriture inclusive au point médian, pas de « (e) » ni de « /se »', (
   }
 });
 
+// ── Accessibilité (VoiceOver, TalkBack, clavier) ──
+
+const EMOJI = /[\p{Extended_Pictographic}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}]/u;
+const htmlVisible = indexHtml.replace(/<(script|style)[^>]*>[\s\S]*?<\/\1>/g, '');
+
+// Élément non interactif cliquable : invisible au clavier et au lecteur
+// d'écran sans role + tabindex (sauf s'il contient déjà un vrai bouton).
+function cliquablesInaccessibles(html) {
+  const fautifs = [];
+  for (const m of html.matchAll(/<(div|span|li|article|section|p|img)\b([^>]*\bonclick=[^>]*)>/g)) {
+    if (/\brole=/.test(m[2]) && /\btabindex=/.test(m[2])) continue;
+    const suite = html.slice(m.index + m[0].length, m.index + m[0].length + 2000);
+    const fin = suite.search(new RegExp(`</${m[1]}>`));
+    if (/<button\b/.test(suite.slice(0, fin))) continue;
+    fautifs.push(m[0].slice(0, 80));
+  }
+  return fautifs;
+}
+
+// Bouton dont le texte visible commence par un emoji, sans aria-label :
+// VoiceOver lit l'emoji (« visage avec la bouche ouverte, Trop intense »).
+function boutonsEmojiSansLibelle(html) {
+  return [...html.matchAll(/<button\b([^>]*)>([\s\S]*?)<\/button>/g)]
+    .filter(m => !/aria-label=/.test(m[1]))
+    .filter(m => EMOJI.test(m[2].replace(/<span[^>]*aria-hidden="true"[^>]*>[\s\S]*?<\/span>/g, '').replace(/<[^>]+>/g, '')))
+    .map(m => m[0].slice(0, 80));
+}
+
+function emojisDecoratifsLus(html) {
+  return [...html.matchAll(/<span\b([^>]*)>\s*([^<]{1,6})\s*<\/span>/g)]
+    .filter(m => EMOJI.test(m[2]) && !/[\p{L}\p{N}]/u.test(m[2]) && !/aria-hidden/.test(m[1]))
+    .map(m => m[0]);
+}
+
+test('les détecteurs d\'accessibilité attrapent bien les cas fautifs', () => {
+  assert.strictEqual(cliquablesInaccessibles('<div class="c" onclick="f()">x</div>').length, 1);
+  assert.strictEqual(cliquablesInaccessibles('<div role="button" tabindex="0" onclick="f()">x</div>').length, 0);
+  assert.strictEqual(cliquablesInaccessibles('<article onclick="f()"><h3>x</h3><button onclick="f()">›</button></article>').length, 0);
+  assert.strictEqual(boutonsEmojiSansLibelle('<button>🌿<span>Forêt</span></button>').length, 1);
+  assert.strictEqual(boutonsEmojiSansLibelle('<button aria-label="Forêt">🌿<span>Forêt</span></button>').length, 0);
+  assert.strictEqual(boutonsEmojiSansLibelle('<button>〰️<span>Blanc</span></button>').length, 1);
+  assert.strictEqual(emojisDecoratifsLus('<span>🔊</span><span aria-hidden="true">🔈</span>').length, 1);
+});
+
+test('accessibilité : tout élément cliquable est atteignable au clavier et annoncé', () => {
+  assert.deepStrictEqual(cliquablesInaccessibles(htmlVisible), [], 'ajouter role="button" tabindex="0" (ou un vrai <button>)');
+  const genere = [...appJs.matchAll(/<(div|span|li|article|section)\b[^>]*\bonclick=[^>]*>/g)].map(m => m[0]);
+  for (const el of genere) assert.match(el, /role=.*tabindex=|tabindex=.*role=/, `app.js : ${el.slice(0, 80)}`);
+});
+
+test('accessibilité : aucun emoji lu à voix haute par le lecteur d\'écran', () => {
+  assert.deepStrictEqual(boutonsEmojiSansLibelle(htmlVisible), [], 'donner un aria-label sans l\'emoji');
+  assert.deepStrictEqual(emojisDecoratifsLus(htmlVisible), [], 'ajouter aria-hidden="true"');
+  // Boutons créés par app.js (retour de fin de séance, toasts) : libellé lisible.
+  const src = appJs.match(/function libelleLisible\([\s\S]*?\n\}/);
+  assert.ok(src, 'libelleLisible absente de app.js');
+  const libelleLisible = new Function(`${src[0]}; return libelleLisible;`)();
+  assert.strictEqual(libelleLisible('😮 Trop intense'), 'Trop intense');
+  assert.strictEqual(libelleLisible('✓ C\'était bien'), 'C\'était bien');
+  assert.strictEqual(libelleLisible('✕', 'Fermer'), 'Fermer');
+  assert.match(appJs, /function showCompletionFeedback[\s\S]*?setAttribute\('aria-label', libelleLisible\(/);
+  assert.match(appJs, /function showActionToast[\s\S]*?libelleLisible\(b\.label/);
+});
+
+test('accessibilité : un symbole posé par app.js (▶ ⬇ ✓ ✕ ↩) a toujours un libellé', () => {
+  // Le bouton de téléchargement disait « Télécharger » alors qu'il affichait ✓.
+  const lignes = appJs.split('\n');
+  lignes.forEach((ligne, i) => {
+    const m = ligne.match(/textContent = ['"`]\s*[▶⬇✓✕↩]/);
+    if (!m) return;
+    const autour = lignes.slice(Math.max(0, i - 3), i + 4).join('\n');
+    assert.match(autour, /aria-label/, `app.js:${i + 1} : « ${ligne.trim()} » sans aria-label à côté`);
+  });
+});
+
+test('accessibilité : les toasts sont annoncés et les choix exclusifs exposent leur état', () => {
+  assert.match(appJs, /function showActionToast[\s\S]*?setAttribute\('role', 'status'\)/);
+  const choix = appJs.match(/const CHOIX_SELECTEUR = '([^']+)'/);
+  assert.ok(choix, 'synchronisation aria-pressed des choix absente');
+  for (const classe of choix[1].split(',').map(c => c.trim().slice(1))) {
+    assert.ok(indexHtml.includes(`class="${classe}`), `${classe} n'existe plus dans index.html : CHOIX_SELECTEUR à revoir`);
+  }
+});
+
 // ── Sécurité de la pratique ──
 
 test('la FAQ informe des effets indésirables possibles et des précautions', () => {

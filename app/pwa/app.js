@@ -402,10 +402,10 @@ function makeSessionCard(s, group, subgroupName) {
   // échouait sur « Fichier audio introuvable ».
   const dl = document.createElement('button');
   dl.className = 'btn-offline';
-  dl.setAttribute('aria-label', 'Télécharger ' + s.title + ' pour écoute hors ligne');
+  dl.dataset.title = s.title;
   dl.dataset.fileMasc = s.file;
   if (s.fileFem) dl.dataset.fileFem = s.fileFem;
-  dl.textContent = '⬇';
+  marquerHorsLigne(dl, false);
   dl.addEventListener('click', () => toggleOfflineCache(dl));
   const launch = document.createElement('button');
   launch.className = 'btn btn-primary';
@@ -473,6 +473,7 @@ function updateSessionChecks() {
       check = document.createElement('span');
       check.className = 'session-done-check';
       check.textContent = '✓';
+      check.setAttribute('role', 'img'); // sans rôle, un span ignore son aria-label
       check.setAttribute('aria-label', 'Séance déjà écoutée');
       h3.appendChild(check);
     } else if (!done && check) {
@@ -585,7 +586,9 @@ function openVoiceOverlay(id, title, parcours, duration, filenameMasc, filenameF
   voiceOverlayMode = 'launch';
   selectedVoice = 'masculine';
   document.getElementById('voice-sheet-hint').style.display = '';
-  document.getElementById('voice-sheet-launch').textContent = '▶ Lancer la séance';
+  const lancer = document.getElementById('voice-sheet-launch');
+  lancer.textContent = '▶ Lancer la séance';
+  lancer.setAttribute('aria-label', 'Lancer la séance'); // sans le ▶ lu à voix haute
   document.querySelectorAll('.voice-option').forEach(o => o.classList.remove('selected'));
   document.getElementById('vopt-masculine').classList.add('selected');
   document.getElementById('voice-overlay').classList.add('open');
@@ -598,7 +601,9 @@ function openVoiceSettings() {
   pendingSession = null;
   selectedVoice = getSavedVoice() || 'masculine';
   document.getElementById('voice-sheet-hint').style.display = 'none';
-  document.getElementById('voice-sheet-launch').textContent = 'Enregistrer';
+  const enregistrer = document.getElementById('voice-sheet-launch');
+  enregistrer.textContent = 'Enregistrer';
+  enregistrer.removeAttribute('aria-label');
   document.querySelectorAll('.voice-option').forEach(o => o.classList.remove('selected'));
   document.getElementById('vopt-' + selectedVoice).classList.add('selected');
   document.getElementById('voice-overlay').classList.add('open');
@@ -760,6 +765,14 @@ function closePlayer() {
 // partagé par le feedback de séance interrompue et la proposition de rappel.
 // buttons : [{ label, ghost?, onClick(toast) }] — le onClick décide lui-même
 // de fermer le toast (toast.remove()).
+// Libellé pour le lecteur d'écran : sans l'emoji de tête, que VoiceOver lirait
+// (« visage avec la bouche ouverte, Trop intense »). Bouton fait d'un seul
+// symbole (✕) : libellé de repli.
+function libelleLisible(texte, repli) {
+  const t = texte.replace(/^[^\p{L}\p{N}]+/u, '').trim();
+  return t || repli || texte;
+}
+
 function showActionToast(id, labelText, buttons) {
   const existing = document.getElementById(id);
   if (existing) existing.remove();
@@ -775,6 +788,7 @@ function showActionToast(id, labelText, buttons) {
 
   const toast = document.createElement('div');
   toast.id = id;
+  toast.setAttribute('role', 'status'); // annoncé par le lecteur d'écran
   toast.style.cssText = [
     'position:fixed',
     'bottom:calc(env(safe-area-inset-bottom, 0px) + ' + bottomOffset + 'px)',
@@ -796,6 +810,8 @@ function showActionToast(id, labelText, buttons) {
   buttons.forEach(b => {
     const btn = document.createElement('button');
     btn.textContent = b.label;
+    const lisible = libelleLisible(b.label, 'Fermer');
+    if (lisible !== b.label) btn.setAttribute('aria-label', lisible);
     btn.style.cssText = [
       b.ghost ? 'background:transparent' : 'background:var(--color-primary-light)',
       'border:1px solid var(--color-border)', 'border-radius:999px',
@@ -1413,6 +1429,16 @@ function offlineUrlFor(btn) {
   return AUDIO_BASE_URL + voiceFolder(voice) + '/' + encodeURIComponent(filename);
 }
 
+// Le symbole (⬇ / ✓) ne dit rien au lecteur d'écran : le libellé suit l'état.
+function marquerHorsLigne(btn, enCache) {
+  btn.classList.toggle('cached', enCache);
+  btn.textContent = enCache ? '✓' : '⬇';
+  const titre = btn.dataset.title || 'la séance';
+  btn.setAttribute('aria-label', enCache
+    ? titre + ' : téléchargée, toucher pour la retirer'
+    : 'Télécharger ' + titre + ' pour écoute hors ligne');
+}
+
 async function toggleOfflineCache(btn) {
   if (!('caches' in window)) { alert('Cache non disponible sur ce navigateur.'); return; }
   if (!btn.classList.contains('cached') && await blockedByWifiOnly()) return;
@@ -1423,13 +1449,12 @@ async function toggleOfflineCache(btn) {
     const existing = await cache.match(url);
     if (existing) {
       await cache.delete(url);
-      btn.classList.remove('cached', 'loading');
-      btn.textContent = '⬇';
+      btn.classList.remove('loading');
+      marquerHorsLigne(btn, false);
     } else {
       await cache.add(url);
       btn.classList.remove('loading');
-      btn.classList.add('cached');
-      btn.textContent = '✓';
+      marquerHorsLigne(btn, true);
     }
     updateOfflineCount();
   } catch(e) {
@@ -1541,7 +1566,7 @@ async function refreshDownloadsUI() {
   await renderDownloadsManager();
   await updateOfflineCount();
   // Réinitialise les coches ✓ de l'écran Explorer puis ré-applique l'état réel
-  document.querySelectorAll('.btn-offline.cached').forEach(b => { b.classList.remove('cached'); b.textContent = '⬇'; });
+  document.querySelectorAll('.btn-offline.cached').forEach(b => marquerHorsLigne(b, false));
   await restoreOfflineButtons();
 }
 
@@ -1554,8 +1579,7 @@ async function restoreOfflineButtons() {
       const match = await cache.match(offlineUrlFor(btn));
       // toggle plutôt qu'add : après un changement de voix, un bouton marqué ✓
       // pour la voix précédente doit repasser en ⬇ si l'autre n'est pas en cache.
-      btn.classList.toggle('cached', !!match);
-      btn.textContent = match ? '✓' : '⬇';
+      marquerHorsLigne(btn, !!match);
     }));
   } catch(e) { console.warn('[Serein cache]', e); }
 }
@@ -3162,6 +3186,7 @@ function showGuideResult(entry) {
     btn.dataset.id = id;
     btn.style.width = '100%';
     btn.textContent = '▶ Lancer';
+    btn.setAttribute('aria-label', 'Lancer ' + rec.title);
     btn.addEventListener('click', () => {
       openVoiceOverlay(rec.id, rec.title, rec.parcours, rec.duration, rec.file, rec.fileFem || false, rec.artwork);
     });
@@ -3194,6 +3219,7 @@ function showGuideResult(entry) {
   const restartBtn = document.createElement('button');
   restartBtn.className = 'guide-restart';
   restartBtn.textContent = '↩ Recommencer';
+  restartBtn.setAttribute('aria-label', 'Recommencer le guide');
   restartBtn.addEventListener('click', restartGuide);
   wrap.appendChild(restartBtn);
 
@@ -3586,6 +3612,7 @@ function showCompletionFeedback() {
   feedbacks.forEach(f => {
     const btn = document.createElement('button');
     btn.textContent = f.label;
+    btn.setAttribute('aria-label', libelleLisible(f.label));
     btn.style.cssText = [
       'background:rgba(255,255,255,.1)',
       'border:1px solid rgba(255,255,255,.2)',
@@ -4888,6 +4915,20 @@ document.addEventListener('keydown', e => {
   e.preventDefault();
   el.click();
 });
+
+// Choix exclusifs (ambiance, voix) : la sélection n'est qu'une classe CSS,
+// que le lecteur d'écran ne voit pas. aria-pressed la suit, d'un seul endroit,
+// quel que soit le code qui change la classe.
+const CHOIX_SELECTEUR = '.ambiance-btn, .ambiance-settings-btn, .voice-option';
+function synchroniserChoix(el) {
+  el.setAttribute('aria-pressed', String(el.classList.contains('active') || el.classList.contains('selected')));
+}
+document.querySelectorAll(CHOIX_SELECTEUR).forEach(synchroniserChoix);
+if (typeof MutationObserver !== 'undefined') {
+  new MutationObserver(mutations => {
+    for (const m of mutations) if (m.target.matches && m.target.matches(CHOIX_SELECTEUR)) synchroniserChoix(m.target);
+  }).observe(document.body, { subtree: true, attributes: true, attributeFilter: ['class'] });
+}
 
 // ── INIT ──
 document.addEventListener('DOMContentLoaded', async () => {

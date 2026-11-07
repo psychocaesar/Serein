@@ -1030,18 +1030,18 @@
     <p class="voice-sheet-title">Choisir la voix</p>
     <div class="voice-sheet-options">
       <button class="voice-option selected" id="vopt-masculine" onclick="selectVoiceOption('masculine')">
-        <span class="voice-option-icon">🧑</span>
+        <span class="voice-option-icon" aria-hidden="true">🧑</span>
         <div class="voice-option-info"><div class="voice-option-name">Voix masculine</div><div class="voice-option-desc">César</div></div>
         <span class="voice-option-check"></span>
       </button>
       <button class="voice-option" id="vopt-feminine" onclick="selectVoiceOption('feminine')">
-        <span class="voice-option-icon">👩</span>
+        <span class="voice-option-icon" aria-hidden="true">👩</span>
         <div class="voice-option-info"><div class="voice-option-name">Voix féminine</div><div class="voice-option-desc">Daïdrée</div></div>
         <span class="voice-option-check"></span>
       </button>
     </div>
     <p class="voice-sheet-hint" id="voice-sheet-hint" style="font-size:.75rem;color:var(--color-muted);text-align:center;margin-bottom:1rem;">Ton choix sera retenu, modifiable à tout moment dans les Réglages.</p>
-    <button class="voice-sheet-launch" id="voice-sheet-launch" onclick="confirmVoiceAndLaunch()">▶ Lancer la séance</button>
+    <button class="voice-sheet-launch" id="voice-sheet-launch" onclick="confirmVoiceAndLaunch()" aria-label="Lancer la séance">▶ Lancer la séance</button>
     <button class="voice-sheet-cancel" onclick="closeVoiceOverlay()">Annuler</button>
   </div>
 </div>
@@ -1125,17 +1125,17 @@
       <div class="player-ambiance" id="player-ambiance">
         <p class="player-ambiance-label">Ambiance</p>
         <div class="ambiance-btns" role="group" aria-label="Son d'ambiance">
-          <button class="ambiance-btn active" id="amb-off" onclick="setAmbiance(null)">🔇<span>Aucun</span></button>
-          <button class="ambiance-btn" id="amb-pluie" onclick="setAmbiance('pluie.mp3')">🌧️<span>Pluie</span></button>
-          <button class="ambiance-btn" id="amb-foret" onclick="setAmbiance('foret.mp3')">🌿<span>Forêt</span></button>
-          <button class="ambiance-btn" id="amb-vagues" onclick="setAmbiance('vagues.mp3')">🌊<span>Vagues</span></button>
-          <button class="ambiance-btn" id="amb-feu" onclick="setAmbiance('feu.mp3')">🔥<span>Feu</span></button>
-          <button class="ambiance-btn" id="amb-blanc" onclick="setAmbiance('bruit-blanc.mp3')">〰️<span>Blanc</span></button>
+          <button class="ambiance-btn active" id="amb-off" onclick="setAmbiance(null)" aria-label="Aucune ambiance">🔇<span>Aucun</span></button>
+          <button class="ambiance-btn" id="amb-pluie" onclick="setAmbiance('pluie.mp3')" aria-label="Pluie">🌧️<span>Pluie</span></button>
+          <button class="ambiance-btn" id="amb-foret" onclick="setAmbiance('foret.mp3')" aria-label="Forêt">🌿<span>Forêt</span></button>
+          <button class="ambiance-btn" id="amb-vagues" onclick="setAmbiance('vagues.mp3')" aria-label="Vagues">🌊<span>Vagues</span></button>
+          <button class="ambiance-btn" id="amb-feu" onclick="setAmbiance('feu.mp3')" aria-label="Feu">🔥<span>Feu</span></button>
+          <button class="ambiance-btn" id="amb-blanc" onclick="setAmbiance('bruit-blanc.mp3')" aria-label="Bruit blanc">〰️<span>Blanc</span></button>
         </div>
         <div class="ambiance-volume-wrap" id="ambiance-volume-wrap" style="display:none">
-          <span>🎵</span>
+          <span aria-hidden="true">🎵</span>
           <input type="range" class="volume-slider" id="ambiance-volume-slider" min="0" max="1" step="0.02" value="0.3" aria-label="Volume de l'ambiance sonore">
-          <span>🔊</span>
+          <span aria-hidden="true">🔊</span>
         </div>
       </div>
 
@@ -1176,18 +1176,18 @@
       <p class="complete-subtitle">Prends un instant avant de continuer.<br>Comment tu te sens ?</p>
       <div class="complete-actions">
         <button class="btn-white" onclick="closePlayer()">Explorer les séances</button>
-        <button class="btn-outline-white" onclick="replaySession()">↩ Rejouer</button>
+        <button class="btn-outline-white" onclick="replaySession()" aria-label="Rejouer la séance">↩ Rejouer</button>
       </div>
     </div>
 
     <!-- Réglages sheet (volume principal + vitesse) -->
     <div class="player-options-sheet" id="options-sheet">
-      <div class="sheet-handle" onclick="toggleOptionsSheet()"></div>
+      <div class="sheet-handle" role="button" tabindex="0" aria-label="Fermer les réglages de lecture" onclick="toggleOptionsSheet()"></div>
       <p class="sheet-section-label" id="main-volume-label">Volume principal</p>
       <div class="ambiance-volume-wrap" id="main-volume-wrap" style="display:flex;margin-bottom:1.25rem;">
-        <span>🔈</span>
+        <span aria-hidden="true">🔈</span>
         <input type="range" class="volume-slider" id="volume-slider" min="0" max="1" step="0.02" value="1" aria-label="Volume principal">
-        <span>🔊</span>
+        <span aria-hidden="true">🔊</span>
       </div>
       <p class="sheet-section-label">Vitesse de lecture</p>
       <div class="speed-wrap">
@@ -1225,7 +1225,7 @@
         <p class="welcome-sub">Des séances guidées en français, sans compte, sans publicité.</p>
       </div>
     </div>
-    <div class="intro-audio-card" onclick="launchIntroAudio()">
+    <div class="intro-audio-card" role="button" tabindex="0" onclick="launchIntroAudio()">
       <div class="intro-audio-left">
         <div class="intro-audio-play">
           <svg viewBox="0 0 24 24" width="20" height="20"><polygon points="6 3 20 12 6 21 6 3" fill="currentColor"/></svg>
@@ -1260,14 +1260,14 @@
     <p class="timer-block-label" style="margin-bottom:.2rem;">Comment tu te sens, là ?</p>
     <p class="mood-lead">Dis-le en un mot, je te propose la séance qui colle.</p>
     <div class="mood-chips">
-      <button class="mood-chip" onclick="openGuideMood('stress')">😮‍💨 Stressé·e</button>
-      <button class="mood-chip" onclick="openGuideMood('anxiete')">😰 Anxieux·se</button>
-      <button class="mood-chip" onclick="openGuideMood('colere')">😤 Irritable</button>
-      <button class="mood-chip" onclick="openGuideMood('tristesse')">😔 Tristesse</button>
-      <button class="mood-chip" onclick="openGuideMood('fatigue')">😴 Fatigué·e</button>
-      <button class="mood-chip" onclick="openGuideMood('sommeil')">🌙 Sommeil</button>
-      <button class="mood-chip" id="mood-chip-concentration" onclick="openGuideMood('concentration')">🎯 Concentration</button>
-      <button class="mood-chip" onclick="openGuideMood('unknown')">🤷 Je ne sais pas</button>
+      <button class="mood-chip" onclick="openGuideMood('stress')" aria-label="Stressé·e">😮‍💨 Stressé·e</button>
+      <button class="mood-chip" onclick="openGuideMood('anxiete')" aria-label="Anxieux·se">😰 Anxieux·se</button>
+      <button class="mood-chip" onclick="openGuideMood('colere')" aria-label="Irritable">😤 Irritable</button>
+      <button class="mood-chip" onclick="openGuideMood('tristesse')" aria-label="Tristesse">😔 Tristesse</button>
+      <button class="mood-chip" onclick="openGuideMood('fatigue')" aria-label="Fatigué·e">😴 Fatigué·e</button>
+      <button class="mood-chip" onclick="openGuideMood('sommeil')" aria-label="Sommeil">🌙 Sommeil</button>
+      <button class="mood-chip" id="mood-chip-concentration" onclick="openGuideMood('concentration')" aria-label="Concentration">🎯 Concentration</button>
+      <button class="mood-chip" onclick="openGuideMood('unknown')" aria-label="Je ne sais pas">🤷 Je ne sais pas</button>
     </div>
   </section>
 
@@ -1544,22 +1544,22 @@
     <p class="article-section-label">Commencer ici</p>
     <div class="article-mini-grid">
       <div class="article-mini-card" role="article" tabindex="0" onclick="openArticle('pourquoi-mediter')" style="cursor:pointer;">
-        <span class="article-mini-icon">✦</span>
+        <span class="article-mini-icon" aria-hidden="true">✦</span>
         <div class="article-mini-title">Pourquoi méditer ?</div>
         <div class="article-mini-desc">L'essentiel en 3 minutes</div>
       </div>
       <div class="article-mini-card" role="article" tabindex="0" onclick="openArticle('posture')" style="cursor:pointer;">
-        <span class="article-mini-icon">🧘</span>
+        <span class="article-mini-icon" aria-hidden="true">🧘</span>
         <div class="article-mini-title">Trouver sa posture</div>
         <div class="article-mini-desc">Assis, allongé, en marchant</div>
       </div>
       <div class="article-mini-card" role="article" tabindex="0" onclick="openArticle('pensees')" style="cursor:pointer;">
-        <span class="article-mini-icon">☁️</span>
+        <span class="article-mini-icon" aria-hidden="true">☁️</span>
         <div class="article-mini-title">Que faire des pensées ?</div>
         <div class="article-mini-desc">Les laisser passer</div>
       </div>
       <div class="article-mini-card" role="article" tabindex="0" onclick="openArticle('quotidien')" style="cursor:pointer;">
-        <span class="article-mini-icon">🔁</span>
+        <span class="article-mini-icon" aria-hidden="true">🔁</span>
         <div class="article-mini-title">Méditer au quotidien</div>
         <div class="article-mini-desc">Créer une habitude douce</div>
       </div>
@@ -1568,42 +1568,42 @@
     <p class="article-section-label">Comprendre tes émotions et ton corps</p>
     <div class="article-mini-grid">
       <div class="article-mini-card" role="article" tabindex="0" onclick="openArticle('anxiete-tcc')" style="cursor:pointer;">
-        <span class="article-mini-icon">🤍</span>
+        <span class="article-mini-icon" aria-hidden="true">🤍</span>
         <div class="article-mini-title">L'anxiété et la TCC</div>
         <div class="article-mini-desc">Le triangle de l'anxiété</div>
       </div>
       <div class="article-mini-card" role="article" tabindex="0" onclick="openArticle('stress-mecanisme')" style="cursor:pointer;">
-        <span class="article-mini-icon">😮‍💨</span>
+        <span class="article-mini-icon" aria-hidden="true">😮‍💨</span>
         <div class="article-mini-title">Le mécanisme du stress</div>
         <div class="article-mini-desc">Utile ou épuisant ?</div>
       </div>
       <div class="article-mini-card" role="article" tabindex="0" onclick="openArticle('sommeil-pleine-conscience')" style="cursor:pointer;">
-        <span class="article-mini-icon">🌙</span>
+        <span class="article-mini-icon" aria-hidden="true">🌙</span>
         <div class="article-mini-title">Sommeil et pleine conscience</div>
         <div class="article-mini-desc">Sortir du piège de l'hyperéveil</div>
       </div>
       <div class="article-mini-card" role="article" tabindex="0" onclick="openArticle('respiration-regulateur')" style="cursor:pointer;">
-        <span class="article-mini-icon">🌬️</span>
+        <span class="article-mini-icon" aria-hidden="true">🌬️</span>
         <div class="article-mini-title">Le souffle, un régulateur</div>
         <div class="article-mini-desc">3 techniques pour t'apaiser</div>
       </div>
       <div class="article-mini-card" role="article" tabindex="0" onclick="openArticle('attention-entrainement')" style="cursor:pointer;">
-        <span class="article-mini-icon">🎯</span>
+        <span class="article-mini-icon" aria-hidden="true">🎯</span>
         <div class="article-mini-title">L'attention, ça s'entraîne</div>
         <div class="article-mini-desc">Sortir du pilote automatique</div>
       </div>
       <div class="article-mini-card" role="article" tabindex="0" onclick="openArticle('emotions-act')" style="cursor:pointer;">
-        <span class="article-mini-icon">🌿</span>
+        <span class="article-mini-icon" aria-hidden="true">🌿</span>
         <div class="article-mini-title">Accueillir ses émotions</div>
         <div class="article-mini-desc">L'approche ACT</div>
       </div>
       <div class="article-mini-card" role="article" tabindex="0" onclick="openArticle('colere-reguler')" style="cursor:pointer;">
-        <span class="article-mini-icon">😤</span>
+        <span class="article-mini-icon" aria-hidden="true">😤</span>
         <div class="article-mini-title">Comprendre la colère</div>
         <div class="article-mini-desc">L'écouter sans déborder</div>
       </div>
       <div class="article-mini-card" role="article" tabindex="0" onclick="openArticle('tristesse-activation')" style="cursor:pointer;">
-        <span class="article-mini-icon">☁️</span>
+        <span class="article-mini-icon" aria-hidden="true">☁️</span>
         <div class="article-mini-title">Tristesse et activation</div>
         <div class="article-mini-desc">Agir avant d'aller mieux</div>
       </div>
@@ -1722,11 +1722,11 @@
         <span class="toggle-track"></span>
       </label>
     </article>
-    <article class="card setting-item" style="cursor:pointer;" onclick="openAmbianceSettings()">
+    <article class="card setting-item" role="button" tabindex="0" style="cursor:pointer;" onclick="openAmbianceSettings()">
       <div class="info"><h3>Sons d'ambiance</h3><p>Fond sonore pendant les séances</p></div>
       <span class="setting-value" id="ambiance-default-label">Aucun ›</span>
     </article>
-    <article class="card setting-item" style="cursor:pointer;" onclick="openVoiceSettings()">
+    <article class="card setting-item" role="button" tabindex="0" style="cursor:pointer;" onclick="openVoiceSettings()">
       <div class="info"><h3>Voix des séances</h3><p>Quand les deux voix sont disponibles</p></div>
       <span class="setting-value" id="voice-default-label">— ›</span>
     </article>
@@ -1840,12 +1840,12 @@
   <div class="timer-sheet">
     <p class="timer-sheet-title">Son d'ambiance par défaut</p>
     <div class="ambiance-settings-grid" id="ambiance-settings-grid">
-      <button class="ambiance-settings-btn active" data-value="" onclick="selectAmbianceDefault(this)">🔇<span>Aucun</span></button>
-      <button class="ambiance-settings-btn" data-value="pluie.mp3" onclick="selectAmbianceDefault(this)">🌧️<span>Pluie</span></button>
-      <button class="ambiance-settings-btn" data-value="foret.mp3" onclick="selectAmbianceDefault(this)">🌿<span>Forêt</span></button>
-      <button class="ambiance-settings-btn" data-value="vagues.mp3" onclick="selectAmbianceDefault(this)">🌊<span>Vagues</span></button>
-      <button class="ambiance-settings-btn" data-value="feu.mp3" onclick="selectAmbianceDefault(this)">🔥<span>Feu</span></button>
-      <button class="ambiance-settings-btn" data-value="bruit-blanc.mp3" onclick="selectAmbianceDefault(this)">〰️<span>Blanc</span></button>
+      <button class="ambiance-settings-btn active" data-value="" onclick="selectAmbianceDefault(this)" aria-label="Aucune ambiance">🔇<span>Aucun</span></button>
+      <button class="ambiance-settings-btn" data-value="pluie.mp3" onclick="selectAmbianceDefault(this)" aria-label="Pluie">🌧️<span>Pluie</span></button>
+      <button class="ambiance-settings-btn" data-value="foret.mp3" onclick="selectAmbianceDefault(this)" aria-label="Forêt">🌿<span>Forêt</span></button>
+      <button class="ambiance-settings-btn" data-value="vagues.mp3" onclick="selectAmbianceDefault(this)" aria-label="Vagues">🌊<span>Vagues</span></button>
+      <button class="ambiance-settings-btn" data-value="feu.mp3" onclick="selectAmbianceDefault(this)" aria-label="Feu">🔥<span>Feu</span></button>
+      <button class="ambiance-settings-btn" data-value="bruit-blanc.mp3" onclick="selectAmbianceDefault(this)" aria-label="Bruit blanc">〰️<span>Blanc</span></button>
     </div>
     <button class="timer-sheet-cancel" onclick="closeAmbianceSettings()">Fermer</button>
   </div>
