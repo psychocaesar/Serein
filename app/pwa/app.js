@@ -157,6 +157,104 @@ function setupAndroidBackButton() {
   });
 }
 
+// ── LIENS PROFONDS ──
+// serein://respirer, serein://seance/<id>, serein://programme[/<id>],
+// serein://parcours/<nom>, serein://explorer, serein://accueil — et la même
+// chose sous https://sereinapp.fr/ouvrir/… (liens universels, à venir).
+// Utilisés par les widgets et tout objet qui ouvre l'app sur une séance.
+// Navigation seulement : un lien ne modifie jamais de donnée, et tout
+// identifiant est vérifié contre le catalogue (n'importe quelle app ou page
+// web peut ouvrir un lien serein://).
+const LIEN_ROUTES = ['accueil', 'explorer', 'respirer', 'seance', 'programme', 'parcours'];
+let lienEnAttente = null;
+let dernierLien = { url: '', t: 0 };
+
+function analyserLienProfond(url) {
+  if (typeof url !== 'string') return null;
+  let chemin = null;
+  const m = url.match(/^serein:\/\/+(.*)$/i) || url.match(/^https:\/\/(?:www\.)?sereinapp\.fr\/ouvrir(?:\/(.*))?$/i);
+  if (!m) return null;
+  chemin = (m[1] || '').split(/[?#]/)[0].replace(/\/+$/, '');
+  const [route, ...reste] = chemin.split('/');
+  const nom = (route || 'accueil').toLowerCase();
+  if (!LIEN_ROUTES.includes(nom)) return null;
+  let param = null;
+  try { param = reste.length ? decodeURIComponent(reste.join('/')) : null; } catch(e) { return null; }
+  if ((nom === 'seance' || nom === 'parcours') && !param) return null;
+  return { route: nom, param };
+}
+
+function trouverParcoursParNom(nom) {
+  if (!CATALOG || !nom) return null;
+  const cle = stripAccents(nom).toLowerCase().replace(/[-_]+/g, ' ').trim();
+  return CATALOG.groups.find(g => stripAccents(g.name).toLowerCase() === cle) || null;
+}
+
+function ouvrirLienProfond(url) {
+  const lien = analyserLienProfond(url);
+  if (!lien) return false;
+  // Même lien reçu deux fois (getLaunchUrl + appUrlOpen au démarrage) : une fois.
+  const maintenant = Date.now();
+  if (url === dernierLien.url && maintenant - dernierLien.t < 2000) return true;
+  dernierLien = { url, t: maintenant };
+  // Premier lancement ou catalogue pas encore chargé : on attend.
+  if (document.documentElement.classList.contains('needs-onboarding') || !CATALOG) {
+    lienEnAttente = url;
+    return true;
+  }
+  executerLien(lien);
+  return true;
+}
+
+function executerLien({ route, param }) {
+  // Repartir d'un état propre : toutes les surcouches fermées (fiche parcours,
+  // respiration, player…), puis l'accueil. Sans ça, la destination s'ouvrait
+  // sous ce qui était déjà affiché.
+  let garde = 20;
+  while (overlayStack.length && garde--) goBack();
+  const player = document.getElementById('player-screen');
+  if (player && player.classList.contains('open')) closePlayer();
+  if (route === 'explorer') { showScreen('explore'); return; }
+  showScreen('home');
+  if (route === 'respirer') { openBreathing(); return; }
+  if (route === 'seance') {
+    const f = findSessionById(param);
+    if (!f) return;
+    openVoiceOverlay(f.session.id, f.session.title, f.group.name, f.session.duration + ' min', f.session.file, f.session.fileFem || false, f.group.artwork);
+    return;
+  }
+  if (route === 'parcours') {
+    const g = trouverParcoursParNom(param);
+    if (g) openParcoursOverlay(g.name);
+    return;
+  }
+  if (route === 'programme') {
+    if (param) { if (findProgram(param)) openProgramOverlay(param); return; }
+    const state = getProgramState();
+    if (!state) { showScreen('explore'); return; }
+    const p = findProgram(state.programId);
+    if (p && state.doneCount < p.days.length && isProgramDayAvailable(state)) launchProgramDay();
+    else openProgramOverlay(state.programId); // jour fait, ou programme terminé : sa fiche
+  }
+}
+
+function executerLienEnAttente() {
+  if (!lienEnAttente || document.documentElement.classList.contains('needs-onboarding') || !CATALOG) return;
+  const url = lienEnAttente;
+  lienEnAttente = null;
+  const lien = analyserLienProfond(url);
+  if (lien) executerLien(lien);
+}
+
+function initialiserLiensProfonds() {
+  const App = window.Capacitor?.Plugins?.App;
+  if (!App || !App.addListener) return;
+  App.addListener('appUrlOpen', e => { if (e && e.url) ouvrirLienProfond(e.url); });
+  if (App.getLaunchUrl) {
+    App.getLaunchUrl().then(r => { if (r && r.url) ouvrirLienProfond(r.url); }).catch(() => {});
+  }
+}
+
 // ── ONBOARDING PREMIÈRE OUVERTURE ──
 // Carousel de 3 cartes affiché une seule fois (classe html.needs-onboarding
 // posée par le script anti-flash du <head>). À la fin, on lève le flag et on
@@ -181,7 +279,10 @@ function finishOnboarding() {
   try { localStorage.setItem('serein-onboarding-vu', 'true'); } catch(_) {}
   const root = document.documentElement;
   root.classList.add('onboarding-leaving');
-  setTimeout(() => { root.classList.remove('needs-onboarding', 'onboarding-leaving'); }, 320);
+  setTimeout(() => {
+    root.classList.remove('needs-onboarding', 'onboarding-leaving');
+    executerLienEnAttente(); // lien reçu pendant le premier lancement
+  }, 320);
 }
 function setupOnboarding() {
   if (!document.documentElement.classList.contains('needs-onboarding')) return;
@@ -5031,6 +5132,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   updateMoodChips();
   await renderSessionList();
   rattraperFinEnAttente(); // séance fermée au tout dernier moment la fois d'avant
+  initialiserLiensProfonds();
+  executerLienEnAttente(); // lien arrivé avant le chargement du catalogue
   restoreOfflineButtons();
   updateOfflineCount();
 
