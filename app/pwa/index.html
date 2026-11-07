@@ -169,6 +169,11 @@
 
     /* PATH CARDS */
     .path-card { cursor: pointer; position: relative; overflow: hidden; padding: 0; border: none; border-radius: var(--radius); min-height: 200px; display: flex; flex-direction: column; justify-content: flex-end; transition: transform .2s, box-shadow .2s; }
+    /* Pas de flou d'arrière-plan : l'illustration couvre toute la carte, et
+       WebKit (iPhone, iPad) ne dessine pas un élément en backdrop-filter placé
+       dans la 2e colonne d'une grille en colonnes CSS : toute la colonne de
+       droite de l'Explorer était invisible. Contrôlé par scripts/captures.mjs. */
+    .path-card { backdrop-filter: none; -webkit-backdrop-filter: none; }
     .path-card .card-illustration { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; display: block; }
     .path-card::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 20%, rgba(0,0,0,.72) 100%); border-radius: var(--radius); pointer-events: none; }
     .path-card .card-content { position: relative; z-index: 1; padding: 1rem 1rem .9rem; color: #fff; }

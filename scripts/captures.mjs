@@ -6,7 +6,8 @@
 // Android par Chromium (celui de la WebView Android).
 // Vérifications bloquantes : défilement horizontal, écran plein écran qui ne
 // couvre pas toute la largeur (le refus iPad de sept. 2026), erreur JavaScript,
-// bouton de l'écran de fin hors de l'écran (iPhone SE avec l'invitation au don).
+// bouton de l'écran de fin hors de l'écran (iPhone SE avec l'invitation au don),
+// flou d'arrière-plan dans des colonnes CSS (grille Explorer invisible sur iPhone).
 // Prérequis, une fois par machine : npx playwright install webkit chromium
 import { createServer } from 'node:http';
 import { readFile, mkdir, writeFile, rm } from 'node:fs/promises';
@@ -81,6 +82,17 @@ const CONTROLES = `(() => {
     if (r.height < H * 0.9) continue; // feuilles du bas, barres : pas des écrans plein écran
     if (r.left > 0.5 || r.right < L - 0.5) {
       pb.push('écran plein écran trop étroit : ' + (el.id ? '#' + el.id : el.className || el.tagName) + ' (' + Math.round(r.width) + ' px sur ' + L + ')');
+    }
+  }
+  // Colonnes CSS : WebKit ne dessine pas un élément en backdrop-filter dans la
+  // 2e colonne (la moitié droite de la grille Explorer était invisible sur iPhone).
+  for (const conteneur of document.querySelectorAll('body *')) {
+    const cc = getComputedStyle(conteneur);
+    if (cc.display === 'none' || !(parseInt(cc.columnCount, 10) > 1)) continue;
+    for (const el of conteneur.querySelectorAll('*')) {
+      const ce = getComputedStyle(el);
+      const flou = ce.backdropFilter || ce.webkitBackdropFilter;
+      if (flou && flou !== 'none') { pb.push('backdrop-filter dans des colonnes CSS (invisible sous WebKit) : ' + (el.className || el.tagName)); break; }
     }
   }
   // Écran de fin : ses boutons doivent se voir sans défiler, même sur iPhone SE.
