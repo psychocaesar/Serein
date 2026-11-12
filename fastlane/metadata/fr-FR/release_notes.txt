@@ -1,3 +1,5 @@
-Guide revu : des suggestions qui respectent le temps dont tu disposes, une réponse adaptée au soir, à la nuit ou au matin, et le numéro d'écoute 3114 toujours visible.
+Une interface plus sobre : des icônes au trait partout, un accueil plus court avec la respiration et le minuteur juste sous « Comment tu te sens ? », des cartes de séance plus compactes.
 
-Explorer : une carte de parcours pouvait disparaître sous le doigt, c'est corrigé. Et d'autres petites corrections.
+La fin de séance est allégée : une seule question, et dans un programme, l'annonce du jour suivant.
+
+Le thème clair est mieux soigné, VoiceOver et le clavier sont mieux pris en charge, et la grille d'Explorer s'affiche en entier sur iPhone.

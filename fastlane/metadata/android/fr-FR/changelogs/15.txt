@@ -1,0 +1,5 @@
+Nouveau — un widget pour l'écran d'accueil : ton prochain jour de programme ou la séance du jour, à un toucher.
+
+Interface plus sobre : icônes au trait, accueil resserré avec la respiration et le minuteur sous « Comment tu te sens ? », cartes de séance plus compactes, fin de séance allégée.
+
+Corrections : plantage sur Android 7, icône de la notification de lecture, lecteur d'écran et clavier mieux pris en charge.
