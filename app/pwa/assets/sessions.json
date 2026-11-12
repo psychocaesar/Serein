@@ -19,7 +19,7 @@
       "disclaimer": "Ces séances sont des outils de soutien psychologique. Elles ne remplacent pas un accompagnement professionnel. Si tu traverses une période difficile, n'hésite pas à consulter un·e psychologue ou ton médecin traitant.",
       "subgroups": [
         {
-          "label": "😮‍💨 Stress",
+          "label": "Stress",
           "name": "Stress",
           "sessions": [
             { "id": "s5", "title": "SOS Stress en 6 minutes", "duration": 6, "file": "SOS Stress en 6 minutes.mp3", "fileFem": null, "desc": "Couper la montée de stress, rapide et ciblé." },
@@ -30,7 +30,7 @@
           ]
         },
         {
-          "label": "😤 Colère",
+          "label": "Colère",
           "name": "Colère",
           "sessions": [
             { "id": "s37", "title": "SOS Colère - décharger sans exploser", "duration": 5, "file": "SOS Colère.mp3", "fileFem": null, "desc": "Faire redescendre la pression sans exploser ni ruminer." },
@@ -38,7 +38,7 @@
           ]
         },
         {
-          "label": "😢 Tristesse",
+          "label": "Tristesse",
           "name": "Tristesse",
           "sessions": [
             { "id": "s40", "title": "Quand l'humeur pèse", "duration": 8, "file": "Tristesse et Mauvaise humeur.mp3", "fileFem": null, "desc": "Faire de la place à la tristesse sans te laisser submerger." },
@@ -132,7 +132,7 @@
     },
     {
       "id": "sommeil-5j",
-      "title": "7 jours vers un meilleur sommeil",
+      "title": "7 jours pour faire la paix avec la nuit",
       "subtitle": "Relâcher la lutte avec la nuit, en douceur.",
       "note": "Si tes difficultés de sommeil reviennent au moins trois nuits par semaine depuis plus de trois mois, ou si tu ronfles fort et te réveilles fatigué·e, parles-en à ton médecin. Une thérapie cognitive et comportementale de l'insomnie (TCC-I) est le traitement recommandé.",
       "artwork": "assets/illustrations/player-03.jpg",

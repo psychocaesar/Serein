@@ -27,14 +27,22 @@ const APPAREILS = [
   { id: 'ipad', nom: 'iPad Air 11"', moteur: webkit, largeur: 820, hauteur: 1180, dpr: 2, mobile: true },
   { id: 'ipad13', nom: 'iPad Pro 13"', moteur: webkit, largeur: 1024, hauteur: 1366, dpr: 2, mobile: true },
   { id: 'android', nom: 'Android (Pixel 7)', moteur: chromium, largeur: 412, hauteur: 915, dpr: 2.625, mobile: true },
+  // Thème clair : proposé dans les Réglages, il n'était regardé par personne
+  // avant une mise en ligne. Un seul format suffit, les couleurs ne dépendent
+  // pas de la taille de l'écran.
+  { id: 'iphone-clair', nom: 'iPhone 15 · thème clair', moteur: webkit, largeur: 393, hauteur: 852, dpr: 3, mobile: true, theme: 'light' },
 ];
 
 // Chaque écran : ce qu'on exécute dans la page après chargement.
 // `vierge` : premier lancement (onboarding visible).
 const ECRANS = [
   { id: 'onboarding', nom: 'Premier lancement', vierge: true },
+  // Avant la première séance terminée : slogan et carte de bienvenue.
+  { id: 'accueil-premier', nom: 'Accueil (avant la première séance)', action: `showScreen('home')`, debutant: true },
   { id: 'accueil', nom: 'Accueil', action: `showScreen('home')` },
   { id: 'explorer', nom: 'Explorer', action: `showScreen('explore')` },
+  // Liste de séances mêlant plusieurs parcours (cartes avec le nom du parcours et le liseré).
+  { id: 'recherche', nom: 'Explorer · recherche', action: `(() => { showScreen('explore'); const c = document.getElementById('explore-search-input'); c.value = 'souffle'; c.dispatchEvent(new Event('input', { bubbles: true })); })()` },
   { id: 'apprendre', nom: 'Apprendre', action: `showScreen('guide')` },
   { id: 'guide', nom: 'Guide (conversation)', action: `openGuideMood('sommeil')`, attente: 3000 },
   { id: 'reglages', nom: 'Réglages', action: `showScreen('settings')` },
@@ -43,6 +51,13 @@ const ECRANS = [
   { id: 'lecteur', nom: 'Lecteur de séance', action: `(() => { const f = findSessionById('s1'); launchPlayer('s1', f.session.title, f.group.name, f.session.duration + ' min', f.session.file, 'masculine', f.group.artwork); })()`, attente: 1200 },
   // Écran de fin le plus chargé : retour de séance + invitation au don (seuil atteint).
   { id: 'fin', nom: 'Fin de séance (invitation au don)', action: `(() => { localStorage.setItem('serein_seances_terminees', String(DON_INVITATION_SEUIL - 1)); localStorage.removeItem('serein_invitation_don_vue'); donsDisponibles = () => true; const f = findSessionById('s1'); launchPlayer('s1', f.session.title, f.group.name, f.session.duration + ' min', f.session.file, 'masculine', f.group.artwork); setTimeout(() => audio.dispatchEvent(new Event('ended')), 300); })()`, attente: 1500 },
+  // Écran de fin ordinaire : celui qu'on voit à chaque séance (retour de séance, pas d'invitation).
+  { id: 'fin-simple', nom: 'Fin de séance (ordinaire)', action: `(() => { const f = findSessionById('s1'); launchPlayer('s1', f.session.title, f.group.name, f.session.duration + ' min', f.session.file, 'masculine', f.group.artwork); setTimeout(() => audio.dispatchEvent(new Event('ended')), 300); })()`, attente: 1500 },
+  // Fin d'un jour de programme : le bouton principal annonce la suite.
+  { id: 'fin-programme', nom: 'Fin de séance (jour de programme)', action: `(() => { setProgramState({ programId: 'debuter-7j', doneCount: 2, lastDate: null }); launchProgramDay(); if (document.getElementById('voice-overlay').classList.contains('open')) confirmVoiceAndLaunch(); setTimeout(() => audio.dispatchEvent(new Event('ended')), 300); })()`, attente: 1500 },
+  { id: 'parcours-emotions', nom: 'Fiche parcours à sous-groupes', action: `openParcoursOverlay('Émotions')` },
+  { id: 'voix', nom: 'Choix de la voix', action: `openVoiceSettings()` },
+  { id: 'lecteur-reglages', nom: 'Lecteur · réglages', action: `(() => { const f = findSessionById('s1'); launchPlayer('s1', f.session.title, f.group.name, f.session.duration + ' min', f.session.file, 'masculine', f.group.artwork); toggleOptionsSheet(); })()`, attente: 1200 },
   { id: 'pratique', nom: 'Ta pratique', action: `openPratique()` },
   { id: 'respiration', nom: 'Respiration guidée', action: `openBreathing()` },
   { id: 'minuteur', nom: 'Minuteur', action: `openTimerSheet()` },
@@ -103,28 +118,38 @@ const CONTROLES = `(() => {
   return pb;
 })()`;
 
-export async function lancerCaptures({ silencieux = false } = {}) {
+// `appareils` : liste d'identifiants pour ne refaire qu'une partie de la
+// planche pendant qu'on travaille (npm run captures -- --appareil=iphone-clair).
+export async function lancerCaptures({ silencieux = false, appareils = null } = {}) {
+  const choisis = appareils ? APPAREILS.filter(a => appareils.includes(a.id)) : APPAREILS;
+  if (!choisis.length) throw new Error('Appareil inconnu. Possibles : ' + APPAREILS.map(a => a.id).join(', '));
   const serveur = await demarrerServeur();
   const base = `http://127.0.0.1:${serveur.address().port}/`;
-  await rm(SORTIE, { recursive: true, force: true });
+  if (appareils) for (const a of choisis) await rm(join(SORTIE, a.id), { recursive: true, force: true });
+  else await rm(SORTIE, { recursive: true, force: true });
   const problemes = [];
   const resultats = {};
 
-  for (const app of APPAREILS) {
+  for (const app of choisis) {
     const navigateur = await app.moteur.launch();
     await mkdir(join(SORTIE, app.id), { recursive: true });
     for (const ecran of ECRANS) {
       const contexte = await navigateur.newContext({
         viewport: { width: app.largeur, height: app.hauteur },
         deviceScaleFactor: app.dpr, isMobile: app.mobile, hasTouch: true,
-        colorScheme: 'dark', serviceWorkers: 'block',
+        colorScheme: app.theme || 'dark', serviceWorkers: 'block',
       });
+      if (ecran.debutant) await contexte.addInitScript(() => { window.__debutant = true; });
       if (!ecran.vierge) {
         // Utilisateur installé : onboarding vu, quelques séances terminées
         // (fait apparaître « Ta pratique » et la progression).
         await contexte.addInitScript(() => {
           try {
             localStorage.setItem('serein-onboarding-vu', '1');
+            if (window.__debutant) return;
+            // Posé avant le chargement : c'est ce que lit le script anti-flash
+            // pour afficher l'accueil d'un habitué (salutation, pas de bienvenue).
+            if (!localStorage.getItem('serein-stats')) localStorage.setItem('serein-stats', JSON.stringify({ sessions: 2, minutes: 11 }));
             if (!localStorage.getItem('serein-history')) {
               const j = 24 * 3600 * 1000, t = Date.now();
               localStorage.setItem('serein-history', JSON.stringify([
@@ -141,7 +166,7 @@ export async function lancerCaptures({ silencieux = false } = {}) {
       page.on('pageerror', e => erreurs.push('erreur JavaScript : ' + e.message));
       await page.goto(base, { waitUntil: 'load' });
       await page.waitForFunction(() => typeof CATALOG !== 'undefined' && CATALOG, null, { timeout: 10000 }).catch(() => {});
-      if (!ecran.vierge) await page.evaluate(() => { try { enregistrerPratique(10); } catch (e) {} });
+      if (!ecran.vierge && !ecran.debutant) await page.evaluate(() => { try { enregistrerPratique(10); } catch (e) {} });
       if (ecran.action) await page.evaluate(ecran.action).catch(e => erreurs.push('action impossible : ' + e.message));
       await page.waitForTimeout(ecran.attente || 700);
       const pb = [...erreurs, ...(await page.evaluate(CONTROLES))];
@@ -153,17 +178,17 @@ export async function lancerCaptures({ silencieux = false } = {}) {
     await navigateur.close();
   }
   serveur.close();
-  await ecrirePlanche(resultats, problemes);
-  if (!silencieux) console.log(`${APPAREILS.length * ECRANS.length} captures → captures/index.html`);
+  await ecrirePlanche(resultats, problemes, choisis);
+  if (!silencieux) console.log(`${choisis.length * ECRANS.length} captures → captures/index.html`);
   return problemes;
 }
 
-async function ecrirePlanche(resultats, problemes) {
+async function ecrirePlanche(resultats, problemes, appareils) {
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   let commit = '';
   try { commit = execSync('git log -1 --format="%h · %s"', { cwd: ROOT, encoding: 'utf8' }).trim(); } catch {}
   const lignes = ECRANS.map(e => `
-    <section><h2>${esc(e.nom)}</h2><div class="rangee">${APPAREILS.map(a => {
+    <section><h2>${esc(e.nom)}</h2><div class="rangee">${appareils.map(a => {
       const pb = resultats[`${a.id}/${e.id}`] || [];
       return `<figure class="${pb.length ? 'ko' : ''}"><a href="${a.id}/${e.id}.png"><img src="${a.id}/${e.id}.png" alt="${esc(e.nom)} sur ${esc(a.nom)}" style="width:${Math.round(a.largeur / 3.2)}px" loading="lazy"></a>
         <figcaption>${esc(a.nom)}${pb.map(p => `<br><b>${esc(p)}</b>`).join('')}</figcaption></figure>`;
@@ -200,7 +225,8 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     console.error('Navigateurs Playwright absents : npx playwright install webkit chromium');
     process.exit(1);
   }
-  const problemes = await lancerCaptures();
+  const filtre = process.argv.filter(a => a.startsWith('--appareil=')).flatMap(a => a.slice(11).split(','));
+  const problemes = await lancerCaptures({ appareils: filtre.length ? filtre : null });
   problemes.forEach(p => console.log(`  ✖ ${p}`));
   if (process.argv.includes('--ouvrir')) {
     const planche = join(SORTIE, 'index.html');

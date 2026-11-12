@@ -466,7 +466,9 @@ function renderFavorisSection() {
   updateSessionChecks();
 }
 
-function makeSessionCard(s, group, subgroupName) {
+// options.dansParcours : la carte est affichée dans la fiche de son parcours,
+// dont le nom est déjà en titre — seule la durée reste utile.
+function makeSessionCard(s, group, subgroupName, options = {}) {
   const durationLabel = s.duration + ' min';
   const card = document.createElement('article');
   card.className = 'card session-card';
@@ -475,14 +477,24 @@ function makeSessionCard(s, group, subgroupName) {
   card.dataset.durationMin = s.duration;
   card.dataset.title = s.title;
 
+  const lancer = () => openVoiceOverlay(s.id, s.title, group.name, durationLabel, s.file, s.fileFem || false, group.artwork);
+
+  // Le rond est le vrai bouton (clavier, lecteur d'écran) ; toute la carte
+  // réagit au toucher, sauf ses deux actions secondaires.
+  const play = document.createElement('button');
+  play.className = 'session-play';
+  play.type = 'button';
+  play.setAttribute('aria-label', 'Lancer la séance ' + s.title + ', ' + group.name + ', ' + durationLabel);
+  play.innerHTML = '<svg class="icone" aria-hidden="true"><use href="#i-lecture"/></svg>';
+  card.addEventListener('click', e => {
+    if (e.target.closest && e.target.closest('.session-actions')) return;
+    lancer();
+  });
+
   const info = document.createElement('div');
   info.className = 'session-info';
   const h3 = document.createElement('h3');
   h3.textContent = s.title;
-  const meta = document.createElement('p');
-  meta.textContent = subgroupName
-    ? group.name + ' · ' + subgroupName + ' · ' + durationLabel
-    : group.name + ' · ' + durationLabel;
   info.appendChild(h3);
   if (s.desc) {
     const desc = document.createElement('p');
@@ -490,10 +502,23 @@ function makeSessionCard(s, group, subgroupName) {
     desc.textContent = s.desc;
     info.appendChild(desc);
   }
-  info.appendChild(meta);
+
+  const pied = document.createElement('div');
+  pied.className = 'session-pied';
+  const meta = document.createElement('span');
+  meta.className = 'session-meta';
+  meta.textContent = options.dansParcours ? durationLabel
+    : subgroupName ? group.name + ' · ' + subgroupName + ' · ' + durationLabel
+    : group.name + ' · ' + durationLabel;
+  pied.appendChild(meta);
 
   const actions = document.createElement('div');
   actions.className = 'session-actions';
+  const fav = document.createElement("button");
+  fav.className = "btn-fav" + (isFavori(s.id) ? " is-fav" : "");
+  fav.setAttribute("aria-label", isFavori(s.id) ? "Retirer des favoris" : "Ajouter aux favoris");
+  fav.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
+  fav.addEventListener("click", function() { toggleFavoris(s.id, fav); });
   // Les DEUX fichiers sont portés par le bouton ; la voix est résolue au
   // moment de l'action (offlineTargetFor), jamais ici. La liste des séances
   // n'est rendue qu'au démarrage de l'app : figer la voix au rendu mettait en
@@ -507,22 +532,13 @@ function makeSessionCard(s, group, subgroupName) {
   if (s.fileFem) dl.dataset.fileFem = s.fileFem;
   marquerHorsLigne(dl, false);
   dl.addEventListener('click', () => toggleOfflineCache(dl));
-  const launch = document.createElement('button');
-  launch.className = 'btn btn-primary';
-  launch.setAttribute('aria-label', 'Lancer la séance ' + s.title + ', ' + group.name + ', ' + durationLabel);
-  launch.textContent = 'Lancer';
-  launch.addEventListener('click', () => openVoiceOverlay(s.id, s.title, group.name, durationLabel, s.file, s.fileFem || false, group.artwork));
-  actions.appendChild(dl);
-  const fav = document.createElement("button");
-  fav.className = "btn-fav" + (isFavori(s.id) ? " is-fav" : "");
-  fav.setAttribute("aria-label", isFavori(s.id) ? "Retirer des favoris" : "Ajouter aux favoris");
-  fav.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
-  fav.addEventListener("click", function(e) { e.stopPropagation(); toggleFavoris(s.id, fav); });
   actions.appendChild(fav);
-  actions.appendChild(launch);
+  actions.appendChild(dl);
+  pied.appendChild(actions);
+  info.appendChild(pied);
 
+  card.appendChild(play);
   card.appendChild(info);
-  card.appendChild(actions);
   return card;
 }
 
@@ -564,7 +580,9 @@ function getListenedTitles() {
 // Coche ✓ sur les séances déjà écoutées
 function updateSessionChecks() {
   const listened = getListenedTitles();
-  document.querySelectorAll('.session-list .session-card, .favoris-list .session-card').forEach(card => {
+  // Toutes les cartes, y compris celles de la fiche d'un parcours (elles
+  // étaient oubliées : Explorer affichait « 2/7 » sans dire lesquelles).
+  document.querySelectorAll('.session-card').forEach(card => {
     const h3 = card.querySelector('h3');
     if (!h3) return;
     const done = listened.has(card.dataset.title);
@@ -937,9 +955,9 @@ function showInterruptedFeedbackToast(snap) {
     toast.remove();
   };
   showActionToast('interrupted-feedback-toast', 'Comment était cette séance ?', [
-    { label: '😮 Trop intense', onClick: answer('intense') },
-    { label: '✓ Bien', onClick: answer('ok') },
-    { label: '🌿 Trop doux', onClick: answer('doux') },
+    { label: 'Trop intense', onClick: answer('intense') },
+    { label: 'Bien', onClick: answer('ok') },
+    { label: 'Trop doux', onClick: answer('doux') },
     { label: '✕', onClick: answer('dismiss') },
   ]);
 }
@@ -1159,7 +1177,9 @@ audio.addEventListener('ended', () => {
   // du guide, qui enchaîne sur sa propre conversation).
   if (currentSession && currentSession.id !== 'observation') showCompletionFeedback();
   if (currentSession && currentSession.id !== 'observation' && currentSession.id !== 'intro') afficherInvitationDon();
+  const jourDeProgramme = programDayInProgress;
   if (programDayInProgress) { completeProgramDay(); programDayInProgress = null; }
+  preparerSuiteFin(jourDeProgramme);
   maybeShowReminderPrompt();
   preparerDemandeAvis(); // la fenêtre s'ouvrira au retour à l'accueil (closePlayer)
 });
@@ -1766,6 +1786,14 @@ function loadStats() {
   if (welcomeBlock) welcomeBlock.style.display = hasSession ? 'none' : 'block';
   const pratiqueBtn = document.getElementById('pratique-btn');
   if (pratiqueBtn) pratiqueBtn.hidden = !hasSession;
+  const salut = document.getElementById('home-salut');
+  if (salut) salut.textContent = salutationAccueil();
+}
+
+// Titre de l'accueil une fois le premier lancement passé (le slogan reste
+// celui de l'onboarding et du tout premier écran).
+function salutationAccueil(heure = getCurrentHour()) {
+  return heure >= 5 && heure < 18 ? 'Bonjour.' : 'Bonsoir.';
 }
 
 // Point d'entrée commun des séances guidées, du minuteur et de la respiration.
@@ -1869,6 +1897,7 @@ function renderPratique() {
   const s = getStats();
   document.getElementById('stat-jours-mois').textContent = joursDePratiqueCeMois();
   document.getElementById('stat-sessions').textContent = s.sessions || 0;
+  document.getElementById('stat-sessions-label').innerHTML = (s.sessions || 0) > 1 ? 'Séances<br>terminées' : 'Séance<br>terminée';
   document.getElementById('stat-time').textContent = formatDureePratique(s.minutes || 0);
 
   const liste = document.getElementById('pratique-historique');
@@ -1978,11 +2007,54 @@ function afficherInvitationDon() {
   const due = invitationDonDue();
   if (ecran && ecran.classList) ecran.classList.toggle('avec-don', due); // version compacte sur petit écran
   if (!due) { block.style.display = 'none'; return; }
+  // Une demande à la fois : ce jour-là, l'invitation remplace « Cette séance
+  // était… » (les deux à la suite, plus les boutons, faisaient trois sollicitations).
+  const retour = document.getElementById('guide-feedback-wrap');
+  if (retour && retour.remove) retour.remove();
   const n = parseInt(localStorage.getItem(DON_COUNT_KEY), 10) || 0;
   // Apostrophes françaises → template literal obligatoire (quotes simples = crash).
   document.getElementById('complete-don-text').textContent = `Serein t'a accompagné·e sur ${n} séances. C'est gratuit et sans pub parce que d'autres soutiennent le projet. Tu peux faire pareil.`;
   block.style.display = '';
   markDonInvitationSeen(false);
+}
+
+// ── SUITE APRÈS LA FIN ──
+// Le bouton principal de l'écran de fin dit ce qui vient ensuite. Après un
+// jour de programme : où on en est et quand vient le suivant (le jour suivant
+// s'ouvre le lendemain, voir isProgramDayAvailable). Sinon : « Terminer », qui
+// ramène là d'où la séance a été lancée (l'ancien « Explorer les séances »
+// n'y menait pas).
+let programmeApresFin = null;
+
+function texteSuiteProgramme(fait, total) {
+  if (fait >= total) return `Programme terminé : tu as traversé les ${total} jours.`;
+  return `Jour ${fait} sur ${total} terminé. Le jour ${fait + 1} t'attend demain.`;
+}
+
+function preparerSuiteFin(jour) {
+  const bouton = document.getElementById('complete-suite');
+  const note = document.getElementById('complete-programme');
+  if (!bouton || !note) return;
+  const state = jour ? getProgramState() : null;
+  const p = state && state.programId === jour.programId ? findProgram(state.programId) : null;
+  // Le jour n'a été validé que si la progression a bien avancé d'un cran.
+  if (!p || state.doneCount !== jour.day + 1) {
+    programmeApresFin = null;
+    note.hidden = true;
+    bouton.textContent = 'Terminer';
+    return;
+  }
+  programmeApresFin = p.id;
+  note.textContent = texteSuiteProgramme(state.doneCount, p.days.length);
+  note.hidden = false;
+  bouton.textContent = 'Revenir au programme';
+}
+
+function suiteApresFin() {
+  const programme = programmeApresFin;
+  programmeApresFin = null;
+  closePlayer();
+  if (programme) openProgramOverlay(programme);
 }
 
 // Marque l'invitation comme vue : elle ne réapparaîtra plus jamais.
@@ -2837,7 +2909,7 @@ function ficheTeaserHTML(slug) {
   const lede = (art.md.split('\n\n')[0] || '').trim();
   return '<div class="article-hero fiche-teaser" role="button" tabindex="0" aria-label="Lire : ' + art.title + '" onclick="openArticleFromParcours(\'' + slug + '\')">' +
     '<div class="article-hero-content">' +
-    '<span class="article-hero-badge">📖 Comprendre</span>' +
+    '<span class="article-hero-badge">Comprendre</span>' +
     '<h3>' + art.title + '</h3>' +
     '<p class="fiche-lede">' + lede + '</p>' +
     '<p class="article-hero-meta">' + art.meta + '</p>' +
@@ -3003,7 +3075,7 @@ function renderProgramOverlayContent(programId) {
     p.days.forEach((d, i) => { html += dayRowHTML(i + 1, dayTitleOf(d.sessionId), 'future'); });
     html += '</div>';
   } else if (doneCount >= total) {
-    html += `<div class="program-done"><div class="program-done-em">🌿</div><h2>Programme terminé</h2><p>Tu as traversé les ${total} jours. Tu peux le recommencer quand tu veux, ou en choisir un autre.</p><button class="btn btn-ghost" onclick="restartProgram('${p.id}')">↩ Recommencer</button></div>`;
+    html += `<div class="program-done"><div class="program-done-em"><svg class="icone" aria-hidden="true"><use href="#i-feuille"/></svg></div><h2>Programme terminé</h2><p>Tu as traversé les ${total} jours. Tu peux le recommencer quand tu veux, ou en choisir un autre.</p><button class="btn btn-ghost" onclick="restartProgram('${p.id}')">↩ Recommencer</button></div>`;
   } else {
     html += `<div class="program-progress"><div class="program-progress-track"><div class="program-progress-fill" style="width:${doneCount / total * 100}%"></div></div><span class="program-progress-label">Jour ${doneCount + 1} sur ${total}</span></div>`;
     html += '<div class="program-days">';
@@ -3043,7 +3115,7 @@ function renderProgramHomeCard() {
   if (!p) { wrap.style.display = 'none'; wrap.innerHTML = ''; return; }
   const total = p.days.length;
   const finished = state.doneCount >= total;
-  const dayTitle = finished ? 'Programme terminé 🌿' : ('Jour ' + (state.doneCount + 1) + ' · ' + dayTitleOf(p.days[state.doneCount].sessionId));
+  const dayTitle = finished ? 'Programme terminé' : ('Jour ' + (state.doneCount + 1) + ' · ' + dayTitleOf(p.days[state.doneCount].sessionId));
   let dots = '';
   for (let i = 0; i < total; i++) dots += `<span class="${i < state.doneCount ? 'on' : ''}"></span>`;
   wrap.innerHTML = `<button class="program-hc" onclick="openProgramOverlay('${p.id}')">`
@@ -3101,14 +3173,14 @@ function openParcoursOverlay(groupName) {
       body.appendChild(label);
       const subSlug = PARCOURS_ARTICLES[groupName + '::' + sg.name];
       if (subSlug) body.insertAdjacentHTML('beforeend', ficheTeaserHTML(subSlug));
-      sg.sessions.forEach(s => body.appendChild(makeSessionCard(s, group, sg.name)));
+      sg.sessions.forEach(s => body.appendChild(makeSessionCard(s, group, sg.name, { dansParcours: true })));
     });
   } else {
     const label = document.createElement('p');
     label.className = 'parcours-sub-label';
-    label.textContent = '🎧 Les séances';
+    label.textContent = 'Les séances';
     body.appendChild(label);
-    group.sessions.forEach(s => body.appendChild(makeSessionCard(s, group, null)));
+    group.sessions.forEach(s => body.appendChild(makeSessionCard(s, group, null, { dansParcours: true })));
   }
   if (group.resources) body.appendChild(makeResourcesBlock(group.resources));
 
@@ -3790,9 +3862,9 @@ function showCompletionFeedback() {
   btns.style.cssText = 'display:flex;gap:.6rem;';
 
   const feedbacks = [
-    { label: '😮 Trop intense', value: 'intense' },
-    { label: '✓ C\'était bien',  value: 'ok'      },
-    { label: '🌿 Trop doux',    value: 'doux'     },
+    { label: 'Trop intense', value: 'intense' },
+    { label: 'C\'était bien', value: 'ok'      },
+    { label: 'Trop doux',    value: 'doux'     },
   ];
 
   feedbacks.forEach(f => {
@@ -4288,7 +4360,7 @@ function resetBreathCircle() {
   c.style.transition = "transform 0.5s ease, box-shadow 0.5s ease";
   c.style.transform = "scale(0.72)";
   c.style.boxShadow = "0 0 0 0 rgba(147,201,172,0.2)";
-  document.getElementById("breathPhaseText").innerHTML = "Appuie<br>pour commencer";
+  document.getElementById("breathPhaseText").textContent = "";
   document.getElementById("breathCountdown").textContent = "";
   document.getElementById("breathInfo").textContent = "";
   setBreathRingProgress(0, true);
@@ -4342,7 +4414,7 @@ function tickBreath() {
   setBreathRingProgress(breathSecondsLeft / breathPhaseDuration, false);
   if (breathTargetSec > 0) {
     const remaining = breathTargetSec - (Date.now() - breathStartTime) / 1000;
-    document.getElementById("breathInfo").textContent = "⏳ " + breathFmt(remaining) + " restantes";
+    document.getElementById("breathInfo").textContent = breathFmt(remaining) + " restantes";
   }
   breathSecondsLeft--;
   breathTimer = setTimeout(tickBreath, 1000);
@@ -4375,7 +4447,7 @@ function finishBreathSession() {
   c.style.transition = "transform 0.6s ease, box-shadow 0.6s ease";
   c.style.transform = "scale(0.82)";
   c.style.boxShadow = "0 0 40px 12px rgba(147,201,172,0.2)";
-  document.getElementById("breathPhaseText").innerHTML = "Séance<br>terminée 🌿";
+  document.getElementById("breathPhaseText").innerHTML = "Séance<br>terminée";
   document.getElementById("breathCountdown").textContent = "";
   document.getElementById("breathInfo").textContent = "Bravo, tu as pris ce temps pour toi.";
   setBreathRingProgress(1, true);
@@ -4491,6 +4563,10 @@ function timerTick() {
       document.getElementById('player-main').classList.add('hidden');
       document.getElementById('complete-screen').classList.add('visible');
       document.getElementById('complete-title').textContent = 'Minuteur libre · ' + (timerTotalSeconds / 60) + ' min';
+      // Rien d'une séance guidée précédente ne doit rester sur cet écran.
+      const retour = document.getElementById('guide-feedback-wrap');
+      if (retour) retour.remove();
+      preparerSuiteFin(null);
       recordTimerCompletion();
     }, 2500);
   }
@@ -4613,8 +4689,12 @@ const DON_PALIERS = { mensuel: [300, 500, 1000, 2000], ponctuel: [500, 1000, 200
 const DON_MONTANT_MIN = 300;
 const DON_MONTANT_MAX = 100000;
 
-let donType = 'mensuel';
-let donMontant = DON_PALIERS.mensuel[1];
+// Type proposé à l'ouverture : le don ponctuel. Présélectionner l'engagement
+// mensuel est l'incitation classique des apps dont Serein veut se distinguer ;
+// le mensuel reste à un toucher.
+const DON_TYPE_DEFAUT = 'ponctuel';
+let donType = DON_TYPE_DEFAUT;
+let donMontant = DON_PALIERS[DON_TYPE_DEFAUT][1];
 let donMontantLibre = false;
 let donPresentationActive = false;
 
@@ -4686,8 +4766,8 @@ function montantDonValide() {
 
 function openDon() {
   if (!donsDisponibles()) return;
-  donType = 'mensuel';
-  donMontant = DON_PALIERS.mensuel[1];
+  donType = DON_TYPE_DEFAUT;
+  donMontant = DON_PALIERS[DON_TYPE_DEFAUT][1];
   donMontantLibre = false;
   document.getElementById('don-autre').value = '';
   document.getElementById('don-erreur').textContent = '';
